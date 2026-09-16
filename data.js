@@ -225,6 +225,7 @@ window.PROJECT = {
         {
           id: "wardrobe", name: "Wardrobes", status: "open",
           refs: [
+            { src: "assets/refs/wardrobe-options-A-C-D.svg", caption: "Glass options — A linear (chosen), C linear with four-dot jewels, D border and jewels" },
             { src: "assets/refs/wardrobe-ref-2-steel-leaded-doors-wide.jpg", caption: "Ref. 2 — blackened steel doors with transoms, textured glass in linear leading" },
             { src: "assets/refs/wardrobe-ref-3-steel-leaded-doors-closeup.jpg", caption: "Ref. 2 close-up — the leading pattern, slim bar pulls" },
             { src: "assets/refs/wardrobe-ref-1-laylight-white-glass-grid.jpg", caption: "Ref. 1 — white glass lit from behind in a square grid (laylight)" },
@@ -233,10 +234,12 @@ window.PROJECT = {
           parts: [
             { label: "Direction", value: "Not wood. Full-height blackened-steel doors with a transom (ref. 2), white textured glass in lead came, lit from inside so the wall glows softly like lit windows (ref. 1). Brass bar pulls." },
             { label: "Glass", value: "", hint: "White glass that hides the clothes: opal, satin-etched, reeded or seeded/cathedral glass in lead came" },
-            { label: "Pattern", value: "A — linear leading like ref. 2, pairs mirrored. Variations with the four-dot motif from ref. 1 being explored." },
+            { label: "Pattern", value: "A — linear leading like ref. 2, pairs mirrored (chosen). C adds the laylight's four-dot jewels where they fit; D is a bordered alternative. See the options board." },
             { label: "Frames", value: "Blackened steel T-section, 38 mm face, transom bar at 560 below the cornice (as ref. 2)." },
             { label: "Lighting", value: "", hint: "Warm 2700 K LED strips on a dimmer, set back behind a diffuser so there are no bright spots" },
-            { label: "Internals", value: "", hint: "Hanging, drawers, shoe rack, loft; a light-coloured back panel so the glass glows evenly" },
+            { label: "Lit glass", value: "The wardrobe is lit from inside so the leaded white glass glows like a window at night — warm 2700 K LED on its own dimmer, set back so there are no bright spots." },
+            { label: "Inside finish", value: "Sunmica (laminate) in a warm ivory / cream with a matte linen (fabric-texture) finish on back panels, sides and shelves. Light and matte so the glass glows evenly and creamy like parchment; the texture hides scuffs. Not white gloss (reflections, hot spots, clinical) and not dark (the glass turns grey and dead)." },
+            { label: "Internals", value: "", hint: "Hanging, drawers, shoe rack, loft; brass rails; drawer fronts inside can be a contrast (e.g. walnut-tone or deep green) since they sit behind the glass" },
             { label: "Hardware", value: "", hint: "Brass only (gold on handles)" },
             { label: "Dimensions", value: "" },
           ],

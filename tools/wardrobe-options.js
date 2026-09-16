@@ -23,7 +23,7 @@ function leaf(x0, draw, mirror) {
   o += `<rect x="${px - 7}" y="${1200}" width="14" height="320" rx="7" fill="${BRASS}"/>`;
   return o + `</g>`;
 }
-const dots = (cx, cy, s = 26, r = 10) => [[0, -s], [s, 0], [0, s], [-s, 0]].map(([dx, dy]) => `<circle cx="${f(cx + dx)}" cy="${f(cy + dy)}" r="${r}" fill="${INK}" stroke="none"/>`).join("");
+const dots = (cx, cy, s = 44, r = 18) => [[0, -s], [s, 0], [0, s], [-s, 0]].map(([dx, dy]) => `<circle cx="${f(cx + dx)}" cy="${f(cy + dy)}" r="${r}" fill="${INK}" stroke="none"/>`).join("");
 
 // A — linear leading after the reference: border strip and staggered rectangles.
 const A = ({ X, Y, main, trans, line }) => {
@@ -37,7 +37,7 @@ const A = ({ X, Y, main, trans, line }) => {
 // C — A with the four-dot jewels from the laylight, set in the open panes.
 const C = (p) => {
   const { X, Y, main: m, trans: t } = p;
-  return A(p) + dots(X(0.49, m), Y(0.45, m)) + dots(X(0.82, m), Y(0.74, m)) + dots(X(0.63, t), Y(0.28, t));
+  return A(p) + dots(X(0.49, m), Y(0.45, m)) + dots(X(0.82, m), Y(0.74, m)) + dots(X(0.13, m), Y(0.87, m), 28, 13) + dots(X(0.63, t), Y(0.27, t));
 };
 // D — border and jewels: an inner border line, three tall panes, a small square with a four-dot jewel in each.
 const D = ({ X, Y, main: m, trans: t, line }) => {
@@ -47,10 +47,10 @@ const D = ({ X, Y, main: m, trans: t, line }) => {
   [[m[0], m[1], m[0] + b, m[1] + b], [m[2], m[1], m[2] - b, m[1] + b], [m[0], m[3], m[0] + b, m[3] - b], [m[2], m[3], m[2] - b, m[3] - b]].forEach(([a, bb, c, d]) => { o += line(a, bb, c, d); });
   const y1 = Y(1 / 3, m), y2 = Y(2 / 3, m);
   o += line(m[0] + b, y1, m[2] - b, y1) + line(m[0] + b, y2, m[2] - b, y2);
-  const cx = (m[0] + m[2]) / 2, sq = 110;
-  [(m[1] + y1) / 2, (y1 + y2) / 2, (y2 + m[3]) / 2].forEach((cy) => { o += rect(cx - sq / 2, cy - sq / 2, cx + sq / 2, cy + sq / 2) + dots(cx, cy, 22, 8); });
+  const cx = (m[0] + m[2]) / 2, sq = 170;
+  [(m[1] + y1) / 2, (y1 + y2) / 2, (y2 + m[3]) / 2].forEach((cy) => { o += rect(cx - sq / 2, cy - sq / 2, cx + sq / 2, cy + sq / 2) + dots(cx, cy, 40, 16); });
   const tcx = (t[0] + t[2]) / 2, tcy = (t[1] + t[3]) / 2;
-  o += rect(tcx - sq / 2, tcy - sq / 2, tcx + sq / 2, tcy + sq / 2) + dots(tcx, tcy, 22, 8);
+  o += rect(tcx - sq / 2, tcy - sq / 2, tcx + sq / 2, tcy + sq / 2) + dots(tcx, tcy, 40, 16);
   return o;
 };
 
