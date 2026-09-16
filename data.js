@@ -29,13 +29,20 @@ window.PROJECT = {
   },
 
   room: {
-    plan: "",            // path to plan image once sent, e.g. "assets/plan.jpg"
+    plan: "assets/refs/room-plan-lighting-rcp.jpg",   // lighting / false-ceiling plan (photo of the CAD screen)
     facts: [
-      { k: "Partition", v: "At the 11 ft mark" },
-      { k: "Zones", v: "Bedroom · Study · Dressing · Bathroom" },
-      { k: "Doors", v: "3 — all identical" },
+      { k: "Plan", v: "Rectangle, roughly 14 × 18 ft read off the photo (to confirm)" },
+      { k: "Study end", v: "Top of the plan: study wall with shelves and cupboards; window at its right-hand end" },
+      { k: "Desk", v: "Faces the partition; the study wall is behind the chair" },
+      { k: "Partition", v: "Across the middle, about 11 ft from the entrance wall, curved ends, three sections" },
+      { k: "Bed end", v: "Bottom of the plan: 6 ft 6 in bed against the wall, curved bed back wrapping round with bedside tables" },
+      { k: "Entrance", v: "Bottom-left corner, door swings in" },
+      { k: "Beyond right wall", v: "Washroom and dressing (plan to come)" },
+      { k: "Ceiling", v: "Barrel vault with coffered panels; cove line and down-lights around the perimeter" },
+      { k: "Doors", v: "3 — all identical (D1 8 × 3 ft, D2/D3 8 × 2 ft 6 in)" },
     ],
   },
+
 
   // Tabs. Each item is a spec sheet built from parts.
   // A part with inherit:"veneer" / "polish" pulls from the master unless overridden.
