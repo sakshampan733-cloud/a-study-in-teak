@@ -224,14 +224,18 @@ window.PROJECT = {
       items: [
         {
           id: "wardrobe", name: "Wardrobes", status: "open",
+          drawings: ["wardrobe"],
           refs: [
-            { src: "assets/refs/ceiling-barrel-vault-coffers.jpg", caption: "The room's ceiling — barrel vault with coffered panels (the wardrobe should complement it)" },
+            { src: "assets/refs/wardrobe-ref-2-steel-leaded-doors-wide.jpg", caption: "Ref. 2 — blackened steel doors with transoms, textured glass in linear leading" },
+            { src: "assets/refs/wardrobe-ref-3-steel-leaded-doors-closeup.jpg", caption: "Ref. 2 close-up — the leading pattern, slim bar pulls" },
+            { src: "assets/refs/wardrobe-ref-1-laylight-white-glass-grid.jpg", caption: "Ref. 1 — white glass lit from behind in a square grid (laylight)" },
+            { src: "assets/refs/ceiling-barrel-vault-coffers.jpg", caption: "The room's ceiling — barrel vault with coffered panels" },
           ],
           parts: [
-            { label: "Direction", value: "Not wood. Leaded-glass wardrobe fronts: white (obscure) glass set in a leaded grid, lit from inside so the wardrobe glows softly like a row of windows at night. Photos to come." },
+            { label: "Direction", value: "Not wood. Full-height blackened-steel doors with a transom (ref. 2), white textured glass in lead came, lit from inside so the wall glows softly like lit windows (ref. 1). Brass bar pulls. Door study: AST-DR-007." },
             { label: "Glass", value: "", hint: "White glass that hides the clothes: opal, satin-etched, reeded or seeded/cathedral glass in lead came" },
-            { label: "Pattern", value: "", hint: "Rectangular grid (echoes the ceiling coffers) or diamond quarries (more Tudor/Georgian)" },
-            { label: "Frames", value: "", hint: "Blackened steel / bronze, or painted — not teak, to break the wood" },
+            { label: "Pattern", value: "", hint: "A: linear leading like ref. 2 (pairs mirror) — or B: square grid like the laylight, ref. 1" },
+            { label: "Frames", value: "Blackened steel T-section, 38 mm face, transom bar at 560 below the cornice (as ref. 2)." },
             { label: "Lighting", value: "", hint: "Warm 2700 K LED strips on a dimmer, set back behind a diffuser so there are no bright spots" },
             { label: "Internals", value: "", hint: "Hanging, drawers, shoe rack, loft; a light-coloured back panel so the glass glows evenly" },
             { label: "Hardware", value: "", hint: "Brass only (gold on handles)" },
