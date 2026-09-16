@@ -29,7 +29,8 @@ window.PROJECT = {
   },
 
   room: {
-    plan: "assets/refs/room-plan-lighting-rcp.jpg",   // lighting / false-ceiling plan (photo of the CAD screen)
+    drawing: "room-plan",                              // AST-DR-000, redrawn from the lighting plan
+    plan: "assets/refs/room-plan-lighting-rcp.jpg",   // source: photo of the lighting / false-ceiling plan
     facts: [
       { k: "Plan", v: "Rectangle, roughly 14 × 18 ft read off the photo (to confirm)" },
       { k: "Study end", v: "Top of the plan: study wall with shelves and cupboards; window at its right-hand end" },

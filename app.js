@@ -67,7 +67,7 @@ function overview() {
     <h3>Sections</h3><div class="grid">${tiles}</div>
     <h3>The room</h3>
     <div class="grid" style="grid-template-columns:2fr 1fr">
-      <div class="card plan">${P.room.plan ? `<img src="${esc(P.room.plan)}" alt="Room plan">` : "Room plan — to be added"}</div>
+      <div class="card plan">${P.room.drawing && window.DRAWINGS?.[P.room.drawing] ? `<figure class="dwg" data-open="dwg:${P.room.drawing}" style="margin:0;width:100%">${window.DRAWINGS[P.room.drawing].svg}<figcaption>${esc(window.DRAWINGS[P.room.drawing].title)} — click to open full size</figcaption></figure>` : P.room.plan ? `<img src="${esc(P.room.plan)}" alt="Room plan">` : "Room plan — to be added"}</div>
       <div class="card facts">${P.room.facts.map((f) => `<div class="lab" style="color:var(--muted)">${esc(f.k)}</div><div>${esc(f.v)}</div>`).join("")}</div>
     </div>`;
 }
