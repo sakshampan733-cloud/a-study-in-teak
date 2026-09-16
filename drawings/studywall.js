@@ -4,16 +4,16 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const WALL = {
-  rev: "2 — band panels, sconces, pedestals",
+  rev: "3 — 2 ft cupboards, window from site photo",
   date: "17.09.2026",
   W: 4877, H: 2743,            // 16 ft wall, 9 ft ceiling (owner's measure)
   skirt: 120,                  // skirting line on the cupboard fronts
-  base: { h: 800, top: 40, d: 450, over: 25 },   // cupboards under all three bays, reeded top (matches the desk edge)
-  book: { w: 1500, d: 350, stile: 60, shelves: [1130, 1410, 1690] },   // flat head, no arch
+  base: { h: 570, top: 40, d: 450, over: 25 },   // cupboards under all three bays, 2 ft to the top of the reeded counter
+  book: { w: 1500, d: 350, stile: 60, shelves: [890, 1160, 1430, 1700] },   // flat head, no arch
   band: { h: 400, rail: 40 },   // moulded panel band under the cornice — same size over all three bays (ref. 3)
   pil: { w: 240, proj: 60, flutes: 9, capH: 130, d: 440, ped: 25, pedProj: 50 },  // ref. 1 fluted shaft; ref. 3 pedestal steps forward below the counter
   panel: { w: 1400, set: 200, frame: 70, painting: [760, 860], paintingC: 1440 },
-  win: { w: 1200, sill: 840, head: 1880, arch: 70, wall: 230 },  // window size ASSUMED
+  win: { w: 1160, sill: 650, head: 2320, fromRight: 35, arch: 70, wall: 230 },  // read off the site photo (9 ft ceiling as scale) — confirm with a tape
   sconce: { y: 1560, span: 150 },  // twin-arm candle sconce with shade, one on each pilaster (ref. 3)
   ent: { architrave: 60, frieze: 80, mod: 70, dentil: 30, crown: 90, proj: 160, modW: 44, modPitch: 105 },
 };
@@ -28,7 +28,7 @@ const WALL = {
   const xPanel = [xP1[1], xP1[1] + PN.w];
   const xP2 = [xPanel[1], xPanel[1] + PL.w];
   const xZone = [xP2[1], K.W];
-  const winC = (xZone[0] + xZone[1]) / 2, xWin = [winC - WN.w / 2, winC + WN.w / 2];
+  const xWin = [K.W - WN.fromRight - WN.w, K.W - WN.fromRight], winC = (xWin[0] + xWin[1]) / 2;
   // ── heights ──
   const yTop = B.h + B.top;                                   // counter top
   const entH = E.architrave + E.frieze + E.mod + E.dentil + E.crown;
@@ -150,10 +150,10 @@ const WALL = {
   }
 
   function windowZone(th) {
-    const [z0, z1] = xZone, [w0, w1] = xWin, ar = WN.arch;
+    const [z0, z1] = xZone, [w0, w1] = xWin, ar = WN.arch, arR = Math.min(ar, WN.fromRight);   // tight to the corner: only a slim return on the right
     let o = R(z0, yTop, z1, yEnt, W(th));
     // architrave round the opening
-    o += R(w0 - ar, WN.sill, w1 + ar, WN.head + ar) + `<g ${W(th)}>${R(w0 - ar + 20, WN.sill, w1 + ar - 20, WN.head + ar - 20)}${R(w0 - ar + 40, WN.sill, w1 + ar - 40, WN.head + ar - 40)}</g>`;
+    o += R(w0 - ar, WN.sill, w1 + arR, WN.head + ar) + `<g ${W(th)}>${R(w0 - ar + 20, WN.sill, w1 + Math.max(arR - 20, 0), WN.head + ar - 20)}${R(w0 - ar + 40, WN.sill, w1 + Math.max(arR - 40, 0), WN.head + ar - 40)}</g>`;
     // opening, pair of casements with glazing bars
     o += R(w0, WN.sill, w1, WN.head);
     const mid = (w0 + w1) / 2;
@@ -163,9 +163,14 @@ const WALL = {
       o += Ln((a + b) / 2, WN.sill + 20, (a + b) / 2, WN.head - 20, W(th));
     });
     // the same moulded band panel over the window as over the other bays
-    o += bandPanel(z0, z1, th);
+    if (WN.head + ar <= yOpen) o += bandPanel(z0, z1, th);
+    else {
+      // window reaches the band: its architrave runs up to the cornice, the band panel continues only beside it
+      o += R(w0 - ar, WN.head + ar, w1 + arR, yEnt, W(th)) + Ln(w0 - ar, yEnt - 20, w1 + arR, yEnt - 20, W(th));
+      if (w0 - ar - z0 > 200) o += bandPanel(z0, w0 - ar, th);
+    }
     // side panels
-    [[z0 + 30, w0 - ar - 25], [w1 + ar + 25, z1 - 30]].forEach(([a, b]) => { if (b - a > 40) o += `<g ${W(th)}>${R(a, yTop + 60, b, yOpen - 30)}</g>`; });
+    [[z0 + 30, w0 - ar - 25], [w1 + arR + 25, z1 - 30]].forEach(([a, b]) => { if (b - a > 40) o += `<g ${W(th)}>${R(a, yTop + 60, b, yOpen - 30)}${R(a + 18, yTop + 78, b - 18, yOpen - 48)}</g>`; });
     return o;
   }
 
@@ -225,7 +230,7 @@ const WALL = {
     let o = `<rect x="-${WN.wall}" y="${ey(K.H)}" width="${WN.wall}" height="${K.H}" fill="url(#hatchWall)" stroke-width="${th * 2}"/>`;
     // base cupboard + counter
     o += `<rect x="0" y="${ey(B.h)}" width="${B.d}" height="${B.h}"/><rect x="0" y="${ey(yTop)}" width="${B.d + B.over}" height="${B.top}" ${hatch}/>`;
-    o += `<g stroke-width="${th}"><rect x="${B.d - 22}" y="${ey(B.h - 20)}" width="22" height="${B.h - 20 - K.skirt}"/><line x1="18" y1="${ey(450)}" x2="${B.d - 22}" y2="${ey(450)}"/><rect x="0" y="${ey(K.skirt)}" width="${B.d - 20}" height="${K.skirt}"/></g>`;
+    o += `<g stroke-width="${th}"><rect x="${B.d - 22}" y="${ey(B.h - 20)}" width="22" height="${B.h - 20 - K.skirt}"/><line x1="18" y1="${ey(B.h / 2)}" x2="${B.d - 22}" y2="${ey(B.h / 2)}"/><rect x="0" y="${ey(K.skirt)}" width="${B.d - 20}" height="${K.skirt}"/></g>`;
     // upper case: back, shelves, arch soffit
     o += `<rect x="0" y="${ey(yEnt)}" width="${BK.d}" height="${yEnt - yTop}"/><rect x="0" y="${ey(yEnt)}" width="18" height="${yEnt - yTop}" ${hatch}/>`;
     BK.shelves.forEach((y) => { o += `<rect x="18" y="${ey(y)}" width="${BK.d - 18}" height="25" ${hatch}/>`; });
@@ -261,11 +266,11 @@ const WALL = {
   s1 += lab(xPanel[0] + 400, (yMod + yDen) / 2, vE.X(xPanel[0] + 400) + 10, 27, "PLAIN MODILLION BLOCKS + DENTILS", "REF. 2 — NO LEAF CARVING");
   s1 += lab(xP2[0] + 60, 1500, vE.X(xP2[1]) + 22, vE.Y(ey(1700)), "FLUTED PILASTER ×2", "ON A PANELLED PEDESTAL — REF. 1");
   s1 += lab((xPanel[0] + xPanel[1]) / 2 + 400, 1150, vE.X(xP2[1]) + 22, vE.Y(ey(1200)), "MOULDED PANEL", "PAINTING OPTIONAL — REF. 1");
-  s1 += lab(BK.w / 2, (yBand + yEnt) / 2, vE.X(-40), vE.Y(ey(2300)), "BAND PANELS", "SAME SIZE, ALL 3 BAYS", "end");
+  s1 += lab(BK.w / 2, (yBand + yEnt) / 2, vE.X(-40), vE.Y(ey(2300)), "BAND PANELS", "SAME SIZE WHERE THEY FIT", "end");
   s1 += lab(BK.w / 2, yOpen - 13, vE.X(-40), vE.Y(ey(1850)), "FLAT HEAD, NO ARCH", "STRIP LIGHT UNDER RAIL", "end");
   s1 += lab((xP1[0] + xP1[1]) / 2 - SC.span, SC.y + 150, vE.X(xP1[0]) - 10, vE.Y(ey(1500)) + 20, "TWIN SCONCE ×2", "ON THE PILASTERS — REF. 3", "end");
   s1 += lab(xP2[1] + PL.ped, 450, vE.X(xP2[1]) + 22, vE.Y(ey(600)), "PEDESTAL STEPS FORWARD", "COUNTER WRAPS IT — REF. 3");
-  s1 += lab(260, 420, vE.X(-40), vE.Y(ey(450)), "CUPBOARDS, ALL 3 BAYS", "MOULDED PANEL DOORS", "end");
+  s1 += lab(260, 300, vE.X(-40), vE.Y(ey(300)), "CUPBOARDS 2 FT, ALL 3 BAYS", "MOULDED PANEL DOORS", "end");
   s1 += lab(BK.w / 2, yTop - 10, vE.X(-40), vE.Y(ey(900)), "REEDED TOP", "MATCHES THE DESK", "end");
 
   // Plan
@@ -273,7 +278,7 @@ const WALL = {
   s1 += heading(18, 180, "PLAN", `CUT AT 1200 · SCALE 1:${scP} · ROOM BELOW, WALL ABOVE`, 60);
   s1 += vP.g(plan(tP, `${vP.w(1)} ${vP.w(0.7)}`), 0.28);
   s1 += chainV([vP.Y(0), vP.Y(BK.d), vP.Y(PL.d + PL.proj), vP.Y(B.d + B.over)], vP.X(-150) - 4, [BK.d, PL.proj + PL.d - BK.d, ""], { from: vP.X(0) - 1, size: 1.4 });
-  s1 += note(vP.X(xWin[0] + 100), vP.Y(-WN.wall / 2), vP.X(xWin[0] + 100) + 4, vP.Y(-WN.wall) - 5, "WINDOW (ASSUMED 1200 WIDE)", "PANELLED REVEALS");
+  s1 += note(vP.X(xWin[0] + 100), vP.Y(-WN.wall / 2), vP.X(xWin[0] + 100) + 4, vP.Y(-WN.wall) - 5, "WINDOW ~1160 WIDE, TIGHT TO CORNER", "FROM SITE PHOTO — CONFIRM");
 
   // Section
   const scS = 25, vS = view(345, 34, scS, "Section through bookcase"), tS = vS.w(0.1);
@@ -286,7 +291,7 @@ const WALL = {
 
   // Notes
   s1 += heading(318, 170, "NOTES", "REVISION 2", 40);
-  ["Wall 16 ft wide, ceiling 9 ft (owner's measure).", "Window size and position ASSUMED — measure.", "Elements taken from the references:",
+  ["Wall 16 ft wide, ceiling 9 ft (owner's measure).", "Window read off a site photo — tape-measure it.", "Elements taken from the references:",
    "   Ref. 1 — fluted pilasters, moulded painting panel.", "   Ref. 2 — block-and-dentil cornice, no carving.", "   Ref. 3 — band panels over every bay, twin",
    "   sconces, pedestals stepping forward, no arch.", "Cupboards under all three bays. Solid teak.", "Gold only on handles and sconces."]
     .forEach((n, i) => { s1 += text(318, 181 + i * 4.1, n, { size: 1.55 }); });
