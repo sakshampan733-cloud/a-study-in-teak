@@ -224,7 +224,6 @@ window.PROJECT = {
       items: [
         {
           id: "wardrobe", name: "Wardrobes", status: "open",
-          drawings: ["wardrobe"],
           refs: [
             { src: "assets/refs/wardrobe-ref-2-steel-leaded-doors-wide.jpg", caption: "Ref. 2 — blackened steel doors with transoms, textured glass in linear leading" },
             { src: "assets/refs/wardrobe-ref-3-steel-leaded-doors-closeup.jpg", caption: "Ref. 2 close-up — the leading pattern, slim bar pulls" },
@@ -232,9 +231,9 @@ window.PROJECT = {
             { src: "assets/refs/ceiling-barrel-vault-coffers.jpg", caption: "The room's ceiling — barrel vault with coffered panels" },
           ],
           parts: [
-            { label: "Direction", value: "Not wood. Full-height blackened-steel doors with a transom (ref. 2), white textured glass in lead came, lit from inside so the wall glows softly like lit windows (ref. 1). Brass bar pulls. Door study: AST-DR-007." },
+            { label: "Direction", value: "Not wood. Full-height blackened-steel doors with a transom (ref. 2), white textured glass in lead came, lit from inside so the wall glows softly like lit windows (ref. 1). Brass bar pulls." },
             { label: "Glass", value: "", hint: "White glass that hides the clothes: opal, satin-etched, reeded or seeded/cathedral glass in lead came" },
-            { label: "Pattern", value: "", hint: "A: linear leading like ref. 2 (pairs mirror) — or B: square grid like the laylight, ref. 1" },
+            { label: "Pattern", value: "A — linear leading like ref. 2, pairs mirrored. Variations with the four-dot motif from ref. 1 being explored." },
             { label: "Frames", value: "Blackened steel T-section, 38 mm face, transom bar at 560 below the cornice (as ref. 2)." },
             { label: "Lighting", value: "", hint: "Warm 2700 K LED strips on a dimmer, set back behind a diffuser so there are no bright spots" },
             { label: "Internals", value: "", hint: "Hanging, drawers, shoe rack, loft; a light-coloured back panel so the glass glows evenly" },
