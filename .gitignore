@@ -1,0 +1,8 @@
+# local tooling
+tools/.venv/
+__pycache__/
+build/
+.claude/
+
+# macOS
+.DS_Store
