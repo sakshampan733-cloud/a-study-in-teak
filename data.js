@@ -29,7 +29,6 @@ window.PROJECT = {
   },
 
   room: {
-    drawing: "room-plan",                              // AST-DR-000, redrawn from the lighting plan
     plan: "assets/refs/room-plan-lighting-rcp.jpg",   // source: photo of the lighting / false-ceiling plan
     facts: [
       { k: "Plan", v: "Rectangle, roughly 14 × 18 ft read off the photo (to confirm)" },
@@ -229,16 +228,13 @@ window.PROJECT = {
             { src: "assets/refs/ceiling-barrel-vault-coffers.jpg", caption: "The room's ceiling — barrel vault with coffered panels (the wardrobe should complement it)" },
           ],
           parts: [
-            { label: "Direction", value: "Uniform, British colonial (1940s–60s) teak wardrobe wall that complements the vaulted, coffered ceiling and shares the study wall's language." },
-            { label: "Recommended", value: "A — Panelled, like the study wall: full-height teak shutters in a strict grid of moulded raised panels whose rhythm lines up with the ceiling coffers, same cornice and plinth as the study wall, brass handles only." },
-            { label: "Option B", value: "Colonial cane: teak frame shutters with woven cane in the upper panels (lets clothes breathe) over solid moulded lower panels, brass campaign flush pulls." },
-            { label: "Option C", value: "Planter louvres: teak louvred upper panels over raised lower panels — most climate-friendly, most Anglo-Indian." },
-            { label: "Ceiling tie-in", value: "Where the wardrobe meets the vault, run the cornice along the springing line; on an end wall, let the top follow the arch. The one arch in the room belongs here." },
-            { label: "Shutter design", value: "", hint: "Choose A / B / C, or mix (e.g. panels with one mirrored pair for dressing)" },
-            { label: "Veneer", inherit: "veneer" },
-            { label: "Polish", inherit: "polish" },
-            { label: "Internals", value: "", hint: "Hanging, drawers, shoe rack, loft" },
-            { label: "Hardware", value: "", hint: "Brass only (gold on handles) — campaign flush pulls, swan-neck drops, or knobs" },
+            { label: "Direction", value: "Not wood. Leaded-glass wardrobe fronts: white (obscure) glass set in a leaded grid, lit from inside so the wardrobe glows softly like a row of windows at night. Photos to come." },
+            { label: "Glass", value: "", hint: "White glass that hides the clothes: opal, satin-etched, reeded or seeded/cathedral glass in lead came" },
+            { label: "Pattern", value: "", hint: "Rectangular grid (echoes the ceiling coffers) or diamond quarries (more Tudor/Georgian)" },
+            { label: "Frames", value: "", hint: "Blackened steel / bronze, or painted — not teak, to break the wood" },
+            { label: "Lighting", value: "", hint: "Warm 2700 K LED strips on a dimmer, set back behind a diffuser so there are no bright spots" },
+            { label: "Internals", value: "", hint: "Hanging, drawers, shoe rack, loft; a light-coloured back panel so the glass glows evenly" },
+            { label: "Hardware", value: "", hint: "Brass only (gold on handles)" },
             { label: "Dimensions", value: "" },
           ],
           questions: [

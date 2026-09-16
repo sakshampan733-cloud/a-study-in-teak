@@ -67,7 +67,9 @@ function overview() {
     <h3>Sections</h3><div class="grid">${tiles}</div>
     <h3>The room</h3>
     <div class="grid" style="grid-template-columns:2fr 1fr">
-      <div class="card plan">${P.room.drawing && window.DRAWINGS?.[P.room.drawing] ? `<figure class="dwg" data-open="dwg:${P.room.drawing}" style="margin:0;width:100%">${window.DRAWINGS[P.room.drawing].svg}<figcaption>${esc(window.DRAWINGS[P.room.drawing].title)} — click to open full size</figcaption></figure>` : P.room.plan ? `<img src="${esc(P.room.plan)}" alt="Room plan">` : "Room plan — to be added"}</div>
+      <div class="card plan">${(window.PLANS || []).length
+        ? `<div class="media" style="width:100%;margin:0">${window.PLANS.map((p) => `<figure class="ref" data-open="img:${esc(p.src)}"><img src="${esc(p.src)}" alt="" style="object-fit:contain;background:#fff"><figcaption>${esc(p.title)} · <a href="${esc(p.file)}" download>file</a></figcaption></figure>`).join("")}</div>`
+        : P.room.plan ? `<figure class="ref" data-open="img:${esc(P.room.plan)}" style="width:100%"><img src="${esc(P.room.plan)}" alt="Room plan" style="height:auto;max-height:520px;object-fit:contain"></figure>` : "Room plan — to be added"}</div>
       <div class="card facts">${P.room.facts.map((f) => `<div class="lab" style="color:var(--muted)">${esc(f.k)}</div><div>${esc(f.v)}</div>`).join("")}</div>
     </div>`;
 }

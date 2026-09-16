@@ -5,3 +5,4 @@ set -e
 cd "$(dirname "$0")/.."
 node tools/dump-cad.js
 tools/.venv/bin/python tools/svg2dxf.py
+tools/.venv/bin/python tools/import_plans.py

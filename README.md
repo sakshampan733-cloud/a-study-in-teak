@@ -17,12 +17,17 @@ python3 -m http.server 4178
 | `assets/refs/` | Reference photos |
 | `tools/` | Scripts that rebuild the CAD files |
 
+## Adding your own CAD drawings
+
+Drop `.dxf`, `.pdf` or image files into `plans/`, then run `tools/build-cad.sh`. They appear on the Overview page.
+DWG can't be read directly — in AutoCAD use **Save As → DXF**, or **Export / Plot → PDF**.
+
 ## Rebuilding the CAD files
 
 After changing a drawing:
 
 ```bash
-python3 -m venv tools/.venv && tools/.venv/bin/pip install ezdxf svgelements shapely   # first time only
+python3 -m venv tools/.venv && tools/.venv/bin/pip install ezdxf svgelements shapely pymupdf   # first time only
 tools/build-cad.sh
 ```
 
