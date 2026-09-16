@@ -81,7 +81,7 @@ window.PROJECT = {
       ],
     },
     {
-      id: "study", title: "Study", kicker: "Desk & shelf",
+      id: "study", title: "Study", kicker: "Desk & study wall",
       intro: "",
       items: [
         {
@@ -115,15 +115,25 @@ window.PROJECT = {
           ],
         },
         {
-          id: "shelf", name: "Shelf", status: "brief",
+          id: "shelf", name: "Study Wall — Bookcase, Panelled Centre, Window", status: "open",
           parts: [
-            { label: "Design", value: "", hint: "Open / glazed, cornice, divisions" },
-            { label: "Veneer", inherit: "veneer" },
+            { label: "Layout", value: "Left: bookcase with open shelves above and cupboards below. Centre: plain panel moulding (a painting may hang here). Right: the window — no shelf. Two pilasters frame the centre panel, one each side." },
+            { label: "Style", value: "After the reference study: full-height teak panelling, cornice and frieze running across the whole wall, a desk-height cupboard band with a projecting top, open shelves lit from above." },
+            { label: "Pilasters", value: "", hint: "Two, flanking the centre panel — references to come (fluted / reeded, capital, base, carving)" },
+            { label: "Bookcase", value: "", hint: "Shelf spacing, adjustable or fixed, glazed or open, lighting" },
+            { label: "Cupboards", value: "", hint: "Height (desk height ~750 to match the desk?), door panel design, handles" },
+            { label: "Centre panel", value: "", hint: "Panel moulding pattern, painting size and light" },
+            { label: "Window side", value: "", hint: "Panelled reveal, window seat, or pilaster + panel to balance the bookcase" },
+            { label: "Wood", inherit: "wood" },
             { label: "Polish", inherit: "polish" },
-            { label: "Dimensions", value: "" },
-            { label: "Lighting", value: "", hint: "Internal shelf lighting? (see Lighting)" },
+            { label: "Dimensions", value: "", hint: "Wall width, ceiling height, window size and position" },
           ],
-          questions: [],
+          questions: [
+            "Wall width, ceiling height, and the window's width, height, sill height and distance from the corners?",
+            "Does the panelling and cornice run over the window too, so the wall reads as one piece?",
+            "Bookcase: open shelves, or glazed doors above the cupboards?",
+            "Should the pilasters and cupboard band borrow the desk's details (reeded consoles, hollow corners, carved drops)?",
+          ],
         },
       ],
     },
