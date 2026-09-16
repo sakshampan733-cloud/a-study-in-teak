@@ -14,7 +14,7 @@ const WALL = {
   pil: { w: 240, proj: 60, flutes: 9, capH: 130, d: 440, ped: 25, pedProj: 50 },  // ref. 1 fluted shaft; ref. 3 pedestal steps forward below the counter
   panel: { w: 1400, set: 200, frame: 70, painting: [760, 860], paintingC: 1440 },
   win: { w: 1160, sill: 650, head: 2320, fromRight: 35, arch: 70, wall: 230 },  // read off the site photo (9 ft ceiling as scale) — confirm with a tape
-  sconce: { y: 1560, span: 150 },  // twin-arm candle sconce with shade, one on each pilaster (ref. 3)
+  sconce: { y: 1290, span: 150 },  // twin-arm candle sconce with shade, one on each pilaster (ref. 3)
   ent: { architrave: 60, frieze: 80, mod: 70, dentil: 30, crown: 90, proj: 160, modW: 44, modPitch: 105 },
 };
 
