@@ -4,16 +4,16 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const WALL = {
-  rev: "0 — first draft from references",
+  rev: "1 — 16 ft × 9 ft, full-height plain pilasters, cupboards in every bay",
   date: "17.09.2026",
-  W: 3660, H: 3050,            // ASSUMED: 12 ft wall, 10 ft ceiling — to confirm
-  skirt: 120,                  // plinth / skirting at the floor
-  base: { h: 800, top: 40, d: 450, over: 25 },   // cupboard band, reeded top (matches the desk edge)
-  book: { w: 1100, d: 350, stile: 60, shelves: [1150, 1450, 1750, 2050], spring: 2250, rise: 220 },
-  pil: { w: 220, proj: 60, flutes: 7, baseH: 140, capH: 170, d: 350 },
-  panel: { w: 1100, set: 200, frame: 70, painting: [700, 900], paintingC: 1700 },
-  win: { w: 820, sill: 840, head: 2350, arch: 70, wall: 230 },
-  ent: { architrave: 80, frieze: 115, mod: 90, dentil: 40, crown: 140, proj: 190, modW: 50, modPitch: 115 },
+  W: 4877, H: 2743,            // 16 ft wall, 9 ft ceiling (owner's measure)
+  skirt: 120,                  // skirting line on the cupboard fronts
+  base: { h: 800, top: 40, d: 450, over: 25 },   // cupboards under all three bays, reeded top (matches the desk edge)
+  book: { w: 1500, d: 350, stile: 60, shelves: [1150, 1420, 1690, 1960], spring: 2150, rise: 180 },
+  pil: { w: 240, proj: 60, flutes: 9, capH: 130, d: 440 },  // from reference 1: fluted, floor to cornice, moulded cap
+  panel: { w: 1400, set: 200, frame: 70, painting: [800, 1000], paintingC: 1630 },
+  win: { w: 1200, sill: 840, head: 2150, arch: 70, wall: 230 },  // window size ASSUMED
+  ent: { architrave: 60, frieze: 80, mod: 70, dentil: 30, crown: 90, proj: 160, modW: 44, modPitch: 105 },
 };
 
 (function () {
@@ -31,7 +31,7 @@ const WALL = {
   const yTop = B.h + B.top;                                   // counter top
   const entH = E.architrave + E.frieze + E.mod + E.dentil + E.crown;
   const yEnt = K.H - entH;                                    // underside of the entablature
-  const yCap = yEnt - PL.capH, yShaft0 = yTop + PL.baseH;
+  const yCap = yEnt - PL.capH;
   const yFr = yEnt + E.architrave, yMod = yFr + E.frieze, yDen = yMod + E.mod, yCrown = yDen + E.dentil;
 
   // elevation helpers (local mm, SVG y down)
@@ -40,69 +40,49 @@ const WALL = {
   const Ln = (x0, y0, x1, y1, a = "") => `<line x1="${f(x0)}" y1="${f(ey(y0))}" x2="${f(x1)}" y2="${f(ey(y1))}" ${a}/>`;
   const W = (th) => `stroke-width="${th}"`;
 
-  // Acanthus leaf, base centre (cx, y) growing up h, width w: serrated lobes, tip curling forward, midrib and veins.
-  const leaf = (cx, y, w, h, th) => {
-    const side = (m) => Array.from({ length: 25 }, (_, i) => {
-      const t = i / 24, hw = (w / 2) * Math.sin(Math.PI * Math.pow(t, 0.75)) * (1 - 0.25 * t), lobe = 0.72 + 0.28 * Math.abs(Math.sin(3.5 * Math.PI * t));
-      return [cx + m * hw * lobe, y + h * t];
-    });
-    const out = [...side(-1), ...side(1).reverse()].map(([x, yy]) => `${f(x)} ${f(ey(yy))}`);
-    let o = `<path d="M ${out.join(" L ")} Z" fill="#fff"/>`;
-    o += `<path ${W(th)} d="M ${f(cx)} ${f(ey(y))} Q ${f(cx + w * 0.05)} ${f(ey(y + h * 0.5))} ${f(cx)} ${f(ey(y + h * 0.92))}"/>`;
-    [0.28, 0.5, 0.7].forEach((t) => { o += `<path ${W(th)} d="M ${f(cx)} ${f(ey(y + h * t))} Q ${f(cx - w * 0.15)} ${f(ey(y + h * (t + 0.04)))} ${f(cx - w * 0.3)} ${f(ey(y + h * (t + 0.12)))} M ${f(cx)} ${f(ey(y + h * t))} Q ${f(cx + w * 0.15)} ${f(ey(y + h * (t + 0.04)))} ${f(cx + w * 0.3)} ${f(ey(y + h * (t + 0.12)))}"/>`; });
-    return o;
-  };
-  const volute = (cx, cy, r, dir, th) => {
-    const pts = Array.from({ length: 26 }, (_, i) => { const t = i / 25, a = dir * (Math.PI * 0.5 + t * Math.PI * 2.2), rr = r * (1 - 0.8 * t); return `${f(cx + rr * Math.cos(a))} ${f(ey(cy) - rr * Math.sin(a))}`; });
-    return `<path ${W(th)} d="M ${pts.join(" L ")}"/><circle cx="${f(cx)}" cy="${f(ey(cy))}" r="${f(r * 0.18)}" ${W(th)}/>`;
-  };
-
-  // Fluted pilaster: moulded base, stopped flutes, astragal, acanthus capital with volutes, abacus.
+  // Fluted pilaster after reference 1: floor to cornice, plinth block, torus, stopped flutes, plain moulded capital.
   function pilaster(x0, th) {
-    const x1 = x0 + PL.w, cx = (x0 + x1) / 2;
-    let o = R(x0, yTop, x1, yEnt);
-    // base: plinth block, torus, scotia, fillet
-    o += R(x0 - 12, yTop, x1 + 12, yTop + 70) + R(x0 - 8, yTop + 70, x1 + 8, yTop + 95) + `<g ${W(th)}>${Ln(x0 - 8, yTop + 82, x1 + 8, yTop + 82)}${Ln(x0 - 3, yTop + 110, x1 + 3, yTop + 110)}${Ln(x0, yTop + 125, x1, yTop + 125)}</g>`;
-    // flutes: stopped, rounded ends
-    const n = PL.flutes, pitch = (PL.w - 30) / n, fw = pitch * 0.7;
+    const x1 = x0 + PL.w;
+    let o = R(x0, 0, x1, yEnt);
+    // base at the floor: plinth block, torus, fillet
+    o += R(x0 - 15, 0, x1 + 15, 130) + R(x0 - 10, 130, x1 + 10, 160) + R(x0 - 5, 160, x1 + 5, 175);
+    o += `<g ${W(th)}>${Ln(x0 - 15, 110, x1 + 15, 110)}${Ln(x0 - 10, 145, x1 + 10, 145)}</g>`;
+    // stopped flutes, rounded ends
+    const n = PL.flutes, pitch = (PL.w - 30) / n, fw = pitch * 0.7, f0 = 235, f1 = yCap - 40;
     for (let i = 0; i < n; i++) {
       const xc = x0 + 15 + pitch * (i + 0.5);
-      o += `<rect ${W(th)} x="${f(xc - fw / 2)}" y="${f(ey(yCap - 45))}" width="${f(fw)}" height="${f(yCap - 45 - (yShaft0 + 40))}" rx="${f(fw / 2)}"/>`;
+      o += `<rect ${W(th)} x="${f(xc - fw / 2)}" y="${f(ey(f1))}" width="${f(fw)}" height="${f(f1 - f0)}" rx="${f(fw / 2)}"/>`;
     }
-    // astragal
-    o += R(x0 - 4, yCap - 22, x1 + 4, yCap) + `<g ${W(th)}>${Ln(x0 - 4, yCap - 11, x1 + 4, yCap - 11)}</g>`;
-    // capital bell: two rows of acanthus, volutes, abacus
-    o += `<path ${W(th)} d="M ${f(x0)} ${f(ey(yCap))} C ${f(x0 - 6)} ${f(ey(yCap + 90))} ${f(x0 - 18)} ${f(ey(yEnt - 30))} ${f(x0 - 22)} ${f(ey(yEnt - 25))} M ${f(x1)} ${f(ey(yCap))} C ${f(x1 + 6)} ${f(ey(yCap + 90))} ${f(x1 + 18)} ${f(ey(yEnt - 30))} ${f(x1 + 22)} ${f(ey(yEnt - 25))}"/>`;
-    [cx - 38, cx + 38].forEach((lx) => { o += leaf(lx, yCap + 30, 56, 105, th); });
-    [cx - 74, cx, cx + 74].forEach((lx) => { o += leaf(lx, yCap + 2, 54, 78, th); });
-    o += volute(x0 - 4, yEnt - 48, 22, 1, th) + volute(x1 + 4, yEnt - 48, 22, -1, th);
-    o += `<circle cx="${f(cx)}" cy="${f(ey(yEnt - 40))}" r="11" ${W(th)}/><circle cx="${f(cx)}" cy="${f(ey(yEnt - 40))}" r="4" ${W(th)}/>`;
-    o += R(x0 - 26, yEnt - 25, x1 + 26, yEnt) + `<g ${W(th)}>${Ln(x0 - 26, yEnt - 12, x1 + 26, yEnt - 12)}</g>`;
+    // capital: astragal, neck, ovolo, abacus
+    o += R(x0 - 4, yCap, x1 + 4, yCap + 18) + `<g ${W(th)}>${Ln(x0 - 4, yCap + 9, x1 + 4, yCap + 9)}</g>`;
+    o += `<path d="M ${f(x0)} ${f(ey(yCap + 55))} C ${f(x0 - 2)} ${f(ey(yCap + 70))} ${f(x0 - 12)} ${f(ey(yCap + 78))} ${f(x0 - 12)} ${f(ey(yCap + 85))} L ${f(x1 + 12)} ${f(ey(yCap + 85))} C ${f(x1 + 12)} ${f(ey(yCap + 78))} ${f(x1 + 2)} ${f(ey(yCap + 70))} ${f(x1)} ${f(ey(yCap + 55))}" fill="#fff"/>`;
+    o += `<g ${W(th)}>${Ln(x0, yCap + 55, x1, yCap + 55)}${Ln(x0 - 6, yCap + 72, x1 + 6, yCap + 72)}</g>`;
+    o += R(x0 - 22, yCap + 85, x1 + 22, yEnt) + `<g ${W(th)}>${Ln(x0 - 22, yCap + 100, x1 + 22, yCap + 100)}</g>`;
     return o;
   }
 
-  // Raised-panel cupboard door with a small brass drop handle.
+  // Cupboard door with a moulded frame and raised field (same family as the painting panel) and a brass drop handle.
   function door(x0, x1, y0, y1, th, handleSide) {
-    let o = R(x0, y0, x1, y1) + `<g ${W(th)}>${R(x0 + 45, y0 + 45, x1 - 45, y1 - 45)}${R(x0 + 60, y0 + 60, x1 - 60, y1 - 60)}</g>`;
-    [[x0 + 45, y0 + 45, x0 + 60, y0 + 60], [x1 - 45, y0 + 45, x1 - 60, y0 + 60], [x0 + 45, y1 - 45, x0 + 60, y1 - 60], [x1 - 45, y1 - 45, x1 - 60, y1 - 60]].forEach(([a, b, c, d]) => { o += Ln(a, b, c, d, W(th)); });
-    const hx = handleSide > 0 ? x1 - 28 : x0 + 28, hy = y1 - 120;
+    let o = R(x0, y0, x1, y1) + R(x0 + 38, y0 + 38, x1 - 38, y1 - 38);
+    o += `<g ${W(th)}>${R(x0 + 50, y0 + 50, x1 - 50, y1 - 50)}${R(x0 + 62, y0 + 62, x1 - 62, y1 - 62)}${R(x0 + 95, y0 + 95, x1 - 95, y1 - 95)}</g>`;
+    [[x0 + 38, y0 + 38, x0 + 62, y0 + 62], [x1 - 38, y0 + 38, x1 - 62, y0 + 62], [x0 + 38, y1 - 38, x0 + 62, y1 - 62], [x1 - 38, y1 - 38, x1 - 62, y1 - 62]].forEach(([a, b, c, d]) => { o += Ln(a, b, c, d, W(th)); });
+    const hx = handleSide > 0 ? x1 - 20 : x0 + 20, hy = y1 - 150;
     o += `<circle cx="${f(hx)}" cy="${f(ey(hy))}" r="7" ${W(th)}/><path ${W(th)} d="M ${f(hx - 9)} ${f(ey(hy) + 4)} Q ${f(hx)} ${f(ey(hy) + 22)} ${f(hx + 9)} ${f(ey(hy) + 4)}"/>`;
     return o;
   }
 
-  // Entablature across the full width: stepped architrave, frieze, carved modillion blocks, dentils, crown.
+  // Entablature across the full width: stepped architrave, frieze, plain modillion blocks, dentils, crown.
   function entablature(x0, x1, th) {
     let o = R(x0, yEnt, x1, K.H);
-    o += `<g ${W(th)}>${Ln(x0, yEnt + 30, x1, yEnt + 30)}${Ln(x0, yEnt + 58, x1, yEnt + 58)}${Ln(x0, yFr, x1, yFr)}${Ln(x0, yMod, x1, yMod)}${Ln(x0, yMod + 14, x1, yMod + 14)}${Ln(x0, yDen, x1, yDen)}${Ln(x0, yCrown, x1, yCrown)}${Ln(x0, yCrown + 45, x1, yCrown + 45)}${Ln(x0, yCrown + 95, x1, yCrown + 95)}${Ln(x0, K.H - 12, x1, K.H - 12)}</g>`;
+    o += `<g ${W(th)}>${Ln(x0, yEnt + 22, x1, yEnt + 22)}${Ln(x0, yEnt + 42, x1, yEnt + 42)}${Ln(x0, yFr, x1, yFr)}${Ln(x0, yMod, x1, yMod)}${Ln(x0, yMod + 14, x1, yMod + 14)}${Ln(x0, yDen, x1, yDen)}${Ln(x0, yCrown, x1, yCrown)}${Ln(x0, yCrown + 30, x1, yCrown + 30)}${Ln(x0, yCrown + 62, x1, yCrown + 62)}${Ln(x0, K.H - 12, x1, K.H - 12)}</g>`;
     // breaks forward over each pilaster
     [xP1, xP2].forEach(([a, b]) => { o += `<g ${W(th)}>${Ln(a - 26, yEnt, a - 26, yMod)}${Ln(b + 26, yEnt, b + 26, yMod)}</g>`; });
     // dentils
     for (let x = x0 + 10; x + 16 < x1; x += 28) o += `<rect ${W(th)} x="${f(x)}" y="${f(ey(yCrown - 4))}" width="16" height="${E.dentil - 8}"/>`;
-    // modillion blocks with carved acanthus
+    // plain modillion blocks (no carving)
     for (let x = x0 + E.modPitch / 2; x < x1 - E.modW / 2; x += E.modPitch) {
       o += R(x - E.modW / 2, yMod + 14, x + E.modW / 2, yDen);
-      o += leaf(x, yMod + 20, 34, 58, th);
-      o += `<path ${W(th)} d="M ${f(x - 18)} ${f(ey(yDen - 6))} q 6 8 12 0 M ${f(x + 6)} ${f(ey(yDen - 6))} q 6 8 12 0"/>`;
+      o += `<g ${W(th)}>${R(x - E.modW / 2 + 8, yMod + 22, x + E.modW / 2 - 8, yDen - 10)}</g>`;
     }
     return o;
   }
@@ -140,7 +120,7 @@ const WALL = {
 
   function centrePanel(th) {
     const [x0, x1] = xPanel, fr = PN.frame, ins = 70;
-    const a0 = x0 + ins, a1 = x1 - ins, b0 = yShaft0 + 20, b1 = yCap;
+    const a0 = x0 + ins, a1 = x1 - ins, b0 = yTop + 90, b1 = yEnt - 90;
     let o = R(x0, yTop, x1, yEnt, W(th));
     // bolection frame: outer, step, inner
     o += R(a0, b0, a1, b1) + `<g ${W(th)}>${R(a0 + 22, b0 + 22, a1 - 22, b1 - 22)}${R(a0 + 45, b0 + 45, a1 - 45, b1 - 45)}</g>` + R(a0 + fr, b0 + fr, a1 - fr, b1 - fr);
@@ -175,17 +155,16 @@ const WALL = {
     return o;
   }
 
+  // Cupboards under all three bays (bookcase, centre panel, window), each bay with its own reeded counter
+  // that dies into the full-height pilasters.
   function baseBand(th) {
-    let o = R(0, 0, K.W, B.h) + R(-B.over * 0, B.h, K.W, yTop);
-    o += `<g ${W(th)}>${Ln(0, B.h + 10, K.W, B.h + 10)}${Ln(0, B.h + 20, K.W, B.h + 20)}${Ln(0, B.h + 30, K.W, B.h + 30)}${Ln(0, K.skirt, K.W, K.skirt)}${Ln(0, K.skirt - 30, K.W, K.skirt - 30)}</g>`;
-    // under bookcase: two doors; under pilasters: blocks; under panel: drawers + doors; under window: panelled front
-    o += door(20, BK.w / 2 - 5, K.skirt, B.h - 20, th, 1) + door(BK.w / 2 + 5, BK.w - 20, K.skirt, B.h - 20, th, -1);
-    [xP1, xP2].forEach(([a, b]) => { o += `<g ${W(th)}>${R(a + 15, K.skirt, b - 15, B.h - 20)}${R(a + 35, K.skirt + 30, b - 35, B.h - 50)}</g>`; });
-    const [p0, p1] = xPanel, pm = (p0 + p1) / 2;
-    o += `<g ${W(th)}>${R(p0 + 20, B.h - 180, pm - 5, B.h - 20)}${R(pm + 5, B.h - 180, p1 - 20, B.h - 20)}</g>`;
-    [(p0 + pm) / 2, (pm + p1) / 2].forEach((hx) => { o += `<circle cx="${f(hx)}" cy="${f(ey(B.h - 100))}" r="7" ${W(th)}/>`; });
-    o += door(p0 + 20, pm - 5, K.skirt, B.h - 200, th, 1) + door(pm + 5, p1 - 20, K.skirt, B.h - 200, th, -1);
-    o += `<g ${W(th)}>${R(xZone[0] + 20, K.skirt, xZone[1] - 20, B.h - 20)}${R(xZone[0] + 60, K.skirt + 40, xZone[1] - 60, B.h - 60)}</g>`;
+    let o = "";
+    [xBook, xPanel, xZone].forEach(([a, b]) => {
+      o += R(a, 0, b, B.h) + R(a, B.h, b, yTop);
+      o += `<g ${W(th)}>${Ln(a, B.h + 10, b, B.h + 10)}${Ln(a, B.h + 20, b, B.h + 20)}${Ln(a, B.h + 30, b, B.h + 30)}${Ln(a, 40, b, 40)}</g>`;
+      const m = (a + b) / 2;
+      o += door(a + 20, m - 4, 50, B.h - 20, th, 1) + door(m + 4, b - 20, 50, B.h - 20, th, -1);
+    });
     return o;
   }
 
@@ -256,18 +235,19 @@ const WALL = {
   s1 += vE.g(elevation(tE), 0.28);
   const yb = vE.Y(ey(0));
   s1 += chainH([0, xBook[1], xP1[1], xPanel[1], xP2[1], K.W].map(vE.X), yb + 6, [BK.w, PL.w, PN.w, PL.w, xZone[1] - xZone[0]], { from: yb + 1, size: 1.5 });
-  s1 += chainH([vE.X(0), vE.X(K.W)], yb + 12, [`${K.W} WALL (ASSUMED 12 FT)`], { from: yb + 1 });
-  s1 += chainV([K.H, yEnt, yCap, yShaft0, yTop, B.h, K.skirt, 0].map((y) => vE.Y(ey(y))), vE.X(K.W) + 8, [entH, PL.capH, yCap - yShaft0, PL.baseH, B.top, B.h - K.skirt, K.skirt], { from: vE.X(K.W) + 1, size: 1.4 });
-  s1 += chainV([vE.Y(ey(K.H)), vE.Y(ey(0))], vE.X(K.W) + 15, [`${K.H} CEILING (ASSUMED 10 FT)`], { from: vE.X(K.W) + 1 });
+  s1 += chainH([vE.X(0), vE.X(K.W)], yb + 12, [`${K.W} WALL (16 FT)`], { from: yb + 1 });
+  s1 += chainV([K.H, yEnt, yCap, yTop, B.h, 0].map((y) => vE.Y(ey(y))), vE.X(K.W) + 8, [entH, PL.capH, yCap - yTop, B.top, B.h], { from: vE.X(K.W) + 1, size: 1.4 });
+  s1 += chainV([vE.Y(ey(K.H)), vE.Y(ey(0))], vE.X(K.W) + 15, [`${K.H} CEILING (9 FT)`], { from: vE.X(K.W) + 1 });
   s1 += chainV([vE.Y(ey(WN.head)), vE.Y(ey(WN.sill))], vE.X(xWin[1]) + 6, [WN.head - WN.sill], { from: vE.X(xWin[1]) + 1, size: 1.4 });
   // labels
   const lab = (x, y, lx, ly, t1, t2, a) => note(vE.X(x), vE.Y(ey(y)), lx, ly, t1, t2, a);
-  s1 += lab(xP1[1] - 30, yEnt - 60, vE.X(xP1[1]) + 18, vE.Y(ey(2300)), "ACANTHUS CAPITAL", "WITH VOLUTES — REF. 2");
-  s1 += lab(xPanel[0] + 400, (yMod + yDen) / 2, vE.X(xPanel[0] + 400) + 10, 27, "CARVED MODILLION BLOCKS", "UNDER DENTILS + CROWN — REF. 2");
-  s1 += lab(xP2[0] + 60, 1600, vE.X(xP2[1]) + 22, vE.Y(ey(1850)), "FLUTED PILASTER ×2", `${PL.flutes} STOPPED FLUTES — REF. 1`);
-  s1 += lab((xPanel[0] + xPanel[1]) / 2 + 300, 1100, vE.X(xP2[1]) + 22, vE.Y(ey(1250)), "BOLECTION PANEL", "PAINTING OPTIONAL — REF. 1");
-  s1 += lab(BK.w / 2, BK.spring + BK.rise - 20, vE.X(-40), vE.Y(ey(2700)) + 18, "LIT ARCHED HEAD", "REF. 2", "end");
-  s1 += lab(250, 450, vE.X(-40), vE.Y(ey(500)), "CUPBOARDS", "RAISED PANELS", "end");
+  s1 += lab(xP2[1] + 15, yCap + 70, vE.X(xP2[1] + 700), 27, "MOULDED CAPITAL", "NO CARVING — REF. 1");
+  s1 += lab(xPanel[0] + 400, (yMod + yDen) / 2, vE.X(xPanel[0] + 400) + 10, 27, "PLAIN MODILLION BLOCKS + DENTILS", "REF. 2 — NO LEAF CARVING");
+  s1 += lab(xP2[0] + 60, 1500, vE.X(xP2[1]) + 22, vE.Y(ey(1700)), "FLUTED PILASTER ×2", "FLOOR TO CORNICE — REF. 1");
+  s1 += lab((xPanel[0] + xPanel[1]) / 2 + 400, 1150, vE.X(xP2[1]) + 22, vE.Y(ey(1200)), "MOULDED PANEL", "PAINTING OPTIONAL — REF. 1");
+  s1 += lab(xP1[0] + 120, 60, vE.X(xP1[0] + 120) + 4, vE.Y(ey(0)) + 3, "PLINTH BLOCK AT FLOOR", "");
+  s1 += lab(BK.w / 2, BK.spring + BK.rise - 20, vE.X(-40), vE.Y(ey(2450)) + 12, "LIT ARCHED HEAD", "REF. 2", "end");
+  s1 += lab(260, 420, vE.X(-40), vE.Y(ey(450)), "CUPBOARDS, ALL 3 BAYS", "MOULDED PANEL DOORS", "end");
   s1 += lab(BK.w / 2, yTop - 10, vE.X(-40), vE.Y(ey(900)), "REEDED TOP", "MATCHES THE DESK", "end");
 
   // Plan
@@ -275,7 +255,7 @@ const WALL = {
   s1 += heading(18, 180, "PLAN", `CUT AT 1200 · SCALE 1:${scP} · ROOM BELOW, WALL ABOVE`, 60);
   s1 += vP.g(plan(tP, `${vP.w(1)} ${vP.w(0.7)}`), 0.28);
   s1 += chainV([vP.Y(0), vP.Y(BK.d), vP.Y(PL.d + PL.proj), vP.Y(B.d + B.over)], vP.X(-150) - 4, [BK.d, PL.proj + PL.d - BK.d, ""], { from: vP.X(0) - 1, size: 1.4 });
-  s1 += note(vP.X(xWin[0] + 100), vP.Y(-WN.wall / 2), vP.X(xWin[0] + 100) + 4, vP.Y(-WN.wall) - 5, "WINDOW (ASSUMED 820 WIDE)", "PANELLED REVEALS");
+  s1 += note(vP.X(xWin[0] + 100), vP.Y(-WN.wall / 2), vP.X(xWin[0] + 100) + 4, vP.Y(-WN.wall) - 5, "WINDOW (ASSUMED 1200 WIDE)", "PANELLED REVEALS");
 
   // Section
   const scS = 25, vS = view(345, 34, scS, "Section through bookcase"), tS = vS.w(0.1);
@@ -287,10 +267,10 @@ const WALL = {
   s1 += chainH([vS.X(0), vS.X(BK.d), vS.X(B.d + B.over)], vS.Y(ey(0)) + 6, [BK.d, B.d + B.over - BK.d], { from: vS.Y(ey(0)) + 1, size: 1.3 });
 
   // Notes
-  s1 += heading(318, 170, "NOTES", "FIRST DRAFT", 40);
-  ["Wall width, ceiling height and window size", "   are ASSUMED — measure before the next draft.", "Elements taken from the references:",
-   "   Ref. 1 — fluted pilasters, bolection panel,", "   cupboard band with projecting top.", "   Ref. 2 — acanthus capitals, carved modillions",
-   "   over dentils, lit arched bookcase head.", "Solid teak; polish to match the desk.", "Gold only on handles."]
+  s1 += heading(318, 170, "NOTES", "REVISION 1", 40);
+  ["Wall 16 ft wide, ceiling 9 ft (owner's measure).", "Window size and position ASSUMED — measure.", "Elements taken from the references:",
+   "   Ref. 1 — full-height fluted pilasters, moulded", "   painting panel, cupboards under every bay.", "   Ref. 2 — block-and-dentil cornice (plain,",
+   "   no leaf carving), lit arched bookcase head.", "Solid teak; polish to match the desk.", "Gold only on handles."]
     .forEach((n, i) => { s1 += text(318, 181 + i * 4.1, n, { size: 1.55 }); });
   s1 += titleBlock({ title: "STUDY WALL — GENERAL ARRANGEMENT", sub: "Elevation · Plan · Section", date: K.date, rev: K.rev, dwg: "AST-DR-005" });
 
@@ -300,23 +280,25 @@ const WALL = {
   s2 += `<defs><pattern id="hatchSW" patternUnits="userSpaceOnUse" width="3" height="3" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="3" stroke="#999" stroke-width="0.25"/></pattern></defs>`;
 
   // 1 — pilaster capital + base, elevation 1:5 with break
-  s2 += heading(18, 17, "1 · PILASTER", "CAPITAL AND BASE · ELEVATION · SCALE 1:5", 60);
+  s2 += heading(18, 17, "1 · PILASTER", "CAPITAL AND BASE · ELEVATION · SCALE 1:5 · REF. 1", 70);
   {
-    const s = 5, capTop = yEnt, keep = 330;           // show 330 below the abacus and 260 above the counter
-    const vC = view(55 - 0, 30 - (K.H - capTop) / s, s, "Pilaster capital");
-    const clipTop = `<clipPath id="clipCap"><rect x="-60" y="${ey(capTop)}" width="${PL.w + 120}" height="${keep}"/></clipPath>`;
-    s2 += vC.g(`${clipTop}<g clip-path="url(#clipCap)">${pilaster(0, vC.w(0.12))}</g>`, 0.3);
-    const gap = 8, off = keep / s + gap;
-    const vB = view(55, 30 + off - (K.H - (yTop + 260)) / s, s, "Pilaster base");
-    s2 += vB.g(`<clipPath id="clipBase"><rect x="-60" y="${ey(yTop + 260)}" width="${PL.w + 120}" height="${260 + 20}"/></clipPath><g clip-path="url(#clipBase)">${pilaster(0, vB.w(0.12))}<line x1="-80" y1="${ey(yTop)}" x2="${PL.w + 80}" y2="${ey(yTop)}" stroke-width="${vB.w(0.4)}"/></g>`, 0.3);
-    const brk = 30 + keep / s + gap / 2;
+    const s = 5, keep = 300, baseKeep = 330;
+    const vC = view(55, 32 - (K.H - yEnt) / s, s, "Pilaster capital");
+    s2 += vC.g(`<clipPath id="clipCap"><rect x="-60" y="${ey(yEnt)}" width="${PL.w + 120}" height="${keep}"/></clipPath><g clip-path="url(#clipCap)">${pilaster(0, vC.w(0.12))}</g>`, 0.3);
+    const gap = 8, top2 = 32 + keep / s + gap;
+    const vB = view(55, top2 - (K.H - baseKeep) / s, s, "Pilaster base");
+    s2 += vB.g(`<clipPath id="clipBase"><rect x="-60" y="${ey(baseKeep)}" width="${PL.w + 120}" height="${baseKeep + 20}"/></clipPath><g clip-path="url(#clipBase)">${pilaster(0, vB.w(0.12))}<line x1="-80" y1="${ey(0)}" x2="${PL.w + 80}" y2="${ey(0)}" stroke-width="${vB.w(0.5)}"/></g>`, 0.3);
+    const brk = 32 + keep / s + gap / 2;
     s2 += `<path d="M 40 ${brk} L 70 ${brk} L 74 ${brk - 3} L 80 ${brk + 3} L 84 ${brk} L 115 ${brk}" stroke="${INK}" stroke-width="0.2" fill="none"/>`;
-    s2 += chainH([vC.X(-26), vC.X(0), vC.X(PL.w), vC.X(PL.w + 26)], 27, [26, PL.w, 26], { from: 29, size: 1.4 });
-    s2 += note(vC.X(PL.w / 2 - 70), vC.Y(ey(yCap + 30)), 122, 45, "ACANTHUS, TWO ROWS", "CARVED IN TEAK");
-    s2 += note(vC.X(PL.w + 4), vC.Y(ey(yEnt - 48)), 122, 36, "VOLUTE", "");
-    s2 += note(vC.X(PL.w / 2), vC.Y(ey(yCap - 11)), 122, 62, "ASTRAGAL", "");
-    s2 += note(vC.X(PL.w / 2), vC.Y(ey(yCap - 150)), 122, 76, `${PL.flutes} STOPPED FLUTES`, "ROUNDED ENDS");
-    s2 += note(vB.X(PL.w + 12), vB.Y(ey(yTop + 35)), 122, vB.Y(ey(yTop + 60)), "PLINTH BLOCK", "TORUS · SCOTIA · FILLET");
+    s2 += chainH([vC.X(-22), vC.X(0), vC.X(PL.w), vC.X(PL.w + 22)], 29, [22, PL.w, 22], { from: 31, size: 1.4 });
+    s2 += note(vC.X(PL.w + 22), vC.Y(ey(yCap + 108)), 128, 38, "ABACUS", "");
+    s2 += note(vC.X(PL.w + 10), vC.Y(ey(yCap + 75)), 128, 46, "OVOLO", "");
+    s2 += note(vC.X(PL.w), vC.Y(ey(yCap + 35)), 128, 54, "NECK", "");
+    s2 += note(vC.X(PL.w + 4), vC.Y(ey(yCap + 9)), 128, 62, "ASTRAGAL", "");
+    s2 += note(vC.X(PL.w / 2), vC.Y(ey(yCap - 120)), 128, 74, `${PL.flutes} STOPPED FLUTES`, "ROUNDED ENDS, FULL HEIGHT");
+    s2 += note(vB.X(PL.w + 10), vB.Y(ey(145)), 128, vB.Y(ey(170)), "TORUS", "");
+    s2 += note(vB.X(PL.w + 15), vB.Y(ey(60)), 128, vB.Y(ey(60)), "PLINTH BLOCK", "SITS ON THE FLOOR");
+    s2 += chainV([vB.Y(ey(175)), vB.Y(ey(130)), vB.Y(ey(0))], vB.X(-15) - 5, [45, 130], { from: vB.X(-15) - 1, size: 1.3 });
   }
 
   // 2 — pilaster section, plan 1:2
@@ -350,17 +332,17 @@ const WALL = {
   }
 
   // 4 — modillion block, front 1:2
-  s2 += heading(150, 95, "4 · MODILLION + DENTILS", "FRONT · SCALE 1:2", 55);
+  s2 += heading(150, 95, "4 · MODILLION + DENTILS", "FRONT · SCALE 1:2 · PLAIN", 55);
   {
     const s = 2, v = view(170, 108 - (K.H - yCrown) / s, s, "Modillion front"), th = v.w(0.12);
     let g = `<rect x="-${E.modW}" y="${ey(yCrown)}" width="${E.modW * 3 + 20}" height="${E.dentil}" fill="none"/>`;
     for (let x = -E.modW + 6; x < E.modW * 2 + 10; x += 28) g += `<rect stroke-width="${th}" x="${x}" y="${ey(yCrown - 4)}" width="16" height="${E.dentil - 8}"/>`;
-    g += R(0, yMod + 14, E.modW, yDen) + leaf(E.modW / 2, yMod + 20, 34, 58, th) + `<path stroke-width="${th}" d="M ${E.modW / 2 - 18} ${ey(yDen - 6)} q 6 8 12 0 M ${E.modW / 2 + 6} ${ey(yDen - 6)} q 6 8 12 0"/>`;
+    g += R(0, yMod + 14, E.modW, yDen) + `<rect stroke-width="${th}" x="8" y="${ey(yDen - 10)}" width="${E.modW - 16}" height="${E.mod - 14 - 32}"/>`;
     g += `<line x1="-${E.modW}" y1="${ey(yMod + 14)}" x2="${E.modW * 2 + 20}" y2="${ey(yMod + 14)}"/>`;
     s2 += v.g(g, 0.3);
     s2 += chainH([v.X(0), v.X(E.modW)], v.Y(ey(yMod + 14)) + 6, [E.modW], { from: v.Y(ey(yMod + 14)) + 1, size: 1.4 });
     s2 += chainH([v.X(E.modW), v.X(E.modPitch)], v.Y(ey(yMod + 14)) + 6, [`${E.modPitch} CENTRES`], { from: v.Y(ey(yMod + 14)) + 1, size: 1.4 });
-    s2 += note(v.X(E.modW / 2), v.Y(ey(yMod + 50)), v.X(E.modW * 2 + 30), v.Y(ey(yMod + 50)), "CARVED ACANTHUS", "OPTIONAL GILT — NO, HANDLES ONLY");
+    s2 += note(v.X(E.modW / 2), v.Y(ey(yMod + 50)), v.X(E.modW * 2 + 30), v.Y(ey(yMod + 50)), "PLAIN BLOCK, SUNK PANEL", "NO CARVING");
     s2 += note(v.X(E.modW + 20), v.Y(ey(yCrown + 16)), v.X(E.modW * 2 + 30), v.Y(ey(yCrown + 30)), "DENTILS 16 × 32", "12 GAP");
   }
 
@@ -405,7 +387,7 @@ const WALL = {
   }
 
   s2 += heading(270, 195, "NOTES", "DETAILS", 40);
-  ["Carving (1, 4): carver to work from references 1 and 2.", "Flute and modillion spacing to be set out on site",
+  ["No carving on pilasters or modillions — mouldings only.", "Flute and modillion spacing to be set out on site",
    "   so they finish symmetrically on the wall.", "Mock up profiles 3, 5 and 7 full size before cutting."]
     .forEach((n, i) => { s2 += text(270, 206 + i * 4.3, n, { size: 1.55 }); });
   s2 += titleBlock({ title: "STUDY WALL — DETAILS", sub: "Pilaster · Cornice · Modillion · Panel · Arch · Counter", date: K.date, rev: K.rev, dwg: "AST-DR-006" });
