@@ -4,21 +4,23 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const WALL = {
-  rev: "1 — 16 ft × 9 ft, full-height plain pilasters, cupboards in every bay",
+  rev: "2 — band panels, sconces, pedestals",
   date: "17.09.2026",
   W: 4877, H: 2743,            // 16 ft wall, 9 ft ceiling (owner's measure)
   skirt: 120,                  // skirting line on the cupboard fronts
   base: { h: 800, top: 40, d: 450, over: 25 },   // cupboards under all three bays, reeded top (matches the desk edge)
-  book: { w: 1500, d: 350, stile: 60, shelves: [1150, 1420, 1690, 1960], spring: 2150, rise: 180 },
-  pil: { w: 240, proj: 60, flutes: 9, capH: 130, d: 440 },  // from reference 1: fluted, floor to cornice, moulded cap
-  panel: { w: 1400, set: 200, frame: 70, painting: [800, 1000], paintingC: 1630 },
-  win: { w: 1200, sill: 840, head: 2150, arch: 70, wall: 230 },  // window size ASSUMED
+  book: { w: 1500, d: 350, stile: 60, shelves: [1130, 1410, 1690] },   // flat head, no arch
+  band: { h: 400, rail: 40 },   // moulded panel band under the cornice — same size over all three bays (ref. 3)
+  pil: { w: 240, proj: 60, flutes: 9, capH: 130, d: 440, ped: 25, pedProj: 50 },  // ref. 1 fluted shaft; ref. 3 pedestal steps forward below the counter
+  panel: { w: 1400, set: 200, frame: 70, painting: [760, 860], paintingC: 1440 },
+  win: { w: 1200, sill: 840, head: 1880, arch: 70, wall: 230 },  // window size ASSUMED
+  sconce: { y: 1560, span: 150 },  // twin-arm candle sconce with shade, one on each pilaster (ref. 3)
   ent: { architrave: 60, frieze: 80, mod: 70, dentil: 30, crown: 90, proj: 160, modW: 44, modPitch: 105 },
 };
 
 (function () {
   const { INK, THIN, DIM, f, text, view, chainH, chainV, note, heading, frame, titleBlock, sheet } = window.DK;
-  const K = WALL, B = K.base, BK = K.book, PL = K.pil, PN = K.panel, WN = K.win, E = K.ent;
+  const K = WALL, B = K.base, BK = K.book, PL = K.pil, PN = K.panel, WN = K.win, E = K.ent, BD = K.band, SC = K.sconce;
 
   // ── layout along the wall (x from the left corner) ──
   const xBook = [0, BK.w];
@@ -32,6 +34,7 @@ const WALL = {
   const entH = E.architrave + E.frieze + E.mod + E.dentil + E.crown;
   const yEnt = K.H - entH;                                    // underside of the entablature
   const yCap = yEnt - PL.capH;
+  const yBand = yEnt - BD.h, yOpen = yBand - BD.rail;   // band panel zone, and the top of the bay openings below it
   const yFr = yEnt + E.architrave, yMod = yFr + E.frieze, yDen = yMod + E.mod, yCrown = yDen + E.dentil;
 
   // elevation helpers (local mm, SVG y down)
@@ -40,15 +43,19 @@ const WALL = {
   const Ln = (x0, y0, x1, y1, a = "") => `<line x1="${f(x0)}" y1="${f(ey(y0))}" x2="${f(x1)}" y2="${f(ey(y1))}" ${a}/>`;
   const W = (th) => `stroke-width="${th}"`;
 
-  // Fluted pilaster after reference 1: floor to cornice, plinth block, torus, stopped flutes, plain moulded capital.
+  // Pilaster: a panelled pedestal from the floor to the counter that steps forward (ref. 3), a counter cap that
+  // wraps it, then the fluted shaft (ref. 1) with a moulded base and plain capital up to the cornice.
   function pilaster(x0, th) {
-    const x1 = x0 + PL.w;
-    let o = R(x0, 0, x1, yEnt);
-    // base at the floor: plinth block, torus, fillet
-    o += R(x0 - 15, 0, x1 + 15, 130) + R(x0 - 10, 130, x1 + 10, 160) + R(x0 - 5, 160, x1 + 5, 175);
-    o += `<g ${W(th)}>${Ln(x0 - 15, 110, x1 + 15, 110)}${Ln(x0 - 10, 145, x1 + 10, 145)}</g>`;
-    // stopped flutes, rounded ends
-    const n = PL.flutes, pitch = (PL.w - 30) / n, fw = pitch * 0.7, f0 = 235, f1 = yCap - 40;
+    const x1 = x0 + PL.w, pe = PL.ped;
+    let o = "";
+    // pedestal, floor to counter
+    o += R(x0 - pe, 0, x1 + pe, B.h) + R(x0 - pe - 12, 0, x1 + pe + 12, 90) + `<g ${W(th)}>${Ln(x0 - pe - 12, 70, x1 + pe + 12, 70)}${Ln(x0 - pe, 100, x1 + pe, 100)}</g>`;
+    o += `<g ${W(th)}>${R(x0 - pe + 30, 140, x1 + pe - 30, B.h - 40)}${R(x0 - pe + 42, 152, x1 + pe - 42, B.h - 52)}${R(x0 - pe + 62, 172, x1 + pe - 62, B.h - 72)}</g>`;
+    // counter cap wrapping the pedestal
+    o += R(x0 - pe - 15, B.h, x1 + pe + 15, yTop) + `<g ${W(th)}>${Ln(x0 - pe - 15, B.h + 10, x1 + pe + 15, B.h + 10)}${Ln(x0 - pe - 15, B.h + 20, x1 + pe + 15, B.h + 20)}${Ln(x0 - pe - 15, B.h + 30, x1 + pe + 15, B.h + 30)}</g>`;
+    // shaft with moulded base on the counter
+    o += R(x0, yTop, x1, yEnt) + R(x0 - 10, yTop, x1 + 10, yTop + 45) + `<g ${W(th)}>${Ln(x0 - 10, yTop + 25, x1 + 10, yTop + 25)}${Ln(x0 - 4, yTop + 58, x1 + 4, yTop + 58)}</g>`;
+    const n = PL.flutes, pitch = (PL.w - 30) / n, fw = pitch * 0.7, f0 = yTop + 105, f1 = yCap - 40;
     for (let i = 0; i < n; i++) {
       const xc = x0 + 15 + pitch * (i + 0.5);
       o += `<rect ${W(th)} x="${f(xc - fw / 2)}" y="${f(ey(f1))}" width="${f(fw)}" height="${f(f1 - f0)}" rx="${f(fw / 2)}"/>`;
@@ -58,6 +65,30 @@ const WALL = {
     o += `<path d="M ${f(x0)} ${f(ey(yCap + 55))} C ${f(x0 - 2)} ${f(ey(yCap + 70))} ${f(x0 - 12)} ${f(ey(yCap + 78))} ${f(x0 - 12)} ${f(ey(yCap + 85))} L ${f(x1 + 12)} ${f(ey(yCap + 85))} C ${f(x1 + 12)} ${f(ey(yCap + 78))} ${f(x1 + 2)} ${f(ey(yCap + 70))} ${f(x1)} ${f(ey(yCap + 55))}" fill="#fff"/>`;
     o += `<g ${W(th)}>${Ln(x0, yCap + 55, x1, yCap + 55)}${Ln(x0 - 6, yCap + 72, x1 + 6, yCap + 72)}</g>`;
     o += R(x0 - 22, yCap + 85, x1 + 22, yEnt) + `<g ${W(th)}>${Ln(x0 - 22, yCap + 100, x1 + 22, yCap + 100)}</g>`;
+    return o;
+  }
+
+  // Twin-arm candle sconce with fabric shades, centred on a pilaster (ref. 3).
+  function sconce(cx, th) {
+    const y = SC.y, sp = SC.span;
+    let o = `<ellipse cx="${f(cx)}" cy="${f(ey(y))}" rx="28" ry="60" fill="#fff"/><ellipse cx="${f(cx)}" cy="${f(ey(y))}" rx="18" ry="44" ${W(th)}/><circle cx="${f(cx)}" cy="${f(ey(y))}" r="9" fill="#fff"/>`;
+    [-1, 1].forEach((m) => {
+      const ax = cx + m * sp;
+      o += `<path fill="none" d="M ${f(cx + m * 12)} ${f(ey(y - 10))} C ${f(cx + m * 70)} ${f(ey(y - 80))} ${f(ax - m * 10)} ${f(ey(y - 50))} ${f(ax)} ${f(ey(y + 20))}"/>`;
+      o += `<path fill="none" ${W(th)} d="M ${f(cx + m * 12)} ${f(ey(y - 20))} C ${f(cx + m * 60)} ${f(ey(y - 72))} ${f(ax - m * 16)} ${f(ey(y - 44))} ${f(ax - m * 4)} ${f(ey(y + 14))}"/>`;
+      o += `<path d="M ${f(ax - 26)} ${f(ey(y + 20))} Q ${f(ax)} ${f(ey(y + 2))} ${f(ax + 26)} ${f(ey(y + 20))} L ${f(ax + 18)} ${f(ey(y + 36))} L ${f(ax - 18)} ${f(ey(y + 36))} Z" fill="#fff"/>`;
+      o += R(ax - 8, y + 36, ax + 8, y + 90, 'fill="#fff"');
+      o += `<path d="M ${f(ax - 60)} ${f(ey(y + 90))} L ${f(ax + 60)} ${f(ey(y + 90))} L ${f(ax + 36)} ${f(ey(y + 190))} L ${f(ax - 36)} ${f(ey(y + 190))} Z" fill="#fff"/>`;
+      o += `<g ${W(th)}>${[-40, -20, 0, 20, 40].map((d) => `<line x1="${f(ax + d)}" y1="${f(ey(y + 92))}" x2="${f(ax + d * 0.6)}" y2="${f(ey(y + 188))}"/>`).join("")}</g>`;
+    });
+    return o;
+  }
+
+  // Moulded panel in the band under the cornice — identical in every bay.
+  function bandPanel(a, b, th) {
+    const x0 = a + 60, x1 = b - 60, y0 = yBand + 45, y1 = yEnt - 45;
+    let o = R(a, yOpen, b, yBand, W(th)) + R(x0, y0, x1, y1) + `<g ${W(th)}>${R(x0 + 18, y0 + 18, x1 - 18, y1 - 18)}${R(x0 + 32, y0 + 32, x1 - 32, y1 - 32)}</g>` + R(x0 + 45, y0 + 45, x1 - 45, y1 - 45);
+    [[x0, y0, x0 + 45, y0 + 45], [x1, y0, x1 - 45, y0 + 45], [x0, y1, x0 + 45, y1 - 45], [x1, y1, x1 - 45, y1 - 45]].forEach(([p, q, r2, s2]) => { o += Ln(p, q, r2, s2, W(th)); });
     return o;
   }
 
@@ -87,41 +118,25 @@ const WALL = {
     return o;
   }
 
-  // Bookcase bay with arched, lit head.
+  // Bookcase bay: open shelves with a flat head rail, the moulded band panel above.
   function bookcase(th) {
-    const [x0, x1] = xBook, s = BK.stile, xi0 = x0 + s, xi1 = x1 - s, span = xi1 - xi0, cx = (xi0 + xi1) / 2;
-    const r = (span * span / 4 + BK.rise * BK.rise) / (2 * BK.rise), cyUp = BK.spring + BK.rise - r;   // arc centre (y up)
+    const [x0, x1] = xBook, s = BK.stile, xi0 = x0 + s, xi1 = x1 - s;
     let o = R(x0, yTop, x1, yEnt);
-    o += `<g ${W(th)}>${Ln(xi0, yTop, xi0, BK.spring)}${Ln(xi1, yTop, xi1, BK.spring)}</g>`;
+    o += `<g ${W(th)}>${R(xi0, yTop, xi1, yOpen)}${Ln(xi0 - 15, yOpen, xi1 + 15, yOpen)}</g>`;
     BK.shelves.forEach((y) => { o += R(xi0, y - 25, xi1, y, W(th)) + Ln(xi0, y - 12, xi1, y - 12, `${W(th)} opacity=".5"`); });
-    // books, suggested
     [yTop, ...BK.shelves].forEach((y, i) => {
-      let x = xi0 + 20; const top = (BK.shelves[i] ?? BK.spring) - 25 - 30;
+      let x = xi0 + 20; const top = (BK.shelves[i] ?? yOpen) - 25 - 30;
       while (x < xi1 - 40) { const bw = 22 + ((x * 7) % 18), bh = top - y - ((x * 13) % 60); o += R(x, y, x + bw, y + bh, `${W(th)} opacity=".35"`); x += bw + 2; }
     });
-    // arch opening, archivolt and keystone
-    const arc = (rad) => { const dx = Math.sqrt(rad * rad - (BK.spring - cyUp) ** 2); return `M ${f(cx - dx)} ${f(ey(BK.spring))} A ${f(rad)} ${f(rad)} 0 0 1 ${f(cx + dx)} ${f(ey(BK.spring))}`; };
-    o += `<path d="${arc(r)}"/><path ${W(th)} d="${arc(r + 35)}"/><path d="${arc(r + 60)}"/>`;
-    o += `<path d="M ${f(cx - 26)} ${f(ey(cyUp + r - 8))} L ${f(cx - 34)} ${f(ey(cyUp + r + 95))} L ${f(cx + 34)} ${f(ey(cyUp + r + 95))} L ${f(cx + 26)} ${f(ey(cyUp + r - 8))} Z" fill="#fff"/>`;
-    o += `<g ${W(th)}>${Ln(cx - 20, cyUp + r + 20, cx + 20, cyUp + r + 20)}</g>`;
-    // spandrel panels
-    [-1, 1].forEach((m) => {
-      const pts = [];
-      for (let a = 0; a <= 1.001; a += 0.1) { const ang = Math.PI / 2 - m * a * (Math.PI / 2 - Math.acos(Math.min(1, (span / 2 + 40) / (r + 85)))); const px = cx + (r + 85) * Math.cos(ang) * (m < 0 ? -1 : 1) * (m < 0 ? -1 : 1), py = cyUp + (r + 85) * Math.sin(ang); pts.push([cx + m * Math.abs(px - cx), py]); }
-      const edgeX = m < 0 ? xi0 - 20 : xi1 + 20, topY = yEnt - 30;
-      const poly = [[edgeX, topY], ...pts.filter((p) => p[1] < topY && (m < 0 ? p[0] > edgeX : p[0] < edgeX)).map((p) => p)];
-      if (poly.length > 2) o += `<path ${W(th)} d="M ${poly.map((p) => `${f(p[0])} ${f(ey(p[1]))}`).join(" L ")} Z"/>`;
-    });
-    // up-light in the arch
-    o += `<circle cx="${f(cx)}" cy="${f(ey(cyUp + r - 30))}" r="12" ${W(th)}/>`;
-    [-40, -20, 0, 20, 40].forEach((d) => { o += Ln(cx, cyUp + r - 44, cx + d * 3, cyUp + r - 170, `${W(th)} opacity=".35" stroke-dasharray="20 14"`); });
-    return o;
+    // strip light under the head rail
+    o += R(xi0 + 40, yOpen - 18, xi1 - 40, yOpen - 8, W(th));
+    return o + bandPanel(x0, x1, th);
   }
 
   function centrePanel(th) {
     const [x0, x1] = xPanel, fr = PN.frame, ins = 70;
-    const a0 = x0 + ins, a1 = x1 - ins, b0 = yTop + 90, b1 = yEnt - 90;
-    let o = R(x0, yTop, x1, yEnt, W(th));
+    const a0 = x0 + ins, a1 = x1 - ins, b0 = yTop + 90, b1 = yOpen - 60;
+    let o = R(x0, yTop, x1, yEnt, W(th)) + bandPanel(x0, x1, th);
     // bolection frame: outer, step, inner
     o += R(a0, b0, a1, b1) + `<g ${W(th)}>${R(a0 + 22, b0 + 22, a1 - 22, b1 - 22)}${R(a0 + 45, b0 + 45, a1 - 45, b1 - 45)}</g>` + R(a0 + fr, b0 + fr, a1 - fr, b1 - fr);
     [[a0, b0, a0 + fr, b0 + fr], [a1, b0, a1 - fr, b0 + fr], [a0, b1, a0 + fr, b1 - fr], [a1, b1, a1 - fr, b1 - fr]].forEach(([p, q, r2, s2]) => { o += Ln(p, q, r2, s2, W(th)); });
@@ -147,11 +162,10 @@ const WALL = {
       for (let k = 1; k < 3; k++) o += Ln(a, WN.sill + 20 + ((WN.head - WN.sill - 40) * k) / 3, b, WN.sill + 20 + ((WN.head - WN.sill - 40) * k) / 3, W(th));
       o += Ln((a + b) / 2, WN.sill + 20, (a + b) / 2, WN.head - 20, W(th));
     });
-    // panel over the head, with keystone
-    o += `<g ${W(th)}>${R(w0, WN.head + ar + 30, w1, yEnt - 30)}</g>`;
-    o += `<path d="M ${f(mid - 30)} ${f(ey(WN.head))} L ${f(mid - 40)} ${f(ey(WN.head + ar + 15))} L ${f(mid + 40)} ${f(ey(WN.head + ar + 15))} L ${f(mid + 30)} ${f(ey(WN.head))} Z" fill="#fff"/>`;
+    // the same moulded band panel over the window as over the other bays
+    o += bandPanel(z0, z1, th);
     // side panels
-    [[z0 + 30, w0 - ar - 25], [w1 + ar + 25, z1 - 30]].forEach(([a, b]) => { if (b - a > 40) o += `<g ${W(th)}>${R(a, yTop + 60, b, yEnt - 30)}</g>`; });
+    [[z0 + 30, w0 - ar - 25], [w1 + ar + 25, z1 - 30]].forEach(([a, b]) => { if (b - a > 40) o += `<g ${W(th)}>${R(a, yTop + 60, b, yOpen - 30)}</g>`; });
     return o;
   }
 
@@ -170,6 +184,7 @@ const WALL = {
 
   function elevation(th) {
     return baseBand(th) + bookcase(th) + centrePanel(th) + windowZone(th) + pilaster(xP1[0], th) + pilaster(xP2[0], th) + entablature(0, K.W, th) +
+      sconce((xP1[0] + xP1[1]) / 2, th) + sconce((xP2[0] + xP2[1]) / 2, th) +
       `<line x1="-150" y1="${ey(0)}" x2="${K.W + 150}" y2="${ey(0)}" stroke-width="${th * 5}"/><line x1="-150" y1="${ey(K.H)}" x2="${K.W + 150}" y2="${ey(K.H)}" stroke-width="${th * 3}" stroke-dasharray="40 20"/>`;
   }
 
@@ -186,6 +201,7 @@ const WALL = {
     // pilasters with fluted faces
     [xP1, xP2].forEach(([a, b]) => {
       o += `<rect x="${a}" y="0" width="${PL.w}" height="${PL.d}"/>`;
+      o += `<rect x="${a - PL.ped - 15}" y="0" width="${PL.w + 2 * PL.ped + 30}" height="${B.d + B.over + PL.pedProj}" stroke-dasharray="${dash}" stroke-width="${th}"/>`;
       let d = `M ${a} ${PL.d} L ${a} ${PL.d + PL.proj - 15} `; const n = PL.flutes, pitch = (PL.w - 30) / n, fw = pitch * 0.7;
       d = `M ${a} ${PL.d} L ${a} ${PL.d + PL.proj} L ${a + 15} ${PL.d + PL.proj} `;
       for (let i = 0; i < n; i++) { const xc = a + 15 + pitch * (i + 0.5); d += `L ${f(xc - fw / 2)} ${PL.d + PL.proj} A ${f(fw / 2)} ${f(fw / 2)} 0 0 0 ${f(xc + fw / 2)} ${PL.d + PL.proj} `; }
@@ -213,7 +229,7 @@ const WALL = {
     // upper case: back, shelves, arch soffit
     o += `<rect x="0" y="${ey(yEnt)}" width="${BK.d}" height="${yEnt - yTop}"/><rect x="0" y="${ey(yEnt)}" width="18" height="${yEnt - yTop}" ${hatch}/>`;
     BK.shelves.forEach((y) => { o += `<rect x="18" y="${ey(y)}" width="${BK.d - 18}" height="25" ${hatch}/>`; });
-    o += `<path stroke-width="${th}" d="M 18 ${ey(BK.spring)} L ${BK.d} ${ey(BK.spring)} M 18 ${ey(BK.spring + BK.rise)} L ${BK.d} ${ey(BK.spring + BK.rise)}" stroke-dasharray="30 20"/>`;
+    o += `<rect x="18" y="${ey(yBand)}" width="${BK.d - 18}" height="${BD.rail}" fill="url(#hatchWall2)"/><rect x="${BK.d - 22}" y="${ey(yEnt)}" width="22" height="${BD.h}" fill="url(#hatchWall2)"/><rect x="${BK.d}" y="${ey(yEnt - 45)}" width="14" height="${BD.h - 90}" stroke-width="${th}"/>`;
     // entablature profile
     const p = E.proj, z = (y) => ey(y);
     const prof = [[BK.d, yEnt], [BK.d + 10, yEnt], [BK.d + 10, yEnt + 30], [BK.d + 20, yEnt + 30], [BK.d + 20, yEnt + 58], [BK.d + 32, yEnt + 58], [BK.d + 32, yFr], [BK.d + 26, yFr], [BK.d + 26, yMod],
@@ -243,10 +259,12 @@ const WALL = {
   const lab = (x, y, lx, ly, t1, t2, a) => note(vE.X(x), vE.Y(ey(y)), lx, ly, t1, t2, a);
   s1 += lab(xP2[1] + 15, yCap + 70, vE.X(xP2[1] + 700), 27, "MOULDED CAPITAL", "NO CARVING — REF. 1");
   s1 += lab(xPanel[0] + 400, (yMod + yDen) / 2, vE.X(xPanel[0] + 400) + 10, 27, "PLAIN MODILLION BLOCKS + DENTILS", "REF. 2 — NO LEAF CARVING");
-  s1 += lab(xP2[0] + 60, 1500, vE.X(xP2[1]) + 22, vE.Y(ey(1700)), "FLUTED PILASTER ×2", "FLOOR TO CORNICE — REF. 1");
+  s1 += lab(xP2[0] + 60, 1500, vE.X(xP2[1]) + 22, vE.Y(ey(1700)), "FLUTED PILASTER ×2", "ON A PANELLED PEDESTAL — REF. 1");
   s1 += lab((xPanel[0] + xPanel[1]) / 2 + 400, 1150, vE.X(xP2[1]) + 22, vE.Y(ey(1200)), "MOULDED PANEL", "PAINTING OPTIONAL — REF. 1");
-  s1 += lab(xP1[0] + 120, 60, vE.X(xP1[0] + 120) + 4, vE.Y(ey(0)) + 3, "PLINTH BLOCK AT FLOOR", "");
-  s1 += lab(BK.w / 2, BK.spring + BK.rise - 20, vE.X(-40), vE.Y(ey(2450)) + 12, "LIT ARCHED HEAD", "REF. 2", "end");
+  s1 += lab(BK.w / 2, (yBand + yEnt) / 2, vE.X(-40), vE.Y(ey(2300)), "BAND PANELS", "SAME SIZE, ALL 3 BAYS", "end");
+  s1 += lab(BK.w / 2, yOpen - 13, vE.X(-40), vE.Y(ey(1850)), "FLAT HEAD, NO ARCH", "STRIP LIGHT UNDER RAIL", "end");
+  s1 += lab((xP1[0] + xP1[1]) / 2 - SC.span, SC.y + 150, vE.X(xP1[0]) - 10, vE.Y(ey(1500)) + 20, "TWIN SCONCE ×2", "ON THE PILASTERS — REF. 3", "end");
+  s1 += lab(xP2[1] + PL.ped, 450, vE.X(xP2[1]) + 22, vE.Y(ey(600)), "PEDESTAL STEPS FORWARD", "COUNTER WRAPS IT — REF. 3");
   s1 += lab(260, 420, vE.X(-40), vE.Y(ey(450)), "CUPBOARDS, ALL 3 BAYS", "MOULDED PANEL DOORS", "end");
   s1 += lab(BK.w / 2, yTop - 10, vE.X(-40), vE.Y(ey(900)), "REEDED TOP", "MATCHES THE DESK", "end");
 
@@ -267,10 +285,10 @@ const WALL = {
   s1 += chainH([vS.X(0), vS.X(BK.d), vS.X(B.d + B.over)], vS.Y(ey(0)) + 6, [BK.d, B.d + B.over - BK.d], { from: vS.Y(ey(0)) + 1, size: 1.3 });
 
   // Notes
-  s1 += heading(318, 170, "NOTES", "REVISION 1", 40);
+  s1 += heading(318, 170, "NOTES", "REVISION 2", 40);
   ["Wall 16 ft wide, ceiling 9 ft (owner's measure).", "Window size and position ASSUMED — measure.", "Elements taken from the references:",
-   "   Ref. 1 — full-height fluted pilasters, moulded", "   painting panel, cupboards under every bay.", "   Ref. 2 — block-and-dentil cornice (plain,",
-   "   no leaf carving), lit arched bookcase head.", "Solid teak; polish to match the desk.", "Gold only on handles."]
+   "   Ref. 1 — fluted pilasters, moulded painting panel.", "   Ref. 2 — block-and-dentil cornice, no carving.", "   Ref. 3 — band panels over every bay, twin",
+   "   sconces, pedestals stepping forward, no arch.", "Cupboards under all three bays. Solid teak.", "Gold only on handles and sconces."]
     .forEach((n, i) => { s1 += text(318, 181 + i * 4.1, n, { size: 1.55 }); });
   s1 += titleBlock({ title: "STUDY WALL — GENERAL ARRANGEMENT", sub: "Elevation · Plan · Section", date: K.date, rev: K.rev, dwg: "AST-DR-005" });
 
@@ -282,23 +300,24 @@ const WALL = {
   // 1 — pilaster capital + base, elevation 1:5 with break
   s2 += heading(18, 17, "1 · PILASTER", "CAPITAL AND BASE · ELEVATION · SCALE 1:5 · REF. 1", 70);
   {
-    const s = 5, keep = 300, baseKeep = 330;
+    const s = 5, keep = 300, lo = B.h - 90, hi = yTop + 250;
     const vC = view(55, 32 - (K.H - yEnt) / s, s, "Pilaster capital");
     s2 += vC.g(`<clipPath id="clipCap"><rect x="-60" y="${ey(yEnt)}" width="${PL.w + 120}" height="${keep}"/></clipPath><g clip-path="url(#clipCap)">${pilaster(0, vC.w(0.12))}</g>`, 0.3);
     const gap = 8, top2 = 32 + keep / s + gap;
-    const vB = view(55, top2 - (K.H - baseKeep) / s, s, "Pilaster base");
-    s2 += vB.g(`<clipPath id="clipBase"><rect x="-60" y="${ey(baseKeep)}" width="${PL.w + 120}" height="${baseKeep + 20}"/></clipPath><g clip-path="url(#clipBase)">${pilaster(0, vB.w(0.12))}<line x1="-80" y1="${ey(0)}" x2="${PL.w + 80}" y2="${ey(0)}" stroke-width="${vB.w(0.5)}"/></g>`, 0.3);
+    const vB = view(55, top2 - (K.H - hi) / s, s, "Pilaster base and pedestal");
+    s2 += vB.g(`<clipPath id="clipBase"><rect x="-80" y="${ey(hi)}" width="${PL.w + 160}" height="${hi - lo}"/></clipPath><g clip-path="url(#clipBase)">${pilaster(0, vB.w(0.12))}</g>`, 0.3);
     const brk = 32 + keep / s + gap / 2;
-    s2 += `<path d="M 40 ${brk} L 70 ${brk} L 74 ${brk - 3} L 80 ${brk + 3} L 84 ${brk} L 115 ${brk}" stroke="${INK}" stroke-width="0.2" fill="none"/>`;
+    s2 += `<path d="M 36 ${brk} L 70 ${brk} L 74 ${brk - 3} L 80 ${brk + 3} L 84 ${brk} L 118 ${brk}" stroke="${INK}" stroke-width="0.2" fill="none"/>`;
     s2 += chainH([vC.X(-22), vC.X(0), vC.X(PL.w), vC.X(PL.w + 22)], 29, [22, PL.w, 22], { from: 31, size: 1.4 });
     s2 += note(vC.X(PL.w + 22), vC.Y(ey(yCap + 108)), 128, 38, "ABACUS", "");
     s2 += note(vC.X(PL.w + 10), vC.Y(ey(yCap + 75)), 128, 46, "OVOLO", "");
     s2 += note(vC.X(PL.w), vC.Y(ey(yCap + 35)), 128, 54, "NECK", "");
     s2 += note(vC.X(PL.w + 4), vC.Y(ey(yCap + 9)), 128, 62, "ASTRAGAL", "");
-    s2 += note(vC.X(PL.w / 2), vC.Y(ey(yCap - 120)), 128, 74, `${PL.flutes} STOPPED FLUTES`, "ROUNDED ENDS, FULL HEIGHT");
-    s2 += note(vB.X(PL.w + 10), vB.Y(ey(145)), 128, vB.Y(ey(170)), "TORUS", "");
-    s2 += note(vB.X(PL.w + 15), vB.Y(ey(60)), 128, vB.Y(ey(60)), "PLINTH BLOCK", "SITS ON THE FLOOR");
-    s2 += chainV([vB.Y(ey(175)), vB.Y(ey(130)), vB.Y(ey(0))], vB.X(-15) - 5, [45, 130], { from: vB.X(-15) - 1, size: 1.3 });
+    s2 += note(vC.X(PL.w / 2), vC.Y(ey(yCap - 120)), 128, 74, `${PL.flutes} STOPPED FLUTES`, "ROUNDED ENDS");
+    s2 += note(vB.X(PL.w + 10), vB.Y(ey(yTop + 25)), 128, vB.Y(ey(yTop + 90)), "MOULDED BASE", "ON THE COUNTER");
+    s2 += note(vB.X(PL.w + PL.ped + 15), vB.Y(ey(B.h + 20)), 128, vB.Y(ey(B.h + 20)), "COUNTER CAP", "WRAPS THE PEDESTAL");
+    s2 += note(vB.X(PL.w + PL.ped), vB.Y(ey(B.h - 60)), 128, vB.Y(ey(B.h - 70)), `PEDESTAL, ${PL.pedProj} FORWARD`, `${PL.ped} WIDER EACH SIDE`);
+    s2 += chainH([vB.X(-PL.ped), vB.X(0), vB.X(PL.w), vB.X(PL.w + PL.ped)], vB.Y(ey(lo)) + 4, [PL.ped, PL.w, PL.ped], { from: vB.Y(ey(lo)) + 1, size: 1.3 });
   }
 
   // 2 — pilaster section, plan 1:2
@@ -360,17 +379,15 @@ const WALL = {
     s2 += note(v.X(-20), v.Y(9), v.X(-40) - 4, v.Y(-6), "PANEL FRAME", "", "end");
   }
 
-  // 6 — bookcase head: arch, archivolt, keystone, spandrels, light — elevation 1:10
-  s2 += heading(18, 170, "6 · BOOKCASE HEAD", "ARCH · KEYSTONE · SPANDRELS · LIGHT · SCALE 1:15", 70);
+  // 6 — band panel, pilaster head and sconce, elevation 1:20
+  s2 += heading(18, 205, "6 · BAND PANEL + SCONCE", "ELEVATION · SCALE 1:20 · SAME PANEL OVER EVERY BAY", 80);
   {
-    const s = 15, top = K.H, bot = BK.shelves[BK.shelves.length - 1] - 60;
-    const v = view(30, 180 - (K.H - top) / s, s, "Bookcase head");
-    s2 += v.g(`<clipPath id="clipHead"><rect x="-20" y="${ey(top)}" width="${BK.w + 260}" height="${top - bot}"/></clipPath><g clip-path="url(#clipHead)">${bookcase(v.w(0.12))}${pilaster(xP1[0], v.w(0.12))}${entablature(0, BK.w + 240, v.w(0.12))}</g>`, 0.3);
-    const cx = BK.w / 2;
-    s2 += note(v.X(cx), v.Y(ey(BK.spring + BK.rise + 50)), v.X(BK.w + 260) + 4, v.Y(ey(BK.spring + BK.rise + 120)), "KEYSTONE", "");
-    s2 += note(v.X(cx), v.Y(ey(BK.spring + BK.rise - 30)), v.X(BK.w + 260) + 4, v.Y(ey(BK.spring + 60)), "LED DOWN-LIGHT IN ARCH", "WARM WHITE, ON DIMMER");
-    s2 += note(v.X(90), v.Y(ey(yEnt - 60)), v.X(-20) - 2, v.Y(ey(yEnt - 60)), "SPANDREL PANEL", "", "end");
-    s2 += note(v.X(BK.stile + 20), v.Y(ey(BK.spring + 40)), v.X(-20) - 2, v.Y(ey(BK.spring)), `ARCH RISE ${BK.rise}`, "SEGMENTAL", "end");
+    const s = 20, lo = SC.y - 120, x0 = BK.w - 700, x1 = xP1[1] + 700;
+    const v = view(28 - x0 / s, 214 - (K.H - K.H) / s, s, "Band panel and sconce");
+    s2 += v.g(`<clipPath id="clipBand"><rect x="${x0}" y="${ey(K.H)}" width="${x1 - x0}" height="${K.H - lo}"/></clipPath><g clip-path="url(#clipBand)">${bookcase(v.w(0.12))}${centrePanel(v.w(0.12))}${pilaster(xP1[0], v.w(0.12))}${entablature(0, K.W, v.w(0.12))}${sconce((xP1[0] + xP1[1]) / 2, v.w(0.12))}</g>`, 0.3);
+    s2 += chainV([v.Y(ey(yEnt)), v.Y(ey(yBand)), v.Y(ey(yOpen))], v.X(x1) + 5, [BD.h, BD.rail], { from: v.X(x1) + 1, size: 1.3 });
+    s2 += note(v.X(BK.w - 300), v.Y(ey((yBand + yEnt) / 2)), v.X(x1) + 12, v.Y(ey(yEnt - 60)), "BAND PANEL", `${BD.h} HIGH, EVERY BAY`);
+    s2 += note(v.X((xP1[0] + xP1[1]) / 2 + SC.span), v.Y(ey(SC.y + 140)), v.X(x1) + 12, v.Y(ey(SC.y + 120)), "TWIN SCONCE", "BRASS, FABRIC SHADES");
   }
 
   // 7 — counter edge + cupboard door, section 1:2
@@ -390,7 +407,7 @@ const WALL = {
   ["No carving on pilasters or modillions — mouldings only.", "Flute and modillion spacing to be set out on site",
    "   so they finish symmetrically on the wall.", "Mock up profiles 3, 5 and 7 full size before cutting."]
     .forEach((n, i) => { s2 += text(270, 206 + i * 4.3, n, { size: 1.55 }); });
-  s2 += titleBlock({ title: "STUDY WALL — DETAILS", sub: "Pilaster · Cornice · Modillion · Panel · Arch · Counter", date: K.date, rev: K.rev, dwg: "AST-DR-006" });
+  s2 += titleBlock({ title: "STUDY WALL — DETAILS", sub: "Pilaster · Cornice · Modillion · Panel · Band · Counter", date: K.date, rev: K.rev, dwg: "AST-DR-006" });
 
   window.DRAWINGS.studywall = { title: "Study wall — General arrangement · AST-DR-005", svg: sheet(s1), params: WALL };
   window.DRAWINGS["studywall-details"] = { title: "Study wall — Details · AST-DR-006", svg: sheet(s2), params: WALL };
