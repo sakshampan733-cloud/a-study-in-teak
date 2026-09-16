@@ -4,12 +4,12 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const WALL = {
-  rev: "3 — 2 ft cupboards, window from site photo",
+  rev: "4 — pilaster tight beside the window",
   date: "17.09.2026",
   W: 4877, H: 2743,            // 16 ft wall, 9 ft ceiling (owner's measure)
   skirt: 120,                  // skirting line on the cupboard fronts
   base: { h: 570, top: 40, d: 450, over: 25 },   // cupboards under all three bays, 2 ft to the top of the reeded counter
-  book: { w: 1500, d: 350, stile: 60, shelves: [890, 1160, 1430, 1700] },   // flat head, no arch
+  book: { w: 1650, d: 350, stile: 60, shelves: [890, 1160, 1430, 1700] },   // flat head, no arch
   band: { h: 400, rail: 40 },   // moulded panel band under the cornice — same size over all three bays (ref. 3)
   pil: { w: 240, proj: 60, flutes: 9, capH: 130, d: 440, ped: 25, pedProj: 50 },  // ref. 1 fluted shaft; ref. 3 pedestal steps forward below the counter
   panel: { w: 1400, set: 200, frame: 70, painting: [760, 860], paintingC: 1440 },
@@ -25,10 +25,14 @@ const WALL = {
   // ── layout along the wall (x from the left corner) ──
   const xBook = [0, BK.w];
   const xP1 = [BK.w, BK.w + PL.w];
-  const xPanel = [xP1[1], xP1[1] + PN.w];
-  const xP2 = [xPanel[1], xPanel[1] + PL.w];
-  const xZone = [xP2[1], K.W];
-  const xWin = [K.W - WN.fromRight - WN.w, K.W - WN.fromRight], winC = (xWin[0] + xWin[1]) / 2;
+  // The window bay is exactly the window and its architrave, so the right-hand pilaster stands right beside it;
+  // the centre panel takes whatever width is left.
+  const zoneW = WN.arch + WN.w + WN.fromRight;
+  const xZone = [K.W - zoneW, K.W];
+  const xP2 = [xZone[0] - PL.w, xZone[0]];
+  const xPanel = [xP1[1], xP2[0]];
+  const PNW = xPanel[1] - xPanel[0];
+  const xWin = [xZone[0] + WN.arch, xZone[0] + WN.arch + WN.w], winC = (xWin[0] + xWin[1]) / 2;
   // ── heights ──
   const yTop = B.h + B.top;                                   // counter top
   const entH = E.architrave + E.frieze + E.mod + E.dentil + E.crown;
@@ -214,8 +218,8 @@ const WALL = {
       o += `<path d="${d}" fill="#fff"/>`;
     });
     // centre panelling set forward of the wall on battens
-    o += `<rect x="${xPanel[0]}" y="0" width="${PN.w}" height="${PN.set}" stroke-width="${th}"/><line x1="${xPanel[0]}" y1="${PN.set}" x2="${xPanel[1]}" y2="${PN.set}"/>`;
-    o += `<rect x="${xPanel[0] + 70}" y="${PN.set}" width="${PN.w - 140}" height="35" stroke-width="${th}"/>`;
+    o += `<rect x="${xPanel[0]}" y="0" width="${PNW}" height="${PN.set}" stroke-width="${th}"/><line x1="${xPanel[0]}" y1="${PN.set}" x2="${xPanel[1]}" y2="${PN.set}"/>`;
+    o += `<rect x="${xPanel[0] + 70}" y="${PN.set}" width="${PNW - 140}" height="35" stroke-width="${th}"/>`;
     // window zone panelling and reveal linings
     o += `<rect x="${xZone[0]}" y="0" width="${xZone[1] - xZone[0]}" height="${PN.set}" stroke-width="${th}"/><line x1="${xZone[0]}" y1="${PN.set}" x2="${xWin[0] - WN.arch}" y2="${PN.set}"/><line x1="${xWin[1] + WN.arch}" y1="${PN.set}" x2="${xZone[1]}" y2="${PN.set}"/>`;
     o += `<g stroke-width="${th}"><path d="M ${xWin[0] - WN.arch} ${PN.set} L ${xWin[0] - WN.arch} ${PN.set + 25} L ${xWin[0]} ${PN.set + 25} L ${xWin[0]} -${WN.wall / 2 + 30}"/><path d="M ${xWin[1] + WN.arch} ${PN.set} L ${xWin[1] + WN.arch} ${PN.set + 25} L ${xWin[1]} ${PN.set + 25} L ${xWin[1]} -${WN.wall / 2 + 30}"/></g>`;
@@ -255,7 +259,7 @@ const WALL = {
   s1 += heading(18, 17, "ELEVATION — STUDY WALL", `SCALE 1:${sc} · BOOKCASE · PANEL FOR PAINTING · WINDOW`, 90);
   s1 += vE.g(elevation(tE), 0.28);
   const yb = vE.Y(ey(0));
-  s1 += chainH([0, xBook[1], xP1[1], xPanel[1], xP2[1], K.W].map(vE.X), yb + 6, [BK.w, PL.w, PN.w, PL.w, xZone[1] - xZone[0]], { from: yb + 1, size: 1.5 });
+  s1 += chainH([0, xBook[1], xP1[1], xPanel[1], xP2[1], K.W].map(vE.X), yb + 6, [BK.w, PL.w, PNW, PL.w, xZone[1] - xZone[0]], { from: yb + 1, size: 1.5 });
   s1 += chainH([vE.X(0), vE.X(K.W)], yb + 12, [`${K.W} WALL (16 FT)`], { from: yb + 1 });
   s1 += chainV([K.H, yEnt, yCap, yTop, B.h, 0].map((y) => vE.Y(ey(y))), vE.X(K.W) + 8, [entH, PL.capH, yCap - yTop, B.top, B.h], { from: vE.X(K.W) + 1, size: 1.4 });
   s1 += chainV([vE.Y(ey(K.H)), vE.Y(ey(0))], vE.X(K.W) + 15, [`${K.H} CEILING (9 FT)`], { from: vE.X(K.W) + 1 });
