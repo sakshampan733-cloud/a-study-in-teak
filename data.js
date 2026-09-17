@@ -212,8 +212,12 @@ window.PROJECT = {
           questions: [],
         },
         {
-          id: "bed", name: "Bed", status: "brief",
+          id: "bed", name: "Bed", status: "open",
+          refs: [
+            { src: "assets/refs/bed-ref-1-low-platform-bed.jpg", caption: "Bed reference (Newberry Projects) — low bed with a thick upholstered base, wide wooden side ledge as a bedside table, aged metal-leaf panels behind" },
+          ],
           parts: [
+            { label: "Reference", value: "Low, deep bed with a thick fabric-covered base and cushion; a wide plank-like wooden ledge runs out beside it as the bedside table; behind, a framed screen of aged copper/metal-leaf panels." },
             { label: "Design", value: "", hint: "Frame, legs, storage (hydraulic / drawers / none)" },
             { label: "Veneer", inherit: "veneer" },
             { label: "Polish", inherit: "polish" },
@@ -223,6 +227,9 @@ window.PROJECT = {
         },
         {
           id: "headboard", name: "Headboard & Bed-back Wall", status: "brief",
+          refs: [
+            { src: "assets/refs/bed-ref-1-low-platform-bed.jpg", caption: "Bed reference — framed metal-leaf panels behind the bed" },
+          ],
           parts: [
             { label: "Design", value: "", hint: "Upholstered / panelled / full-wall" },
             { label: "Veneer", inherit: "veneer" },
