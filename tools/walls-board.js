@@ -31,7 +31,7 @@ const INK = "#262626", SOFT = "#8a8479", PAPER = "#faf8f4", WALL = "#f1ece3", GO
 const f = (n) => +n.toFixed(1);
 const Y = (y) => K.H - y;                              // y up from the floor
 const R = (x0, y0, x1, y1, a) => `<rect x="${f(x0)}" y="${f(Y(y1))}" width="${f(x1 - x0)}" height="${f(y1 - y0)}" ${a}/>`;
-const SHORT = [K.skirt + 110, K.dado - 80], TALL = [K.dado + K.rail + 110, K.H - K.crown - 160];
+const SHORT = [K.skirt + 110, K.dado - 80], TALL = [K.dado + K.rail + 110, K.H - 310];
 
 // one bay: short panel under the rail, tall panel above, both painted the wall colour
 function bay(x0, x1) {
@@ -61,9 +61,7 @@ function lamp(cx) {
 function wall(opt) {
   const aL = K.run - K.door.arch, aR = K.run + K.door.w + K.door.arch;       // architrave outer edges
   let o = `<rect x="0" y="0" width="${K.L}" height="${K.H}" fill="${WALL}"/>`;
-  o += `<rect x="0" y="0" width="${K.L}" height="${K.crown}" fill="${WALL}" stroke="${INK}" stroke-width="5"/>`;
-  o += `<line x1="0" y1="${K.crown * 0.45}" x2="${K.L}" y2="${K.crown * 0.45}" stroke="${INK}" stroke-width="3"/>`;
-  o += `<rect x="0" y="${K.crown}" width="${K.L}" height="${K.cove * 3}" fill="url(#glow)"/>`;
+  o += `<rect x="0" y="0" width="${K.L}" height="${K.cove * 3}" fill="url(#glow)"/>`;                 // light from the ceiling cove, no crown
   o += R(0, 0, K.L, K.skirt, `fill="${WALL}" stroke="${INK}" stroke-width="5"`);
   o += R(0, 0, K.study, K.dado, `fill="#e3dccf" stroke="${INK}" stroke-width="5"`);
   o += R(K.study, K.dado, aL, K.dado + K.rail, `fill="${WALL}" stroke="${INK}" stroke-width="5"`);
@@ -83,7 +81,7 @@ function wall(opt) {
   o += R(aL, 0, aR, K.door.h + K.door.arch, `fill="${WALL}" stroke="${INK}" stroke-width="6"`);
   o += R(K.run, 0, K.run + K.door.w, K.door.h, `fill="#e7e2d8" stroke="${INK}" stroke-width="4"`);
   o += `<text x="${f(K.run + K.door.w / 2)}" y="${f(Y(K.door.h / 2))}" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="70" letter-spacing="6" fill="${SOFT}">BATHROOM</text>`;
-  o += `<line x1="-200" y1="${K.H}" x2="${K.L + 200}" y2="${K.H}" stroke="${INK}" stroke-width="12"/>`;
+  o += `<line x1="-200" y1="0" x2="${K.L + 200}" y2="0" stroke="${INK}" stroke-width="8"/><line x1="-200" y1="${K.H}" x2="${K.L + 200}" y2="${K.H}" stroke="${INK}" stroke-width="12"/>`;
   return { svg: o, pw };
 }
 
@@ -105,7 +103,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${vbW} ${vbH}"
 </defs>
 <rect width="${vbW}" height="${vbH}" fill="${PAPER}"/>
 <text x="${pad}" y="170" font-family="Georgia, 'Times New Roman', serif" font-size="110" letter-spacing="8" fill="${INK}">RIGHT WALL · OPTIONS</text>
-<text x="${pad}" y="260" font-family="Helvetica, Arial, sans-serif" font-size="50" letter-spacing="5" fill="${SOFT}">MOULDING IN THE WALL COLOUR · DADO ON THE 610 LINE OF THE STUDY CUPBOARDS · LAMPS INSIDE THE PANELS · 2 FT OF WALL PAST THE DOOR</text>
+<text x="${pad}" y="260" font-family="Helvetica, Arial, sans-serif" font-size="50" letter-spacing="5" fill="${SOFT}">MOULDING IN THE WALL COLOUR · DADO ON THE 610 LINE OF THE STUDY CUPBOARDS · LAMPS INSIDE THE PANELS · 2 FT OF WALL PAST THE DOOR · CEILING COVE LIGHT, NO CROWN</text>
 ${body}
 </svg>`;
 const out = path.join(__dirname, "..", "build", "right-wall.svg");
