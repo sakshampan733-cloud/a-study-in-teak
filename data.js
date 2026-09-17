@@ -35,6 +35,22 @@ window.PROJECT = {
     ],
   },
 
+  // How the wood is shared out across the room — the 60 / 30 / 10 rule, applied to what is planned.
+  scheme: {
+    intro: "Nothing here is confirmed. It is the shortlist and the rules the picks are judged against.",
+    rows: [
+      { k: "60 · Wood", v: "Dark reddish teak, one tone everywhere: the desk (solid), the study wall and its cupboards, the partition, the three doors, and — if they go wood — the wardrobes and the bathroom vanity." },
+      { k: "30 · Quiet surfaces", v: "Warm cream painted walls and mouldings, the parchment bed wall, parchment drawer fronts, the white lit glass of the wardrobes, and the bed's leather if it is wrapped rather than wood." },
+      { k: "10 · Accent", v: "Brass on handles and pulls, blackened steel frames, the black ceiling linework in the bathroom, the black volute curtain hook." },
+      { k: "Solid vs veneer", v: "Solid teak for the desk and anything carved or shaped (cornice, fluted pilasters, mouldings, edges). Teak veneer for every large flat panel and for the vaulted ceiling, so nothing moves or cracks. Wardrobes and bathroom vanity: veneer only." },
+      { k: "Finish", v: "Satin to semi-gloss lacquer on panelling, doors and trim for the formal look. Matte or oiled on the desk, so it feels different under the hand and does not mirror the lamp." },
+      { k: "Grain", v: "Straight and consistent, slip-matched so a run of panels reads as one piece. No burl, crotch or wild figure — the reeding and fluting supply the texture." },
+      { k: "Undertone", v: "Warm only — teak, walnut, dark oak, mahogany. No grey-washed or ash-toned wood anywhere." },
+      { k: "The floor it sits on", v: "Polished taupe-brown marble. Polished, so it throws light back up and carries dark wood above it; being cooler than the wood, the cream and parchment have to stay generous or the floor reads grey." },
+      { k: "Wet areas", v: "The bathroom vanity needs a moisture-resistant core (BWP / marine ply) with every edge sealed." },
+    ],
+  },
+
   room: {
     plan: "assets/refs/room-plan-lighting-rcp.jpg",   // source: photo of the lighting / false-ceiling plan
     facts: [
@@ -365,6 +381,11 @@ window.PROJECT = {
   // ── Lighting & switch plan ──────────────────────────────────
   lighting: {
     intro: "Which switch turns on which light, grouped by zone. Dimmer groups can span several switches.",
+    notes: [
+      "Bulb colour — to see at the shop. The cove and focus lights are currently 4000 K natural white (8 W).",
+      "At 4000 K the reddish teak goes flat and the cream paint and parchment turn cold. 2700–3000 K suits everything chosen so far.",
+      "Keep 4000 K only where you need to see properly: the bathroom mirror and the desk task light.",
+    ],
     zones: [
       { id: "bedroom",  name: "Bedroom" },
       { id: "study",    name: "Study" },

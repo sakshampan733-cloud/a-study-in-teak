@@ -235,6 +235,9 @@ function veneer() {
     ${(M.floor.refs || []).length ? `<div class="gallery reveal few" style="margin-top:24px">${M.floor.refs.map((r) => `<figure class="shot" data-open="img:${esc(r.src)}"><div class="frame"><img src="${esc(r.src)}" alt="" loading="lazy"></div><figcaption>${esc(r.caption)}</figcaption></figure>`).join("")}</div>` : ""}
     <div class="group-label"><span class="eyebrow" data-decode>05 · Wall paint</span></div><div class="cards">${card("paint", "Paint")}</div>
     ${(M.paint.refs || []).length ? `<div class="gallery reveal few" style="margin-top:24px">${M.paint.refs.map((r) => `<figure class="shot" data-open="img:${esc(r.src)}"><div class="frame"><img src="${esc(r.src)}" alt="" loading="lazy"></div><figcaption>${esc(r.caption)}</figcaption></figure>`).join("")}</div>` : ""}
+    <div class="group-label"><span class="eyebrow" data-decode>06 · The wood scheme</span></div>
+    <div class="wrap"><p class="prose" style="text-align:center;color:var(--dim);max-width:560px;margin:0 auto 32px">${esc(P.scheme.intro)}</p>
+      <div class="spec reveal">${P.scheme.rows.map((r) => `<div class="spec-row"><div class="lab">${esc(r.k)}</div><div class="val">${esc(r.v)}</div></div>`).join("")}</div></div>
     ${M.notes.length ? `<div class="asks reveal" style="margin-top:var(--gap)"><span class="eyebrow">Notes</span><ul class="ask-list notes">${M.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul></div>` : ""}` +
     nextLink("veneer") + footer();
 }
@@ -261,7 +264,8 @@ function lighting() {
     `<section class="bone on-bone index-strip" data-light><div class="eyebrow" style="text-align:center" data-decode>The one rule</div><div class="tally-ink" style="font:400 20px/1.2 var(--cond);color:var(--void)">${esc(L.dimmers[0]?.rule || "")}</div></section>` +
     `<div class="group-label"><span class="eyebrow" data-decode>01 · Dimmer groups</span></div><div class="cards">${dims}</div>
     <div class="group-label"><span class="eyebrow" data-decode>02 · By zone</span></div><div class="sheets" style="margin-top:0">${zones}</div>
-    <div class="group-label"><span class="eyebrow" data-decode>03 · Switch boards</span></div><div class="sheets" style="margin-top:0">${boards}</div>` +
+    <div class="group-label"><span class="eyebrow" data-decode>03 · Switch boards</span></div><div class="sheets" style="margin-top:0">${boards}</div>
+    ${(L.notes || []).length ? `<div class="asks reveal" style="margin-top:var(--gap)"><span class="eyebrow">Notes</span><ul class="ask-list notes">${L.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul></div>` : ""}` +
     nextLink("lighting") + footer();
 }
 
