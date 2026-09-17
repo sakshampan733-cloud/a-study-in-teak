@@ -111,21 +111,20 @@ function overview() {
       <div><span class="n">${pad2(all.brief)}</span><span class="badge">To brief</span></div>
     </div></section>`;
 
-  const sections = allTabIds().map((id, i) => {
-    const t = P.tabs.find((x) => x.id === id), c = tally(itemsOf(id)), n = c.brief + c.open + c.final;
-    const blurb = id === "veneer" ? "One veneer for the whole room, picked by look. Solid wood is teak, and every polish must match the desk."
-      : id === "lighting" ? P.lighting.intro || "Lights, switches and the single master dimmer for the cove runs."
-      : t.intro || `${t.items.map((x) => x.name).join(", ")}.`;
-    return `<article class="scard" style="--i:${i};--last:${allTabIds().length - 1}">
-      <span class="badge">${pad2(i + 1)}</span>
-      <h3 class="h-sm" data-decode>${esc(titleOf(id))}</h3>
-      ${mark("mini-mark")}
-      <p class="prose">${esc(blurb)}</p>
-      <div class="meta"><span class="status ${c.final === n && n ? "final" : c.open ? "open" : "brief"}" style="pointer-events:none">${c.final} of ${n} final</span><a class="btn" href="#${id}">Open</a></div>
-    </article>`;
+  const chapters = [
+    { title: "The Study", ids: ["study", "walls"], img: "assets/refs/wall-ref-4-dark-study-bands-sconces.jpg", line: "The teak desk, the full-height study wall, and the panelled walls either side." },
+    { title: "The Bedroom", ids: ["bedroom", "bathroom"], img: "assets/refs/bed-ref-1-low-platform-bed.jpg", line: "The bed, the bed-back wall, the TV unit, and the vanity next door." },
+    { title: "The Dressing", ids: ["dressing"], img: "assets/refs/wardrobe-ref-3-steel-leaded-doors-closeup.jpg", line: "Lit white-glass wardrobes in steel frames, and a folding mirror." },
+    { title: "The Fabric", ids: ["veneer", "doors", "lighting"], img: "assets/refs/door-ref-1.jpg", line: "One veneer, three identical doors, and every light on one dimmer plan." },
+  ].map((ch, i) => {
+    const c = tally(ch.ids.flatMap(itemsOf)), n = c.brief + c.open + c.final;
+    return `<article class="scard" style="--i:${i}"><div class="ph" ${bg(ch.img)}></div><div class="body">
+      <span class="badge">${pad2(i + 1)}</span><h3 class="h-sm" data-decode>${esc(ch.title)}</h3>
+      <p class="prose">${esc(ch.line)}</p><span class="mono" style="font-size:11px;color:var(--dim)">${c.final} of ${n} final</span>
+      <div class="meta">${ch.ids.map((id) => `<a class="btn" href="#${id}">${esc(titleOf(id))}</a>`).join("")}</div></div></article>`;
   }).join("");
-  const stack = `<section class="section" style="padding-bottom:0">${head("The book", "Eight sections. One room.", "Doors, study, walls, bedroom, dressing, bathroom, lighting — and the materials that hold them together.")}</section>
-    <section class="stack"><div class="stack-bg"><div ${bg(IMG.stack)}></div></div><div class="stack-cards">${sections}</div></section>
+  const stack = `<section class="section" style="padding-bottom:0">${head("The book", "Four chapters. One room.", "The study, the bedroom, the dressing room — and the materials that hold them together.")}</section>
+    <section class="stack"><div class="stack-bg"><div ${bg(IMG.stack)}></div></div><div class="stack-cards">${chapters}</div></section>
     <section class="section"><div class="wrap"><div class="ledger reveal">${allTabIds().map((id, i) => {
       const c = tally(itemsOf(id)), n = c.brief + c.open + c.final;
       return `<a class="ledger-row" href="#${id}"><span class="badge">${pad2(i + 1)}</span><span class="h-sm">${esc(titleOf(id))}</span>
@@ -156,7 +155,7 @@ function overview() {
     : P.room.plan ? `<figure class="plan-img" data-open="img:${esc(P.room.plan)}"><img src="${esc(P.room.plan)}" alt="Room plan"></figure>` : `<div class="empty">Room plan — to be added</div>`;
   const plan = `<section class="section">${head("The plan", "One room, roughly fourteen by eighteen feet.")}
     <div class="wrap"><div class="plan-grid reveal"><div class="panel" style="padding:12px">${plans}</div>
-    <div class="panel"><div class="facts">${P.room.facts.map((f) => `<div class="k">${esc(f.k)}</div><div class="prose">${esc(f.v)}</div>`).join("")}</div></div></div></div></section>`;
+    <div class="panel"><div class="facts">${P.room.facts.map((f) => `<div class="k">${esc(f.k)}</div><div class="v">${esc(f.v)}</div>`).join("")}</div></div></div></div></section>`;
 
   return hero + bone + statement + stack + row + plan + footer();
 }
@@ -190,7 +189,7 @@ function partValue(p) {
 function tabPage(t) {
   const c = tally(itemsOf(t.id));
   const index = `<section class="bone on-bone index-strip" data-light><div class="eyebrow" style="text-align:center" data-decode>In this section</div>
-    <div class="index reveal">${t.items.map((i, k) => `<a class="btn" href="#${t.id}" data-item="${i.id}">${pad2(k + 1)} · ${esc(i.name)}</a>`).join("")}</div>
+    <div class="index">${t.items.map((i, k) => `<a class="btn" href="#${t.id}" data-item="${i.id}">${pad2(k + 1)} · ${esc(i.name)}</a>`).join("")}</div>
     <div class="tally-ink">${c.final} final · ${c.open} deciding · ${c.brief} to brief</div></section>`;
   const items = t.items.map((i, k) => `
     <section class="item" id="${i.id}">
