@@ -4,29 +4,48 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta http-equiv="Cache-Control" content="no-cache" />
+  <meta name="theme-color" content="#0b0b0b" />
   <title>A Study in Teak</title>
-  <link rel="stylesheet" href="styles.css?v=20260917131745" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400&family=Inter:wght@400&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=20260917144734" />
 </head>
 <body>
-  <aside class="side">
-    <div class="brand">
-      <div class="brand-name" id="brandName"></div>
-      <div class="brand-tag" id="brandTag"></div>
+  <!-- load: the mark blurs into focus on the void, then lifts away -->
+  <div id="loader" aria-hidden="true">
+    <div class="loader-mark"></div>
+    <div class="loader-word">A STUDY IN TEAK</div>
+  </div>
+
+  <div class="ticker" id="ticker"></div>
+
+  <header class="nav">
+    <a class="btn" id="navHome" href="#overview"><span>Overview</span></a>
+    <button class="btn" id="menuBtn" aria-expanded="false"><span>Menu</span><i class="burger"></i></button>
+  </header>
+
+  <div id="menu" aria-hidden="true">
+    <div class="menu-mark"></div>
+    <nav id="menuLinks"></nav>
+    <div class="menu-foot">
+      <button class="btn" id="printBtn">Print this sheet</button>
+      <span class="tally-line" id="menuTally"></span>
+      <a class="btn" href="https://github.com/sakshampan733-cloud/a-study-in-teak" target="_blank" rel="noopener">Repository</a>
     </div>
-    <nav id="nav"></nav>
-    <button class="print" onclick="window.print()">Print this sheet</button>
-  </aside>
+  </div>
+
   <main id="main"></main>
   <div id="lightbox" hidden></div>
 
-  <script src="data.js?v=20260917131745"></script>
-  <script src="drawings/kit.js?v=20260917131745"></script>
-  <script src="drawings/iso.js?v=20260917131745"></script>
-  <script src="drawings/door.js?v=20260917131745"></script>
-  <script src="drawings/desk.js?v=20260917131745"></script>
-  <script src="drawings/studywall.js?v=20260917131745"></script>
-  <script src="drawings/rightwall.js?v=20260917131745"></script>
-  <script src="plans/plans.js?v=20260917131745"></script>
-  <script src="app.js?v=20260917131745"></script>
+  <script src="data.js?v=20260917144734"></script>
+  <script src="drawings/kit.js?v=20260917144734"></script>
+  <script src="drawings/iso.js?v=20260917144734"></script>
+  <script src="drawings/door.js?v=20260917144734"></script>
+  <script src="drawings/desk.js?v=20260917144734"></script>
+  <script src="drawings/studywall.js?v=20260917144734"></script>
+  <script src="drawings/rightwall.js?v=20260917144734"></script>
+  <script src="plans/plans.js?v=20260917144734"></script>
+  <script src="app.js?v=20260917144734"></script>
 </body>
 </html>
