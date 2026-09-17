@@ -22,8 +22,8 @@ K.L = K.run + K.door.w + K.return;
 // Options: panel count on the long run, and which tall panels get a lamp (1-based from the study end).
 const OPTIONS = [
   { key: "A", bays: 4, lamps: [2, 3], text: "4 PANELS · 2 LAMPS IN THE MIDDLE PAIR" },
-  { key: "B", bays: 5, lamps: [2, 4], text: "5 PANELS · 2 LAMPS, PLAIN · LAMP · PLAIN · LAMP · PLAIN", best: true },
-  { key: "C", bays: 5, lamps: [1, 3, 5], text: "5 PANELS · 3 LAMPS, ALTERNATING" },
+  { key: "B", bays: 5, lamps: [2, 4], text: "5 PANELS · 2 LAMPS, PLAIN · LAMP · PLAIN · LAMP · PLAIN" },
+  { key: "C", bays: 5, lamps: [1, 3, 5], text: "5 PANELS · 3 LAMPS, ALTERNATING", best: true },
   { key: "D", bays: 3, lamps: [1, 2, 3], text: "3 WIDE PANELS · A LAMP IN EACH" },
 ];
 
@@ -95,7 +95,7 @@ OPTIONS.forEach((opt, i) => {
   body += `<text x="${pad}" y="${y + 110}" font-family="Georgia, 'Times New Roman', serif" font-size="110" fill="${INK}">${opt.key}</text>`;
   body += `<text x="${pad + 150}" y="${y + 100}" font-family="Helvetica, Arial, sans-serif" font-size="56" letter-spacing="5" fill="${INK}">${opt.text}</text>`;
   body += `<text x="${pad + 150}" y="${y + 170}" font-family="Helvetica, Arial, sans-serif" font-size="44" letter-spacing="4" fill="${SOFT}">PANELS ABOUT ${Math.round(w.pw / 25.4)} IN WIDE</text>`;
-  if (opt.best) body += `<text x="${pad + K.L}" y="${y + 100}" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-size="56" letter-spacing="8" fill="${GOLD}">RECOMMENDED</text>`;
+  if (opt.best) body += `<text x="${pad + K.L}" y="${y + 100}" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-size="56" letter-spacing="8" fill="${GOLD}">CHOSEN</text>`;
   body += `<g transform="translate(${pad} ${y + 240})">${w.svg}</g>`;
 });
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${vbW} ${vbH}" width="${f(vbW / 6)}" height="${f(vbH / 6)}">
