@@ -28,7 +28,7 @@ window.PROJECT = {
                 { src: "assets/refs/floor-ref-1-taupe-brown-marble-slab.jpg", caption: "The same slab, seen at the yard" },
               ] },
     // Two more stones: the room's border and skirting, and the bathroom.
-    trimStone: { value: "White marble with brown-grey veining, polished — laid", status: "final", options: ["Polished", "Honed / matte"], rule: "Used for the border in the room floor and for the skirting — a light stone that draws a line around the taupe field.",
+    trimStone: { value: "White marble with brown-grey veining, polished — laid", status: "final", options: ["Polished", "Honed / matte"], rule: "Used for the border in the room floor and for the skirting. Skirting runs on three walls only — the bed wall and the left and right walls — not on the study wall, where the joinery meets the floor. Laid; no changes.",
               refs: [{ src: "assets/refs/stone-ref-2-white-brown-border-skirting.jpg", caption: "Border and skirting — white marble with soft brown-grey veining, polished" }] },
     bathStone: { value: "Beige-gold marble, polished — laid", status: "final", options: ["Polished", "Honed / matte"], rule: "The bathroom stone — a warm beige-gold marble with faint cloudy veining, warmer and lighter than the room floor.",
               refs: [{ src: "assets/refs/stone-ref-3-beige-gold-bathroom-marble.jpg", caption: "Bathroom marble — warm beige-gold with faint veining" }] },
@@ -225,6 +225,7 @@ window.PROJECT = {
           parts: [
             { label: "Treatment", value: "Applied panel moulding painted the wall colour. Short panels below a dado rail, tall panels above, 150 stiles between" },
             { label: "Length", value: "About 14–15 ft from the study wall to the bathroom door (drawn at 4420 / 14 ft 6 in), then the door, then 2 ft of wall to the corner" },
+            { label: "Skirting", value: "White marble, already laid — the panel moulding starts above it (height to measure)." },
             { label: "Heights", value: "Skirting 130 · rail 570–610, the study counter band carried round the corner unbroken · short panels 240–490 · tall panels 720–2433, 310 below the ceiling · no crown moulding — the cove light is in the ceiling" },
             { label: "Panels", value: "Option C: 5 equal panels about 24 in (606) wide on the long run, short and tall on the same centres, plus one narrow 345 panel on the 2 ft wall past the door" },
             { label: "Mouldings", value: "Panel moulding 55 × 24 ogee, mitred · rail 40 × 28 with the same 4 reeds as the study counter edge · skirting 130 × 18 — all painted the wall colour" },
