@@ -173,7 +173,7 @@ window.PROJECT = {
           drawings: ["rightwall"],
           refs: [
             { src: "assets/refs/right-wall-panelling.svg", caption: "Options A–D — C chosen: 5 panels, lamps in panels 1, 3 and 5" },
-            { src: "assets/refs/walls-ref-1-panel-moulding.jpg", caption: "Ref. — painted panel moulding: short panels under a dado, tall panels above, cove light under the crown" },
+            { src: "assets/refs/walls-ref-1-panel-moulding.jpg", caption: "Ref. — painted panel moulding: short panels under a dado, tall panels above, cove light at the ceiling" },
           ],
           parts: [
             { label: "Treatment", value: "Applied panel moulding painted the wall colour. Short panels below a dado rail, tall panels above, 150 stiles between" },

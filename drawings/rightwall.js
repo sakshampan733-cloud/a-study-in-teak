@@ -4,7 +4,7 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const RWALL = {
-  rev: "4 — no crown, ceiling cove light",
+  rev: "4 — top left plain for cove light",
   date: "17.09.2026",
   run: 4420,                   // study wall to the bathroom door opening, about 14.5 ft (owner's estimate — confirm)
   H: 2743,                     // 9 ft ceiling
@@ -173,7 +173,7 @@ const RWALL = {
   s += text(vE.X(K.run + D.w / 2), vE.Y(ey(1225)), "BATHROOM", { size: 1.5, anchor: "middle", fill: THIN, ls: 0.3 });
   // labels on the left margin, one line each
   const lab = (x, y, ly, t1, t2) => note(vE.X(x), vE.Y(ey(y)), 57, vE.Y(ey(ly)), t1, t2 || "", "end");
-  s += lab(300, K.H, K.H + 40, "CEILING", "COVE LIGHT ABOVE, NO CROWN");
+  s += lab(300, K.H, K.H + 40, "CEILING", "COVE LIGHT ABOVE");
   s += lab(bays[0][0] + 18, 1900, 1900, "TALL PANEL ×6", "WALL COLOUR");
   s += lab(lx - K.lamp.span - 60, K.lamp.y + 140, K.lamp.y + 200, "WALL LAMP ×3", "PANELS 1, 3, 5");
   s += lab(K.study.w + 60, yDado - 10, yDado + 150, "RAIL = STUDY COUNTER", "SAME 570–610 BAND");
@@ -194,7 +194,7 @@ const RWALL = {
   s += heading(318, 17, "SECTION A–A", `THROUGH PANEL 1 · 1:${scS}`, 50);
   s += vS.g(section(tS), 0.28);
   const nx = vS.X(K.lamp.proj + 250) + 2;
-  s += note(vS.X(200), vS.Y(ey(K.H + 120)), nx, vS.Y(ey(K.H - 30)), "CEILING COVE LIGHT", "NO CROWN ON THE WALL");
+  s += note(vS.X(200), vS.Y(ey(K.H + 120)), nx, vS.Y(ey(K.H - 30)), "CEILING COVE LIGHT", "NOTHING FIXED AT THE TOP");
   s += note(vS.X(M.proj), vS.Y(ey(yTall - 30)), nx, vS.Y(ey(yTall - 180)), "PANEL MOULDING", "DET. 1");
   s += note(vS.X(K.lamp.proj + 30), vS.Y(ey(K.lamp.y + 140)), nx, vS.Y(ey(K.lamp.y + 280)), "WALL LAMP", "DET. 4");
   s += note(vS.X(K.dado.proj), vS.Y(ey(K.dado.y + 22)), nx, vS.Y(ey(K.dado.y + 150)), "RAIL", "DET. 2");

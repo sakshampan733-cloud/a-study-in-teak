@@ -103,7 +103,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${vbW} ${vbH}"
 </defs>
 <rect width="${vbW}" height="${vbH}" fill="${PAPER}"/>
 <text x="${pad}" y="170" font-family="Georgia, 'Times New Roman', serif" font-size="110" letter-spacing="8" fill="${INK}">RIGHT WALL · OPTIONS</text>
-<text x="${pad}" y="260" font-family="Helvetica, Arial, sans-serif" font-size="50" letter-spacing="5" fill="${SOFT}">MOULDING IN THE WALL COLOUR · DADO ON THE 610 LINE OF THE STUDY CUPBOARDS · LAMPS INSIDE THE PANELS · 2 FT OF WALL PAST THE DOOR · CEILING COVE LIGHT, NO CROWN</text>
+<text x="${pad}" y="260" font-family="Helvetica, Arial, sans-serif" font-size="50" letter-spacing="5" fill="${SOFT}">MOULDING IN THE WALL COLOUR · DADO ON THE 610 LINE OF THE STUDY CUPBOARDS · LAMPS INSIDE THE PANELS · 2 FT OF WALL PAST THE DOOR · COVE LIGHT IN THE CEILING</text>
 ${body}
 </svg>`;
 const out = path.join(__dirname, "..", "build", "right-wall.svg");
