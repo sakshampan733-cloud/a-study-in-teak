@@ -21,6 +21,9 @@ window.PROJECT = {
     tone:   { value: "", status: "brief", options: ["Natural", "Warm / honeyed", "Dark stained"], rule: "Must match the solid teak desk." },
     // Solid timber, for pieces that are not veneered.
     wood:   { value: "Teak", status: "final", options: ["Teak"], usedFor: ["Desk"] },
+    // The floor the whole scheme sits on.
+    floor:  { value: "Taupe-brown marble", status: "open", options: ["Polished", "Honed / matte"], rule: "Mid taupe-brown marble with fine white veining — brown but with a greyish cast, not red or golden. Every wood tone is judged against this slab.",
+              refs: [{ src: "assets/refs/floor-ref-1-taupe-brown-marble-slab.jpg", caption: "The floor — mid taupe-brown marble slab with fine white veining (photographed at the yard)" }] },
     // Wall paint for the room.
     paint:  { value: "Warm cream", status: "open", options: ["Warm cream", "Soft ivory", "Warm off-white"], rule: "Soft, warm cream like the reference room — calm and light, never stark white. Exact shade to pick from samples.",
               refs: [{ src: "assets/refs/paint-ref-1-warm-cream-room-sheer-curtains.jpg", caption: "Paint reference — warm cream walls and ceiling, soft daylight through white curtains" }] },
