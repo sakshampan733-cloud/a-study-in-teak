@@ -4,7 +4,7 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const RWALL = {
-  rev: "5 — 4 in marble skirting",
+  rev: "6 — marble skirting, rail painted, door hinged right",
   date: "17.09.2026",
   run: 4420,                   // study wall to the bathroom door opening, about 14.5 ft (owner's estimate — confirm)
   H: 2743,                     // 9 ft ceiling
@@ -93,7 +93,7 @@ const RWALL = {
     o += `<rect x="-${K.wall}" y="-${K.wall}" width="${K.wall}" height="${K.wall + 600}" fill="url(#hatchRW)" stroke="none"/><rect x="${L}" y="-${K.wall}" width="${K.wall}" height="${K.wall + 600}" fill="url(#hatchRW)" stroke="none"/>`;
     o += `<path d="M 0 600 L 0 0 L ${K.run} 0 L ${K.run} -${K.wall} M ${K.run + D.w} -${K.wall} L ${K.run + D.w} 0 L ${L} 0 L ${L} 600" stroke-width="${th * 3}"/>`;
     // door leaf opening into the bathroom, swing dashed
-    o += `<g stroke-width="${th}"><rect x="${K.run}" y="-${K.wall + D.w}" width="40" height="${D.w}"/><path d="M ${K.run + 40} -${K.wall + D.w} A ${D.w} ${D.w} 0 0 1 ${K.run + D.w} -${K.wall}" stroke-dasharray="${dash}"/></g>`;
+    o += `<g stroke-width="${th}"><rect x="${K.run + D.w - 40}" y="-${K.wall + D.w}" width="40" height="${D.w}"/><path d="M ${K.run + D.w - 40} -${K.wall + D.w} A ${D.w} ${D.w} 0 0 0 ${K.run} -${K.wall}" stroke-dasharray="${dash}"/></g>`;
     // architraves
     [[aL, K.run], [K.run + D.w, aR]].forEach(([a, b]) => { o += `<rect x="${a}" y="0" width="${b - a}" height="22"/>`; });
     // study cupboards return
@@ -185,7 +185,7 @@ const RWALL = {
   const vP = view(ox, 205, sc, "Right wall plan"), tP = vP.w(0.1);
   s += heading(18, 170, "PLAN", `CUT AT 1000 · SCALE 1:${sc} · ROOM BELOW, WALL ABOVE`, 60);
   s += vP.g(plan(tP, `${vP.w(1)} ${vP.w(0.7)}`), 0.28);
-  s += note(vP.X(K.run + D.w / 2), vP.Y(-K.wall - D.w * 0.5), vP.X(aL) - 30, vP.Y(-K.wall - D.w * 0.5), "BATHROOM DOOR 2′6″ × 8′", "OPENS INWARD", "end");
+  s += note(vP.X(K.run + D.w / 2), vP.Y(-K.wall - D.w * 0.5), vP.X(aL) - 30, vP.Y(-K.wall - D.w * 0.5), "BATHROOM DOOR 2′6″ × 8′", "INWARD, HINGED RIGHT", "end");
   s += note(vP.X(K.study.w / 2), vP.Y(400), 57, vP.Y(400), "STUDY CUPBOARDS", "", "end");
   s += note(vP.X(bays[2][0] + pw / 2 - K.lamp.span), vP.Y(K.lamp.proj - 60), vP.X(bays[2][0] + pw / 2) + 3, vP.Y(560), "LAMP ABOVE, 230 OFF THE WALL", "");
 
