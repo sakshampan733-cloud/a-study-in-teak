@@ -208,7 +208,7 @@ window.PROJECT = {
       ],
     },
     {
-      id: "bedroom", title: "Bedroom", kicker: "TV unit · bed · bed wall · partition",
+      id: "bedroom", title: "Bedroom", kicker: "TV unit · bed · headboard",
       intro: "",
       items: [
         {
@@ -259,34 +259,6 @@ window.PROJECT = {
             { label: "Edges", value: "", hint: "Dark slim edge / stone skirting as in ref 2, or plain" },
           ],
           questions: ["Large panels or seamless — to decide", "Whole wall, or just behind the bed?"],
-        },
-        {
-          id: "partition", name: "Partition", status: "brief",
-          refs: [
-            { src: "https://i.pinimg.com/736x/4c/ed/40/4ced4039e979cfef253b3cd7846daed2.jpg", caption: "Your idea · frosted glass on a curved wall, with a clear strip" },
-            { src: "https://i.pinimg.com/originals/cc/99/ec/cc99ecdbc552003e45a90dfcf2f95c6e.jpg", caption: "Your idea · curved glass, frosted low and clear above" },
-            { src: "https://www.windowcool.com/wp-content/uploads/2021/07/Gradient-Films-Window-Cool-Gradation-Window-Film-for-Glass-Partition-Office-Home-Hotels-Shops-Hospital-Schools-Universities.jpg", caption: "Your idea · frosted glass fading to clear" },
-            { src: "https://i.pinimg.com/736x/be/6d/93/be6d93d8fb21e3208c28b03177f29086.jpg", caption: "Wood slats · curved timber slats to the ceiling, light still passes" },
-            { src: "https://i.pinimg.com/736x/a7/5d/18/a75d186c87f848727ced5580fe46e7ec.jpg", caption: "Wood + glass · timber frame holding frosted glass" },
-            { src: "https://i.pinimg.com/736x/ec/b8/15/ecb815364927e166f2ab7a2923b7996b.jpg", caption: "Wood + glass · timber grid with frosted panels" },
-            { src: "https://liznylon.com/wp-content/uploads/2019/04/bedroom_with_reeded_glass_wall_by_nicholas_worley_in_manchester-e1554894209100.png", caption: "Reeded glass · beside a bed, light passes and shapes blur" },
-            { src: "https://i.pinimg.com/736x/e8/3d/e8/e83de8e93542809929d2a52222aa6884.jpg", caption: "Reeded glass · floor to ceiling in a slim dark frame" },
-            { src: "https://i.pinimg.com/originals/e8/fc/c4/e8fcc44e32c5fbda9c2c090fd014cdc3.jpg", caption: "Reeded glass · a screen with rounded ends" },
-            { src: "https://i.pinimg.com/originals/df/ce/97/dfce97cba147183e02d7b975fa62139c.jpg", caption: "Glass block · a lit curved wall, a 1930s–40s material" },
-            { src: "https://i.pinimg.com/736x/b7/d6/ae/b7d6aebd90ec670ac8fb4d1989dd04af.jpg", caption: "Glass block · following a curve" },
-            { src: "https://i.pinimg.com/originals/2c/e6/e8/2ce6e88fc52abf99ece93573c33aec7e.jpg", caption: "Glass block · framed panels around a bed" },
-            { src: "https://clementwindows.co.uk/news/wp-content/uploads/2023/07/65657362-scaled.jpeg", caption: "Steel & reeded glass · slim dark frames, like the wardrobe glass" },
-            { src: "https://i.pinimg.com/736x/e6/26/b5/e626b54b51fab56ebe8f3da746c8c6d3.jpg", caption: "Textured glass · slim bronze frames, softly obscured" },
-          ],
-          parts: [
-            { label: "Size", value: "About 8 ft long, floor to ceiling, rounded (curved) ends. Gaps of about 3½ ft and 2½ ft at the two ends — rough numbers; 8 + 3½ + 2½ makes 14 ft against a 16 ft room, so one of these needs measuring." },
-            { label: "Goal", value: "Keep the room feeling spacious — not a solid wall; let light through." },
-            { label: "Your idea", value: "Wood in the middle, turning into frosted glass towards the ends, the frosting fading to clear glass at the curved ends. Made as one gradient (a printed or etched frost that fades) set beside or into the timber." },
-            { label: "Directions to look at", value: "1 · Frosted-to-clear gradient glass · 2 · Timber slats (light passes between) · 3 · Timber frame with frosted glass · 4 · Reeded glass · 5 · Glass block (very 1930s–40s) · 6 · Slim dark frames with reeded or textured glass, like the wardrobe." },
-            { label: "Materials", value: "", hint: "Wood, glass, or two materials (e.g. timber centre, glass curved ends) — undecided" },
-            { label: "Surface", value: "", hint: "Plain, mouldings, or a pattern — undecided" },
-          ],
-          questions: ["Measure the room width and the two end gaps so they add up", "How much should you see through from the bed side to the desk?"],
         },
       ],
     },
