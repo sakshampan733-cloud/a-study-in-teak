@@ -25,7 +25,6 @@ window.PROJECT = {
     floor:  { value: "Taupe-brown marble, polished — laid", status: "final", options: ["Polished", "Honed / matte"], rule: "Mid taupe-brown marble with fine white veining — brown but with a greyish cast, not red or golden. Polished, so it throws light back up. Every wood tone is judged against this slab.",
               refs: [
                 { src: "assets/refs/floor-ref-2-taupe-brown-marble-slab.jpg", caption: "Room floor — taupe-brown marble with fine white veining" },
-                { src: "assets/refs/floor-ref-1-taupe-brown-marble-slab.jpg", caption: "The same slab, seen at the yard" },
               ] },
     // Two more stones: the room's border and skirting, and the bathroom.
     trimStone: { value: "White marble with brown-grey veining, polished — laid", status: "final", options: ["Polished", "Honed / matte"], rule: "Used for the border in the room floor and for the skirting. Skirting runs on three walls only — the bed wall and the left and right walls — not on the study wall, where the joinery meets the floor. Laid; no changes.",
@@ -224,7 +223,7 @@ window.PROJECT = {
           ],
           parts: [
             { label: "Treatment", value: "Applied panel moulding painted the wall colour. Short panels below a dado rail, tall panels above, 150 stiles between" },
-            { label: "Length", value: "About 14–15 ft from the study wall to the bathroom door (drawn at 4420 / 14 ft 6 in), then the door, then 2 ft of wall to the corner" },
+            { label: "Length", value: "About 14–15 ft from the study wall to the dressing door (drawn at 4420 / 14 ft 6 in), then the door, then 2 ft of wall to the corner" },
             { label: "Skirting", value: "White marble, 4 in (102) high, already laid — square with a small top chamfer; the panel moulding starts above it." },
             { label: "Heights", value: "Marble skirting 102 · rail 570–610, the study counter band carried round the corner unbroken · short panels 212–470 · tall panels 720–2433, 310 below the ceiling · no crown moulding — the cove light is in the ceiling" },
             { label: "Panels", value: "Option C: 5 equal panels about 24 in (606) wide on the long run, short and tall on the same centres, plus one narrow 345 panel on the 2 ft wall past the door" },
@@ -233,7 +232,7 @@ window.PROJECT = {
             { label: "Lamps", value: "3 twin-arm wall lamps, brass with fabric shades, centred inside tall panels 1, 3 and 5 at 1290 — the same height as the study sconces" },
             { label: "Lighting", value: "No crown moulding on this wall — the ceiling cove light runs above it, on the room's cove dimmer" },
           ],
-          questions: ["Exact length to the bathroom door"],
+          questions: ["Exact length to the dressing door"],
         },
       ],
     },

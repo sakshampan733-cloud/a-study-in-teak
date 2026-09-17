@@ -1,12 +1,12 @@
-// Right wall — applied panel moulding (option C), bathroom door, 2 ft of wall past the door.
+// Right wall — applied panel moulding (option C), dressing door, 2 ft of wall past the door.
 // AST-DR-007 general arrangement + details. Real-world units are mm; y measured UP from the floor, x from the study wall.
 
 window.DRAWINGS = window.DRAWINGS || {};
 
 const RWALL = {
-  rev: "6 — marble skirting, rail painted, door hinged right",
+  rev: "7 — dressing door (not bathroom), panel top level with door head",
   date: "17.09.2026",
-  run: 4420,                   // study wall to the bathroom door opening, about 14.5 ft (owner's estimate — confirm)
+  run: 4420,                   // study wall to the dressing door opening, about 14.5 ft (owner's estimate — confirm)
   H: 2743,                     // 9 ft ceiling
   wall: 230,
   study: { w: 280, h: 570 },   // study unit 280 (11 in) deep; cupboard carcase to 570, reeded counter 570–610 on top
@@ -17,8 +17,8 @@ const RWALL = {
   bays: 5,
   lamps: [1, 3, 5],                    // lamps centred inside tall panels 1, 3 and 5
   short: { y0: 212, y1: 470 },
-  tall: { y0: 720, top: 310 },         // tall panels stop 310 below the ceiling; no crown — the cove light is in the ceiling
-  door: { w: 762, h: 2438, arch: 65 }, // bathroom door 2 ft 6 × 8 ft, architrave about 2½ in
+  tall: { y0: 720, top: 305 },         // tall panels stop level with the door head (2438) — ties the panelling to the door across the wall
+  door: { w: 762, h: 2438, arch: 65 }, // dressing door 2 ft 6 × 8 ft, architrave about 2½ in
   ret: 610,                            // 2 ft of wall past the door opening to the corner
   lamp: { y: 1290, span: 150, proj: 230 },   // twin-arm sconce, same height and family as the study wall
 };
@@ -77,7 +77,7 @@ const RWALL = {
     // panels
     [...bays, narrow].forEach(([a, b]) => { o += panel(a, K.short.y0, b, K.short.y1, th) + panel(a, K.tall.y0, b, yTall, th); });
     K.lamps.forEach((n) => { const [a, b] = bays[n - 1]; o += sconce((a + b) / 2, th); });
-    // bathroom door: stepped architrave, leaf with two moulded panels, lever
+    // dressing door: stepped architrave, leaf with two moulded panels, lever
     o += R(aL, 0, aR, D.h + D.arch) + `<g ${W(th)}>${R(aL + 20, 0, aR - 20, D.h + D.arch - 20)}${R(aL + 40, 0, aR - 40, D.h + D.arch - 40)}</g>`;
     o += R(K.run, 0, K.run + D.w, D.h);
     const px0 = K.run + 110, px1 = K.run + D.w - 110;
@@ -170,7 +170,7 @@ const RWALL = {
   s += chainV([vE.Y(ey(K.H)), vE.Y(ey(0))], vE.X(L) + 13, [`${K.H} (9 FT)`], { from: vE.X(L) + 1, size: 1.4 });
   const lx = (bays[0][0] + bays[0][1]) / 2;
   s += chainV([vE.Y(ey(D.h)), vE.Y(ey(0))], vE.X(K.run) + 4, [`${D.h}`], { from: vE.X(K.run) + 1, size: 1.2 });
-  s += text(vE.X(K.run + D.w / 2), vE.Y(ey(1225)), "BATHROOM", { size: 1.5, anchor: "middle", fill: THIN, ls: 0.3 });
+  s += text(vE.X(K.run + D.w / 2), vE.Y(ey(1225)), "DRESSING", { size: 1.5, anchor: "middle", fill: THIN, ls: 0.3 });
   // labels on the left margin, one line each
   const lab = (x, y, ly, t1, t2) => note(vE.X(x), vE.Y(ey(y)), 57, vE.Y(ey(ly)), t1, t2 || "", "end");
   s += lab(300, K.H, K.H + 40, "CEILING", "COVE LIGHT ABOVE");
@@ -185,7 +185,7 @@ const RWALL = {
   const vP = view(ox, 205, sc, "Right wall plan"), tP = vP.w(0.1);
   s += heading(18, 170, "PLAN", `CUT AT 1000 · SCALE 1:${sc} · ROOM BELOW, WALL ABOVE`, 60);
   s += vP.g(plan(tP, `${vP.w(1)} ${vP.w(0.7)}`), 0.28);
-  s += note(vP.X(K.run + D.w / 2), vP.Y(-K.wall - D.w * 0.5), vP.X(aL) - 30, vP.Y(-K.wall - D.w * 0.5), "BATHROOM DOOR 2′6″ × 8′", "INWARD, HINGED RIGHT", "end");
+  s += note(vP.X(K.run + D.w / 2), vP.Y(-K.wall - D.w * 0.5), vP.X(aL) - 30, vP.Y(-K.wall - D.w * 0.5), "DRESSING DOOR 2′6″ × 8′", "INWARD, HINGED RIGHT", "end");
   s += note(vP.X(K.study.w / 2), vP.Y(400), 57, vP.Y(400), "STUDY CUPBOARDS", "", "end");
   s += note(vP.X(bays[2][0] + pw / 2 - K.lamp.span), vP.Y(K.lamp.proj - 60), vP.X(bays[2][0] + pw / 2) + 3, vP.Y(560), "LAMP ABOVE, 230 OFF THE WALL", "");
 
