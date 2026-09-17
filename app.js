@@ -231,8 +231,8 @@ function veneer() {
     <div class="group-label"><span class="eyebrow" data-decode>02 · Solid wood</span></div><div class="cards">${card("wood", "Wood type")}</div>
     <div class="wrap"><div class="eyebrow" style="text-align:center;margin-top:32px;color:var(--dim)">Used for</div>${chips(M.wood.usedFor)}</div>
     <div class="group-label"><span class="eyebrow" data-decode>03 · Polish</span></div><div class="cards">${card("polish", "Polish")}${card("tone", "Tone")}</div>
-    <div class="group-label"><span class="eyebrow" data-decode>04 · Floor</span></div><div class="cards">${card("floor", "Marble")}</div>
-    ${(M.floor.refs || []).length ? `<div class="gallery reveal few" style="margin-top:24px">${M.floor.refs.map((r) => `<figure class="shot" data-open="img:${esc(r.src)}"><div class="frame"><img src="${esc(r.src)}" alt="" loading="lazy"></div><figcaption>${esc(r.caption)}</figcaption></figure>`).join("")}</div>` : ""}
+    <div class="group-label"><span class="eyebrow" data-decode>04 · Stone</span></div><div class="cards">${card("floor", "Room floor")}${card("trimStone", "Border & skirting")}${card("bathStone", "Bathroom")}</div>
+    ${["floor", "trimStone", "bathStone"].flatMap((k) => M[k].refs || []).length ? `<div class="gallery reveal" style="margin-top:24px">${["floor", "trimStone", "bathStone"].flatMap((k) => M[k].refs || []).map((r) => `<figure class="shot" data-open="img:${esc(r.src)}"><div class="frame"><img src="${esc(r.src)}" alt="" loading="lazy"></div><figcaption>${esc(r.caption)}</figcaption></figure>`).join("")}</div>` : ""}
     <div class="group-label"><span class="eyebrow" data-decode>05 · Wall paint</span></div><div class="cards">${card("paint", "Paint")}</div>
     ${(M.paint.refs || []).length ? `<div class="gallery reveal few" style="margin-top:24px">${M.paint.refs.map((r) => `<figure class="shot" data-open="img:${esc(r.src)}"><div class="frame"><img src="${esc(r.src)}" alt="" loading="lazy"></div><figcaption>${esc(r.caption)}</figcaption></figure>`).join("")}</div>` : ""}
     <div class="group-label"><span class="eyebrow" data-decode>06 · The wood scheme</span></div>
