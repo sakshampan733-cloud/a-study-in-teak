@@ -39,6 +39,7 @@ window.PROJECT = {
       "One single veneer for the entire room — bedroom, study, dressing and all three doors.",
       "Solid wood is teak — final.",
       "Veneer is picked by look, not species. Whatever it is, its polish and tone must match the teak desk.",
+      "Hardware is brass/gold everywhere except the bathroom — those fittings are already bought, in chrome (brass and gold were too expensive).",
     ],
   },
 
@@ -373,13 +374,26 @@ window.PROJECT = {
           questions: ["Follow the reference pattern closely, or design your own motif?"],
         },
         {
-          id: "vanity", name: "Vanity", status: "brief",
+          id: "vanity", name: "Vanity", status: "open",
           parts: [
-            { label: "Design", value: "" },
-            { label: "Counter", value: "", hint: "Stone / marble / quartz" },
+            { label: "Size", value: "2 ft wide, 5 ft long (610 × 1524)." },
+            { label: "Shelving", value: "", hint: "An irregular ('weird') shelf unit on the left-hand side — a drawing is coming" },
+            { label: "Fittings", value: "Chrome — already bought. Brass and gold were priced out for the bathroom, so this is the one place in the room that breaks from the brass rule." },
+            { label: "Counter", value: "Probably the same beige-gold marble as the rest of the bathroom — not decided." },
+            { label: "A concept, parked for later", value: "A seamless push-to-open niche in the marble top: press a point on the plain surface and a section (about an inch deep) recesses to reveal hidden storage — phone, hand towels. Not being worked on yet." },
             { label: "Basin & tap", value: "" },
             { label: "Mirror", value: "" },
-            { label: "Material / finish", value: "", hint: "Veneer in a wet area needs a moisture-resistant core" },
+            { label: "Material / finish", value: "Marble top; veneer or lacquer below needs a moisture-resistant core in a wet area." },
+          ],
+          questions: ["Push-to-open niche — worth the mechanism, or a normal drawer instead?"],
+        },
+        {
+          id: "fittings", name: "Fittings & Fixtures", status: "brief",
+          parts: [
+            { label: "Status", value: "Everything else in the bathroom is done — floor, niche, walls, ceiling. Only the vanity, the shower glass enclosure, the WC and the bathtub position are left." },
+            { label: "Shower", value: "", hint: "Glass enclosure — size and where it stands" },
+            { label: "WC", value: "", hint: "Position" },
+            { label: "Bathtub", value: "", hint: "Where it goes" },
           ],
           questions: [],
         },
@@ -391,6 +405,7 @@ window.PROJECT = {
   lighting: {
     intro: "Which switch turns on which light, grouped by zone. Dimmer groups can span several switches.",
     notes: [
+      "The lighting/RCP photo on the Overview is out of date — the plan has changed since it was taken (drawn up months ago). Treat it as a starting point only, to be rechecked before anything here is treated as final.",
       "Bulb colour — to see at the shop. The cove and focus lights are currently 4000 K natural white (8 W).",
       "At 4000 K the reddish teak goes flat and the cream paint and parchment turn cold. 2700–3000 K suits everything chosen so far.",
       "Keep 4000 K only where you need to see properly: the bathroom mirror and the desk task light.",
