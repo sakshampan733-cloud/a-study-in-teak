@@ -185,7 +185,7 @@ const RWALL = {
   const vP = view(ox, 205, sc, "Right wall plan"), tP = vP.w(0.1);
   s += heading(18, 170, "PLAN", `CUT AT 1000 · SCALE 1:${sc} · ROOM BELOW, WALL ABOVE`, 60);
   s += vP.g(plan(tP, `${vP.w(1)} ${vP.w(0.7)}`), 0.28);
-  s += note(vP.X(K.run + D.w / 2), vP.Y(-K.wall - D.w * 0.5), vP.X(aL) - 30, vP.Y(-K.wall - D.w * 0.5), "BATHROOM DOOR 2′6″ × 8′", "SWING TO CONFIRM", "end");
+  s += note(vP.X(K.run + D.w / 2), vP.Y(-K.wall - D.w * 0.5), vP.X(aL) - 30, vP.Y(-K.wall - D.w * 0.5), "BATHROOM DOOR 2′6″ × 8′", "OPENS INWARD", "end");
   s += note(vP.X(K.study.w / 2), vP.Y(400), 57, vP.Y(400), "STUDY CUPBOARDS", "", "end");
   s += note(vP.X(bays[2][0] + pw / 2 - K.lamp.span), vP.Y(K.lamp.proj - 60), vP.X(bays[2][0] + pw / 2) + 3, vP.Y(560), "LAMP ABOVE, 230 OFF THE WALL", "");
 
