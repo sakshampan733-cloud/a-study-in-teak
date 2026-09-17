@@ -235,7 +235,7 @@ window.PROJECT = {
       ],
     },
     {
-      id: "dressing", title: "Dressing", kicker: "Wardrobes",
+      id: "dressing", title: "Dressing", kicker: "Wardrobes · mirror",
       intro: "",
       items: [
         {
@@ -263,8 +263,23 @@ window.PROJECT = {
             "Which wall do the wardrobes go on, its width, and how deep can they be (600 is standard)?",
             "Does the vault run along the wardrobe wall or end on it (so the top would meet the arch)?",
             "Height where the vault starts (springing line)?",
-            "How many doors / how much hanging vs drawers, and do you want a mirror in the dressing area?",
+            "How many doors / how much hanging vs drawers?",
           ],
+        },
+        {
+          id: "dressing-mirror", name: "Dressing Mirror", status: "open",
+          refs: [
+            { src: "assets/refs/dressing-mirror-ref-1-folding-screen.jpg", caption: "Chosen reference — free-standing three-panel mirror screen in slim dark bronze frames with cut top corners" },
+          ],
+          parts: [
+            { label: "Design", value: "Free-standing folding mirror screen after the reference: three tall mirror panels hinged together — a wide centre panel with two narrower wings angled in so you see front and sides at once." },
+            { label: "Frame", value: "Slim dark bronze / blackened metal frame round each panel, with the top outer corners cut on an angle (chamfered) and a stepped foot rail at the bottom." },
+            { label: "Mirror", value: "Clear silver mirror, full height of each panel." },
+            { label: "Placement", value: "", hint: "Which wall or corner of the dressing area; free-standing or fixed to the floor" },
+            { label: "Dimensions", value: "", hint: "Height, centre panel width, wing width" },
+            { label: "Finish", value: "", hint: "Frame finish to sit with the blackened-steel wardrobe frames and brass pulls" },
+          ],
+          questions: ["Where does the mirror stand, and how tall should it be?"],
         },
       ],
     },
