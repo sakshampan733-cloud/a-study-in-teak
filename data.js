@@ -159,14 +159,29 @@ window.PROJECT = {
       intro: "",
       items: [
         {
-          id: "left-wall", name: "Left Wall", status: "brief",
-          parts: [
-            { label: "Treatment", value: "", hint: "Panelling, dado, wainscot, paint, wallpaper" },
-            { label: "Veneer", inherit: "veneer" },
-            { label: "Polish", inherit: "polish" },
-            { label: "What sits here", value: "" },
+          id: "left-wall", name: "Left Wall", status: "open",
+          refs: [
+            { src: "assets/refs/left-wall-ideas.svg", caption: "Six ideas on the same wall — entrance door D1 on the left, study bookcase end on the right" },
           ],
-          questions: [],
+          parts: [
+            { label: "The wall", value: "Runs from the entrance door D1 to the end of the study bookcase, with the partition meeting it about 11 ft from the entrance wall. Every idea carries the study counter line (570–610) along it, as on the right wall." },
+            { label: "Idea 1 · Panels", value: "Same panel moulding and lamps as the right wall. Quiet and symmetrical — the desk and shelves stay the stars. Safest, cheapest." },
+            { label: "Idea 2 · Reeded teak", value: "Full-height fluted teak veneer above the counter line, plain teak panels below. Milan and Paris in the 1930s (Villa Necchi Campiglio). Echoes the reeds on the desk; warm and wood-lined, but a lot of wood next to the bookcase." },
+            { label: "Idea 3 · Antiqued mirror", value: "Smoky antiqued-mirror panels in a slim brass grid, like the 1930s ocean-liner salons. Throws the window light and the bookcase back into the room, so the room feels bigger. Needs care near the bed." },
+            { label: "Idea 4 · Mural", value: "One hand-painted landscape running behind the panel mouldings, sepia on a gold ground, in the manner of Josep Maria Sert's 1930s murals. The most personal — the subject can be anything you choose." },
+            { label: "Idea 5 · Upholstered", value: "Fabric or leather panels with brass nailhead borders (1940s Hollywood, Jean-Michel Frank). Soft, quiet and acoustic — good on the bed side of the partition." },
+            { label: "Idea 6 · Parchment squares", value: "A grid of vellum-toned squares above the counter line (Jean-Michel Frank's Paris). Pale and rich at once; available as parchment-look panels or wallcovering." },
+            { label: "My pick", value: "" , hint: "Tell me which way you lean, or what you had in mind — ideas can be mixed (e.g. panels on the study side, upholstered on the bed side of the partition)" },
+          ],
+          links: [
+            { label: "Villa Necchi Campiglio (Milan, 1935)", url: "https://fondoambiente.it/luoghi/villa-necchi-campiglio" },
+            { label: "Villa Necchi — interior photos", url: "https://commons.wikimedia.org/w/index.php?search=Villa+Necchi+Campiglio+interior&title=Special:MediaSearch&type=image" },
+            { label: "SS Normandie interiors", url: "https://en.wikipedia.org/wiki/SS_Normandie" },
+            { label: "Josep Maria Sert murals", url: "https://en.wikipedia.org/wiki/Josep_Maria_Sert" },
+            { label: "Jean-Michel Frank", url: "https://en.wikipedia.org/wiki/Jean-Michel_Frank" },
+            { label: "Dorothy Draper", url: "https://en.wikipedia.org/wiki/Dorothy_Draper" },
+          ],
+          questions: ["Where exactly is D1 on this wall, and does the partition touch the wall?", "Is anything placed against this wall (bed side table, chair, TV)?"],
         },
         {
           id: "right-wall", name: "Right Wall", status: "final",

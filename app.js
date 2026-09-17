@@ -111,6 +111,7 @@ function tabPage(t) {
       </div>` : ""}
       ${[].concat(i.drawings || i.drawing || []).filter((d) => window.DRAWINGS?.[d]).map((d) => `<figure class="dwg" data-open="dwg:${d}">${window.DRAWINGS[d].svg}<figcaption>${esc(window.DRAWINGS[d].title)} — click to open full size</figcaption></figure>
         <div class="cad-links">Editable CAD: ${window.DRAWINGS[d].model === false ? "" : `<a href="cad/${d}-model.dxf" download>DXF · true size</a>`}<a href="cad/${d}-sheet.dxf" download>DXF · A3 sheet</a><a href="cad/${d}.svg" download>SVG</a></div>`).join("")}
+      ${i.links?.length ? `<div class="cad-links">Look further: ${i.links.map((l) => `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join("")}</div>` : ""}
       ${i.notes?.length ? `<ul class="notes">${i.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>` : ""}
       ${i.questions?.length ? `<ul class="qs">${i.questions.map((q) => `<li>${esc(q)}</li>`).join("")}</ul>` : ""}
     </section>`).join("");
