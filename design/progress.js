@@ -1,8 +1,8 @@
 window.PROGRESS = `
-<p>Round <b>1</b> reviewed → fixes applied · Round 2 pending · 4 pieces</p>
-<table><tr><th>Piece</th><th>Brief</th><th>System</th><th>Craft</th><th>Biggest gap (round 1)</th></tr>
-<tr><td>A · Foundation & chrome</td><td class="pass">PASS</td><td class="fail">FAIL</td><td class="fail">FAIL</td><td>Close pill filled white; menu oversized & ember display text; nav pills translucent + mono</td></tr>
-<tr><td>B · Overview</td><td class="fail">FAIL</td><td class="fail">FAIL</td><td class="fail">FAIL</td><td>Stacked cards bury text; glow filters; 56–64px type off-scale; text leak in expanding row</td></tr>
-<tr><td>C · Room pages</td><td class="pending">reviewing</td><td class="pending">reviewing</td><td class="fail">FAIL</td><td>Gallery full-bleed with no gutter; bright busy thumbnails; inconsistent column edges</td></tr>
-<tr><td>D · Motion</td><td class="pending">reviewing</td><td class="fail">FAIL</td><td class="fail">FAIL</td><td>Loader handoff overlaps hero title; glow blur; off-system durations (1.2s, 26s drift)</td></tr></table>
-<h2>User requests during run</h2><ul><li>Drawings: light/dark toggle, default dark ✔</li></ul>`;
+<p>Round <b>2</b> reviewed → fixes applied and pushed (f65c81f) · Round 3 not started</p>
+<table><tr><th>Piece</th><th>Brief</th><th>System</th><th>Craft</th><th>Biggest gap (round 2) → fix applied</th></tr>
+<tr><td>A · Chrome</td><td class="pass">PASS (r1)</td><td class="fail">FAIL</td><td class="fail">FAIL</td><td>Menu footer links in mono → ghost pills; cramped zig-zag menu → centred links, counts offset, × close; nav over hero labels → labels hide on scroll, pills blur what's behind</td></tr>
+<tr><td>B · Overview</td><td class="fail">FAIL</td><td class="fail">FAIL</td><td class="fail">FAIL</td><td>Text shows through nav pills → backdrop blur; stack collisions → solid cards with hairline edge, sharp photo; one-sided rays → full circle; plan panel gap → image fills row; mono nav links → condensed</td></tr>
+<tr><td>C · Rooms</td><td class="pass">PASS (r1)</td><td class="fail">FAIL</td><td class="fail">FAIL</td><td>Squeezed hero prose → 560px measure; no light section → bone "In this section" strip; chips/table in mono or mixed case → condensed uppercase</td></tr>
+<tr><td>D · Motion</td><td class="fail">FAIL</td><td class="fail">FAIL</td><td class="fail">FAIL</td><td>Loader too long + broken handoff → 1.1s, same composition as hero, skipped on repeat visits; durations → 0.6s layout / 0.4s opacity</td></tr></table>
+<h2>User requests during run</h2><ul><li>Drawings: light/dark toggle, default dark ✔</li><li>Push to repo ✔</li></ul>`;
