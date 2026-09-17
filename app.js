@@ -202,7 +202,7 @@ function tabPage(t) {
       </div>
       <div class="wrap"><div class="spec reveal">${i.parts.map((p) => `<div class="spec-row"><div class="lab">${esc(p.label)}</div><div class="val">${partValue(p)}</div></div>`).join("")}</div></div>
       ${i.refs?.length ? `<div class="gallery-label"><span class="eyebrow" data-decode>References · ${pad2(i.refs.length)}</span>${i.refs.length > 3 ? `<div class="gallery-nav"><button class="btn" data-gal="-1" aria-label="Previous">←</button><button class="btn" data-gal="1" aria-label="Next">→</button></div>` : ""}</div>
-        <div class="gallery${i.refs.length < 3 ? " few" : ""}">${i.refs.map((r) => `<figure class="shot reveal" data-open="img:${esc(r.src)}"><div class="frame"><img src="${esc(r.src)}" alt="" loading="lazy"></div><figcaption>${esc(r.caption)}</figcaption></figure>`).join("")}</div>` : ""}
+        <div class="gallery reveal${i.refs.length < 3 ? " few" : ""}">${i.refs.map((r) => `<figure class="shot" data-open="img:${esc(r.src)}"><div class="frame"><img src="${esc(r.src)}" alt="" loading="lazy"></div><figcaption>${esc(r.caption)}</figcaption></figure>`).join("")}</div>` : ""}
       ${[].concat(i.drawings || i.drawing || []).filter((d) => window.DRAWINGS?.[d]).length ? `<div class="sheets">${[].concat(i.drawings || i.drawing || []).filter((d) => window.DRAWINGS?.[d]).map((d) => {
         const D = window.DRAWINGS[d], [name, code] = D.title.split(" · ");
         return `<div class="sheet-card reveal"><div class="sheet-top"><h3 class="h-sm">${esc(name)}</h3><div class="sheet-tools"><span class="mono">${esc(code || "")}</span>${paperToggle()}</div></div>
