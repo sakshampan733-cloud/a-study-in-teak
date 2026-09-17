@@ -4,12 +4,12 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const RWALL = {
-  rev: "1 — option C, 5 panels, 3 lamps",
+  rev: "2 — study unit 280 deep",
   date: "17.09.2026",
   run: 4420,                   // study wall to the bathroom door opening, about 14.5 ft (owner's estimate — confirm)
   H: 2743,                     // 9 ft ceiling
   wall: 230,
-  study: { w: 475, h: 610 },   // end of the study cupboards (counter top on the 610 line)
+  study: { w: 280, h: 610 },   // study unit is 280 (11 in) deep   // end of the study cupboards (counter top on the 610 line)
   skirt: { h: 130, t: 18 },
   dado: { y: 610, h: 45, proj: 28 },   // rail sits on the 610 line so it runs on from the study counter top
   crown: { h: 150, proj: 120, led: 40 },

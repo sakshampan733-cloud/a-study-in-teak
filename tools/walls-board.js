@@ -7,7 +7,7 @@ const fs = require("fs"), path = require("path");
 const K = {
   run: 4420,                  // study wall to the bathroom door opening, about 14.5 ft (to confirm)
   H: 2743,
-  study: 475,                 // study cupboard return (610 high); panelling starts after it
+  study: 280,                 // study cupboard return (610 high); panelling starts after it
   skirt: 130, dado: 610, rail: 45,
   crown: 150, cove: 70,       // crown moulding with a hidden LED cove line under it
   gap: 150,                   // stile between panels

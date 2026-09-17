@@ -4,14 +4,14 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const WALL = {
-  rev: "4 — pilaster tight beside the window",
+  rev: "5 — unit 280 (11 in) deep",
   date: "17.09.2026",
   W: 4877, H: 2743,            // 16 ft wall, 9 ft ceiling (owner's measure)
   skirt: 120,                  // skirting line on the cupboard fronts
-  base: { h: 570, top: 40, d: 450, over: 25 },   // cupboards under all three bays, 2 ft to the top of the reeded counter
-  book: { w: 1650, d: 350, stile: 60, shelves: [890, 1160, 1430, 1700] },   // flat head, no arch
+  base: { h: 570, top: 40, d: 255, over: 25 },   // cupboards under all three bays, 2 ft to the top of the reeded counter; 280 (11 in) from the wall
+  book: { w: 1650, d: 280, stile: 60, shelves: [890, 1160, 1430, 1700] },   // flat head, no arch
   band: { h: 400, rail: 40 },   // moulded panel band under the cornice — same size over all three bays (ref. 3)
-  pil: { w: 240, proj: 60, flutes: 9, capH: 130, d: 440, ped: 25, pedProj: 50 },  // ref. 1 fluted shaft; ref. 3 pedestal steps forward below the counter
+  pil: { w: 240, proj: 40, flutes: 9, capH: 130, d: 280, ped: 25, pedProj: 50 },  // ref. 1 fluted shaft; ref. 3 pedestal steps forward below the counter
   panel: { w: 1400, set: 200, frame: 70, painting: [760, 860], paintingC: 1440 },
   win: { w: 1160, sill: 650, head: 2320, fromRight: 35, arch: 70, wall: 230 },  // read off the site photo (9 ft ceiling as scale) — confirm with a tape
   sconce: { y: 1290, span: 150 },  // twin-arm candle sconce with shade, one on each pilaster (ref. 3)
@@ -281,7 +281,7 @@ const WALL = {
   const scP = 25, vP = view(30, 196, scP, "Wall plan"), tP = vP.w(0.1);
   s1 += heading(18, 180, "PLAN", `CUT AT 1200 · SCALE 1:${scP} · ROOM BELOW, WALL ABOVE`, 60);
   s1 += vP.g(plan(tP, `${vP.w(1)} ${vP.w(0.7)}`), 0.28);
-  s1 += chainV([vP.Y(0), vP.Y(BK.d), vP.Y(PL.d + PL.proj), vP.Y(B.d + B.over)], vP.X(-150) - 4, [BK.d, PL.proj + PL.d - BK.d, ""], { from: vP.X(0) - 1, size: 1.4 });
+  s1 += chainV([vP.Y(0), vP.Y(BK.d), vP.Y(B.d + B.over + PL.pedProj)], vP.X(-150) - 4, [`${BK.d} (11 IN)`, PL.pedProj], { from: vP.X(0) - 1, size: 1.3 });
   s1 += note(vP.X(xWin[0] + 100), vP.Y(-WN.wall / 2), vP.X(xWin[0] + 100) + 4, vP.Y(-WN.wall) - 5, "WINDOW ~1160 WIDE, TIGHT TO CORNER", "FROM SITE PHOTO — CONFIRM");
 
   // Section
