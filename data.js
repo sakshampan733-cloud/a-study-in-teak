@@ -194,15 +194,20 @@ window.PROJECT = {
       intro: "",
       items: [
         {
-          id: "tv-unit", name: "TV Unit", status: "brief",
+          id: "tv-unit", name: "TV Unit / Side Drawers", status: "brief",
+          refs: [
+            { src: "assets/refs/bedwall-ref-5-parchment-cabinet-dark-room.jpg", caption: "Reference — parchment-fronted cabinet glowing against dark walls" },
+          ],
           parts: [
-            { label: "Design", value: "" },
+            { label: "Reference", value: "The parchment cabinet: the look for a piece under the TV, but in a drawer style rather than doors." },
+            { label: "What it is", value: "", hint: "A drawer unit under the TV, or side drawers — not decided" },
+            { label: "Design", value: "", hint: "How the drawers look — not decided" },
             { label: "Veneer", inherit: "veneer" },
             { label: "Polish", inherit: "polish" },
             { label: "Dimensions", value: "" },
             { label: "Services", value: "", hint: "Sockets, cable routing, set-top box space" },
           ],
-          questions: [],
+          questions: ["Drawer unit under the TV, or side drawers?"],
         },
         {
           id: "bed", name: "Bed", status: "open",
@@ -225,7 +230,6 @@ window.PROJECT = {
             { src: "assets/refs/bedwall-ref-3-parchment-large-panels.jpg", caption: "Your ref — large parchment panels with soft cloudy tone, joints kept hairline" },
             { src: "assets/refs/bedwall-ref-4-parchment-fireplace-wall.jpg", caption: "Your ref — a whole wall in parchment squares around a fireplace" },
             { src: "assets/refs/bedwall-ref-2-parchment-entry-niche.jpg", caption: "Your ref — parchment niche with a dark stone skirting and a slim dark edge" },
-            { src: "assets/refs/bedwall-ref-5-parchment-cabinet-dark-room.jpg", caption: "Your ref — parchment cabinet glowing against dark walls" },
             { src: "https://i.pinimg.com/736x/7e/3b/66/7e3b668e81cc598a4a784639d55cafc8.jpg", caption: "Idea — seamless warm plaster behind the bed, no joints at all" },
             { src: "https://i.pinimg.com/736x/40/1b/70/401b70e4e1628638f69d68881484f4c2.jpg", caption: "Idea — textured plaster bed wall with a low timber bed" },
             { src: "https://i.pinimg.com/originals/16/0c/30/160c30ebf4787f0679e6fdc7598978be.jpg", caption: "Idea — plaster wrapping a built-in bed alcove" },
@@ -235,11 +239,13 @@ window.PROJECT = {
           parts: [
             { label: "Direction", value: "Parchment on the wall behind the bed — pale, warm, cloudy tone like vellum." },
             { label: "Two ways to do it", value: "Real parchment / vellum panels (as in your references) — large sheets with hairline joints; or parchment-effect plaster — the same colour and cloudy movement trowelled on with no joints at all." },
-            { label: "Panels or seamless", value: "", hint: "Your references all show joints between large panels. Does \"no boxes\" mean no joints at all (seamless plaster), or just no small squares / moulded frames?" },
+            { label: "Panels or seamless", value: "Probably large panels — not decided yet." },
+            { label: "Layout", value: "Symmetrical — the panels set out evenly about the centre of the bed." },
+            { label: "Shade", value: "One even shade across every panel — no panel lighter or darker than the next." },
             { label: "Extent", value: "", hint: "Whole bed wall, floor to ceiling?" },
             { label: "Edges", value: "", hint: "Dark slim edge / stone skirting as in ref 2, or plain" },
           ],
-          questions: ["Seamless, or large panels with hairline joints?", "Whole wall, or just behind the bed?"],
+          questions: ["Large panels or seamless — to decide", "Whole wall, or just behind the bed?"],
         },
       ],
     },
