@@ -22,15 +22,15 @@ window.PROJECT = {
     // Solid timber, for pieces that are not veneered.
     wood:   { value: "Teak", status: "final", options: ["Teak"], usedFor: ["Desk"] },
     // The floor the whole scheme sits on.
-    floor:  { value: "Taupe-brown marble, polished", status: "open", options: ["Polished", "Honed / matte"], rule: "Mid taupe-brown marble with fine white veining — brown but with a greyish cast, not red or golden. Polished, so it throws light back up. Every wood tone is judged against this slab.",
+    floor:  { value: "Taupe-brown marble, polished — laid", status: "final", options: ["Polished", "Honed / matte"], rule: "Mid taupe-brown marble with fine white veining — brown but with a greyish cast, not red or golden. Polished, so it throws light back up. Every wood tone is judged against this slab.",
               refs: [
                 { src: "assets/refs/floor-ref-2-taupe-brown-marble-slab.jpg", caption: "Room floor — taupe-brown marble with fine white veining" },
                 { src: "assets/refs/floor-ref-1-taupe-brown-marble-slab.jpg", caption: "The same slab, seen at the yard" },
               ] },
     // Two more stones: the room's border and skirting, and the bathroom.
-    trimStone: { value: "White marble with brown-grey veining", status: "open", options: ["Polished", "Honed / matte"], rule: "Used for the border in the room floor and for the skirting — a light stone that draws a line around the taupe field.",
+    trimStone: { value: "White marble with brown-grey veining, polished — laid", status: "final", options: ["Polished", "Honed / matte"], rule: "Used for the border in the room floor and for the skirting — a light stone that draws a line around the taupe field.",
               refs: [{ src: "assets/refs/stone-ref-2-white-brown-border-skirting.jpg", caption: "Border and skirting — white marble with soft brown-grey veining, polished" }] },
-    bathStone: { value: "Beige-gold marble", status: "open", options: ["Polished", "Honed / matte"], rule: "The bathroom stone — a warm beige-gold marble with faint cloudy veining, warmer and lighter than the room floor.",
+    bathStone: { value: "Beige-gold marble, polished — laid", status: "final", options: ["Polished", "Honed / matte"], rule: "The bathroom stone — a warm beige-gold marble with faint cloudy veining, warmer and lighter than the room floor.",
               refs: [{ src: "assets/refs/stone-ref-3-beige-gold-bathroom-marble.jpg", caption: "Bathroom marble — warm beige-gold with faint veining" }] },
     // Wall paint for the room.
     paint:  { value: "Warm cream", status: "open", options: ["Warm cream", "Soft ivory", "Warm off-white"], rule: "Soft, warm cream like the reference room — calm and light, never stark white. Exact shade to pick from samples.",
