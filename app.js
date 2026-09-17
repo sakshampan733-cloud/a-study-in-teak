@@ -412,7 +412,8 @@ const firstVisit = !sessionStorage.getItem("seen");
 if (REDUCED) { document.body.classList.add("loaded", "reduced"); render(); }
 else {
   if (firstVisit) {
-    render(1450);
-    setTimeout(() => { document.body.classList.add("loaded"); try { sessionStorage.setItem("seen", 1); } catch {} }, 1100);
+    const left = Math.max(0, 900 - (performance.now() - (window.__t0 || 0)));
+    render(left + 350);
+    setTimeout(() => { document.body.classList.add("loaded"); try { sessionStorage.setItem("seen", 1); } catch {} }, left);
   } else { document.body.classList.add("loaded"); render(); }
 }

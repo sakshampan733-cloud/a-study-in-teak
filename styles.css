@@ -121,6 +121,7 @@ body.menu-open #menuLinks a { opacity: 1; transform: none; }
 #loader .loader-mark { width: 124px; height: 124px; filter: blur(18px); opacity: 0; animation: soften .4s var(--ease) .05s forwards, focus .6s var(--ease) .45s forwards; }
 #loader .loader-word { font: 400 32px/1.05 var(--cond); letter-spacing: -0.02em; filter: blur(18px); opacity: 0; animation: soften .4s var(--ease) .1s forwards, focus .6s var(--ease) .5s forwards; }
 body.loaded #loader { opacity: 0; visibility: hidden; }
+.skip-loader #loader { display: none; }
 body.loaded #loader > * { filter: none; opacity: 1; animation: none; }
 @keyframes soften { to { filter: blur(6px); opacity: .6; } }
 @keyframes focus { from { filter: blur(6px); opacity: .6; } to { filter: blur(0); opacity: 1; } }
