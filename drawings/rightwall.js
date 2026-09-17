@@ -4,19 +4,19 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const RWALL = {
-  rev: "4 — top left plain for cove light",
+  rev: "5 — 4 in marble skirting",
   date: "17.09.2026",
   run: 4420,                   // study wall to the bathroom door opening, about 14.5 ft (owner's estimate — confirm)
   H: 2743,                     // 9 ft ceiling
   wall: 230,
   study: { w: 280, h: 570 },   // study unit 280 (11 in) deep; cupboard carcase to 570, reeded counter 570–610 on top
-  skirt: { h: 130, t: 18 },
+  skirt: { h: 102, t: 20 },          // white marble skirting, 4 in, already laid
   dado: { y: 570, h: 40, proj: 28, reeds: 4 },   // the study counter band carried round the corner: same 570–610 band, same reeds
   mould: { w: 55, proj: 24 },          // panel moulding, painted the wall colour
   stile: 150, edge: 100,               // gap between panels; margin beside the door architrave and at the corner
   bays: 5,
   lamps: [1, 3, 5],                    // lamps centred inside tall panels 1, 3 and 5
-  short: { y0: 240, y1: 490 },
+  short: { y0: 212, y1: 470 },
   tall: { y0: 720, top: 310 },         // tall panels stop 310 below the ceiling; no crown — the cove light is in the ceiling
   door: { w: 762, h: 2438, arch: 65 }, // bathroom door 2 ft 6 × 8 ft, architrave about 2½ in
   ret: 610,                            // 2 ft of wall past the door opening to the corner
@@ -121,7 +121,7 @@ const RWALL = {
   }
   function skirtPath() {
     const h = K.skirt.h, t = K.skirt.t;
-    return `M 0 ${ey(0)} L ${t} ${ey(0)} L ${t} ${ey(h - 30)} Q ${t} ${ey(h - 18)} ${t - 7} ${ey(h - 14)} Q ${t - 12} ${ey(h - 8)} 6 ${ey(h)} L 0 ${ey(h)} Z`;
+    return `M 0 ${ey(0)} L ${t} ${ey(0)} L ${t} ${ey(h - 10)} L ${t - 10} ${ey(h)} L 0 ${ey(h)} Z`;
   }
   // Panel moulding across its width: flat back on the wall, ogee rising to a bead, small step at the inner edge.
   function mouldPath(x0, yBase, s = 1) {
@@ -199,11 +199,11 @@ const RWALL = {
   s += note(vS.X(K.lamp.proj + 30), vS.Y(ey(K.lamp.y + 140)), nx, vS.Y(ey(K.lamp.y + 280)), "WALL LAMP", "DET. 4");
   s += note(vS.X(K.dado.proj), vS.Y(ey(K.dado.y + 22)), nx, vS.Y(ey(K.dado.y + 150)), "RAIL", "DET. 2");
   s += chainV([vS.Y(ey(K.lamp.y)), vS.Y(ey(0))], vS.X(-K.wall) - 4, [`${K.lamp.y} TO LAMP CENTRE`], { from: vS.X(-K.wall) - 1, size: 1.2 });
-  s += note(vS.X(K.skirt.t), vS.Y(ey(60)), nx, vS.Y(ey(120)), "SKIRTING", "DET. 3");
+  s += note(vS.X(K.skirt.t), vS.Y(ey(50)), nx, vS.Y(ey(120)), "MARBLE SKIRTING", "4 IN · LAID");
 
   // Notes
   s += heading(318, 180, "NOTES", `REVISION ${K.rev.split(" ")[0]}`, 40);
-  ["Option C: 5 equal panels, lamps in 1, 3 and 5.", "One narrow panel on the 2 ft wall past the door.", "Moulding, rail and skirting painted the wall colour.",
+  ["Option C: 5 equal panels, lamps in 1, 3 and 5.", "Skirting is white marble, 4 in, already laid.", "One narrow panel on the 2 ft wall past the door.", "Moulding, rail and skirting painted the wall colour.",
    "Rail is the study counter band carried round the", "   corner — same 570–610 height, same 4 reeds.", "Short and tall panels share the same centres.",
    "Lengths are estimates — set out from site measure,", "   keeping the stiles 150 and the panels equal."]
     .forEach((n, i) => { s += text(318, 191 + i * 4.3, n, { size: 1.55 }); });
@@ -225,13 +225,13 @@ const RWALL = {
     s += chainH([v.X(0), v.X(K.dado.proj)], v.Y(ey(yDado)) - 4, [K.dado.proj], { from: v.Y(ey(yDado)) - 1, size: 1.3 });
     s += text(88, 283, "MATCHES THE COUNTER EDGE", { size: 1.3, fill: THIN });
   }
-  s += heading(145, 238, "3 · SKIRTING", "SECTION · 1:4", 36);
+  s += heading(145, 238, "3 · SKIRTING", "MARBLE · SECTION · 1:4", 40);
   {
     const s3 = 4, v = view(165, 250 - ey(K.skirt.h + 15) / s3, s3, "Skirting section");
     s += v.g(`<rect x="-40" y="${ey(K.skirt.h + 15)}" width="40" height="${K.skirt.h + 15}" fill="url(#hatchD5)" stroke="none"/><path d="${skirtPath()}" fill="url(#hatchD2)"/><line x1="0" y1="${ey(K.skirt.h + 15)}" x2="0" y2="${ey(0)}"/><line x1="-40" y1="${ey(0)}" x2="60" y2="${ey(0)}" stroke-width="${v.w(0.5)}"/>`, 0.25);
     s += chainV([v.Y(ey(K.skirt.h)), v.Y(ey(0))], v.X(K.skirt.t) + 6, [K.skirt.h], { from: v.X(K.skirt.t) + 1, size: 1.3 });
     s += chainH([v.X(0), v.X(K.skirt.t)], v.Y(ey(0)) + 4, [K.skirt.t], { from: v.Y(ey(0)) + 1, size: 1.3 });
-    s += text(145, 283, "OGEE TOP · STOPS AT THE ARCHITRAVE", { size: 1.3, fill: THIN });
+    s += text(145, 283, "WHITE MARBLE, ALREADY LAID · SQUARE WITH A SMALL TOP CHAMFER", { size: 1.3, fill: THIN });
   }
   s += heading(222, 238, "4 · WALL LAMP", "ELEVATION · 1:10 · ×3", 40);
   {

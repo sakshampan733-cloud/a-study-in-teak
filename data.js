@@ -225,8 +225,8 @@ window.PROJECT = {
           parts: [
             { label: "Treatment", value: "Applied panel moulding painted the wall colour. Short panels below a dado rail, tall panels above, 150 stiles between" },
             { label: "Length", value: "About 14–15 ft from the study wall to the bathroom door (drawn at 4420 / 14 ft 6 in), then the door, then 2 ft of wall to the corner" },
-            { label: "Skirting", value: "White marble, already laid — the panel moulding starts above it (height to measure)." },
-            { label: "Heights", value: "Skirting 130 · rail 570–610, the study counter band carried round the corner unbroken · short panels 240–490 · tall panels 720–2433, 310 below the ceiling · no crown moulding — the cove light is in the ceiling" },
+            { label: "Skirting", value: "White marble, 4 in (102) high, already laid — square with a small top chamfer; the panel moulding starts above it." },
+            { label: "Heights", value: "Marble skirting 102 · rail 570–610, the study counter band carried round the corner unbroken · short panels 212–470 · tall panels 720–2433, 310 below the ceiling · no crown moulding — the cove light is in the ceiling" },
             { label: "Panels", value: "Option C: 5 equal panels about 24 in (606) wide on the long run, short and tall on the same centres, plus one narrow 345 panel on the 2 ft wall past the door" },
             { label: "Mouldings", value: "Panel moulding 55 × 24 ogee, mitred · rail 40 × 28 with the same 4 reeds as the study counter edge · skirting 130 × 18 — all painted the wall colour" },
             { label: "Door", value: "Bathroom door 2 ft 6 in × 8 ft, architrave 65 (about 2½ in) all round; rail and skirting stop at it" },
