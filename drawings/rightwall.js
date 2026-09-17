@@ -4,21 +4,21 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const RWALL = {
-  rev: "2 — study unit 280 deep",
+  rev: "3 — rail continues the counter",
   date: "17.09.2026",
   run: 4420,                   // study wall to the bathroom door opening, about 14.5 ft (owner's estimate — confirm)
   H: 2743,                     // 9 ft ceiling
   wall: 230,
-  study: { w: 280, h: 610 },   // study unit is 280 (11 in) deep   // end of the study cupboards (counter top on the 610 line)
+  study: { w: 280, h: 570 },   // study unit 280 (11 in) deep; cupboard carcase to 570, reeded counter 570–610 on top
   skirt: { h: 130, t: 18 },
-  dado: { y: 610, h: 45, proj: 28 },   // rail sits on the 610 line so it runs on from the study counter top
+  dado: { y: 570, h: 40, proj: 28, reeds: 4 },   // the study counter band carried round the corner: same 570–610 band, same reeds
   crown: { h: 150, proj: 120, led: 40 },
   mould: { w: 55, proj: 24 },          // panel moulding, painted the wall colour
   stile: 150, edge: 100,               // gap between panels; margin beside the door architrave and at the corner
   bays: 5,
   lamps: [1, 3, 5],                    // lamps centred inside tall panels 1, 3 and 5
-  short: { y0: 240, y1: 530 },
-  tall: { y0: 765, top: 160 },         // tall panels stop 160 below the crown
+  short: { y0: 240, y1: 490 },
+  tall: { y0: 720, top: 160 },         // tall panels stop 160 below the crown
   door: { w: 762, h: 2438, arch: 65 }, // bathroom door 2 ft 6 × 8 ft, architrave about 2½ in
   ret: 610,                            // 2 ft of wall past the door opening to the corner
   lamp: { y: 1290, span: 150, proj: 230 },   // twin-arm sconce, same height and family as the study wall
@@ -70,10 +70,14 @@ const RWALL = {
     // skirting and dado rail, stopping at the architrave
     [[K.study.w, aL], [aR, L]].forEach(([a, b]) => {
       o += R(a, 0, b, K.skirt.h) + Ln(a, K.skirt.h - 25, b, K.skirt.h - 25, W(th));
-      o += R(a, K.dado.y, b, yDado) + Ln(a, K.dado.y + 15, b, K.dado.y + 15, W(th)) + Ln(a, K.dado.y + 30, b, K.dado.y + 30, W(th));
     });
-    // end of the study cupboards: reeded counter top on the 610 line
-    o += R(0, 0, K.study.w, K.study.h) + `<g ${W(th)}>${Ln(0, K.study.h - 40, K.study.w, K.study.h - 40)}${Ln(0, K.study.h - 30, K.study.w, K.study.h - 30)}${Ln(0, K.study.h - 20, K.study.w, K.study.h - 20)}${Ln(0, K.study.h - 10, K.study.w, K.study.h - 10)}${R(40, 40, K.study.w - 40, K.study.h - 80)}</g>`;
+    // end of the study cupboards, then the counter band running on unbroken as the rail
+    o += R(0, 0, K.study.w, K.study.h) + `<g ${W(th)}>${R(40, 40, K.study.w - 40, K.study.h - 40)}</g>`;
+    const reed = K.dado.h / K.dado.reeds;
+    [[0, aL], [aR, L]].forEach(([a, b]) => {
+      o += R(a, K.dado.y, b, yDado);
+      for (let i = 1; i < K.dado.reeds; i++) o += Ln(a, K.dado.y + i * reed, b, K.dado.y + i * reed, W(th));
+    });
     // panels
     [...bays, narrow].forEach(([a, b]) => { o += panel(a, K.short.y0, b, K.short.y1, th) + panel(a, K.tall.y0, b, yTall, th); });
     K.lamps.forEach((n) => { const [a, b] = bays[n - 1]; o += sconce((a + b) / 2, th); });
@@ -124,7 +128,10 @@ const RWALL = {
 
   function dadoPath() {
     const y = K.dado.y, p = K.dado.proj;
-    return `M 0 ${ey(y)} L 8 ${ey(y)} Q 12 ${ey(y + 4)} 14 ${ey(y + 8)} Q ${p} ${ey(y + 10)} ${p} ${ey(y + 22)} Q ${p} ${ey(y + 34)} 16 ${ey(y + 38)} L 12 ${ey(y + K.dado.h)} L 0 ${ey(y + K.dado.h)} Z`;
+    const r = K.dado.h / K.dado.reeds / 2;
+    let d = `M 0 ${ey(y)} L ${p - r} ${ey(y)}`;
+    for (let i = 0; i < K.dado.reeds; i++) d += ` A ${r} ${r} 0 0 0 ${p - r} ${ey(y + (i + 1) * 2 * r)}`;
+    return d + ` L 0 ${ey(y + K.dado.h)} Z`;
   }
   function skirtPath() {
     const h = K.skirt.h, t = K.skirt.t;
@@ -182,8 +189,8 @@ const RWALL = {
   s += lab(250, yCrown - 25, yCrown - 250, "LINE OF LIGHT", "WASHES DOWN");
   s += lab(bays[0][0] + 18, 1900, 1900, "TALL PANEL ×6", "WALL COLOUR");
   s += lab(lx - K.lamp.span - 60, K.lamp.y + 140, K.lamp.y + 200, "WALL LAMP ×3", "PANELS 1, 3, 5");
-  s += lab(K.study.w + 60, yDado - 10, yDado + 150, "DADO RAIL", "ON THE 610 LINE");
-  s += lab(K.study.w - 60, K.study.h - 20, 470, "STUDY COUNTER", "END OF CUPBOARDS");
+  s += lab(K.study.w + 60, yDado - 10, yDado + 150, "RAIL = STUDY COUNTER", "SAME 570–610 BAND");
+  s += lab(K.study.w - 60, 300, 440, "STUDY CUPBOARDS", "END, 280 DEEP");
   s += lab(bays[0][0] + 18, 280, 250, "SHORT PANEL ×6", "");
   s += lab(K.study.w + 60, 60, 20, "SKIRTING", "");
 
@@ -203,14 +210,14 @@ const RWALL = {
   s += note(vS.X(K.crown.proj - 10), vS.Y(ey(yCrown + 100)), nx, vS.Y(ey(K.H - 30)), "CROWN + LED", "DET. 3");
   s += note(vS.X(M.proj), vS.Y(ey(yTall - 30)), nx, vS.Y(ey(yTall - 180)), "PANEL MOULDING", "DET. 1");
   s += note(vS.X(K.lamp.proj + 30), vS.Y(ey(K.lamp.y + 140)), nx, vS.Y(ey(K.lamp.y + 280)), "WALL LAMP", "DET. 4");
-  s += note(vS.X(K.dado.proj), vS.Y(ey(K.dado.y + 22)), nx, vS.Y(ey(K.dado.y + 150)), "DADO RAIL", "DET. 2");
+  s += note(vS.X(K.dado.proj), vS.Y(ey(K.dado.y + 22)), nx, vS.Y(ey(K.dado.y + 150)), "RAIL", "DET. 2");
   s += chainV([vS.Y(ey(K.lamp.y)), vS.Y(ey(0))], vS.X(-K.wall) - 4, [`${K.lamp.y} TO LAMP CENTRE`], { from: vS.X(-K.wall) - 1, size: 1.2 });
   s += note(vS.X(K.skirt.t), vS.Y(ey(60)), nx, vS.Y(ey(120)), "SKIRTING", `${K.skirt.h} × ${K.skirt.t}`);
 
   // Notes
   s += heading(318, 180, "NOTES", `REVISION ${K.rev.split(" ")[0]}`, 40);
   ["Option C: 5 equal panels, lamps in 1, 3 and 5.", "One narrow panel on the 2 ft wall past the door.", "Moulding, rail and skirting painted the wall colour.",
-   "Dado rail on the 610 line — level with the study", "   counter top, so the line runs on round the room.", "Short and tall panels share the same centres.",
+   "Rail is the study counter band carried round the", "   corner — same 570–610 height, same 4 reeds.", "Short and tall panels share the same centres.",
    "Lengths are estimates — set out from site measure,", "   keeping the stiles 150 and the panels equal."]
     .forEach((n, i) => { s += text(318, 191 + i * 4.3, n, { size: 1.55 }); });
 
@@ -223,13 +230,13 @@ const RWALL = {
     s += chainV([v.Y(-M.proj), v.Y(0)], v.X(M.w) + 5, [M.proj], { from: v.X(M.w) + 1, size: 1.3 });
     s += text(22, 283, "WALL FACE BELOW · MITRED CORNERS", { size: 1.3, fill: THIN });
   }
-  s += heading(88, 238, "2 · DADO RAIL", "SECTION · 1:2", 32);
+  s += heading(88, 238, "2 · RAIL", "SECTION · 1:2", 32);
   {
     const s2 = 2, v = view(98, 252 - ey(yDado) / s2, s2, "Dado rail section");
     s += v.g(`<rect x="-24" y="${ey(yDado + 15)}" width="24" height="${K.dado.h + 30}" fill="url(#hatchD2)" stroke="none"/><path d="${dadoPath()}" fill="url(#hatchD2)"/><line x1="0" y1="${ey(yDado + 15)}" x2="0" y2="${ey(K.dado.y - 15)}"/>`, 0.25);
     s += chainV([v.Y(ey(yDado)), v.Y(ey(K.dado.y))], v.X(K.dado.proj) + 5, [K.dado.h], { from: v.X(K.dado.proj) + 1, size: 1.3 });
     s += chainH([v.X(0), v.X(K.dado.proj)], v.Y(ey(yDado)) - 4, [K.dado.proj], { from: v.Y(ey(yDado)) - 1, size: 1.3 });
-    s += text(88, 283, "UNDERSIDE ON THE 610 LINE", { size: 1.3, fill: THIN });
+    s += text(88, 283, "MATCHES THE COUNTER EDGE", { size: 1.3, fill: THIN });
   }
   s += heading(145, 238, "3 · CROWN + LED", "SECTION · 1:5", 36);
   {
