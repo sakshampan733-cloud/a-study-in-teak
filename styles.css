@@ -185,7 +185,7 @@ body.scrolled .hero-meta { opacity: 0; }
   background: var(--charcoal); border: 1px solid rgba(255, 255, 255, 0.1); display: flex; flex-direction: column; text-align: center;
 }
 .scard:last-child { margin-bottom: 0; }
-.scard:nth-child(1) { align-self: flex-start; } .scard:nth-child(2) { align-self: center; } .scard:nth-child(3) { align-self: flex-end; } .scard:nth-child(4) { align-self: center; }
+.scard:nth-child(1) { align-self: flex-start; } .scard:nth-child(2) { align-self: center; } .scard:nth-child(3) { align-self: flex-end; } .scard:nth-child(4) { align-self: center; } .scard:nth-child(5) { align-self: flex-start; }
 .scard .ph { height: 220px; background-size: cover; background-position: center; filter: brightness(.62) contrast(1.15) saturate(1.05); }
 .scard .body { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 26px 32px 30px; }
 .scard .prose { color: rgba(255, 255, 255, .86); max-width: 380px; font: 400 14px/1.4 var(--sans); text-transform: uppercase; letter-spacing: -0.01em; margin: 0; }

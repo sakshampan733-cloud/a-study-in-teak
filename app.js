@@ -46,7 +46,7 @@ const titleOf = (id) => (id === "veneer" ? "Materials" : id === "lighting" ? "Li
 const IMG = {
   overview: "assets/refs/desk-ref-1.jpg", veneer: "assets/refs/desk-ref-1-detail.jpg", doors: "assets/refs/door-ref-1.jpg",
   study: "assets/refs/wall-ref-1-library-pilasters.jpg", walls: "assets/refs/walls-ref-1-panel-moulding.jpg", bedroom: "assets/refs/bed-ref-1-low-platform-bed.jpg",
-  dressing: "assets/refs/wardrobe-ref-2-steel-leaded-doors-wide.jpg", bathroom: "assets/refs/ceiling-barrel-vault-coffers.jpg", lighting: "assets/refs/wall-ref-4-dark-study-bands-sconces.jpg",
+  dressing: "assets/refs/wardrobe-ref-2-steel-leaded-doors-wide.jpg", bathroom: "assets/refs/bathroom-ref-1-painted-ceiling-linework.jpg", lighting: "assets/refs/wall-ref-4-dark-study-bands-sconces.jpg",
   stack: "assets/refs/wall-ref-1-library-pilasters.jpg", footer: "assets/refs/desk-ref-1-detail.jpg",
 };
 const bg = (src) => `style="background-image:url('${src}')"`;
@@ -113,9 +113,10 @@ function overview() {
 
   const chapters = [
     { title: "The Study", ids: ["study", "walls"], img: "assets/refs/wall-ref-4-dark-study-bands-sconces.jpg", line: "The teak desk, the full-height study wall, and the panelled walls either side." },
-    { title: "The Bedroom", ids: ["bedroom", "bathroom"], img: "assets/refs/bed-ref-1-low-platform-bed.jpg", line: "The bed, the bed-back wall, the TV unit, and the vanity next door." },
+    { title: "The Bedroom", ids: ["bedroom"], img: "assets/refs/bed-ref-1-low-platform-bed.jpg", line: "The bed, the parchment bed wall, and the TV unit or side drawers." },
+    { title: "The Bathroom", ids: ["bathroom"], img: "assets/refs/bathroom-ref-1b-painted-ceiling-detail.jpg", line: "A ceiling with fine black hand-painted linework, and the vanity below." },
     { title: "The Dressing", ids: ["dressing"], img: "assets/refs/wardrobe-ref-3-steel-leaded-doors-closeup.jpg", line: "Lit white-glass wardrobes in steel frames, and a folding mirror." },
-    { title: "The Fabric", ids: ["veneer", "doors", "lighting"], img: "assets/refs/door-ref-1.jpg", line: "One veneer, three identical doors, and every light on one dimmer plan." },
+    { title: "The Fabric", ids: ["veneer", "doors", "lighting"], img: "assets/refs/door-ref-1.jpg", line: "One veneer, warm cream paint, three identical doors, and every light on one dimmer plan." },
   ].map((ch, i) => {
     const c = tally(ch.ids.flatMap(itemsOf)), n = c.brief + c.open + c.final;
     return `<article class="scard" style="--i:${i}"><div class="ph" ${bg(ch.img)}></div><div class="body">
@@ -123,7 +124,7 @@ function overview() {
       <p class="prose">${esc(ch.line)}</p><span class="mono" style="font-size:11px;color:var(--dim)">${c.final} of ${n} final</span>
       <div class="meta">${ch.ids.map((id) => `<a class="btn" href="#${id}">${esc(titleOf(id))}</a>`).join("")}</div></div></article>`;
   }).join("");
-  const stack = `<section class="section" style="padding-bottom:0">${head("The book", "Four chapters. One room.", "The study, the bedroom, the dressing room — and the materials that hold them together.")}</section>
+  const stack = `<section class="section" style="padding-bottom:0">${head("The book", "Five chapters. One room.", "The study, the bedroom, the dressing room, the bathroom — and the materials that hold them together.")}</section>
     <section class="stack"><div class="stack-bg"><div ${bg(IMG.stack)}></div></div><div class="stack-cards">${chapters}</div></section>
     <section class="section">${head("The index", "Every section, and where it stands.")}<div class="wrap"><div class="ledger reveal">${allTabIds().map((id, i) => {
       const c = tally(itemsOf(id)), n = c.brief + c.open + c.final;
@@ -229,6 +230,8 @@ function veneer() {
     <div class="group-label"><span class="eyebrow" data-decode>02 · Solid wood</span></div><div class="cards">${card("wood", "Wood type")}</div>
     <div class="wrap"><div class="eyebrow" style="text-align:center;margin-top:32px;color:var(--dim)">Used for</div>${chips(M.wood.usedFor)}</div>
     <div class="group-label"><span class="eyebrow" data-decode>03 · Polish</span></div><div class="cards">${card("polish", "Polish")}${card("tone", "Tone")}</div>
+    <div class="group-label"><span class="eyebrow" data-decode>04 · Wall paint</span></div><div class="cards">${card("paint", "Paint")}</div>
+    ${(M.paint.refs || []).length ? `<div class="gallery reveal few" style="margin-top:24px">${M.paint.refs.map((r) => `<figure class="shot" data-open="img:${esc(r.src)}"><div class="frame"><img src="${esc(r.src)}" alt="" loading="lazy"></div><figcaption>${esc(r.caption)}</figcaption></figure>`).join("")}</div>` : ""}
     ${M.notes.length ? `<div class="asks reveal" style="margin-top:var(--gap)"><span class="eyebrow">Notes</span><ul class="ask-list notes">${M.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul></div>` : ""}` +
     nextLink("veneer") + footer();
 }

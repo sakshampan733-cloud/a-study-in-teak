@@ -20,6 +20,9 @@ window.PROJECT = {
     tone:   { value: "", status: "brief", options: ["Natural", "Warm / honeyed", "Dark stained"], rule: "Must match the solid teak desk." },
     // Solid timber, for pieces that are not veneered.
     wood:   { value: "Teak", status: "final", options: ["Teak"], usedFor: ["Desk"] },
+    // Wall paint for the room.
+    paint:  { value: "Warm cream", status: "open", options: ["Warm cream", "Soft ivory", "Warm off-white"], rule: "Soft, warm cream like the reference room — calm and light, never stark white. Exact shade to pick from samples.",
+              refs: [{ src: "assets/refs/paint-ref-1-warm-cream-room-sheer-curtains.jpg", caption: "Paint reference — warm cream walls and ceiling, soft daylight through white curtains" }] },
     appliesTo: ["Doors & moulding", "Wardrobes", "Shelf", "Walls", "TV unit", "Bed", "Headboard"],
     notes: [
       "One single veneer for the entire room — bedroom, study, dressing and all three doors.",
@@ -151,6 +154,21 @@ window.PROJECT = {
             "Bookcase: open shelves, or glazed doors above the cupboards?",
             "Should the pilasters and cupboard band borrow the desk's details (reeded consoles, hollow corners, carved drops)?",
           ],
+        },
+        {
+          id: "curtains", name: "Window Curtains", status: "open",
+          refs: [
+            { src: "assets/refs/paint-ref-1-warm-cream-room-sheer-curtains.jpg", caption: "Curtain reference — white, light-filtering curtains in soft folds, floor to ceiling" },
+            { src: "assets/refs/curtain-ref-1-volute-tieback.jpg", caption: "Tieback — a black iron volute (spiral) hook holding the curtain back" },
+          ],
+          parts: [
+            { label: "Where", value: "The window on the study wall." },
+            { label: "Fabric", value: "White, light-filtering — not see-through, but daylight passes softly through (like a heavy voile or linen sheer)." },
+            { label: "Tieback", value: "A black iron volute (spiral) hook fixed to the wall, holding the curtain back, as in the reference." },
+            { label: "Track / rod", value: "", hint: "Ceiling track or rod, and how full the pleats are" },
+            { label: "Length", value: "", hint: "Floor length, just kissing the floor, as in the reference?" },
+          ],
+          questions: [],
         },
       ],
     },
@@ -294,9 +312,23 @@ window.PROJECT = {
       ],
     },
     {
-      id: "bathroom", title: "Bathroom", kicker: "Vanity",
+      id: "bathroom", title: "Bathroom", kicker: "Vanity · painted ceiling",
       intro: "",
       items: [
+        {
+          id: "bath-ceiling", name: "Painted Ceiling", status: "open",
+          refs: [
+            { src: "assets/refs/bathroom-ref-1-painted-ceiling-linework.jpg", caption: "Reference (@katrin_dib) — a light ceiling with fine dark hand-painted linework over a dark bathroom" },
+            { src: "assets/refs/bathroom-ref-1b-painted-ceiling-detail.jpg", caption: "Close-up — rosettes, garlands and a border drawn in thin black lines, like embroidery" },
+          ],
+          parts: [
+            { label: "Ceiling", value: "Already done." },
+            { label: "Detail", value: "Fine black hand-painted linework on the ceiling, like embroidery — rosettes, swags and a patterned border, as in the reference." },
+            { label: "Pattern", value: "", hint: "Motifs and layout to be drawn up — follow the reference or adapt" },
+            { label: "Paint", value: "", hint: "Painter / artist, and a moisture-safe finish for the bathroom" },
+          ],
+          questions: ["Follow the reference pattern closely, or design your own motif?"],
+        },
         {
           id: "vanity", name: "Vanity", status: "brief",
           parts: [
