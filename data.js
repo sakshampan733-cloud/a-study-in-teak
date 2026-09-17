@@ -159,31 +159,14 @@ window.PROJECT = {
       intro: "",
       items: [
         {
-          id: "left-wall", name: "Left Wall", status: "open",
-          refs: [
-            { src: "assets/refs/left-wall-newberry.svg", caption: "After Newberry Projects — A linen in teak frames (recommended), B aged metal-leaf panels, C one carved teak panel" },
-            { src: "assets/refs/left-wall-teak-ideas.svg", caption: "Round 2 — teak wainscot ideas" },
-            { src: "assets/refs/left-wall-ideas.svg", caption: "Round 1 — six earlier ideas (set aside)" },
-          ],
-          embeds: [
-            { url: "https://www.instagram.com/p/DdPnAWjAPsC/embed/captioned/", caption: "Newberry Projects — 'form-led details': tall textured panels in slim frames, lamp on the stile (idea A)" },
-            { url: "https://www.instagram.com/p/DdNS46BEaf5/embed/captioned/", caption: "Newberry Projects — 'impactful details': carved radiating-grain panel in a deep wood frame, fabric panels beside (idea C)" },
-            { url: "https://www.instagram.com/p/DdKjyJgkbLg/embed/captioned/", caption: "Newberry Projects — 'panel details': warm full-height wood panelling with hidden light" },
-          ],
+          id: "left-wall", name: "Left Wall", status: "brief",
           parts: [
-            { label: "Direction", value: "Teak, timeless and a little modern, after Newberry Projects: a slim teak framework up to the door head (2503), the reeded rail on the study counter line (570–610), textured panels set in the frame, plain wall above." },
-            { label: "A · Linen in teak frames", value: "Recommended. Tall woven-linen (or grasscloth) panels in a slim teak frame, short ones below the rail, slim lamps on the stiles — as in 'form-led details'. Keeps your teak and long lines, and the fabric stops it feeling like a second bookcase. Soft, warm and quiet." },
-            { label: "B · Aged metal-leaf panels", value: "Copper/bronze leaf panels in dark teak frames, from your bed reference. The richest — glows under warm light. Strongest if the bed back uses the same leaf so the two talk to each other." },
-            { label: "C · One carved teak panel", value: "Linen panels with one deep-framed teak panel carved in a sunburst grain at the centre, as in 'impactful details'. A single statement; everything else stays calm." },
+            { label: "Treatment", value: "", hint: "Panelling, dado, wainscot, paint, wallpaper" },
             { label: "Veneer", inherit: "veneer" },
             { label: "Polish", inherit: "polish" },
+            { label: "What sits here", value: "" },
           ],
-          links: [
-            { label: "Newberry Projects on Instagram", url: "https://www.instagram.com/newberryprojects/" },
-            { label: "Newberry's Pinterest inspiration", url: "https://pin.it/Q8LJO3lZw" },
-            { label: "Newberry's Substack", url: "https://substack.com/@newberryprojects" },
-          ],
-          questions: ["A, B or C?", "Where exactly is D1 on this wall, and does the partition touch the wall?"],
+          questions: [],
         },
         {
           id: "right-wall", name: "Right Wall", status: "final",
