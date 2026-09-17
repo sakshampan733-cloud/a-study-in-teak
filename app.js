@@ -226,6 +226,7 @@ function veneer() {
   return pageHero("veneer", "One material, everywhere", "Materials", "The master materials. Every piece inherits them unless its spec sheet says otherwise.") +
     `<section class="bone on-bone index-strip" data-light><div class="eyebrow" style="text-align:center" data-decode>Used across the room</div><div class="index">${M.appliesTo.map((a) => `<span class="btn" style="pointer-events:none">${esc(a)}</span>`).join("")}</div></section>` +
     `<div class="group-label"><span class="eyebrow" data-decode>01 · Veneer</span></div><div class="cards">${card("veneer", "Veneer")}${card("grain", "Grain / cut")}</div>
+    ${(M.veneer.refs || []).length ? `<div class="gallery reveal few" style="margin-top:24px">${M.veneer.refs.map((r) => `<figure class="shot" data-open="img:${esc(r.src)}"><div class="frame"><img src="${esc(r.src)}" alt="" loading="lazy"></div><figcaption>${esc(r.caption)}</figcaption></figure>`).join("")}</div>` : ""}
     <div class="wrap"><div class="eyebrow" style="text-align:center;margin-top:32px;color:var(--dim)">Used for</div>${chips(M.appliesTo)}</div>
     <div class="group-label"><span class="eyebrow" data-decode>02 · Solid wood</span></div><div class="cards">${card("wood", "Wood type")}</div>
     <div class="wrap"><div class="eyebrow" style="text-align:center;margin-top:32px;color:var(--dim)">Used for</div>${chips(M.wood.usedFor)}</div>

@@ -14,7 +14,8 @@ window.PROJECT = {
 
   // Materials: the one veneer used across the room, plus solid wood for solid pieces.
   master: {
-    veneer: { value: "", status: "brief", options: [], rule: "Chosen by look from the veneer catalogue, not by wood species." },
+    veneer: { value: "", status: "open", options: [], rule: "Chosen by look from the veneer catalogue, not by wood species.",
+              refs: [{ src: "assets/refs/veneer-ref-1-curved-walnut-gloss.jpg", caption: "Reference for veneer, grain, colour and polish — rich dark walnut-toned veneer with a straight, flowing grain and a soft gloss (not decided)" }] },
     grain:  { value: "", status: "brief", options: ["Crown cut", "Quarter cut / straight", "Book-matched", "Slip-matched"] },
     polish: { value: "", status: "brief", options: ["Matte PU", "Satin PU", "High-gloss PU", "Melamine", "Hand-rubbed / French polish"], rule: "Must match the solid teak desk." },
     tone:   { value: "", status: "brief", options: ["Natural", "Warm / honeyed", "Dark stained"], rule: "Must match the solid teak desk." },
@@ -259,6 +260,20 @@ window.PROJECT = {
             { label: "Edges", value: "", hint: "Dark slim edge / stone skirting as in ref 2, or plain" },
           ],
           questions: ["Large panels or seamless — to decide", "Whole wall, or just behind the bed?"],
+        },
+        {
+          id: "partition", name: "Partition", status: "open",
+          refs: [
+            { src: "assets/refs/bedwall-ref-5-parchment-cabinet-dark-room.jpg", caption: "Reference — parchment-fronted cabinet, the look for the partition drawers" },
+          ],
+          parts: [
+            { label: "Size", value: "About 8 ft long, floor to ceiling, curved ends; gaps of about 3½ ft and 2½ ft at the ends (rough — to measure, as they should add up to the room width)." },
+            { label: "Material", value: "Wood only — no glass." },
+            { label: "Drawers", value: "Parchment-fronted drawers, like the cabinet reference." },
+            { label: "Moulding", value: "A little moulding — not too much." },
+            { label: "Design", value: "", hint: "Not decided" },
+          ],
+          questions: ["Measure the room width and the two end gaps"],
         },
       ],
     },
