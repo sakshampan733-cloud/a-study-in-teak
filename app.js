@@ -109,6 +109,7 @@ function tabPage(t) {
       ${i.refs?.length ? `<div class="media">
         ${(i.refs || []).map((r) => `<figure class="ref" data-open="img:${esc(r.src)}"><img src="${esc(r.src)}" alt=""><figcaption>${esc(r.caption)}</figcaption></figure>`).join("")}
       </div>` : ""}
+      ${i.embeds?.length ? `<div class="embeds">${i.embeds.map((e) => `<figure class="embed"><iframe src="${esc(e.url)}" loading="lazy" title="${esc(e.caption)}"></iframe><figcaption>${esc(e.caption)}</figcaption></figure>`).join("")}</div>` : ""}
       ${[].concat(i.drawings || i.drawing || []).filter((d) => window.DRAWINGS?.[d]).map((d) => `<figure class="dwg" data-open="dwg:${d}">${window.DRAWINGS[d].svg}<figcaption>${esc(window.DRAWINGS[d].title)} — click to open full size</figcaption></figure>
         <div class="cad-links">Editable CAD: ${window.DRAWINGS[d].model === false ? "" : `<a href="cad/${d}-model.dxf" download>DXF · true size</a>`}<a href="cad/${d}-sheet.dxf" download>DXF · A3 sheet</a><a href="cad/${d}.svg" download>SVG</a></div>`).join("")}
       ${i.links?.length ? `<div class="cad-links">Look further: ${i.links.map((l) => `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join("")}</div>` : ""}
