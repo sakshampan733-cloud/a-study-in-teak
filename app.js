@@ -125,7 +125,7 @@ function overview() {
   }).join("");
   const stack = `<section class="section" style="padding-bottom:0">${head("The book", "Four chapters. One room.", "The study, the bedroom, the dressing room — and the materials that hold them together.")}</section>
     <section class="stack"><div class="stack-bg"><div ${bg(IMG.stack)}></div></div><div class="stack-cards">${chapters}</div></section>
-    <section class="section"><div class="wrap"><div class="ledger reveal">${allTabIds().map((id, i) => {
+    <section class="section">${head("The index", "Every section, and where it stands.")}<div class="wrap"><div class="ledger reveal">${allTabIds().map((id, i) => {
       const c = tally(itemsOf(id)), n = c.brief + c.open + c.final;
       return `<a class="ledger-row" href="#${id}"><span class="badge">${pad2(i + 1)}</span><span class="h-sm">${esc(titleOf(id))}</span>
         <span class="ledger-bar"><i style="width:${n ? (c.final / n) * 100 : 0}%"></i><i class="o" style="width:${n ? (c.open / n) * 100 : 0}%"></i></span>
@@ -221,9 +221,9 @@ function veneer() {
       <div class="value">${M[k].value ? esc(M[k].value) : `<span class="tbd" style="font-size:14px">Not chosen</span>`}</div>
       ${M[k].rule ? `<p class="rule">${esc(M[k].rule)}</p>` : ""}
       <div class="opts">${M[k].options.map((o) => `<span class="opt ${o === M[k].value ? "sel" : ""}">${esc(o)}</span>`).join("")}</div></div>`;
-  const chips = (list) => `<div class="chips reveal" style="margin-top:24px">${list.map((a) => `<span class="opt">${esc(a)}</span>`).join("")}</div>`;
+  const chips = (list) => `<div class="chips" style="margin-top:24px">${list.map((a) => `<span class="opt">${esc(a)}</span>`).join("")}</div>`;
   return pageHero("veneer", "One material, everywhere", "Materials", "The master materials. Every piece inherits them unless its spec sheet says otherwise.") +
-    `<section class="bone on-bone index-strip" data-light><div class="eyebrow" style="text-align:center" data-decode>Used across the room</div><div class="index reveal">${M.appliesTo.map((a) => `<span class="btn" style="pointer-events:none">${esc(a)}</span>`).join("")}</div></section>` +
+    `<section class="bone on-bone index-strip" data-light><div class="eyebrow" style="text-align:center" data-decode>Used across the room</div><div class="index">${M.appliesTo.map((a) => `<span class="btn" style="pointer-events:none">${esc(a)}</span>`).join("")}</div></section>` +
     `<div class="group-label"><span class="eyebrow" data-decode>01 · Veneer</span></div><div class="cards">${card("veneer", "Veneer")}${card("grain", "Grain / cut")}</div>
     <div class="wrap"><div class="eyebrow" style="text-align:center;margin-top:32px;color:var(--dim)">Used for</div>${chips(M.appliesTo)}</div>
     <div class="group-label"><span class="eyebrow" data-decode>02 · Solid wood</span></div><div class="cards">${card("wood", "Wood type")}</div>
