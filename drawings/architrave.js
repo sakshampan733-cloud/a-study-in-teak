@@ -8,7 +8,7 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const ARCH = {
-  rev: "5 — a plain square block where the head meets each jamb",
+  rev: "6 — head stepped not reeded; moulded corner blocks; scallops set out to them",
   date: "19.09.2026",
   leaf: { w: 762, h: 2311 },     // the dressing and bathroom doors, 2 ft 6 × 7 ft 7
   wide: 914,                     // D1, the main door — a pair of leaves
@@ -66,15 +66,22 @@ const ARCH = {
   function head(W, t, cut) {
     const end = cut != null, x = (e) => (end ? cut : W + e);
     let o = "";
-    o += RC(MO, ey(yFr), end ? cut : W - MO, ey(yC), t * 1.1);               // the lining head
+    const a0 = MO, a1 = end ? cut : W - MO;                                 // between the corner blocks
+    o += RC(MO, ey(yFr), a1, ey(yC), t * 1.1);                              // the lining head
     o += RC(0, ey(yM), x(0), ey(yFr), t * 1.2);                             // the moulding head, 4 in
-    // Where the head meets a jamb the reeding would cross itself, so it stops short at each end
-    // and that square is left plain — a corner block, as the moulding is mitred nowhere.
-    o += reedsH(MO, end ? cut : W - MO, ey(yM), ey(yFr), K.reeds, t);
-    const blk = (a) => LN(a, ey(yM), a, ey(yFr), t * 0.9);
-    o += blk(MO);
-    if (!end) o += blk(W - MO);
-    o += RC(0, ey(yS), x(0), ey(yM), t * 0.9) + scallops(0, x(0), ey(yM), t);
+    // Stepped, not reeded. The reference has no reeding across the head — what looks like it
+    // there is the edges of the stacked fillets, so that is what is drawn.
+    [34, 68].forEach((d) => (o += LN(a0, ey(yM - d), a1, ey(yM - d), t * 0.8)));
+    // a square block at each corner, with a small sunk moulding worked inside it
+    const block = (b) => RC(b, ey(yM), b + MO, ey(yFr), t * 1.2)
+      + RC(b + 15, ey(yM - 15), b + MO - 15, ey(yFr + 15), t * 0.8)
+      + RC(b + 25, ey(yM - 25), b + MO - 25, ey(yFr + 25), t * 0.65);
+    o += block(0);
+    if (!end) o += block(W - MO);
+    // the scallop course — set out in three runs so a joint lands on each block edge
+    o += RC(0, ey(yS), x(0), ey(yM), t * 0.9);
+    o += scallops(0, MO, ey(yM), t) + scallops(a0, a1, ey(yM), t);
+    if (!end) o += scallops(W - MO, W, ey(yM), t);
     o += RC(-K.earA, ey(yA), x(K.earA), ey(yS), t * 0.9);                   // the two small mouldings
     o += RC(-K.earB, ey(yB), x(K.earB), ey(yA), t * 0.9);
     const c0 = ey(TOPY), c1 = ey(yB), cm = c0 + (c1 - c0) * 0.42;           // the crown
@@ -178,9 +185,11 @@ const ARCH = {
     "moulding head sits 6 in ABOVE the leaf rather than on top of it.", "That clearance is the whole of the correction in this revision.",
     "The moulding is reeded and turns the corner over the head, so the", "reeding runs round the opening in one piece."],
    ["Above the moulding, and only above it: a course of scallops, two", "small mouldings, and a crown that mitres back at each end.",
-    "No corbels and no carving. Where the head meets a jamb the",
-    "reeding stops short and that 4 in square is left plain, so the",
-    "reeds never cross.", `The crown lands at ${TOPY} (8 ft 8 in), leaving 5 in to the ceiling.`,
+    "Across the head the moulding is STEPPED, not reeded — the",
+    "reference has no reeding there. The jambs stay reeded.",
+    "A 4 in square block at each corner, with a small sunk moulding",
+    "inside it, takes the two together. The scallops are set out in",
+    "three runs so a joint lands on each block edge.", `The crown lands at ${TOPY} (8 ft 8 in), leaving 5 in to the ceiling.`,
     "All three doors take the identical casing; only the width changes.", "A plinth block takes each jamb down over the marble skirting."]]
     .forEach((col, c) => col.forEach((n, i) => (s += text(18 + c * 104, 214 + i * 4.6, n, { size: 1.7, fill: INK }))));
 
