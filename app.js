@@ -210,7 +210,7 @@ function sheets(list) {
   if (!ds.length) return "";
   return `<div class="sheets">${ds.map((d) => {
     const D = window.DRAWINGS[d], [name, code] = D.title.split(" · ");
-    return `<div class="sheet-card reveal"><div class="sheet-top"><h3 class="h-sm">${esc(name)}</h3><div class="sheet-tools"><span class="mono">${esc(code || "")}</span>${paperToggle()}</div></div>
+    return `<div class="sheet-card reveal"><div class="sheet-top"><h3 class="h-sm">${esc(name)}</h3><div class="sheet-tools"><span class="mono">${esc(code || "")}</span>${dimToggle()}${paperToggle()}</div></div>
       <figure class="dwg" data-open="dwg:${d}">${D.svg}</figure>
       <div class="cad-links"><span class="mono">Editable CAD</span>${D.model === false ? "" : `<a class="btn" href="cad/${d}-model.dxf" download>DXF · true size</a>`}<a class="btn" href="cad/${d}-sheet.dxf" download>DXF · A3 sheet</a><a class="btn" href="cad/${d}.svg" download>SVG</a><button class="btn steel" data-open="dwg:${d}">Full size</button></div></div>`;
   }).join("")}</div>`;
@@ -344,6 +344,23 @@ document.addEventListener("click", (e) => {
   if (!b) return;
   try { localStorage.setItem("sheet-mode-v2", b.dataset.sheet); } catch {}
   applyPaper();
+
+});
+
+// ── dimensions: off, in millimetres, or in feet and inches. Every chain carries both labels. ──
+const DIMS = ["off", "mm", "ft"];
+const dimMode = () => { try { const v = localStorage.getItem("dim-mode-v1"); return DIMS.includes(v) ? v : "mm"; } catch { return "mm"; } };
+const dimToggle = () => `<div class="seg" role="group" aria-label="Dimensions"><button class="${dimMode() === "off" ? "on" : ""}" data-dim="off">Off</button><button class="${dimMode() === "mm" ? "on" : ""}" data-dim="mm">mm</button><button class="${dimMode() === "ft" ? "on" : ""}" data-dim="ft">Ft·In</button></div>`;
+const applyDims = () => {
+  const m = dimMode();
+  DIMS.forEach((k) => document.body.classList.toggle(`dims-${k}`, k === m));
+  $$("[data-dim]").forEach((b) => b.classList.toggle("on", b.dataset.dim === m));
+};
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-dim]");
+  if (!b) return;
+  try { localStorage.setItem("dim-mode-v1", b.dataset.dim); } catch {}
+  applyDims();
 });
 
 // ── motion: decode (characters resolve left to right) + reveal ──
@@ -439,7 +456,7 @@ document.addEventListener("click", (e) => {
     const [kind, ref] = f.dataset.open.split(/:(.*)/s);
     zoom = 1;
     lb.innerHTML = `<div class="lb-bar"><span class="mono" style="font-size:11px;color:var(--dim)">${kind === "dwg" ? esc(window.DRAWINGS[ref].title) : "Reference"}</span>
-      <div class="grp">${kind === "dwg" ? paperToggle() : ""}<button class="btn" data-z="-">−</button><button class="btn" data-z="0">Fit</button><button class="btn" data-z="+">+</button><button class="btn" data-z="x">Close</button></div></div>
+      <div class="grp">${kind === "dwg" ? dimToggle() + paperToggle() : ""}<button class="btn" data-z="-">−</button><button class="btn" data-z="0">Fit</button><button class="btn" data-z="+">+</button><button class="btn" data-z="x">Close</button></div></div>
       <div class="lb-body"><div class="lb-inner${kind === "dwg" ? " is-dwg" : ""}">${kind === "dwg" ? window.DRAWINGS[ref].svg : `<img src="${ref}">`}</div></div>`;
     lb.hidden = false;
     return;
@@ -473,6 +490,7 @@ function render(delayMotion = 0) {
   setTimeout(() => main.classList.remove("entering"), 800);
   delayMotion ? setTimeout(() => animate(main), delayMotion) : animate(main);
   applyPaper();
+  applyDims();
   onScroll();
   if (pendingItem) { const it = pendingItem; pendingItem = null; setTimeout(() => { const el = document.getElementById(it); if (el) window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - 70, behavior: "smooth" }); }, 500); }
 }

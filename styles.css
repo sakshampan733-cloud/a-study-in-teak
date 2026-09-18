@@ -441,3 +441,9 @@ body.sheets-dark .lb-inner.is-dwg svg { filter: invert(1) hue-rotate(180deg) bri
 .prob-shot .frame { border: 1px solid var(--hair); overflow: hidden; }
 .prob-shot img { width: 100%; height: auto; }
 .prob-shot figcaption { margin-top: 12px; font: 400 13px/1.45 var(--sans); color: var(--dim); }
+
+/* ── drawings: dimensions off / millimetres / feet and inches ─ */
+.dims-off .dk-dim { display: none; }
+.dims-mm .dk-in { display: none; }
+.dims-ft .dk-mm { display: none; }
+.sheet-tools { flex-wrap: wrap; row-gap: 10px; }

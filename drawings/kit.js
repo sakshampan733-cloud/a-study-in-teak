@@ -8,7 +8,7 @@ window.DK = (function () {
   const f = (n) => +(+n).toFixed(2);
 
   const text = (x, y, s, o = {}) =>
-    `<text x="${f(x)}" y="${f(y)}" font-size="${o.size || 2.2}" text-anchor="${o.anchor || "start"}" fill="${o.fill || INK}" font-weight="${o.weight || 400}" letter-spacing="${o.ls || 0}" font-family="${FONT}"${o.style ? ` font-style="${o.style}"` : ""}${o.rot ? ` transform="rotate(-90 ${f(x)} ${f(y)})"` : ""}>${s}</text>`;
+    `<text x="${f(x)}" y="${f(y)}" font-size="${o.size || 2.2}" text-anchor="${o.anchor || "start"}" fill="${o.fill || INK}" font-weight="${o.weight || 400}" letter-spacing="${o.ls || 0}" font-family="${FONT}"${o.cls ? ` class="${o.cls}"` : ""}${o.style ? ` font-style="${o.style}"` : ""}${o.rot ? ` transform="rotate(-90 ${f(x)} ${f(y)})"` : ""}>${s}</text>`;
 
   const CAD = window.CAD;
   const begin = (sheet) => { CAD.sheet = sheet; };
@@ -21,19 +21,40 @@ window.DK = (function () {
   });
 
   const tick = (x, y) => `<line x1="${f(x - 1)}" y1="${f(y + 1)}" x2="${f(x + 1)}" y2="${f(y - 1)}" stroke-width="0.3"/>`;
+
+  // Feet and inches, to the nearest eighth — for the imperial view of every dimension.
+  const FR = ["", "\u215B", "\u00BC", "\u215C", "\u00BD", "\u215D", "\u00BE", "\u215E"];
+  function mmToFt(mm) {
+    const total = Math.round((mm / 25.4) * 8) / 8;
+    let ft = Math.floor(total / 12), rest = total - ft * 12;
+    let whole = Math.floor(rest), eighths = Math.round((rest - whole) * 8);
+    if (eighths === 8) { eighths = 0; whole += 1; }
+    if (whole === 12) { whole = 0; ft += 1; }
+    const inch = `${whole}${FR[eighths]}"`;
+    return ft ? `${ft}'-${inch}` : inch;
+  }
+  // A chain label may be a bare number ("4547") or a number with words ("4547 WALL (14 FT 11 IN)").
+  // The imperial version swaps the leading number for feet and inches and drops any bracketed repeat.
+  function imperial(label) {
+    const m = String(label).match(/^(\d+(?:\.\d+)?)(.*)$/);
+    if (!m) return String(label);
+    return mmToFt(+m[1]) + m[2].replace(/\s*\([^)]*(?:FT|IN)[^)]*\)/i, "");
+  }
+  const dimText = (x, y, l, o) =>
+    text(x, y, l, { ...o, cls: "dk-mm" }) + text(x, y, imperial(l), { ...o, cls: "dk-in" });
   function chainH(xs, y, labels, o = {}) {
     let g = `<line x1="${f(xs[0] - 1.5)}" y1="${f(y)}" x2="${f(xs[xs.length - 1] + 1.5)}" y2="${f(y)}"/>`;
     xs.forEach((x) => { g += `<line x1="${f(x)}" y1="${f(o.from ?? y - 2)}" x2="${f(x)}" y2="${f(y + 1.2)}"/>` + tick(x, y); });
     let t = "";
-    labels.forEach((l, i) => { if (l !== "") t += text((xs[i] + xs[i + 1]) / 2, y - 0.8, l, { size: o.size || 1.7, anchor: "middle", fill: DIM }); });
-    return `<g stroke="${DIM}" stroke-width="0.13">${g}</g>${t}`;
+    labels.forEach((l, i) => { if (l !== "") t += dimText((xs[i] + xs[i + 1]) / 2, y - 0.8, l, { size: o.size || 1.7, anchor: "middle", fill: DIM }); });
+    return `<g class="dk-dim"><g stroke="${DIM}" stroke-width="0.13">${g}</g>${t}</g>`;
   }
   function chainV(ys, x, labels, o = {}) {
     let g = `<line x1="${f(x)}" y1="${f(ys[0] - 1.5)}" x2="${f(x)}" y2="${f(ys[ys.length - 1] + 1.5)}"/>`;
     ys.forEach((y) => { g += `<line x1="${f(o.from ?? x - 2)}" y1="${f(y)}" x2="${f(x + 1.2)}" y2="${f(y)}"/>` + tick(x, y); });
     let t = "";
-    labels.forEach((l, i) => { if (l !== "") t += text(x - 0.8, (ys[i] + ys[i + 1]) / 2, l, { size: o.size || 1.7, anchor: "middle", fill: DIM, rot: true }); });
-    return `<g stroke="${DIM}" stroke-width="0.13">${g}</g>${t}`;
+    labels.forEach((l, i) => { if (l !== "") t += dimText(x - 0.8, (ys[i] + ys[i + 1]) / 2, l, { size: o.size || 1.7, anchor: "middle", fill: DIM, rot: true }); });
+    return `<g class="dk-dim"><g stroke="${DIM}" stroke-width="0.13">${g}</g>${t}</g>`;
   }
   const bubble = (x, y, n) =>
     `<circle cx="${f(x)}" cy="${f(y)}" r="2" fill="#fff" stroke="${INK}" stroke-width="0.2"/>${text(x, y + 0.75, n, { size: 2, anchor: "middle", weight: 700 })}`;
@@ -65,5 +86,5 @@ window.DK = (function () {
   }
   const sheet = (inner) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 297" class="sheet">${inner}</svg>`;
 
-  return { begin, capture, INK, THIN, DIM, f, text, view, chainH, chainV, bubble, note, heading, cutMark, frame, titleBlock, sheet };
+  return { begin, capture, INK, THIN, DIM, f, text, mmToFt, view, chainH, chainV, bubble, note, heading, cutMark, frame, titleBlock, sheet };
 })();

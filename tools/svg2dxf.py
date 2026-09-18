@@ -23,6 +23,8 @@ ALIGN = {"start": TextEntityAlignment.LEFT, "middle": TextEntityAlignment.CENTER
 def prepare(svg_fragment):
     """Make a fragment parseable: drop patterns, turn clipPaths into marker rects."""
     s = re.sub(r"<pattern\b.*?</pattern>", "", svg_fragment, flags=re.S)
+    # Chains carry both a mm and a feet-inches label for the web toggle; CAD keeps millimetres only.
+    s = re.sub(r'<text[^>]*class="dk-in"[^>]*>.*?</text>', "", s, flags=re.S)
     s = re.sub(r"</?defs>", "", s)
     s = re.sub(r'<clipPath id="([\w-]+)">\s*<rect ([^>]*?)/>\s*</clipPath>',
                r'<rect data-clipdef="\1" \2 fill="none" stroke="none"/>', s, flags=re.S)
