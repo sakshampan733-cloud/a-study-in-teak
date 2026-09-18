@@ -89,18 +89,18 @@ const SHELL = {
   const yTop = v.Y(-T) - 8, yBot = v.Y(L + T) + 10;
   const wx0 = xR - K.win.w;
   s += chainH([v.X(wx0), v.X(xR)], yTop, [`${K.win.w} (4 FT) WINDOW`], { from: v.Y(0) - 1, size: 1.5 });
-  s += chainH([v.X(xL0), v.X(xR)], yTop - 8, [`${K.wStudy} — STUDY WALL, 14 FT 11 IN`], { from: yTop - 12, size: 1.6 });
-  s += chainH([v.X(xLb), v.X(xR)], yBot, [`${K.wBed} — BED WALL, 15 FT 6 IN`], { from: v.Y(L + T) + 1, size: 1.6 });
-  s += chainH([v.X(xLb), v.X(xLs)], yBot + 9, [`${K.step} (5 IN) STEP`], { from: yBot + 1, size: 1.5 });
+  s += chainH([v.X(xL0), v.X(xR)], yTop - 8, [`${K.wStudy} — STUDY WALL`], { from: yTop - 12, size: 1.6 });
+  s += chainH([v.X(xLb), v.X(xR)], yBot, [`${K.wBed} — BED WALL`], { from: v.Y(L + T) + 1, size: 1.6 });
+  s += chainH([v.X(xLb), v.X(xLs)], yBot + 9, [`${K.step} STEP`], { from: yBot + 1, size: 1.5 });
 
   const xRt = v.X(xR + T) + 9;
   s += chainV([v.Y(0), v.Y(K.dress.from), v.Y(K.dress.from + K.dress.w), v.Y(L)], xRt, [`${K.dress.from}`, `${K.dress.w} DOOR`, `${L - K.dress.from - K.dress.w}`], { from: v.X(xR + T) + 1, size: 1.5 });
-  s += chainV([v.Y(0), v.Y(L)], xRt + 9, [`${L} — RIGHT WALL, 18 FT 11 IN`], { from: xRt + 1, size: 1.6 });
-  s += chainV([v.Y(0), v.Y(L)], v.X(xLb - T) - 9, [`${K.lLeft} — LEFT WALL, 19 FT 0 IN`], { from: v.X(xLb - T) - 1, size: 1.6 });
+  s += chainV([v.Y(0), v.Y(L)], xRt + 9, [`${L} — RIGHT WALL`], { from: xRt + 1, size: 1.6 });
+  s += chainV([v.Y(0), v.Y(L)], v.X(xLb - T) - 9, [`${K.lLeft} — LEFT WALL`], { from: v.X(xLb - T) - 1, size: 1.6 });
 
   // width at the partition line
   const yP = v.Y(K.yPart);
-  s += chainH([v.X(xL0 - (K.yPart / L) * (xL0 - xLs)), v.X(xR)], yP - 1.5, [`${K.wPart} — 15 FT 0 IN AT THE PARTITION LINE`], { from: yP, size: 1.5 });
+  s += chainH([v.X(xL0 - (K.yPart / L) * (xL0 - xLs)), v.X(xR)], yP - 1.5, [`${K.wPart} — AT THE PARTITION LINE`], { from: yP, size: 1.5 });
 
   // ── labels, kept in the column to the right of the plan ──
   const lab = (x, y, tx, ty, a, b, anchor = "start") => note(v.X(x), v.Y(y), tx, ty, a, b, anchor);

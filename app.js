@@ -349,7 +349,7 @@ document.addEventListener("click", (e) => {
 
 // ── dimensions: off, in millimetres, or in feet and inches. Every chain carries both labels. ──
 const DIMS = ["off", "mm", "ft"];
-const dimMode = () => { try { const v = localStorage.getItem("dim-mode-v1"); return DIMS.includes(v) ? v : "mm"; } catch { return "mm"; } };
+const dimMode = () => { try { const v = localStorage.getItem("dim-mode-v1"); return DIMS.includes(v) ? v : "ft"; } catch { return "ft"; } };
 const dimToggle = () => `<div class="seg" role="group" aria-label="Dimensions"><button class="${dimMode() === "off" ? "on" : ""}" data-dim="off">Off</button><button class="${dimMode() === "mm" ? "on" : ""}" data-dim="mm">mm</button><button class="${dimMode() === "ft" ? "on" : ""}" data-dim="ft">Ft·In</button></div>`;
 const applyDims = () => {
   const m = dimMode();

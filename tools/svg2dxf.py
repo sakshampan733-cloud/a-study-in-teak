@@ -23,8 +23,8 @@ ALIGN = {"start": TextEntityAlignment.LEFT, "middle": TextEntityAlignment.CENTER
 def prepare(svg_fragment):
     """Make a fragment parseable: drop patterns, turn clipPaths into marker rects."""
     s = re.sub(r"<pattern\b.*?</pattern>", "", svg_fragment, flags=re.S)
-    # Chains carry both a mm and a feet-inches label for the web toggle; CAD keeps millimetres only.
-    s = re.sub(r'<text[^>]*class="dk-in"[^>]*>.*?</text>', "", s, flags=re.S)
+    # Chains carry both a mm and a feet-inches label for the web toggle; CAD keeps feet and inches.
+    s = re.sub(r'<text[^>]*class="dk-mm"[^>]*>.*?</text>', "", s, flags=re.S)
     s = re.sub(r"</?defs>", "", s)
     s = re.sub(r'<clipPath id="([\w-]+)">\s*<rect ([^>]*?)/>\s*</clipPath>',
                r'<rect data-clipdef="\1" \2 fill="none" stroke="none"/>', s, flags=re.S)
@@ -67,14 +67,18 @@ def to_ez_paths(p):
     return out
 
 
+MM_PER_IN = 25.4          # drawings are authored in mm; CAD is issued in inches
+TO_IN = 1.0 / MM_PER_IN
+
+
 class Writer:
-    def __init__(self, msp, flip_y, dx=0.0, dy=0.0, hatch_scale=1.0, layer=None, text_layer="TEXT"):
+    def __init__(self, msp, flip_y, dx=0.0, dy=0.0, hatch_scale=1.0, layer=None, text_layer="TEXT", k=TO_IN):
         self.msp, self.flip, self.dx, self.dy = msp, flip_y, dx, dy
-        self.hatch_scale, self.layer, self.text_layer = hatch_scale, layer, text_layer
+        self.hatch_scale, self.layer, self.text_layer, self.k = hatch_scale, layer, text_layer, k
         self.clips = {}
 
     def pt(self, x, y):
-        return (x + self.dx, (-y if self.flip else y) + self.dy)
+        return ((x + self.dx) * self.k, ((-y if self.flip else y) + self.dy) * self.k)
 
     def layer_for(self, e):
         if self.layer:
@@ -103,7 +107,8 @@ class Writer:
         for p in ez_paths:
             p = p.transform(ezdxf.math.Matrix44.chain(
                 ezdxf.math.Matrix44.scale(1, -1 if self.flip else 1, 1),
-                ezdxf.math.Matrix44.translate(self.dx, self.dy, 0)))
+                ezdxf.math.Matrix44.translate(self.dx, self.dy, 0),
+                ezdxf.math.Matrix44.scale(self.k, self.k, 1)))
             if p.has_curves:
                 ezpath.render_splines_and_polylines(self.msp, [p], dxfattribs=attribs)
             else:
@@ -118,7 +123,7 @@ class Writer:
             if len(pts) < 3:
                 continue
             h = self.msp.add_hatch(dxfattribs={"layer": (self.layer + " hatch") if self.layer else "HATCH", "color": 8})
-            h.set_pattern_fill("ANSI31", scale=self.hatch_scale)
+            h.set_pattern_fill("ANSI31", scale=self.hatch_scale * self.k)
             h.paths.add_polyline_path(pts, is_closed=True)
 
     def text(self, e):
@@ -131,7 +136,7 @@ class Writer:
         vx, vy = p1.x - p0.x, p1.y - p0.y
         scale = math.hypot(vx, vy) or 1
         angle = math.degrees(math.atan2(-vy if self.flip else vy, vx))
-        height = float(e.font_size or 2) * scale * 0.72
+        height = float(e.font_size or 2) * scale * 0.72 * self.k
         t = self.msp.add_text(content, height=height, rotation=angle, dxfattribs={"layer": self.text_layer})
         t.set_placement(self.pt(p0.x, p0.y), align=ALIGN.get(e.anchor, TextEntityAlignment.LEFT))
 
@@ -171,8 +176,11 @@ class Writer:
 
 
 def new_doc():
-    doc = ezdxf.new("R2010", setup=True, units=ezdxf.units.MM)
-    doc.header["$MEASUREMENT"] = 1
+    doc = ezdxf.new("R2010", setup=True, units=ezdxf.units.IN)
+    doc.header["$MEASUREMENT"] = 0        # imperial
+    doc.header["$INSUNITS"] = 1           # inches
+    doc.header["$LUNITS"] = 4             # architectural: feet and fractional inches
+    doc.header["$AUPREC"] = 3
     return doc
 
 
@@ -206,11 +214,11 @@ def model_dxf(views, title, out):
         x0, y0, x1, y1 = bounds(svg)
         w = Writer(msp, flip_y=True, dx=cursor - x0, dy=y1, hatch_scale=4, layer=name, text_layer=name)
         w.add(svg)
-        label = msp.add_text(f"{v['name'].upper()}  (1:1, mm)", height=max(18, (x1 - x0) * 0.02), dxfattribs={"layer": "LABELS"})
-        label.set_placement((cursor, (y1 - y0) + 60), align=TextEntityAlignment.LEFT)
+        label = msp.add_text(f"{v['name'].upper()}  (1:1, inches)", height=max(18, (x1 - x0) * 0.02) * TO_IN, dxfattribs={"layer": "LABELS"})
+        label.set_placement((cursor * TO_IN, ((y1 - y0) + 60) * TO_IN), align=TextEntityAlignment.LEFT)
         cursor += (x1 - x0) + max(250, (x1 - x0) * 0.15)
-    t = msp.add_text(title, height=40, dxfattribs={"layer": "LABELS"})
-    t.set_placement((0, -220), align=TextEntityAlignment.LEFT)
+    t = msp.add_text(title, height=40 * TO_IN, dxfattribs={"layer": "LABELS"})
+    t.set_placement((0, -220 * TO_IN), align=TextEntityAlignment.LEFT)
     doc.saveas(out)
 
 
@@ -218,7 +226,7 @@ def sheet_dxf(svg_text, out):
     doc = new_doc()
     for n, c in (("GEOMETRY", 7), ("DIMENSIONS", 1), ("TEXT", 7), ("HATCH", 8)):
         doc.layers.add(n, color=c)
-    doc.header["$LTSCALE"] = 0.25
+    doc.header["$LTSCALE"] = 0.25 * TO_IN
     Writer(doc.modelspace(), flip_y=True, dy=297, hatch_scale=0.4).add(svg_text)
     doc.saveas(out)
 

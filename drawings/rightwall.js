@@ -163,8 +163,8 @@ const RWALL = {
   s += chainH(xsA.map(vE.X), yb + 5, xsA.slice(1).map((x, i) => Math.round(x - xsA[i])), { from: yb + 1, size: 1.2 });
   const xsB = [K.run + D.w, aR, narrow[0], narrow[1], L];
   s += chainH(xsB.map(vE.X), yb + 5, xsB.slice(1).map((x, i) => Math.round(x - xsB[i])), { from: yb + 1, size: 1.2 });
-  s += chainH([0, K.study.w, K.run, K.run + D.w, L].map(vE.X), yb + 11, [`${K.study.w} (11 IN)`, `${K.run - K.study.w} PANELLED`, `${D.w} DOOR`, `${K.ret}`], { from: yb + 1, size: 1.4 });
-  s += chainH([vE.X(0), vE.X(L)], yb + 17, [`${L} OVERALL — 18 FT 11 IN · FRAME AT 4141 (13 FT 6 IN) · FRAME 914 (3 FT) · RETURN 711 (2 FT 4 IN)`], { from: yb + 1, size: 1.5 });
+  s += chainH([0, K.study.w, K.run, K.run + D.w, L].map(vE.X), yb + 11, [`${K.study.w}`, `${K.run - K.study.w} PANELLED`, `${D.w} DOOR`, `${K.ret}`], { from: yb + 1, size: 1.4 });
+  s += chainH([vE.X(0), vE.X(L)], yb + 17, [`${L} OVERALL · STUDY WALL CORNER TO THE DRESSING CORNER`], { from: yb + 1, size: 1.5 });
   const ysV = [0, K.skirt.h, K.short.y0, K.short.y1, K.dado.y, yDado, K.tall.y0, yTall, K.H];
   s += chainV(ysV.map((y) => vE.Y(ey(y))), vE.X(L) + 6, ysV.slice(1).map((y, i) => y - ysV[i]), { from: vE.X(L) + 1, size: 1.2 });
   s += chainV([vE.Y(ey(K.H)), vE.Y(ey(0))], vE.X(L) + 13, [`${K.H} (9 FT)`], { from: vE.X(L) + 1, size: 1.4 });
