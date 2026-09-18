@@ -5,21 +5,21 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const SHELL = {
-  rev: "1 — measured on site, step in the left wall recorded",
+  rev: "2 — right wall set out from the measured door frame",
   date: "18.09.2026",
   wStudy: 4547,   // 14 ft 11 in — study wall, the narrow end
   wPart: 4572,    // 15 ft 0 in — at the partition line
   wPreStep: 4597, // 15 ft 1 in — just before the step
   wBed: 4724,     // 15 ft 6 in — bed wall, the wide end
-  lRight: 5791,   // 19 ft 0 in — right wall, study wall to bed wall
-  lLeft: 5766,    // 18 ft 11 in — left wall
+  lRight: 5766,   // 18 ft 11 in — right wall, measured overall; chain 4141 + 914 frame + 711 return
+  lLeft: 5791,    // 19 ft 0 in — left wall
   H: 2769,        // 9 ft 1 in, level throughout
   t: 230,         // wall thickness
   step: 127,      // 5 in — the left wall kicks out past the entrance door
   yStep: 4600,    // how far down the step falls — TO CONFIRM
   yPart: 2900,    // the partition line — TO CONFIRM
   win: { w: 1219 },                 // 4 ft, hard into the right-hand corner of the study wall
-  dress: { from: 4420, w: 762 },    // dressing door in the right wall, 2 ft 6
+  dress: { from: 4217, w: 762 },    // door opening: frame at 4141 + 76 architrave
   ent: { w: 914 },                  // entrance door in the left wall, just before the step — TO CONFIRM
 };
 
@@ -95,8 +95,8 @@ const SHELL = {
 
   const xRt = v.X(xR + T) + 9;
   s += chainV([v.Y(0), v.Y(K.dress.from), v.Y(K.dress.from + K.dress.w), v.Y(L)], xRt, [`${K.dress.from}`, `${K.dress.w} DOOR`, `${L - K.dress.from - K.dress.w}`], { from: v.X(xR + T) + 1, size: 1.5 });
-  s += chainV([v.Y(0), v.Y(L)], xRt + 9, [`${L} — RIGHT WALL, 19 FT 0 IN`], { from: xRt + 1, size: 1.6 });
-  s += chainV([v.Y(0), v.Y(L)], v.X(xLb - T) - 9, [`${K.lLeft} — LEFT WALL, 18 FT 11 IN`], { from: v.X(xLb - T) - 1, size: 1.6 });
+  s += chainV([v.Y(0), v.Y(L)], xRt + 9, [`${L} — RIGHT WALL, 18 FT 11 IN`], { from: xRt + 1, size: 1.6 });
+  s += chainV([v.Y(0), v.Y(L)], v.X(xLb - T) - 9, [`${K.lLeft} — LEFT WALL, 19 FT 0 IN`], { from: v.X(xLb - T) - 1, size: 1.6 });
 
   // width at the partition line
   const yP = v.Y(K.yPart);
@@ -117,6 +117,8 @@ const SHELL = {
   ["The room is not square. It widens about 2 in from the",
    "   study wall to the bed wall — roughly half a degree.",
    "Diagonals measured 24 ft 5 in and 23 ft 11 in.",
+   "Right wall — 13 ft 6 in to the door frame, 3 ft frame,",
+   "   2 ft 4 in return, overall 18 ft 11 in.",
    "The right wall is taken as the straight reference; the left",
    "   wall carries the splay and the step.",
    "Ceiling 9 ft 1 in, level throughout. The main room ceiling",

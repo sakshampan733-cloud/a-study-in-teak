@@ -4,10 +4,10 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const RWALL = {
-  rev: "8 — rail datum moved to 2 ft 3 in (686), level with the window sill",
+  rev: "9 — measured setting out; chain closed to 18 ft 11 in; ceiling 9 ft 1",
   date: "18.09.2026",
-  run: 4420,                   // study wall to the dressing door opening, about 14.5 ft (owner's estimate — confirm)
-  H: 2743,                     // 9 ft ceiling
+  run: 4217,                   // corner to the door OPENING. Frame at 4141 (13 ft 7 in) + 76 architrave; chain closes to 18 ft 11 in
+  H: 2769,                     // 9 ft 1 in ceiling, level throughout
   wall: 230,
   study: { w: 280, h: 646 },   // study unit 280 (11 in) deep; cupboard carcase to 646, reeded counter 646–686 on top
   skirt: { h: 102, t: 20 },          // white marble skirting, 4 in, already laid
@@ -17,9 +17,9 @@ const RWALL = {
   bays: 5,
   lamps: [1, 3, 5],                    // lamps centred inside tall panels 1, 3 and 5
   short: { y0: 212, y1: 546 },
-  tall: { y0: 796, top: 305 },         // tall panels stop level with the door head (2438) — ties the panelling to the door across the wall
-  door: { w: 762, h: 2438, arch: 65 }, // dressing door 2 ft 6 × 8 ft, architrave about 2½ in
-  ret: 610,                            // 2 ft of wall past the door opening to the corner
+  tall: { y0: 796, top: 331 },         // 2769 − 331 = 2438: tall panels stop exactly level with the door head, tying panelling to door
+  door: { w: 762, h: 2438, arch: 76 }, // dressing door 2 ft 6 × 8 ft leaf; frame end to end 3 ft (914) = 762 + 2 × 76
+  ret: 787,                            // little wall past the door: 2 ft 4 in (711) from the frame + 76 architrave
   lamp: { y: 1290, span: 150, proj: 230 },   // twin-arm sconce, same height and family as the study wall
 };
 
@@ -163,8 +163,8 @@ const RWALL = {
   s += chainH(xsA.map(vE.X), yb + 5, xsA.slice(1).map((x, i) => Math.round(x - xsA[i])), { from: yb + 1, size: 1.2 });
   const xsB = [K.run + D.w, aR, narrow[0], narrow[1], L];
   s += chainH(xsB.map(vE.X), yb + 5, xsB.slice(1).map((x, i) => Math.round(x - xsB[i])), { from: yb + 1, size: 1.2 });
-  s += chainH([0, K.study.w, K.run, K.run + D.w, L].map(vE.X), yb + 11, [K.study.w, `${K.run - K.study.w} PANELLED`, `${D.w} DOOR`, `${K.ret} (2 FT)`], { from: yb + 1, size: 1.4 });
-  s += chainH([vE.X(0), vE.X(L)], yb + 17, [`${L} OVERALL · STUDY WALL TO DOOR ${K.run} (ABOUT 14 FT 6 IN) — CONFIRM ON SITE`], { from: yb + 1, size: 1.5 });
+  s += chainH([0, K.study.w, K.run, K.run + D.w, L].map(vE.X), yb + 11, [`${K.study.w} (11 IN)`, `${K.run - K.study.w} PANELLED`, `${D.w} DOOR`, `${K.ret}`], { from: yb + 1, size: 1.4 });
+  s += chainH([vE.X(0), vE.X(L)], yb + 17, [`${L} OVERALL — 18 FT 11 IN · FRAME AT 4141 (13 FT 6 IN) · FRAME 914 (3 FT) · RETURN 711 (2 FT 4 IN)`], { from: yb + 1, size: 1.5 });
   const ysV = [0, K.skirt.h, K.short.y0, K.short.y1, K.dado.y, yDado, K.tall.y0, yTall, K.H];
   s += chainV(ysV.map((y) => vE.Y(ey(y))), vE.X(L) + 6, ysV.slice(1).map((y, i) => y - ysV[i]), { from: vE.X(L) + 1, size: 1.2 });
   s += chainV([vE.Y(ey(K.H)), vE.Y(ey(0))], vE.X(L) + 13, [`${K.H} (9 FT)`], { from: vE.X(L) + 1, size: 1.4 });
@@ -203,9 +203,9 @@ const RWALL = {
 
   // Notes
   s += heading(318, 180, "NOTES", `REVISION ${K.rev.split(" ")[0]}`, 40);
-  ["Option C: 5 equal panels, lamps in 1, 3 and 5.", "Skirting is white marble, 4 in, already laid.", "One narrow panel on the 2 ft wall past the door.", "Moulding, rail and skirting painted the wall colour.",
+  ["Option C: 5 equal panels, lamps in 1, 3 and 5.", "Skirting is white marble, 4 in, already laid.", "One narrow panel on the 2 ft 4 in wall past the door.", "Moulding, rail and skirting painted the wall colour.",
    "Rail is the study counter band carried round the", "   corner — same 646–686 height, same 4 reeds.", "Short and tall panels share the same centres.",
-   "Lengths are estimates — set out from site measure,", "   keeping the stiles 150 and the panels equal."]
+   "Measured: 13 ft 6 in corner to frame, 3 ft frame,", "   2 ft 4 in return, overall 18 ft 11 in. The 1 in goes", "   into the long run to the frame.", "Panelling starts clear of the study unit: 280 (11 in)", "   return, then a 150 (6 in) gap, then panel 1.", "Rail datum 686 is PROVISIONAL, pending the sill.", "   keeping the stiles 150 and the panels equal."]
     .forEach((n, i) => { s += text(318, 191 + i * 4.3, n, { size: 1.55 }); });
 
   // Details along the bottom

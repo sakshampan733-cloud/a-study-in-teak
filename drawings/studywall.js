@@ -4,12 +4,12 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const WALL = {
-  rev: "6 — datum moved to 2 ft 3 in (686), window measured",
+  rev: "7 — wall 14 ft 11 in; centre panel = window bay; ceiling 9 ft 1",
   date: "18.09.2026",
-  W: 4877, H: 2743,            // 16 ft wall, 9 ft ceiling (owner's measure)
+  W: 4547, H: 2769,            // 14 ft 11 in wall, 9 ft 1 in ceiling (measured on site)
   skirt: 120,                  // skirting line on the cupboard fronts
   base: { h: 646, top: 40, d: 255, over: 25 },   // cupboards under all three bays, 2 ft 3 in (686) to the top of the reeded counter — set by the window sill; 280 (11 in) from the wall
-  book: { w: 1650, d: 280, stile: 60, shelves: [890, 1160, 1430, 1700] },   // flat head, no arch
+  book: { w: 1489, d: 280, stile: 60, shelves: [890, 1160, 1430, 1700] },   // flat head, no arch
   band: { h: 400, rail: 40 },   // moulded panel band under the cornice — same size over all three bays (ref. 3)
   pil: { w: 240, proj: 40, flutes: 9, capH: 130, d: 280, ped: 25, pedProj: 50 },  // ref. 1 fluted shaft; ref. 3 pedestal steps forward below the counter
   panel: { w: 1400, set: 200, frame: 70, painting: [760, 860], paintingC: 1440 },
@@ -260,7 +260,7 @@ const WALL = {
   s1 += vE.g(elevation(tE), 0.28);
   const yb = vE.Y(ey(0));
   s1 += chainH([0, xBook[1], xP1[1], xPanel[1], xP2[1], K.W].map(vE.X), yb + 6, [BK.w, PL.w, PNW, PL.w, xZone[1] - xZone[0]], { from: yb + 1, size: 1.5 });
-  s1 += chainH([vE.X(0), vE.X(K.W)], yb + 12, [`${K.W} WALL (16 FT)`], { from: yb + 1 });
+  s1 += chainH([vE.X(0), vE.X(K.W)], yb + 12, [`${K.W} WALL (14 FT 11 IN)`], { from: yb + 1 });
   s1 += chainV([K.H, yEnt, yCap, yTop, B.h, 0].map((y) => vE.Y(ey(y))), vE.X(K.W) + 8, [entH, PL.capH, yCap - yTop, B.top, B.h], { from: vE.X(K.W) + 1, size: 1.4 });
   s1 += chainV([vE.Y(ey(K.H)), vE.Y(ey(0))], vE.X(K.W) + 15, [`${K.H} CEILING (9 FT)`], { from: vE.X(K.W) + 1 });
   s1 += chainV([vE.Y(ey(WN.head)), vE.Y(ey(WN.sill))], vE.X(xWin[1]) + 6, [WN.head - WN.sill], { from: vE.X(xWin[1]) + 1, size: 1.4 });
@@ -295,9 +295,8 @@ const WALL = {
 
   // Notes
   s1 += heading(318, 170, "NOTES", "REVISION 2", 40);
-  ["Wall 16 ft wide, ceiling 9 ft (owner's measure).", "Window measured: 4 ft wide, 5 ft 5 in tall,", "   sill 2 ft 3 in (686), hard into the right corner.", "Counter top set to the sill at 686 — this datum", "   runs on round to the right wall rail.", "Elements taken from the references:",
-   "   Ref. 1 — fluted pilasters, moulded painting panel.", "   Ref. 2 — block-and-dentil cornice, no carving.", "   Ref. 3 — band panels over every bay, twin",
-   "   sconces, pedestals stepping forward, no arch.", "Cupboards under all three bays. Solid teak.", "Gold only on handles and sconces."]
+  ["Wall 14 ft 11 in, ceiling 9 ft 1 in (measured).", "Centre panel set equal to the window bay so the two", "   pilasters frame a matched pair; the bookcase takes", "   the remainder as the anchor at the end of the wall.", "Counter datum 686 is PROVISIONAL, pending the sill.", "Window measured: 4 ft wide, 5 ft 5 in tall,", "   sill 2 ft 3 in (686), hard into the right corner.", "Counter top set to the sill at 686 — this datum", "   runs on round to the right wall rail.", "Refs: 1 fluted pilasters + moulded panel; 2 block-and-", "   dentil cornice, no carving; 3 band panels over every", "   bay, twin sconces, pedestals forward, no arch.",
+   "Cupboards under all three bays. Gold on handles only."]
     .forEach((n, i) => { s1 += text(318, 181 + i * 4.1, n, { size: 1.55 }); });
   s1 += titleBlock({ title: "STUDY WALL — GENERAL ARRANGEMENT", sub: "Elevation · Plan · Section", date: K.date, rev: K.rev, dwg: "AST-DR-005" });
 

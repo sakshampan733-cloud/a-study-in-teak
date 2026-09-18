@@ -396,7 +396,7 @@ window.PROJECT = {
             { label: "Window side", value: "The window is hard into the right-hand corner, so the architrave and panelled reveal can only run down its left side — there is no wall left on the right for a return. The band panel runs above it and the cornice carries across, so the wall still reads as one piece. Counter top and sill are level at 686." },
             { label: "Wood", inherit: "wood" },
             { label: "Polish", inherit: "polish" },
-            { label: "Dimensions", value: "Wall 16 ft wide (4877), ceiling 9 ft (2743). The unit comes 11 in (280) off the wall; pilasters stand 40 proud of it, pedestals 50 proud of the counter. Bays are set out from the window: bookcase 1650, pilaster 240, centre panel 1458, pilaster 240, window bay 1289." },
+            { label: "Dimensions", value: "Wall 14 ft 11 in (4547), ceiling 9 ft 1 in (2769). The unit comes 11 in (280) off the wall; pilasters stand 40 proud of it, pedestals 50 proud of the counter. Bays are set out from the window: bookcase 1489, pilaster 240, centre panel 1289, pilaster 240, window bay 1289 — the centre panel is set equal to the window bay so the two pilasters frame a matched pair." },
             { label: "Window", value: "Measured: 4 ft wide (1219) by 5 ft 5 in tall (1651). Sill 2 ft 3 in (686) off the floor, head at 2337, and 1 ft 3 in of wall above it to the ceiling. Hard into the right-hand corner — no return. The three measurements add to 8 ft 11 in against a 9 ft ceiling; the inch is measuring slack." },
           ],
           questions: [
@@ -448,7 +448,8 @@ window.PROJECT = {
             { label: "Treatment", value: "Applied panel moulding painted the wall colour. Short panels below a dado rail, tall panels above, 150 stiles between" },
             { label: "Length", value: "About 14–15 ft from the study wall to the dressing door (drawn at 4420 / 14 ft 6 in), then the door, then 2 ft of wall to the corner" },
             { label: "Skirting", value: "White marble, 4 in (102) high, already laid — square with a small top chamfer; the panel moulding starts above it." },
-            { label: "Heights", value: "Marble skirting 102 · rail 646–686 (2 ft 3 in to the top), the study counter band carried round the corner unbroken, set by the window sill · short panels 212–546 · tall panels 796–2438, level with the door head · no crown moulding — the cove light is in the ceiling" },
+            { label: "Setting out", value: "Measured along the wall: 13 ft 6 in from the study wall corner to the door frame, 3 ft of door frame end to end (2 ft 6 in leaf), then a 2 ft 4 in return to the corner. Overall 18 ft 11 in. Panelling starts clear of the study unit — its 11 in return, then a 6 in gap, then the first panel." },
+            { label: "Heights", value: "Ceiling 9 ft 1 in (2769). Marble skirting 102 · rail 646–686, the study counter band carried round the corner unbroken · short panels 212–546 · tall panels 796–2438, level with the door head · no crown moulding — the cove light is in the ceiling" },
             { label: "Panels", value: "Option C: 5 equal panels about 24 in (606) wide on the long run, short and tall on the same centres, plus one narrow 345 panel on the 2 ft wall past the door" },
             { label: "Mouldings", value: "Panel moulding 55 × 24 ogee, mitred · rail 40 × 28 with the same 4 reeds as the study counter edge — painted white · marble skirting below" },
             { label: "Door", value: "Bathroom door 2 ft 6 in × 8 ft (confirmed), architrave 65 (about 2½ in) all round; opens inward, hinged on the right; rail and skirting stop at it" },
