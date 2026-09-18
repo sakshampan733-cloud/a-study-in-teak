@@ -4,7 +4,7 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const RWALL = {
-  rev: "10 — sill confirmed at 2 ft 3 in; rail datum fixed at 686",
+  rev: "11 — door head measured at 7 ft 7 in; tall panels follow it",
   date: "18.09.2026",
   run: 4217,                   // corner to the door OPENING. Frame at 4141 (13 ft 7 in) + 76 architrave; chain closes to 18 ft 11 in
   H: 2769,                     // 9 ft 1 in ceiling, level throughout
@@ -17,8 +17,8 @@ const RWALL = {
   bays: 5,
   lamps: [1, 3, 5],                    // lamps centred inside tall panels 1, 3 and 5
   short: { y0: 212, y1: 546 },
-  tall: { y0: 796, top: 331 },         // 2769 − 331 = 2438: tall panels stop exactly level with the door head, tying panelling to door
-  door: { w: 762, h: 2438, arch: 76 }, // dressing door 2 ft 6 × 8 ft leaf; frame end to end 3 ft (914) = 762 + 2 × 76
+  tall: { y0: 796, top: 458 },         // 2769 − 458 = 2311: tall panels stop exactly level with the door head, tying panelling to door
+  door: { w: 762, h: 2311, arch: 76 }, // dressing door 2 ft 6 × 7 ft 7 in leaf; frame end to end 3 ft (914) = 762 + 2 × 76
   ret: 787,                            // little wall past the door: 2 ft 4 in (711) from the frame + 76 architrave
   lamp: { y: 1290, span: 150, proj: 230 },   // twin-arm sconce, same height and family as the study wall
 };
@@ -186,7 +186,7 @@ const RWALL = {
   const vP = view(ox, 205, sc, "Right wall plan"), tP = vP.w(0.1);
   s += heading(18, 170, "PLAN", `CUT AT 1000 · SCALE 1:${sc} · ROOM BELOW, WALL ABOVE`, 60);
   s += vP.g(plan(tP, `${vP.w(1)} ${vP.w(0.7)}`), 0.28);
-  s += note(vP.X(K.run + D.w / 2), vP.Y(-K.wall - D.w * 0.5), vP.X(aL) - 30, vP.Y(-K.wall - D.w * 0.5), "DRESSING DOOR 2′6″ × 8′", "INWARD, HINGED RIGHT", "end");
+  s += note(vP.X(K.run + D.w / 2), vP.Y(-K.wall - D.w * 0.5), vP.X(aL) - 30, vP.Y(-K.wall - D.w * 0.5), "DRESSING DOOR 2′6″ × 7′7″", "INWARD, HINGED RIGHT", "end");
   s += note(vP.X(K.study.w / 2), vP.Y(400), 57, vP.Y(400), "STUDY CUPBOARDS", "", "end");
   s += note(vP.X(bays[2][0] + pw / 2 - K.lamp.span), vP.Y(K.lamp.proj - 60), vP.X(bays[2][0] + pw / 2) + 3, vP.Y(560), "LAMP ABOVE, 230 OFF THE WALL", "");
 

@@ -306,7 +306,7 @@ window.PROJECT = {
       items: [
         {
           id: "door", name: "Doors (×3)", status: "open",
-          drawing: "door",
+          drawings: ["door", "door-narrow"],
           refs: [
             { src: "assets/refs/door-ref-1.jpg", caption: "Reference — pair of panelled doors in a library (film still)" },
             { src: "assets/refs/door-ref-1-crop.jpg", caption: "Close-up — shaped bead, corner roundels, knob on lock rail" },
@@ -316,7 +316,8 @@ window.PROJECT = {
             { label: "Veneer", inherit: "veneer" },
             { label: "Polish", inherit: "polish" },
             { label: "Hardware", value: "", hint: "Handles, hinges, lock, finish (brass / antique brass / nickel)" },
-            { label: "Size", value: "D1 main door 8 ft × 3 ft (2438 × 914). D2 and D3 same design, 8 ft × 2 ft 6 in (2438 × 762). Thickness to confirm." },
+            { label: "Size", value: "Two widths, one design, all three the same height. Measured 7 ft 7 in tall (2311). D1, the main door, is 3 ft wide (914). D2 and D3 — dressing and bathroom — are 2 ft 6 in (762). Thickness to confirm." },
+            { label: "How the widths differ", value: "The stiles stay 100 and every rail and moulding stays the same, so the extra width goes entirely into the panels: 562 wide on D2 and D3 against 257 on a D1 leaf. That is why there are two sheets — the details A, B and C serve both, but the elevations cannot." },
           ],
           questions: [
             "Single leaf or a pair? The reference is a pair of narrow leaves.",
@@ -326,7 +327,7 @@ window.PROJECT = {
             "Are the roundels carved into the panel, or applied brass / wooden bosses?",
             "Is the shaped line a carved groove, or a raised applied moulding?",
             "Knob and hinge finish — ebonised wood, antique brass, or polished brass?",
-            "Which three doors — main entry, bathroom, dressing?",
+            "Is D1 a single 3 ft leaf or a pair of narrow leaves? It is drawn as a pair, after the reference.",
           ],
         },
         {
@@ -449,10 +450,10 @@ window.PROJECT = {
             { label: "Length", value: "About 14–15 ft from the study wall to the dressing door (drawn at 4420 / 14 ft 6 in), then the door, then 2 ft of wall to the corner" },
             { label: "Skirting", value: "White marble, 4 in (102) high, already laid — square with a small top chamfer; the panel moulding starts above it." },
             { label: "Setting out", value: "Measured along the wall: 13 ft 6 in from the study wall corner to the door frame, 3 ft of door frame end to end (2 ft 6 in leaf), then a 2 ft 4 in return to the corner. Overall 18 ft 11 in. Panelling starts clear of the study unit — its 11 in return, then a 6 in gap, then the first panel." },
-            { label: "Heights", value: "Ceiling 9 ft 1 in (2769). Marble skirting 102 · rail 646–686, the study counter band carried round the corner unbroken · short panels 212–546 · tall panels 796–2438, level with the door head · no crown moulding — the cove light is in the ceiling" },
+            { label: "Heights", value: "Ceiling 9 ft 1 in (2769). Marble skirting 102 · rail 646–686, the study counter band carried round the corner unbroken · short panels 212–546 · tall panels 796–2311, level with the door head · no crown moulding — the cove light is in the ceiling" },
             { label: "Panels", value: "Option C: 5 equal panels about 24 in (606) wide on the long run, short and tall on the same centres, plus one narrow 345 panel on the 2 ft wall past the door" },
             { label: "Mouldings", value: "Panel moulding 55 × 24 ogee, mitred · rail 40 × 28 with the same 4 reeds as the study counter edge — painted white · marble skirting below" },
-            { label: "Door", value: "Bathroom door 2 ft 6 in × 8 ft (confirmed), architrave 65 (about 2½ in) all round; opens inward, hinged on the right; rail and skirting stop at it" },
+            { label: "Door", value: "Dressing door 2 ft 6 in × 7 ft 7 in (measured), frame 3 ft end to end so 3 in of architrave each side; opens inward, hinged on the right; rail and skirting stop at it" },
             { label: "Lamps", value: "3 twin-arm wall lamps, brass with fabric shades, centred inside tall panels 1, 3 and 5 at 1290 — the same height as the study sconces" },
             { label: "Lighting", value: "No crown moulding on this wall — the ceiling cove light runs above it, on the room's cove dimmer" },
           ],

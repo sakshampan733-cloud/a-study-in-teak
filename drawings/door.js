@@ -3,19 +3,26 @@
 
 window.DRAWINGS = window.DRAWINGS || {};
 
+// The two doors are the same design at two widths: the stiles, rails and mouldings never
+// change, so only the panel width differs. One parametric build, run twice.
+const DOOR_TYPES = [
+  { key: "door",        W: 457, leaves: 2, name: "D1",      opening: 914, label: "MAIN DOOR",   dwg: "AST-DR-001", sub: "7 ft 7 in × 3 ft" },
+  { key: "door-narrow", W: 762, leaves: 1, name: "D2 · D3", opening: 762, label: "DRESSING · BATHROOM", dwg: "AST-DR-009", sub: "7 ft 7 in × 2 ft 6 in" },
+];
+
 const DOOR = {
-  rev: "1 — main door 8 ft × 3 ft",
+  rev: "3 — leaf height measured at 7 ft 7 in; rails rebalanced",
   date: "17.09.2026",
   // D1 main door: 8 ft × 3 ft opening (2438 × 914). D2, D3: same design, 8 ft × 2 ft 6 in (2438 × 762).
   leaves: 2,          // reference is a pair of narrow leaves — pair vs single still to confirm
   W: 457,             // leaf width (914 / 2)
-  H: 2438,            // leaf height (8 ft)
+  H: 2311,            // leaf height, measured — 7 ft 7 in
   T: 45,              // leaf thickness
   stile: 100,
   topRail: 100,
-  upperH: 1223,       // sized so the knob centre sits 1000 above the floor
+  upperH: 1138,       // set so the knob centre lands about 960 above the floor
   lockRail: 230,
-  lowerH: 655,        // bottom rail = what's left
+  lowerH: 613,        // bottom rail = what is left, and stays the deepest
   sticking: 20,       // ovolo sticking moulding around each panel
   inset: 26,          // shaped bead line, inset from the panel field
   notchR: 26,         // concave shoulder radius (around the roundel)
@@ -28,14 +35,19 @@ const DOOR = {
   architrave: 75,
 };
 
-(function () {
-  const D = DOOR;
+// The wider leaf makes every detail wider too. Pick the smallest standard scale that still
+// leaves the details clear of the key column, so one layout serves both doors.
+const DETAIL_SCALES = [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10, 12, 15, 20];
+const fitScale = (realWidth, budget) => DETAIL_SCALES.find((k) => realWidth / k <= budget) || 20;
+
+function buildDoorSheet(cfg) {
+  const D = { ...DOOR, W: cfg.W, leaves: cfg.leaves };
   const bottomRail = D.H - D.topRail - D.upperH - D.lockRail - D.lowerH;
   const lockY = D.topRail + D.upperH + D.lockRail / 2;   // from top of leaf
   // Drafting helpers come from the shared kit, so this sheet inherits the same dimension
   // chains, label stacks and unit toggle as every other drawing.
   const { INK, THIN, f, text, view, chainH, chainV, bubble, note, labels, heading, frame, titleBlock, sheet } = window.DK;
-  window.DK.begin("door");
+  window.DK.begin(cfg.key);
 
   // Shaped bead: vertical sides; at head and foot a concave shoulder (around the
   // roundel) rising into a rounded crown. Real mm.
@@ -105,7 +117,7 @@ const DOOR = {
   if (D.leaves === 2) e += `<line x1="${D.W + 6}" y1="0" x2="${D.W + 6}" y2="${D.H}" stroke-width="${t1}"/>`;
   e += `<line x1="${-a - 180}" y1="${D.H}" x2="${total + a + 180}" y2="${D.H}" stroke-width="${v1.w(0.6)}"/>`;
   svg += v1.g(e, 0.3);
-  svg += heading(22, 17, "FRONT ELEVATION", `${D.leaves === 2 ? "PAIR OF LEAVES" : "SINGLE LEAF"} · SCALE 1:${s1}`);
+  svg += heading(22, 17, `FRONT ELEVATION — ${cfg.name}`, `${cfg.sub} · ${D.leaves === 2 ? "PAIR OF LEAVES" : "SINGLE LEAF"} · SCALE 1:${s1}`);
   svg += text(v1.X(-a - 180), v1.Y(D.H) - 1, "FFL ±0", { size: 1.6, fill: THIN });
 
   // section / detail markers
@@ -121,12 +133,12 @@ const DOOR = {
   const yd = v1.Y(D.H);
   svg += chainH([0, D.stile, D.W - D.stile, D.W].map(v1.X), yd + 7, [D.stile, D.W - 2 * D.stile, D.stile], { from: yd + 2 });
   svg += chainH(Array.from({ length: D.leaves + 1 }, (_, i) => v1.X(i * D.W)), yd + 13, Array(D.leaves).fill(D.W), { from: yd + 2 });
-  svg += chainH([v1.X(0), v1.X(total)], yd + 19, [`${total} D1 · 3 FT (D2, D3: 762)`], { from: yd + 2 });
+  svg += chainH([v1.X(0), v1.X(total)], yd + 19, [`${cfg.opening} OPENING · ${cfg.name}`], { from: yd + 2 });
   // dims — right
   const xd = v1.X(total + a) + 12;
   svg += chainV([0, D.topRail, D.topRail + D.upperH, D.topRail + D.upperH + D.lockRail, D.H - bottomRail, D.H].map(v1.Y), xd,
     [D.topRail, D.upperH, D.lockRail, D.lowerH, bottomRail], { from: v1.X(total) + 2 });
-  svg += chainV([v1.Y(0), v1.Y(D.H)], xd + 7, [`${D.H} LEAF · 8 FT`], { from: v1.X(total) + 2 });
+  svg += chainV([v1.Y(0), v1.Y(D.H)], xd + 7, [`${D.H} LEAF`], { from: v1.X(total) + 2 });
   // dims — left: knob height
   svg += chainV([v1.Y(lockY), v1.Y(D.H)], v1.X(-a) - 14, [`${D.H - lockY} KNOB C/L`], { from: v1.X(D.knobFromEdge) });
 
@@ -141,7 +153,8 @@ const DOOR = {
   svg += note(v1.X(42), v1.Y(lockY) + 1, v1.X(-a) - 3, v1.Y(lockY) + 12, "", "", "end") + bubble(v1.X(-a) - 5, v1.Y(lockY) + 12, 8);
 
   // ═══ VIEW 2 · DETAIL A — PANEL HEAD 1:2.5 ═══
-  const s2 = 3, pw = D.W - 2 * D.stile, px = D.stile, py = D.topRail;
+  const pw = D.W - 2 * D.stile, px = D.stile, py = D.topRail;
+  const s2 = fitScale(pw + 90, 150);
   const v2 = view(186 - (px - 45) / s2, 44 - (py - 40) / s2, s2, "Panel head - detail A"), t2 = v2.w(0.13);
   const cut = py + 175;
   let d2 = `<clipPath id="clipA"><rect x="${px - 45}" y="${py - 40}" width="${pw + 90}" height="${cut - py + 40}"/></clipPath>`;
@@ -164,7 +177,7 @@ const DOOR = {
   svg += note(v2.X(px + pw / 2 + 50), v2.Y(py + 150), v2.X(px + pw + 45) + 3, v2.Y(py + 160), "SUNK FIELD", `PANEL ${D.panelT} THK`);
 
   // ═══ VIEW 3 · SECTION B–B 1:3 ═══
-  const s3 = 4, T3 = D.T, pT = D.panelT, z0 = (T3 - pT) / 2, st = D.sticking, g = 12, reb = D.rebate;
+  const s3 = fitScale(D.W + 60, 138), T3 = D.T, pT = D.panelT, z0 = (T3 - pT) / 2, st = D.sticking, g = 12, reb = D.rebate;
   const v3 = view(192, 160, s3, "Section B-B"), t3 = v3.w(0.13);
   let d3 = `<pattern id="grain" patternUnits="userSpaceOnUse" width="14" height="9"><path d="M0 3 Q7 1 14 3 M0 7.5 Q7 5.5 14 7.5" stroke="#aaa" stroke-width="${t3}" fill="none"/></pattern>`;
   // stile: outer edge xo, inner (panel) edge xi. meet: "front" = front half projects by reb, "back" = back half projects.
@@ -222,18 +235,23 @@ const DOOR = {
     "Dimensions in feet and inches. Do not scale.",
     "Proportions taken from a film-still reference;",
     "   leaf size, opening and thickness are ASSUMED.",
-    "Knob height follows reference (low) — to confirm.",
-    "D1, D2, D3 identical.",
+    "Knob centre lands 958 above the floor — normal height.",
+    `${cfg.name} — ${cfg.label}, ${cfg.sub}.`,
+    "Same design at both widths: stiles 100, rails and",
+    "   mouldings identical. Only the panel width changes,",
+    `   here ${D.W - 2 * D.stile} per panel. Details A, B and C serve both doors.`,
     "Solid teak frame. Veneer and polish per",
     "   Materials; polish to match the teak desk.",
     "Architrave, hinges and lock not yet designed.",
   ].forEach((n, i) => { svg += text(kx, 105 + i * 4.2, n, { size: 1.7 }); });
 
-  svg += titleBlock({ title: "DOORS D1 – D3", sub: "Elevation · Panel head · Section · Lock rail", date: D.date, rev: D.rev, dwg: "AST-DR-001" });
+  svg += titleBlock({ title: `DOOR ${cfg.name} — ${cfg.sub.toUpperCase()}`, sub: "Elevation · Panel head · Section · Lock rail", date: D.date, rev: D.rev, dwg: cfg.dwg });
 
-  window.DRAWINGS.door = {
-    title: "Doors D1–D3 · AST-DR-001",
+  window.DRAWINGS[cfg.key] = {
+    title: `Doors ${cfg.name.replace(" · ", " and ")} · ${cfg.dwg}`,
     svg: sheet(svg),
-    params: DOOR,
+    params: D,
   };
-})();
+}
+
+DOOR_TYPES.forEach(buildDoorSheet);
