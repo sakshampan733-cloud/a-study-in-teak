@@ -206,7 +206,7 @@ window.PROJECT = {
         effect: "Small, but real. No dimension can be reused from one end of the room to the other, so every fitted piece is made to the wall it actually meets. Half a degree is far too shallow to read on its own — it only shows where something repeats, or where a tight reveal runs the length of the room.",
         doing: "Each wall drawn to its own measurement: study wall 14 ft 11 in, partition 15 ft 0 in, bed wall 15 ft 6 in. All fitted joinery built 15 to 20 mm undersize with a scribe fillet at each end, planed on site to follow the wall — the carpenter has to be told this before he builds, not after. The diagonals close against the widths and the sides, so the shell is now known.",
         need: "Each wall at three heights — floor, waist and ceiling, since walls lean as well as splay — and whether the floor is level end to end.",
-        ref: { src: "assets/refs/room-sketch-1-widths-and-step.jpg", caption: "The room measured — 14 ft 11 in at the study wall, 15 ft 0 in at the partition, 15 ft 1 in before the step, 15 ft 6 in at the bed wall. The step in the left wall is drawn bottom left." },
+        drawings: ["roomshell"],
       },
       {
         id: "ceiling-plain", name: "The ceiling was left plain on purpose", status: "solved",

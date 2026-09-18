@@ -205,6 +205,17 @@ function pointers(id) {
     </article>`).join("")}</div>`;
 }
 
+function sheets(list) {
+  const ds = [].concat(list || []).filter((d) => window.DRAWINGS?.[d]);
+  if (!ds.length) return "";
+  return `<div class="sheets">${ds.map((d) => {
+    const D = window.DRAWINGS[d], [name, code] = D.title.split(" · ");
+    return `<div class="sheet-card reveal"><div class="sheet-top"><h3 class="h-sm">${esc(name)}</h3><div class="sheet-tools"><span class="mono">${esc(code || "")}</span>${paperToggle()}</div></div>
+      <figure class="dwg" data-open="dwg:${d}">${D.svg}</figure>
+      <div class="cad-links"><span class="mono">Editable CAD</span>${D.model === false ? "" : `<a class="btn" href="cad/${d}-model.dxf" download>DXF · true size</a>`}<a class="btn" href="cad/${d}-sheet.dxf" download>DXF · A3 sheet</a><a class="btn" href="cad/${d}.svg" download>SVG</a><button class="btn steel" data-open="dwg:${d}">Full size</button></div></div>`;
+  }).join("")}</div>`;
+}
+
 const PSTAT = { blocking: "Blocking", open: "Open", accepted: "Accepted", solved: "Solved" };
 
 function problems() {
@@ -218,7 +229,7 @@ function problems() {
     `<div class="probs">${PB.items.map((i, k) => `<article class="prob reveal ${i.status}" id="${i.id}">
       <div class="prob-head"><span class="badge">${pad2(k + 1)}</span><h3 class="prob-t">${esc(i.name)}</h3><span class="pstat ${i.status}">${PSTAT[i.status]}</span></div>
       ${row("What", i.what)}${row("What it damages", i.effect)}${row("What we are doing", i.doing)}${row("What is needed", i.need)}
-      ${i.ref ? `<figure class="prob-shot" data-open="img:${esc(i.ref.src)}"><div class="frame"><img src="${esc(i.ref.src)}" alt="" loading="lazy"></div><figcaption>${esc(i.ref.caption)}</figcaption></figure>` : ""}
+      ${sheets(i.drawings)}
     </article>`).join("")}</div>` +
     nextLink("problems") + footer();
 }
@@ -262,12 +273,7 @@ function tabPage(t) {
       <div class="wrap"><div class="spec reveal">${i.parts.map((p) => `<div class="spec-row"><div class="lab">${esc(p.label)}</div><div class="val">${partValue(p)}</div></div>`).join("")}</div></div>
       ${i.refs?.length ? `<div class="gallery-label"><span class="eyebrow" data-decode>References · ${pad2(i.refs.length)}</span>${i.refs.length > 3 ? `<div class="gallery-nav"><button class="btn" data-gal="-1" aria-label="Previous">←</button><button class="btn" data-gal="1" aria-label="Next">→</button></div>` : ""}</div>
         <div class="gallery reveal${i.refs.length < 3 ? " few" : ""}">${i.refs.map((r) => `<figure class="shot" data-open="img:${esc(r.src)}"><div class="frame"><img src="${esc(r.src)}" alt="" loading="lazy"></div><figcaption>${esc(r.caption)}</figcaption></figure>`).join("")}</div>` : ""}
-      ${[].concat(i.drawings || i.drawing || []).filter((d) => window.DRAWINGS?.[d]).length ? `<div class="sheets">${[].concat(i.drawings || i.drawing || []).filter((d) => window.DRAWINGS?.[d]).map((d) => {
-        const D = window.DRAWINGS[d], [name, code] = D.title.split(" · ");
-        return `<div class="sheet-card reveal"><div class="sheet-top"><h3 class="h-sm">${esc(name)}</h3><div class="sheet-tools"><span class="mono">${esc(code || "")}</span>${paperToggle()}</div></div>
-          <figure class="dwg" data-open="dwg:${d}">${D.svg}</figure>
-          <div class="cad-links"><span class="mono">Editable CAD</span>${D.model === false ? "" : `<a class="btn" href="cad/${d}-model.dxf" download>DXF · true size</a>`}<a class="btn" href="cad/${d}-sheet.dxf" download>DXF · A3 sheet</a><a class="btn" href="cad/${d}.svg" download>SVG</a><button class="btn steel" data-open="dwg:${d}">Full size</button></div></div>`;
-      }).join("")}</div>` : ""}
+      ${sheets(i.drawings || i.drawing)}
       ${pointers(i.id)}
       ${i.notes?.length ? `<div class="asks reveal"><span class="eyebrow">Notes</span><ul class="ask-list notes">${i.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul></div>` : ""}
       ${i.questions?.length ? `<div class="asks reveal"><span class="eyebrow">Open questions</span><ul class="ask-list">${i.questions.map((q, n) => `<li><span class="badge">Q${pad2(n + 1)}</span><span>${esc(q)}</span></li>`).join("")}</ul></div>` : ""}
