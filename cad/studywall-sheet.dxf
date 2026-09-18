@@ -489,7 +489,7 @@ $SKPOLY
   9
 $TDCREATE
  40
-2461302.6209143517
+2461302.6254745373
   9
 $TDUCREATE
  40
@@ -497,7 +497,7 @@ $TDUCREATE
   9
 $TDUPDATE
  40
-2461302.6209143517
+2461302.6254745373
   9
 $TDUUPDATE
  40
@@ -549,7 +549,7 @@ $SPLINESEGS
   9
 $HANDSEED
   5
-657
+658
   9
 $SURFTAB1
  70
@@ -929,11 +929,11 @@ $PSTYLEMODE
   9
 $FINGERPRINTGUID
   2
-{09413B1F-29FB-4D27-8688-E0ECE369F47D}
+{45D76528-F865-4DA2-914C-0241CCAC4A55}
   9
 $VERSIONGUID
   2
-{7067A80D-DFFF-4FA5-8249-1E7212B842DC}
+{242D0EBC-5221-43B2-84E6-9537726AA6E0}
   9
 $EXTNAMES
 290
@@ -1323,9 +1323,9 @@ ISM
   0
 CLASS
   1
-LAYOUT
+ACDBPLACEHOLDER
   2
-AcDbLayout
+AcDbPlaceHolder
   3
 ObjectDBX Classes
  90
@@ -1339,9 +1339,9 @@ ObjectDBX Classes
   0
 CLASS
   1
-ACDBPLACEHOLDER
+LAYOUT
   2
-AcDbPlaceHolder
+AcDbLayout
   3
 ObjectDBX Classes
  90
@@ -3181,7 +3181,7 @@ ACAD
   0
 APPID
   5
-654
+655
 330
 3
 100
@@ -3195,7 +3195,7 @@ HATCHBACKGROUNDCOLOR
   0
 APPID
   5
-655
+656
 330
 3
 100
@@ -57867,7 +57867,7 @@ AcDbText
  40
 0.04393700787401574
   1
-Counter datum 686 is PROVISIONAL, pending the sill.
+Window measured: 4 ft wide, 5 ft 5 in tall, hard into
  11
 12.519685039370078
  21
@@ -57897,7 +57897,7 @@ AcDbText
  40
 0.04393700787401574
   1
-Window measured: 4 ft wide, 5 ft 5 in tall,
+the right corner. Sill 2 ft 3 in (686) floor to the
  11
 12.519685039370078
  21
@@ -57927,7 +57927,7 @@ AcDbText
  40
 0.04393700787401574
   1
-sill 2 ft 3 in (686), hard into the right corner.
+underside of the frame — CONFIRMED.
  11
 12.519685039370078
  21
@@ -57957,7 +57957,7 @@ AcDbText
  40
 0.04393700787401574
   1
-Counter top set to the sill at 686 — this datum
+Counter top is set to the sill at 686, so the two are
  11
 12.519685039370078
  21
@@ -57987,7 +57987,7 @@ AcDbText
  40
 0.04393700787401574
   1
-runs on round to the right wall rail.
+one surface; this datum runs on round to the right
  11
 12.519685039370078
  21
@@ -58017,7 +58017,7 @@ AcDbText
  40
 0.04393700787401574
   1
-Refs: 1 fluted pilasters + moulded panel; 2 block-and-
+wall rail.
  11
 12.519685039370078
  21
@@ -58047,7 +58047,7 @@ AcDbText
  40
 0.04393700787401574
   1
-dentil cornice, no carving; 3 band panels over every
+Refs: 1 fluted pilasters + moulded panel; 2 block-and-
  11
 12.519685039370078
  21
@@ -58077,7 +58077,7 @@ AcDbText
  40
 0.04393700787401574
   1
-bay, twin sconces, pedestals forward, no arch.
+dentil cornice, no carving; 3 band panels over every
  11
 12.519685039370078
  21
@@ -58107,7 +58107,7 @@ AcDbText
  40
 0.04393700787401574
   1
-Cupboards under all three bays. Gold on handles only.
+bay, twin sconces, pedestals forward, no arch.
  11
 12.519685039370078
  21
@@ -58117,9 +58117,39 @@ Cupboards under all three bays. Gold on handles only.
 100
 AcDbText
   0
-LWPOLYLINE
+TEXT
   5
 643
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+12.519685039370078
+ 20
+2.4685039370078736
+ 30
+0.0
+ 40
+0.04393700787401574
+  1
+Cupboards under all three bays. Gold on handles only.
+ 11
+12.519685039370078
+ 21
+2.4685039370078736
+ 31
+0.0
+100
+AcDbText
+  0
+LWPOLYLINE
+  5
+644
 330
 17
 100
@@ -58155,30 +58185,6 @@ AcDbPolyline
   0
 LINE
   5
-644
-330
-17
-100
-AcDbEntity
-  8
-GEOMETRY
-100
-AcDbLine
- 10
-11.811023622047244
- 20
-1.7322834645669292
- 30
-0.0
- 11
-16.22047244094488
- 21
-1.7322834645669292
- 31
-0.0
-  0
-LINE
-  5
 645
 330
 17
@@ -58191,13 +58197,13 @@ AcDbLine
  10
 11.811023622047244
  20
-1.1023622047244095
+1.7322834645669292
  30
 0.0
  11
 16.22047244094488
  21
-1.1023622047244095
+1.7322834645669292
  31
 0.0
   0
@@ -58215,6 +58221,30 @@ AcDbLine
  10
 11.811023622047244
  20
+1.1023622047244095
+ 30
+0.0
+ 11
+16.22047244094488
+ 21
+1.1023622047244095
+ 31
+0.0
+  0
+LINE
+  5
+647
+330
+17
+100
+AcDbEntity
+  8
+GEOMETRY
+100
+AcDbLine
+ 10
+11.811023622047244
+ 20
 0.7086614173228346
  30
 0.0
@@ -58227,7 +58257,7 @@ AcDbLine
   0
 LINE
   5
-647
+648
 330
 17
 100
@@ -58251,7 +58281,7 @@ AcDbLine
   0
 TEXT
   5
-648
+649
 330
 17
 100
@@ -58281,7 +58311,7 @@ AcDbText
   0
 TEXT
   5
-649
+64A
 330
 17
 100
@@ -58311,7 +58341,7 @@ AcDbText
   0
 TEXT
   5
-64A
+64B
 330
 17
 100
@@ -58341,7 +58371,7 @@ AcDbText
   0
 TEXT
   5
-64B
+64C
 330
 17
 100
@@ -58371,7 +58401,7 @@ AcDbText
   0
 TEXT
   5
-64C
+64D
 330
 17
 100
@@ -58401,7 +58431,7 @@ AcDbText
   0
 TEXT
   5
-64D
+64E
 330
 17
 100
@@ -58431,7 +58461,7 @@ AcDbText
   0
 TEXT
   5
-64E
+64F
 330
 17
 100
@@ -58461,7 +58491,7 @@ AcDbText
   0
 TEXT
   5
-64F
+650
 330
 17
 100
@@ -58491,7 +58521,7 @@ AcDbText
   0
 TEXT
   5
-650
+651
 330
 17
 100
@@ -58521,7 +58551,7 @@ AcDbText
   0
 TEXT
   5
-651
+652
 330
 17
 100
@@ -58539,7 +58569,7 @@ AcDbText
  40
 0.051023622047244095
   1
-7 — wall 14 ft 11 in; centre panel = window bay; ceiling 9 ft 1
+8 — sill confirmed at 2 ft 3 in; datum fixed at 686
  11
 11.929133858267717
  21
@@ -58551,7 +58581,7 @@ AcDbText
   0
 TEXT
   5
-652
+653
 330
 17
 100
@@ -58581,7 +58611,7 @@ AcDbText
   0
 TEXT
   5
-653
+654
 330
 17
 100
@@ -59699,7 +59729,7 @@ CREATED_BY_EZDXF
   3
 WRITTEN_BY_EZDXF
 350
-656
+657
   0
 DICTIONARYVAR
   5
@@ -59711,7 +59741,7 @@ DictionaryVariables
 280
 0
   1
-1.4.2 @ 2026-09-18T09:24:07.310436+00:00
+1.4.2 @ 2026-09-18T09:30:41.178518+00:00
   0
 VISUALSTYLE
   5
@@ -60415,7 +60445,7 @@ X-Ray
   0
 DICTIONARYVAR
   5
-656
+657
 330
 2D
 100
@@ -60423,7 +60453,7 @@ DictionaryVariables
 280
 0
   1
-1.4.2 @ 2026-09-18T09:24:07.406425+00:00
+1.4.2 @ 2026-09-18T09:30:41.274974+00:00
   0
 ENDSEC
   0

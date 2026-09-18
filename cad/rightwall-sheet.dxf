@@ -489,7 +489,7 @@ $SKPOLY
   9
 $TDCREATE
  40
-2461302.6209143517
+2461302.6254745373
   9
 $TDUCREATE
  40
@@ -497,7 +497,7 @@ $TDUCREATE
   9
 $TDUPDATE
  40
-2461302.6209143517
+2461302.6254745373
   9
 $TDUUPDATE
  40
@@ -549,7 +549,7 @@ $SPLINESEGS
   9
 $HANDSEED
   5
-2EB
+2EC
   9
 $SURFTAB1
  70
@@ -929,11 +929,11 @@ $PSTYLEMODE
   9
 $FINGERPRINTGUID
   2
-{3E51019A-AFBA-4A90-BEE4-0F98F6083E54}
+{F5BC74F5-6603-480C-8D38-DCF05E93851D}
   9
 $VERSIONGUID
   2
-{4C6A63C5-8FE6-4AA0-9627-F590B36E4FC4}
+{D59B25C6-7C5B-4679-B0E7-F2AC8F78D5F4}
   9
 $EXTNAMES
 290
@@ -1323,9 +1323,9 @@ ISM
   0
 CLASS
   1
-LAYOUT
+ACDBPLACEHOLDER
   2
-AcDbLayout
+AcDbPlaceHolder
   3
 ObjectDBX Classes
  90
@@ -1339,9 +1339,9 @@ ObjectDBX Classes
   0
 CLASS
   1
-ACDBPLACEHOLDER
+LAYOUT
   2
-AcDbPlaceHolder
+AcDbLayout
   3
 ObjectDBX Classes
  90
@@ -3181,7 +3181,7 @@ ACAD
   0
 APPID
   5
-2E8
+2E9
 330
 3
 100
@@ -3195,7 +3195,7 @@ HATCHBACKGROUNDCOLOR
   0
 APPID
   5
-2E9
+2EA
 330
 3
 100
@@ -22053,7 +22053,7 @@ AcDbText
  40
 0.048188976377952754
   1
-REVISION 9
+REVISION 10
  11
 12.519685039370078
  21
@@ -22443,7 +22443,7 @@ AcDbText
  40
 0.04393700787401574
   1
-Rail datum 686 is PROVISIONAL, pending the sill.
+Rail datum 686 confirmed — set by the window sill at
  11
 12.519685039370078
  21
@@ -22473,7 +22473,7 @@ AcDbText
  40
 0.04393700787401574
   1
-keeping the stiles 150 and the panels equal.
+2 ft 3 in, carried round from the study counter.
  11
 12.519685039370078
  21
@@ -22486,6 +22486,36 @@ AcDbText
 TEXT
   5
 256
+330
+17
+100
+AcDbEntity
+  8
+TEXT
+100
+AcDbText
+ 10
+12.519685039370078
+ 20
+1.803149606299213
+ 30
+0.0
+ 40
+0.04393700787401574
+  1
+keeping the stiles 150 and the panels equal.
+ 11
+12.519685039370078
+ 21
+1.803149606299213
+ 31
+0.0
+100
+AcDbText
+  0
+TEXT
+  5
+257
 330
 17
 100
@@ -22515,7 +22545,7 @@ AcDbText
   0
 LINE
   5
-257
+258
 330
 17
 100
@@ -22539,7 +22569,7 @@ AcDbLine
   0
 TEXT
   5
-258
+259
 330
 17
 100
@@ -22569,7 +22599,7 @@ AcDbText
   0
 HATCH
   5
-259
+25A
 330
 17
 100
@@ -22723,7 +22753,7 @@ ANSI31
   0
 POLYLINE
   5
-25A
+25B
 330
 17
 100
@@ -22745,9 +22775,9 @@ AcDb2dPolyline
   0
 VERTEX
   5
-25B
+25C
 330
-25A
+25B
 100
 AcDbEntity
   8
@@ -22767,9 +22797,9 @@ AcDb2dVertex
   0
 VERTEX
   5
-25C
+25D
 330
-25A
+25B
 100
 AcDbEntity
   8
@@ -22789,9 +22819,9 @@ AcDb2dVertex
   0
 SEQEND
   5
-25D
+25E
 330
-25A
+25B
 100
 AcDbEntity
   8
@@ -22799,7 +22829,7 @@ GEOMETRY
   0
 SPLINE
   5
-25E
+25F
 330
 17
 100
@@ -22885,7 +22915,7 @@ AcDbSpline
   0
 SPLINE
   5
-25F
+260
 330
 17
 100
@@ -22947,7 +22977,7 @@ AcDbSpline
   0
 SPLINE
   5
-260
+261
 330
 17
 100
@@ -23009,7 +23039,7 @@ AcDbSpline
   0
 POLYLINE
   5
-261
+262
 330
 17
 100
@@ -23031,9 +23061,9 @@ AcDb2dPolyline
   0
 VERTEX
   5
-262
+263
 330
-261
+262
 100
 AcDbEntity
   8
@@ -23053,9 +23083,9 @@ AcDb2dVertex
   0
 VERTEX
   5
-263
+264
 330
-261
+262
 100
 AcDbEntity
   8
@@ -23075,9 +23105,9 @@ AcDb2dVertex
   0
 VERTEX
   5
-264
+265
 330
-261
+262
 100
 AcDbEntity
   8
@@ -23097,9 +23127,9 @@ AcDb2dVertex
   0
 VERTEX
   5
-265
+266
 330
-261
+262
 100
 AcDbEntity
   8
@@ -23119,9 +23149,9 @@ AcDb2dVertex
   0
 SEQEND
   5
-266
+267
 330
-261
+262
 100
 AcDbEntity
   8
@@ -23129,7 +23159,7 @@ GEOMETRY
   0
 LINE
   5
-267
+268
 330
 17
 100
@@ -23153,7 +23183,7 @@ AcDbLine
   0
 LINE
   5
-268
+269
 330
 17
 100
@@ -23177,7 +23207,7 @@ AcDbLine
   0
 LINE
   5
-269
+26A
 330
 17
 100
@@ -23201,7 +23231,7 @@ AcDbLine
   0
 LINE
   5
-26A
+26B
 330
 17
 100
@@ -23225,7 +23255,7 @@ AcDbLine
   0
 LINE
   5
-26B
+26C
 330
 17
 100
@@ -23249,7 +23279,7 @@ AcDbLine
   0
 LINE
   5
-26C
+26D
 330
 17
 100
@@ -23273,7 +23303,7 @@ AcDbLine
   0
 TEXT
   5
-26D
+26E
 330
 17
 100
@@ -23305,7 +23335,7 @@ AcDbText
   0
 LINE
   5
-26E
+26F
 330
 17
 100
@@ -23329,7 +23359,7 @@ AcDbLine
   0
 LINE
   5
-26F
+270
 330
 17
 100
@@ -23353,7 +23383,7 @@ AcDbLine
   0
 LINE
   5
-270
+271
 330
 17
 100
@@ -23377,7 +23407,7 @@ AcDbLine
   0
 LINE
   5
-271
+272
 330
 17
 100
@@ -23401,7 +23431,7 @@ AcDbLine
   0
 LINE
   5
-272
+273
 330
 17
 100
@@ -23425,7 +23455,7 @@ AcDbLine
   0
 TEXT
   5
-273
+274
 330
 17
 100
@@ -23459,7 +23489,7 @@ AcDbText
   0
 TEXT
   5
-274
+275
 330
 17
 100
@@ -23489,7 +23519,7 @@ AcDbText
   0
 TEXT
   5
-275
+276
 330
 17
 100
@@ -23519,7 +23549,7 @@ AcDbText
   0
 LINE
   5
-276
+277
 330
 17
 100
@@ -23543,7 +23573,7 @@ AcDbLine
   0
 TEXT
   5
-277
+278
 330
 17
 100
@@ -23573,7 +23603,7 @@ AcDbText
   0
 HATCH
   5
-278
+279
 330
 17
 100
@@ -23663,7 +23693,7 @@ ANSI31
   0
 HATCH
   5
-279
+27A
 330
 17
 100
@@ -24133,7 +24163,7 @@ ANSI31
   0
 POLYLINE
   5
-27A
+27B
 330
 17
 100
@@ -24155,9 +24185,9 @@ AcDb2dPolyline
   0
 VERTEX
   5
-27B
+27C
 330
-27A
+27B
 100
 AcDbEntity
   8
@@ -24177,9 +24207,9 @@ AcDb2dVertex
   0
 VERTEX
   5
-27C
+27D
 330
-27A
+27B
 100
 AcDbEntity
   8
@@ -24199,9 +24229,9 @@ AcDb2dVertex
   0
 SEQEND
   5
-27D
+27E
 330
-27A
+27B
 100
 AcDbEntity
   8
@@ -24209,7 +24239,7 @@ GEOMETRY
   0
 SPLINE
   5
-27E
+27F
 330
 17
 100
@@ -24391,7 +24421,7 @@ AcDbSpline
   0
 SPLINE
   5
-27F
+280
 330
 17
 100
@@ -24573,7 +24603,7 @@ AcDbSpline
   0
 SPLINE
   5
-280
+281
 330
 17
 100
@@ -24755,7 +24785,7 @@ AcDbSpline
   0
 SPLINE
   5
-281
+282
 330
 17
 100
@@ -24937,7 +24967,7 @@ AcDbSpline
   0
 POLYLINE
   5
-282
+283
 330
 17
 100
@@ -24959,9 +24989,9 @@ AcDb2dPolyline
   0
 VERTEX
   5
-283
+284
 330
-282
+283
 100
 AcDbEntity
   8
@@ -24981,9 +25011,9 @@ AcDb2dVertex
   0
 VERTEX
   5
-284
+285
 330
-282
+283
 100
 AcDbEntity
   8
@@ -25003,9 +25033,9 @@ AcDb2dVertex
   0
 VERTEX
   5
-285
+286
 330
-282
+283
 100
 AcDbEntity
   8
@@ -25025,9 +25055,9 @@ AcDb2dVertex
   0
 SEQEND
   5
-286
+287
 330
-282
+283
 100
 AcDbEntity
   8
@@ -25035,7 +25065,7 @@ GEOMETRY
   0
 LINE
   5
-287
+288
 330
 17
 100
@@ -25059,7 +25089,7 @@ AcDbLine
   0
 LINE
   5
-288
+289
 330
 17
 100
@@ -25083,7 +25113,7 @@ AcDbLine
   0
 LINE
   5
-289
+28A
 330
 17
 100
@@ -25107,7 +25137,7 @@ AcDbLine
   0
 LINE
   5
-28A
+28B
 330
 17
 100
@@ -25131,7 +25161,7 @@ AcDbLine
   0
 LINE
   5
-28B
+28C
 330
 17
 100
@@ -25155,7 +25185,7 @@ AcDbLine
   0
 LINE
   5
-28C
+28D
 330
 17
 100
@@ -25179,7 +25209,7 @@ AcDbLine
   0
 TEXT
   5
-28D
+28E
 330
 17
 100
@@ -25213,7 +25243,7 @@ AcDbText
   0
 LINE
   5
-28E
+28F
 330
 17
 100
@@ -25237,7 +25267,7 @@ AcDbLine
   0
 LINE
   5
-28F
+290
 330
 17
 100
@@ -25261,7 +25291,7 @@ AcDbLine
   0
 LINE
   5
-290
+291
 330
 17
 100
@@ -25285,7 +25315,7 @@ AcDbLine
   0
 LINE
   5
-291
+292
 330
 17
 100
@@ -25309,7 +25339,7 @@ AcDbLine
   0
 LINE
   5
-292
+293
 330
 17
 100
@@ -25333,7 +25363,7 @@ AcDbLine
   0
 TEXT
   5
-293
+294
 330
 17
 100
@@ -25365,7 +25395,7 @@ AcDbText
   0
 TEXT
   5
-294
+295
 330
 17
 100
@@ -25395,7 +25425,7 @@ AcDbText
   0
 TEXT
   5
-295
+296
 330
 17
 100
@@ -25425,7 +25455,7 @@ AcDbText
   0
 LINE
   5
-296
+297
 330
 17
 100
@@ -25449,7 +25479,7 @@ AcDbLine
   0
 TEXT
   5
-297
+298
 330
 17
 100
@@ -25479,7 +25509,7 @@ AcDbText
   0
 HATCH
   5
-298
+299
 330
 17
 100
@@ -25569,7 +25599,7 @@ ANSI31
   0
 HATCH
   5
-299
+29A
 330
 17
 100
@@ -25663,7 +25693,7 @@ ANSI31
   0
 LWPOLYLINE
   5
-29A
+29B
 330
 17
 100
@@ -25703,7 +25733,7 @@ AcDbPolyline
   0
 LINE
   5
-29B
+29C
 330
 17
 100
@@ -25727,7 +25757,7 @@ AcDbLine
   0
 LINE
   5
-29C
+29D
 330
 17
 100
@@ -25751,7 +25781,7 @@ AcDbLine
   0
 LINE
   5
-29D
+29E
 330
 17
 100
@@ -25775,7 +25805,7 @@ AcDbLine
   0
 LINE
   5
-29E
+29F
 330
 17
 100
@@ -25799,7 +25829,7 @@ AcDbLine
   0
 LINE
   5
-29F
+2A0
 330
 17
 100
@@ -25823,7 +25853,7 @@ AcDbLine
   0
 LINE
   5
-2A0
+2A1
 330
 17
 100
@@ -25847,7 +25877,7 @@ AcDbLine
   0
 LINE
   5
-2A1
+2A2
 330
 17
 100
@@ -25871,7 +25901,7 @@ AcDbLine
   0
 TEXT
   5
-2A2
+2A3
 330
 17
 100
@@ -25905,7 +25935,7 @@ AcDbText
   0
 LINE
   5
-2A3
+2A4
 330
 17
 100
@@ -25929,7 +25959,7 @@ AcDbLine
   0
 LINE
   5
-2A4
+2A5
 330
 17
 100
@@ -25953,7 +25983,7 @@ AcDbLine
   0
 LINE
   5
-2A5
+2A6
 330
 17
 100
@@ -25977,7 +26007,7 @@ AcDbLine
   0
 LINE
   5
-2A6
+2A7
 330
 17
 100
@@ -26001,7 +26031,7 @@ AcDbLine
   0
 LINE
   5
-2A7
+2A8
 330
 17
 100
@@ -26025,7 +26055,7 @@ AcDbLine
   0
 TEXT
   5
-2A8
+2A9
 330
 17
 100
@@ -26057,7 +26087,7 @@ AcDbText
   0
 TEXT
   5
-2A9
+2AA
 330
 17
 100
@@ -26087,7 +26117,7 @@ AcDbText
   0
 TEXT
   5
-2AA
+2AB
 330
 17
 100
@@ -26117,7 +26147,7 @@ AcDbText
   0
 LINE
   5
-2AB
+2AC
 330
 17
 100
@@ -26141,7 +26171,7 @@ AcDbLine
   0
 TEXT
   5
-2AC
+2AD
 330
 17
 100
@@ -26171,7 +26201,7 @@ AcDbText
   0
 SPLINE
   5
-2AD
+2AE
 330
 17
 100
@@ -26497,7 +26527,7 @@ AcDbSpline
   0
 SPLINE
   5
-2AE
+2AF
 330
 17
 100
@@ -26823,7 +26853,7 @@ AcDbSpline
   0
 CIRCLE
   5
-2AF
+2B0
 330
 17
 100
@@ -26843,7 +26873,7 @@ AcDbCircle
   0
 SPLINE
   5
-2B0
+2B1
 330
 17
 100
@@ -26905,7 +26935,7 @@ AcDbSpline
   0
 SPLINE
   5
-2B1
+2B2
 330
 17
 100
@@ -26967,7 +26997,7 @@ AcDbSpline
   0
 SPLINE
   5
-2B2
+2B3
 330
 17
 100
@@ -27029,7 +27059,7 @@ AcDbSpline
   0
 POLYLINE
   5
-2B3
+2B4
 330
 17
 100
@@ -27051,9 +27081,9 @@ AcDb2dPolyline
   0
 VERTEX
   5
-2B4
+2B5
 330
-2B3
+2B4
 100
 AcDbEntity
   8
@@ -27073,9 +27103,9 @@ AcDb2dVertex
   0
 VERTEX
   5
-2B5
+2B6
 330
-2B3
+2B4
 100
 AcDbEntity
   8
@@ -27095,9 +27125,9 @@ AcDb2dVertex
   0
 VERTEX
   5
-2B6
+2B7
 330
-2B3
+2B4
 100
 AcDbEntity
   8
@@ -27117,9 +27147,9 @@ AcDb2dVertex
   0
 VERTEX
   5
-2B7
+2B8
 330
-2B3
+2B4
 100
 AcDbEntity
   8
@@ -27139,9 +27169,9 @@ AcDb2dVertex
   0
 SEQEND
   5
-2B8
+2B9
 330
-2B3
+2B4
 100
 AcDbEntity
   8
@@ -27149,7 +27179,7 @@ GEOMETRY
   0
 LWPOLYLINE
   5
-2B9
+2BA
 330
 17
 100
@@ -27185,7 +27215,7 @@ AcDbPolyline
   0
 LWPOLYLINE
   5
-2BA
+2BB
 330
 17
 100
@@ -27221,7 +27251,7 @@ AcDbPolyline
   0
 LINE
   5
-2BB
+2BC
 330
 17
 100
@@ -27245,7 +27275,7 @@ AcDbLine
   0
 LINE
   5
-2BC
+2BD
 330
 17
 100
@@ -27269,7 +27299,7 @@ AcDbLine
   0
 LINE
   5
-2BD
+2BE
 330
 17
 100
@@ -27293,7 +27323,7 @@ AcDbLine
   0
 LINE
   5
-2BE
+2BF
 330
 17
 100
@@ -27317,7 +27347,7 @@ AcDbLine
   0
 LINE
   5
-2BF
+2C0
 330
 17
 100
@@ -27341,7 +27371,7 @@ AcDbLine
   0
 SPLINE
   5
-2C0
+2C1
 330
 17
 100
@@ -27403,7 +27433,7 @@ AcDbSpline
   0
 SPLINE
   5
-2C1
+2C2
 330
 17
 100
@@ -27465,7 +27495,7 @@ AcDbSpline
   0
 SPLINE
   5
-2C2
+2C3
 330
 17
 100
@@ -27527,7 +27557,7 @@ AcDbSpline
   0
 POLYLINE
   5
-2C3
+2C4
 330
 17
 100
@@ -27549,9 +27579,9 @@ AcDb2dPolyline
   0
 VERTEX
   5
-2C4
+2C5
 330
-2C3
+2C4
 100
 AcDbEntity
   8
@@ -27571,9 +27601,9 @@ AcDb2dVertex
   0
 VERTEX
   5
-2C5
+2C6
 330
-2C3
+2C4
 100
 AcDbEntity
   8
@@ -27593,9 +27623,9 @@ AcDb2dVertex
   0
 VERTEX
   5
-2C6
+2C7
 330
-2C3
+2C4
 100
 AcDbEntity
   8
@@ -27615,9 +27645,9 @@ AcDb2dVertex
   0
 VERTEX
   5
-2C7
+2C8
 330
-2C3
+2C4
 100
 AcDbEntity
   8
@@ -27637,9 +27667,9 @@ AcDb2dVertex
   0
 SEQEND
   5
-2C8
+2C9
 330
-2C3
+2C4
 100
 AcDbEntity
   8
@@ -27647,7 +27677,7 @@ GEOMETRY
   0
 LWPOLYLINE
   5
-2C9
+2CA
 330
 17
 100
@@ -27683,7 +27713,7 @@ AcDbPolyline
   0
 LWPOLYLINE
   5
-2CA
+2CB
 330
 17
 100
@@ -27719,7 +27749,7 @@ AcDbPolyline
   0
 LINE
   5
-2CB
+2CC
 330
 17
 100
@@ -27743,7 +27773,7 @@ AcDbLine
   0
 LINE
   5
-2CC
+2CD
 330
 17
 100
@@ -27767,7 +27797,7 @@ AcDbLine
   0
 LINE
   5
-2CD
+2CE
 330
 17
 100
@@ -27791,7 +27821,7 @@ AcDbLine
   0
 LINE
   5
-2CE
+2CF
 330
 17
 100
@@ -27815,7 +27845,7 @@ AcDbLine
   0
 LINE
   5
-2CF
+2D0
 330
 17
 100
@@ -27839,7 +27869,7 @@ AcDbLine
   0
 LINE
   5
-2D0
+2D1
 330
 17
 100
@@ -27863,7 +27893,7 @@ AcDbLine
   0
 LINE
   5
-2D1
+2D2
 330
 17
 100
@@ -27887,7 +27917,7 @@ AcDbLine
   0
 LINE
   5
-2D2
+2D3
 330
 17
 100
@@ -27911,7 +27941,7 @@ AcDbLine
   0
 LINE
   5
-2D3
+2D4
 330
 17
 100
@@ -27935,7 +27965,7 @@ AcDbLine
   0
 LINE
   5
-2D4
+2D5
 330
 17
 100
@@ -27959,7 +27989,7 @@ AcDbLine
   0
 TEXT
   5
-2D5
+2D6
 330
 17
 100
@@ -27991,7 +28021,7 @@ AcDbText
   0
 TEXT
   5
-2D6
+2D7
 330
 17
 100
@@ -28023,7 +28053,7 @@ AcDbText
   0
 LWPOLYLINE
   5
-2D7
+2D8
 330
 17
 100
@@ -28059,30 +28089,6 @@ AcDbPolyline
   0
 LINE
   5
-2D8
-330
-17
-100
-AcDbEntity
-  8
-GEOMETRY
-100
-AcDbLine
- 10
-11.811023622047244
- 20
-1.7322834645669292
- 30
-0.0
- 11
-16.22047244094488
- 21
-1.7322834645669292
- 31
-0.0
-  0
-LINE
-  5
 2D9
 330
 17
@@ -28095,13 +28101,13 @@ AcDbLine
  10
 11.811023622047244
  20
-1.1023622047244095
+1.7322834645669292
  30
 0.0
  11
 16.22047244094488
  21
-1.1023622047244095
+1.7322834645669292
  31
 0.0
   0
@@ -28119,6 +28125,30 @@ AcDbLine
  10
 11.811023622047244
  20
+1.1023622047244095
+ 30
+0.0
+ 11
+16.22047244094488
+ 21
+1.1023622047244095
+ 31
+0.0
+  0
+LINE
+  5
+2DB
+330
+17
+100
+AcDbEntity
+  8
+GEOMETRY
+100
+AcDbLine
+ 10
+11.811023622047244
+ 20
 0.7086614173228346
  30
 0.0
@@ -28131,7 +28161,7 @@ AcDbLine
   0
 LINE
   5
-2DB
+2DC
 330
 17
 100
@@ -28155,7 +28185,7 @@ AcDbLine
   0
 TEXT
   5
-2DC
+2DD
 330
 17
 100
@@ -28185,7 +28215,7 @@ AcDbText
   0
 TEXT
   5
-2DD
+2DE
 330
 17
 100
@@ -28215,7 +28245,7 @@ AcDbText
   0
 TEXT
   5
-2DE
+2DF
 330
 17
 100
@@ -28245,7 +28275,7 @@ AcDbText
   0
 TEXT
   5
-2DF
+2E0
 330
 17
 100
@@ -28275,7 +28305,7 @@ AcDbText
   0
 TEXT
   5
-2E0
+2E1
 330
 17
 100
@@ -28305,7 +28335,7 @@ AcDbText
   0
 TEXT
   5
-2E1
+2E2
 330
 17
 100
@@ -28335,7 +28365,7 @@ AcDbText
   0
 TEXT
   5
-2E2
+2E3
 330
 17
 100
@@ -28365,7 +28395,7 @@ AcDbText
   0
 TEXT
   5
-2E3
+2E4
 330
 17
 100
@@ -28395,7 +28425,7 @@ AcDbText
   0
 TEXT
   5
-2E4
+2E5
 330
 17
 100
@@ -28425,7 +28455,7 @@ AcDbText
   0
 TEXT
   5
-2E5
+2E6
 330
 17
 100
@@ -28443,7 +28473,7 @@ AcDbText
  40
 0.051023622047244095
   1
-9 — measured setting out; chain closed to 18 ft 11 in; ceiling 9 ft 1
+10 — sill confirmed at 2 ft 3 in; rail datum fixed at 686
  11
 11.929133858267717
  21
@@ -28455,7 +28485,7 @@ AcDbText
   0
 TEXT
   5
-2E6
+2E7
 330
 17
 100
@@ -28485,7 +28515,7 @@ AcDbText
   0
 TEXT
   5
-2E7
+2E8
 330
 17
 100
@@ -29603,7 +29633,7 @@ CREATED_BY_EZDXF
   3
 WRITTEN_BY_EZDXF
 350
-2EA
+2EB
   0
 DICTIONARYVAR
   5
@@ -29615,7 +29645,7 @@ DictionaryVariables
 280
 0
   1
-1.4.2 @ 2026-09-18T09:24:07.923510+00:00
+1.4.2 @ 2026-09-18T09:30:41.791246+00:00
   0
 VISUALSTYLE
   5
@@ -30319,7 +30349,7 @@ X-Ray
   0
 DICTIONARYVAR
   5
-2EA
+2EB
 330
 2D
 100
@@ -30327,7 +30357,7 @@ DictionaryVariables
 280
 0
   1
-1.4.2 @ 2026-09-18T09:24:07.965613+00:00
+1.4.2 @ 2026-09-18T09:30:41.833139+00:00
   0
 ENDSEC
   0

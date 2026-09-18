@@ -4,7 +4,7 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const WALL = {
-  rev: "7 — wall 14 ft 11 in; centre panel = window bay; ceiling 9 ft 1",
+  rev: "8 — sill confirmed at 2 ft 3 in; datum fixed at 686",
   date: "18.09.2026",
   W: 4547, H: 2769,            // 14 ft 11 in wall, 9 ft 1 in ceiling (measured on site)
   skirt: 120,                  // skirting line on the cupboard fronts
@@ -295,7 +295,7 @@ const WALL = {
 
   // Notes
   s1 += heading(318, 170, "NOTES", "REVISION 2", 40);
-  ["Wall 14 ft 11 in, ceiling 9 ft 1 in (measured).", "Centre panel set equal to the window bay so the two", "   pilasters frame a matched pair; the bookcase takes", "   the remainder as the anchor at the end of the wall.", "Counter datum 686 is PROVISIONAL, pending the sill.", "Window measured: 4 ft wide, 5 ft 5 in tall,", "   sill 2 ft 3 in (686), hard into the right corner.", "Counter top set to the sill at 686 — this datum", "   runs on round to the right wall rail.", "Refs: 1 fluted pilasters + moulded panel; 2 block-and-", "   dentil cornice, no carving; 3 band panels over every", "   bay, twin sconces, pedestals forward, no arch.",
+  ["Wall 14 ft 11 in, ceiling 9 ft 1 in (measured).", "Centre panel set equal to the window bay so the two", "   pilasters frame a matched pair; the bookcase takes", "   the remainder as the anchor at the end of the wall.", "Window measured: 4 ft wide, 5 ft 5 in tall, hard into", "   the right corner. Sill 2 ft 3 in (686) floor to the", "   underside of the frame — CONFIRMED.", "Counter top is set to the sill at 686, so the two are", "   one surface; this datum runs on round to the right", "   wall rail.", "Refs: 1 fluted pilasters + moulded panel; 2 block-and-", "   dentil cornice, no carving; 3 band panels over every", "   bay, twin sconces, pedestals forward, no arch.",
    "Cupboards under all three bays. Gold on handles only."]
     .forEach((n, i) => { s1 += text(318, 181 + i * 4.1, n, { size: 1.55 }); });
   s1 += titleBlock({ title: "STUDY WALL — GENERAL ARRANGEMENT", sub: "Elevation · Plan · Section", date: K.date, rev: K.rev, dwg: "AST-DR-005" });

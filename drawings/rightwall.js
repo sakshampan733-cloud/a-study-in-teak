@@ -4,7 +4,7 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const RWALL = {
-  rev: "9 — measured setting out; chain closed to 18 ft 11 in; ceiling 9 ft 1",
+  rev: "10 — sill confirmed at 2 ft 3 in; rail datum fixed at 686",
   date: "18.09.2026",
   run: 4217,                   // corner to the door OPENING. Frame at 4141 (13 ft 7 in) + 76 architrave; chain closes to 18 ft 11 in
   H: 2769,                     // 9 ft 1 in ceiling, level throughout
@@ -205,7 +205,7 @@ const RWALL = {
   s += heading(318, 180, "NOTES", `REVISION ${K.rev.split(" ")[0]}`, 40);
   ["Option C: 5 equal panels, lamps in 1, 3 and 5.", "Skirting is white marble, 4 in, already laid.", "One narrow panel on the 2 ft 4 in wall past the door.", "Moulding, rail and skirting painted the wall colour.",
    "Rail is the study counter band carried round the", "   corner — same 646–686 height, same 4 reeds.", "Short and tall panels share the same centres.",
-   "Measured: 13 ft 6 in corner to frame, 3 ft frame,", "   2 ft 4 in return, overall 18 ft 11 in. The 1 in goes", "   into the long run to the frame.", "Panelling starts clear of the study unit: 280 (11 in)", "   return, then a 150 (6 in) gap, then panel 1.", "Rail datum 686 is PROVISIONAL, pending the sill.", "   keeping the stiles 150 and the panels equal."]
+   "Measured: 13 ft 6 in corner to frame, 3 ft frame,", "   2 ft 4 in return, overall 18 ft 11 in. The 1 in goes", "   into the long run to the frame.", "Panelling starts clear of the study unit: 280 (11 in)", "   return, then a 150 (6 in) gap, then panel 1.", "Rail datum 686 confirmed — set by the window sill at", "   2 ft 3 in, carried round from the study counter.", "   keeping the stiles 150 and the panels equal."]
     .forEach((n, i) => { s += text(318, 191 + i * 4.3, n, { size: 1.55 }); });
 
   // Details along the bottom

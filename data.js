@@ -216,11 +216,11 @@ window.PROJECT = {
         need: "",
       },
       {
-        id: "sill-datum", name: "The window sill height does not reconcile", status: "blocking",
-        what: "Three measurements were taken of the same window and they do not add up to the ceiling. Ceiling 9 ft 1 in (109 in). Window 5 ft 5 in tall (65 in). Wall above the window 15 in. Those two leave 29 in — 2 ft 5 in — for the sill. The sill has separately been given as 2 ft 3 in and as 3 ft 4 in.",
+        id: "sill-datum", name: "The window sill height did not reconcile", status: "solved",
+        what: "Three measurements of the same window did not add up to the ceiling, and the sill was given variously as 2 ft 3 in and 3 ft 4 in. Re-measured properly — floor to the underside of the window frame — it is 2 ft 3 in.",
         effect: "The sill sets the datum line that runs round the room — the study counter, the cupboard tops and the right wall rail all land on it. Two drawings are built on that number. It cannot be guessed.",
-        doing: "Both drawings held at their last state until one measurement is confirmed.",
-        need: "One tape measure, floor to the top of the sill. Everything else follows from it.",
+        doing: "Closed. The datum is fixed at 686, which is what both drawings were already built on, so nothing had to be redrawn. The wall above the window works out at about 1 ft 5 in rather than the 15 in first paced — two inches, which is ordinary slack.",
+        need: "",
       },
       {
         id: "partition-square", name: "The partition sits between two walls that are not parallel", status: "open",
@@ -397,7 +397,7 @@ window.PROJECT = {
             { label: "Wood", inherit: "wood" },
             { label: "Polish", inherit: "polish" },
             { label: "Dimensions", value: "Wall 14 ft 11 in (4547), ceiling 9 ft 1 in (2769). The unit comes 11 in (280) off the wall; pilasters stand 40 proud of it, pedestals 50 proud of the counter. Bays are set out from the window: bookcase 1489, pilaster 240, centre panel 1289, pilaster 240, window bay 1289 — the centre panel is set equal to the window bay so the two pilasters frame a matched pair." },
-            { label: "Window", value: "Measured: 4 ft wide (1219) by 5 ft 5 in tall (1651). Sill 2 ft 3 in (686) off the floor, head at 2337, and 1 ft 3 in of wall above it to the ceiling. Hard into the right-hand corner — no return. The three measurements add to 8 ft 11 in against a 9 ft ceiling; the inch is measuring slack." },
+            { label: "Window", value: "Measured: 4 ft wide (1219) by 5 ft 5 in tall (1651). Sill 2 ft 3 in (686) from the floor to the underside of the frame, head at 2337, leaving about 1 ft 5 in of wall above it to the 9 ft 1 in ceiling. Hard into the right-hand corner — no return on that side." },
           ],
           questions: [
             "Does the panelling and cornice run over the window too, so the wall reads as one piece?",
