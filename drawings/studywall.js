@@ -4,7 +4,7 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const WALL = {
-  rev: "9 — curtain shown, tracked off the window head",
+  rev: "9 — sill datum confirmed at 686",
   date: "19.09.2026",
   W: 4547, H: 2769,            // 14 ft 11 in wall, 9 ft 1 in ceiling (measured on site)
   skirt: 120,                  // skirting line on the cupboard fronts
@@ -178,26 +178,6 @@ const WALL = {
     return o;
   }
 
-  // Curtain — the track sits at the window head, not the ceiling, and the curtain falls to the
-  // floor. The window is hard into the right corner, so it can only gather to the LEFT.
-  function curtain(th) {
-    const [w0, w1] = xWin, x1 = w1 + Math.min(WN.arch, WN.fromRight);
-    const stack0 = w0 - 360, stack1 = w0 + 250;                 // where it gathers when drawn back
-    const yH = WN.head + WN.arch, n = 7;
-    let o = "";
-    // the track, boxed, running the full width so the pair can close over the glass
-    o += `<rect x="${f(stack0 - 40)}" y="${f(ey(yH + 52))}" width="${f(x1 - stack0 + 40)}" height="52" fill="#fff" stroke-width="${th * 2}"/>`;
-    o += `<line x1="${f(stack0 - 40)}" y1="${f(ey(yH + 14))}" x2="${f(x1)}" y2="${f(ey(yH + 14))}" stroke-width="${th * 0.7}"/>`;
-    // the curtain itself, gathered back to the left, falling to the floor
-    o += `<path d="M ${f(stack0)} ${f(ey(yH))} L ${f(stack1)} ${f(ey(yH))} L ${f(stack1 + 30)} ${f(ey(0))} L ${f(stack0 - 10)} ${f(ey(0))} Z" fill="#fff" stroke-width="${th * 2}"/>`;
-    for (let i = 1; i < n; i++) {
-      const u = i / n, xT = stack0 + (stack1 - stack0) * u, xB = stack0 - 10 + (stack1 + 30 - (stack0 - 10)) * u, bow = (i % 2 ? 26 : -26);
-      o += `<path d="M ${f(xT)} ${f(ey(yH))} C ${f(xT + bow)} ${f(ey(yH * 0.66))} ${f(xB - bow)} ${f(ey(yH * 0.28))} ${f(xB)} ${f(ey(0))}" fill="none" stroke-width="${th * 1.1}"/>`;
-    }
-    o += `<line x1="${f(stack0 - 10)}" y1="${f(ey(90))}" x2="${f(stack1 + 27)}" y2="${f(ey(90))}" stroke-width="${th * 1}"/>`;
-    return o;
-  }
-
   // Cupboards under all three bays (bookcase, centre panel, window), each bay with its own reeded counter
   // that dies into the full-height pilasters.
   function baseBand(th) {
@@ -212,7 +192,7 @@ const WALL = {
   }
 
   function elevation(th) {
-    return baseBand(th) + bookcase(th) + centrePanel(th) + windowZone(th) + pilaster(xP1[0], th) + pilaster(xP2[0], th) + entablature(0, K.W, th) + curtain(th) +
+    return baseBand(th) + bookcase(th) + centrePanel(th) + windowZone(th) + pilaster(xP1[0], th) + pilaster(xP2[0], th) + entablature(0, K.W, th) +
       sconce((xP1[0] + xP1[1]) / 2, th) + sconce((xP2[0] + xP2[1]) / 2, th) +
       `<line x1="-150" y1="${ey(0)}" x2="${K.W + 150}" y2="${ey(0)}" stroke-width="${th * 5}"/><line x1="-150" y1="${ey(K.H)}" x2="${K.W + 150}" y2="${ey(K.H)}" stroke-width="${th * 3}" stroke-dasharray="40 20"/>`;
   }
@@ -318,7 +298,7 @@ const WALL = {
 
   // Notes
   s1 += heading(318, 166, "NOTES", `REVISION ${K.rev.split(" ")[0]}`, 40);
-  ["Wall 14 ft 11 in, ceiling 9 ft 1 in (measured).", "Centre panel set equal to the window bay so the two", "   pilasters frame a matched pair; the bookcase takes", "   the remainder as the anchor at the end of the wall.", "Window measured: 4 ft wide, 5 ft 5 in tall, hard into", "   the right corner. Sill 2 ft 3 in (686) — CONFIRMED.", "Curtain tracked off the window head, not the ceiling,", "   and falling to the floor. It can only gather LEFT.", "OPEN: sill 2 ft 3 + height 5 ft 5 + your 1 ft 3 to the", "   ceiling makes 8 ft 11, two inches short of the 9 ft 1", "   ceiling. Sill and height are drawn as measured, so the", "   head falls 1 ft 5 down, not 1 ft 3. Laser it.", "Counter top is set to the sill at 686, so the two are", "   one surface; this datum runs on round to the right", "   wall rail.", "Cupboards under all three bays. Gold on handles only."]
+  ["Wall 14 ft 11 in, ceiling 9 ft 1 in (measured).", "Centre panel set equal to the window bay so the two", "   pilasters frame a matched pair; the bookcase takes", "   the remainder as the anchor at the end of the wall.", "Window measured: 4 ft wide, 5 ft 5 in tall, hard into", "   the right corner. Sill 2 ft 3 in (686) — CONFIRMED.", "OPEN: sill 2 ft 3 + height 5 ft 5 + your 1 ft 3 to the", "   ceiling makes 8 ft 11, two inches short of the 9 ft 1", "   ceiling. Sill and height are drawn as measured, so the", "   head falls 1 ft 5 down, not 1 ft 3. Laser it.", "Counter top is set to the sill at 686, so the two are", "   one surface; this datum runs on round to the right", "   wall rail.", "Cupboards under all three bays. Gold on handles only."]
     .forEach((n, i) => { s1 += text(318, 177 + i * 4.1, n, { size: 1.55 }); });
   s1 += titleBlock({ title: "STUDY WALL — GENERAL ARRANGEMENT", sub: "Elevation · Plan · Section", date: K.date, rev: K.rev, dwg: "AST-DR-005" });
 
