@@ -60,6 +60,138 @@ window.PROJECT = {
     ],
   },
 
+  // The reasoning behind the room — the rules every decision is judged against, and where the room
+  // currently stands against each one. Rules appear here in full and again on the card they govern.
+  principles: {
+    intro: "The room is being built to a set of rules rather than assembled and then adjusted. These are the rules, why each one exists, and — honestly — where the room stands against it today.",
+    groups: [
+      {
+        n: "01", name: "Light", line: "The one that decides whether everything else reads as warm.",
+        rules: [
+          {
+            id: "warmth", t: "Light warm, or lose everything else",
+            body: "Colour temperature decides whether every other warm decision in this room actually reads as warm. 4000K is neutral white — the light of an office, a clinic, a showroom. On teak it pulls the red out and leaves the grain faintly grey-green; on parchment it turns the cream clinical. 2700K for the room. 3000K at the very most, and only if the study half wants to be crisper. Never two temperatures in one sightline.",
+            check: "Currently specified at 4000K throughout, cove and focus lights both. Nothing is bought yet, so this is still free — and it is the single biggest thing standing between this room and the feeling it is aiming at. The 1930s-40s reference argues the same way: those rooms were lit by lamps and filament, nowhere near 4000K.",
+            at: ["lighting"],
+          },
+          {
+            id: "cri", t: "CRI 90, or the stone was wasted",
+            body: "Colour rendering, not brightness. Under a low-CRI lamp marble veining goes flat and grey and wood grain loses its depth. CRI 90+ on every fitting is the difference between a material looking expensive and looking printed.",
+            check: "Not yet specified anywhere. It belongs on the list before the shop visit.",
+            at: ["lighting", "veneer"],
+          },
+          {
+            id: "layers", t: "Three layers, never one",
+            body: "Ambient (the cove), task (desk, mirror, wardrobe), and low pools for the evening — lamps below eye level, 2200 to 2700K. A room lit only from the ceiling reads as a corridor no matter what is in it. The evening layer is the one that makes a room feel like somewhere lived in rather than somewhere visited.",
+            check: "The cove and the focus lights cover the first two. The right wall lamps are the beginning of the third — protect them when the plan is redrawn.",
+            at: ["lighting", "right-wall"],
+          },
+          {
+            id: "dim", t: "Everything on a dimmer",
+            body: "A calm room is one that can be turned down. 8W of focus light at full is a lot of punch in a room that is also a bedroom. Every circuit dimmable, and the cove on its own dimmer, separate from the rest.",
+            check: "The dimmer groups are already planned. Carry them across when the lighting plan is redone.",
+            at: ["lighting"],
+          },
+        ],
+      },
+      {
+        n: "02", name: "Colour", line: "Two different rules doing two different jobs.",
+        rules: [
+          {
+            id: "split", t: "Sixty, thirty, ten — in colour, not only in wood",
+            body: "The wood scheme already splits the timber. Colour needs its own split: roughly 60 per cent warm neutral (cream walls, parchment, ceiling), 30 per cent wood, 10 per cent accent. A room can pass one of these rules and fail the other, which is why they are counted separately.",
+            at: ["veneer"],
+          },
+          {
+            id: "accent", t: "Metal is punctuation. Find the colour.",
+            body: "Teak, cream, parchment, white marble and brass is a disciplined scheme and an entirely neutral one — and neutral schemes are exactly the ones that end up feeling like a good hotel rather than someone's home. Hotels are calm and nobody lives in them. One colour, chosen by you, repeated three times around the room so it reads as intentional rather than accidental. Deep green, oxblood, ochre and indigo all sit naturally with teak. Put it in textiles, where changing your mind costs an afternoon instead of a wall.",
+            check: "There is currently no colour anywhere in the room. This is the real gap in the scheme.",
+            at: ["bed", "curtains"],
+          },
+          {
+            id: "value", t: "Dark low, light high",
+            body: "Visual weight at the bottom, lightness at the top: darkest at the floor, mid on the walls, lightest at the ceiling. It is why some rooms feel settled and others feel top-heavy. The part to protect is the middle — teak running full height on more than one wall will close the room in.",
+            check: "The floor is mid-dark and the ceiling is light, so both ends are right. The 610 datum running through the study cupboards, the right wall rail and the partition keeps the dark band low, which is the correct instinct. Hold it.",
+            at: ["walls", "study"],
+          },
+        ],
+      },
+      {
+        n: "03", name: "Surface", line: "How much the room reflects, and how many times the eye stops.",
+        rules: [
+          {
+            id: "contrast", t: "Count the contrast moments",
+            body: "Every hard light-against-dark edge is a place the eye stops, and calm is a low number of stops. They are worth counting across the whole room rather than judging one at a time.",
+            check: "Five already: the white marble skirting, the white rail, white curtains against teak, the parchment-to-teak junction, and the television. Nothing new gets added without something else coming out.",
+            at: ["walls", "right-wall"],
+          },
+          {
+            id: "ballast", t: "Polish needs something soft to answer it",
+            body: "Polished floor, polished skirting, polished bathroom stone, satin lacquer on the panelling. Every one of those is right on its own; together they are a great deal of reflective surface, and rooms that bounce light read as lobbies. Homes feel calm because soft things absorb light — and sound. Echo is a larger part of a room not feeling like home than most people expect. A real rug over that marble, full curtains and an upholstered or leather bed are structural here, not decoration.",
+            check: "The curtains and the leather bed are already heading the right way. A rug is the missing piece, and nothing has been said about one yet.",
+            at: ["veneer", "bed"],
+          },
+          {
+            id: "texture", t: "Texture, not pattern",
+            body: "Calm rooms vary how surfaces feel rather than what is printed on them. Parchment, teak grain, marble veining, linen, leather and wool are already a strong set. Laying pattern on top is what tips a restrained room into a busy one.",
+            at: ["veneer", "headboard"],
+          },
+          {
+            id: "skirting", t: "The line at ankle height",
+            body: "A high-contrast horizontal running round a room at ankle height pulls the eye downward and cuts the wall away from the floor. It is the least forgiving place in a room to put contrast.",
+            check: "The white marble skirting is laid and it is staying. Skipping the study wall saved it — against teak it would have been much worse. What is left is to keep the wall paint close enough in value to the white marble that the two read as one soft base rather than a stripe, which quietly makes the paint choice more important than it looks.",
+            at: ["walls", "veneer"],
+          },
+        ],
+      },
+      {
+        n: "04", name: "Form", line: "Shape, symmetry, and what each wall is asked to do.",
+        rules: [
+          {
+            id: "curves", t: "Curves calm, corners alert",
+            body: "This one is measurable rather than taste: people rate rounded contours as safer and more pleasant with striking consistency, and sharp angles provoke a mild threat response. Spend the curves where the body passes closest — the edges walked past, sat against, reached around.",
+            check: "The curved partition ends, the curved bed back and the bullnose edges are all this rule already working. It can be pushed further: a rounded mirror, a curved chair back.",
+            at: ["partition", "bed", "dressing-mirror"],
+          },
+          {
+            id: "symmetry", t: "Symmetry to rest, asymmetry to work",
+            body: "Symmetry reads as settled and lets the eye stop searching; asymmetry keeps it moving. Which one is wanted depends entirely on what the wall is for. The sleeping half can afford to be symmetrical; the working half can afford to be looser.",
+            check: "A symmetrical parchment bed wall, one even shade with no panel darker than its neighbour, is right for what that wall is for.",
+            at: ["headboard", "study"],
+          },
+          {
+            id: "onejob", t: "One job per wall",
+            body: "Give each wall a single thing to do. The moment a wall is asked to store, display and divide all at once it stops being restful and starts being a fixture.",
+            check: "Study wall stores and works. Bed wall holds the bed. Right wall panels and leads through to the dressing room. Left wall holds one painting. This is the rule most rooms break.",
+            at: ["walls", "left-wall"],
+          },
+          {
+            id: "rest", t: "Leave somewhere for the eye to rest",
+            body: "Every wall doing something is exhausting. Blank wall is not wasted wall — it is what makes the considered things legible. A plain wall beside a worked one flatters it.",
+            check: "The left wall going plain, with an air-conditioner high on it ruling out anything full height, is a gain rather than a compromise.",
+            at: ["left-wall"],
+          },
+        ],
+      },
+      {
+        n: "05", name: "The two sightlines", line: "The only two views guaranteed to be seen every day.",
+        rules: [
+          {
+            id: "door", t: "What you see from the door",
+            body: "The view from the doorway sets the impression of the room every single time it is entered, and it is the one view that cannot be avoided. It should land on the calmest thing in the room — not on the working half and its cables.",
+            at: ["walls", "study"],
+          },
+          {
+            id: "pillow", t: "What you see from the pillow",
+            body: "Whether the working half is visible from the bed decides whether the room can be switched off at night. That, rather than storage or a television, is the partition's true job. It is also the honest tension in the brief: the more open the partition is, the more spacious the room feels, and the less it does the one thing it is there for.",
+            check: "Unresolved — and it is the decision the partition shape should follow from, not the other way round.",
+            at: ["partition"],
+          },
+        ],
+      },
+    ],
+  },
+
   room: {
     plan: "assets/refs/room-plan-lighting-rcp.jpg",   // source: photo of the lighting / false-ceiling plan
     facts: [

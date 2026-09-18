@@ -385,3 +385,37 @@ body.sheets-dark .lb-inner.is-dwg svg { filter: invert(1) hue-rotate(180deg) bri
   .dwg svg { filter: none !important; }
   [data-decode], .reveal { visibility: visible !important; opacity: 1 !important; transform: none !important; }
 }
+
+/* ── principles: the reasoning behind the room ─────────── */
+.gline { text-align: center; color: var(--dim); max-width: 560px; margin: 0 auto 8px; }
+.rules { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+.rule { display: grid; grid-template-columns: 300px 1fr; gap: 48px; padding: 44px 0; border-bottom: 1px solid var(--hair); align-items: start; }
+.rule:last-child { border-bottom: 0; }
+.rule-l { position: sticky; top: 84px; }
+.rule-l .mono { display: block; font-size: 12px; color: var(--ember); margin-bottom: 12px; }
+.rule-t { font: 400 26px/1.08 var(--cond); text-transform: uppercase; letter-spacing: -0.02em; margin: 0; }
+.rule-b { font: 400 16px/1.55 var(--sans); letter-spacing: -0.01em; margin: 0; color: rgba(255, 255, 255, .88); }
+.rule-c { margin-top: 24px; border-left: 1px solid var(--ember); padding: 4px 0 4px 20px; }
+.rule-c .eyebrow { display: block; color: var(--ember); margin-bottom: 8px; }
+.rule-c p { margin: 0; font: 400 15px/1.5 var(--sans); color: var(--dim); }
+.rule-at { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.rule-at .mono { font-size: 12px; color: var(--steel); margin-right: 6px; }
+.rule-at .btn { height: 32px; padding: 0 15px; font-size: 13px; }
+
+/* the same rules, repeated on the card they govern */
+.pointers { max-width: 1100px; margin: 44px auto 0; padding: 0 24px; }
+.pointers-top { display: flex; align-items: center; justify-content: space-between; gap: 20px; border-bottom: 1px solid var(--hair); padding-bottom: 14px; margin-bottom: 4px; }
+.pointers-top .eyebrow::before { content: ""; display: inline-block; width: 24px; height: 1px; background: var(--ember); vertical-align: middle; margin-right: 12px; }
+.pointer { padding: 24px 0; border-bottom: 1px solid var(--hair); }
+.pointer:last-child { border-bottom: 0; }
+.pointer-n { display: block; font-size: 12px; color: var(--steel); }
+.pointer-t { font: 400 19px/1.1 var(--cond); text-transform: uppercase; letter-spacing: -0.02em; margin: 10px 0 10px; }
+.pointer-b { margin: 0; font: 400 15px/1.5 var(--sans); color: rgba(255, 255, 255, .82); max-width: 76ch; }
+.pointer-c { margin: 14px 0 0; font: 400 14px/1.5 var(--sans); color: var(--dim); border-left: 1px solid var(--steel); padding-left: 16px; max-width: 76ch; }
+.pointer-c span { display: block; font: 400 12px/1 var(--mono); text-transform: uppercase; letter-spacing: -0.02em; color: var(--ember); margin-bottom: 7px; }
+
+@media (max-width: 860px) {
+  .rule { grid-template-columns: 1fr; gap: 18px; padding: 34px 0; }
+  .rule-l { position: static; }
+  .pointers-top { flex-direction: column; align-items: flex-start; gap: 12px; }
+}

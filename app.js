@@ -41,10 +41,11 @@ function tally(list) {
   list.forEach((x) => c[statusOf(x.key, x.s)]++);
   return c;
 }
-const allTabIds = () => ["veneer", ...P.tabs.map((t) => t.id), "lighting"];
-const titleOf = (id) => (id === "veneer" ? "Materials" : id === "lighting" ? "Lighting & Switches" : id === "overview" ? "Overview" : P.tabs.find((t) => t.id === id)?.title || id);
+const allTabIds = () => ["veneer", "principles", ...P.tabs.map((t) => t.id), "lighting"];
+const titleOf = (id) => (id === "veneer" ? "Materials" : id === "principles" ? "Principles" : id === "lighting" ? "Lighting & Switches" : id === "overview" ? "Overview" : P.tabs.find((t) => t.id === id)?.title || id);
 const IMG = {
   overview: "assets/refs/desk-ref-1.jpg", veneer: "assets/refs/desk-ref-1-detail.jpg", doors: "assets/refs/door-ref-1.jpg",
+  principles: "assets/refs/paint-ref-1-warm-cream-room-sheer-curtains.jpg",
   study: "assets/refs/wall-ref-1-library-pilasters.jpg", walls: "assets/refs/walls-ref-1-panel-moulding.jpg", bedroom: "assets/refs/bed-ref-1-low-platform-bed.jpg",
   dressing: "assets/refs/wardrobe-ref-2-steel-leaded-doors-wide.jpg", bathroom: "assets/refs/bathroom-ref-1-painted-ceiling-linework.jpg", lighting: "assets/refs/wall-ref-4-dark-study-bands-sconces.jpg",
   stack: "assets/refs/wall-ref-1-library-pilasters.jpg", footer: "assets/refs/desk-ref-1-detail.jpg",
@@ -74,7 +75,7 @@ function footer() {
     <div class="footer-card">
       <span></span>
       <div style="display:flex;flex-direction:column;align-items:center;gap:18px">${mark("mk")}<div class="wordmark" data-decode>A Study in Teak</div></div>
-      <div class="footer-btns"><a class="btn" href="#overview">Overview</a><a class="btn" href="#veneer">Materials</a></div>
+      <div class="footer-btns"><a class="btn" href="#overview">Overview</a><a class="btn" href="#veneer">Materials</a><a class="btn" href="#principles">Principles</a></div>
       <div class="footer-links"><span class="dotline"></span>${P.tabs.map((t) => `<a class="nav-link" href="#${t.id}">${esc(t.title)}</a>`).join("")}<a class="nav-link" href="#lighting">Lighting</a><span class="dotline"></span></div>
       <div class="eyebrow">Rough work · finalised with the family</div>
       <div class="footer-flank l">One room, in teak</div><div class="footer-flank r">Rev. ${today}</div>
@@ -162,7 +163,7 @@ function overview() {
 }
 
 // ── pages ──
-function pageHero(id, eyebrow, title, prose) {
+function pageHero(id, eyebrow, title, prose, flankR) {
   const c = tally(itemsOf(id)), n = c.brief + c.open + c.final;
   return `<section class="hero short page-hero"><div class="hero-bg" ${bg(IMG[id] || IMG.overview)}></div>
     <div class="hero-flank l" data-decode>${esc(eyebrow)}</div>
@@ -171,12 +172,51 @@ function pageHero(id, eyebrow, title, prose) {
       <h1 class="wordmark" data-decode>${esc(title)}</h1>
       ${prose ? `<p class="prose-lg reveal">${esc(prose)}</p>` : ""}
     </div>
-    <div class="hero-flank r" data-decode>${c.final} of ${n} final</div></section>`;
+    <div class="hero-flank r" data-decode>${flankR || `${c.final} of ${n} final`}</div></section>`;
 }
 
 function nextLink(id) {
   const ids = allTabIds(), nx = ids[(ids.indexOf(id) + 1) % ids.length];
   return `<section class="next"><span class="eyebrow" data-decode>Next section</span><a href="#${nx}"><h2 class="headline" data-decode>${esc(titleOf(nx))}</h2></a><a class="btn" href="#${nx}">Continue</a></section>`;
+}
+
+const allRules = () => P.principles.groups.flatMap((g) => g.rules.map((r) => ({ ...r, gn: g.n, gname: g.name })));
+
+function atLink(a) {
+  const t = P.tabs.find((x) => x.id === a);
+  if (t) return `<a class="btn steel" href="#${a}">${esc(t.title)}</a>`;
+  if (a === "veneer" || a === "lighting") return `<a class="btn steel" href="#${a}">${esc(titleOf(a))}</a>`;
+  for (const tb of P.tabs) { const it = tb.items.find((i) => i.id === a); if (it) return `<a class="btn steel" href="#${tb.id}" data-item="${a}">${esc(it.name)}</a>`; }
+  return "";
+}
+
+// Every rule also appears on the card it governs, so the reasoning sits next to the decision.
+function pointers(id) {
+  const m = allRules().filter((r) => (r.at || []).includes(id));
+  if (!m.length) return "";
+  return `<div class="pointers reveal">
+    <div class="pointers-top"><span class="eyebrow" data-decode>The reasoning here</span><a class="btn steel" href="#principles">All principles</a></div>
+    ${m.map((r) => `<article class="pointer">
+      <span class="pointer-n mono">${esc(r.gn)} · ${esc(r.gname)}</span>
+      <h4 class="pointer-t">${esc(r.t)}</h4>
+      <p class="pointer-b">${esc(r.body)}</p>
+      ${r.check ? `<p class="pointer-c"><span>Where it stands</span>${esc(r.check)}</p>` : ""}
+    </article>`).join("")}</div>`;
+}
+
+function principles() {
+  const PR = P.principles, n = PR.groups.reduce((a, g) => a + g.rules.length, 0);
+  return pageHero("principles", "Why the room is the way it is", "Principles", PR.intro, `${n} rules`) +
+    PR.groups.map((g) => `<div class="group-label"><span class="eyebrow" data-decode>${esc(g.n)} · ${esc(g.name)}</span></div>
+      <div class="wrap"><p class="prose gline">${esc(g.line)}</p></div>
+      <div class="rules">${g.rules.map((r) => `<article class="rule reveal" id="rule-${r.id}">
+        <div class="rule-l"><span class="mono">${esc(g.n)}</span><h3 class="rule-t">${esc(r.t)}</h3></div>
+        <div class="rule-r">
+          <p class="rule-b">${esc(r.body)}</p>
+          ${r.check ? `<div class="rule-c"><span class="eyebrow">Where the room stands</span><p>${esc(r.check)}</p></div>` : ""}
+          ${(r.at || []).length ? `<div class="rule-at"><span class="mono">Applies to</span>${r.at.map(atLink).join("")}</div>` : ""}
+        </div></article>`).join("")}</div>`).join("") +
+    nextLink("principles") + footer();
 }
 
 function partValue(p) {
@@ -209,10 +249,11 @@ function tabPage(t) {
           <figure class="dwg" data-open="dwg:${d}">${D.svg}</figure>
           <div class="cad-links"><span class="mono">Editable CAD</span>${D.model === false ? "" : `<a class="btn" href="cad/${d}-model.dxf" download>DXF · true size</a>`}<a class="btn" href="cad/${d}-sheet.dxf" download>DXF · A3 sheet</a><a class="btn" href="cad/${d}.svg" download>SVG</a><button class="btn steel" data-open="dwg:${d}">Full size</button></div></div>`;
       }).join("")}</div>` : ""}
+      ${pointers(i.id)}
       ${i.notes?.length ? `<div class="asks reveal"><span class="eyebrow">Notes</span><ul class="ask-list notes">${i.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul></div>` : ""}
       ${i.questions?.length ? `<div class="asks reveal"><span class="eyebrow">Open questions</span><ul class="ask-list">${i.questions.map((q, n) => `<li><span class="badge">Q${pad2(n + 1)}</span><span>${esc(q)}</span></li>`).join("")}</ul></div>` : ""}
     </section>`).join("");
-  return pageHero(t.id, t.kicker, t.title, t.intro) + index + items + nextLink(t.id) + footer();
+  return pageHero(t.id, t.kicker, t.title, t.intro) + index + pointers(t.id) + items + nextLink(t.id) + footer();
 }
 
 function veneer() {
@@ -239,7 +280,7 @@ function veneer() {
     <div class="wrap"><p class="prose" style="text-align:center;color:var(--dim);max-width:560px;margin:0 auto 32px">${esc(P.scheme.intro)}</p>
       <div class="spec reveal">${P.scheme.rows.map((r) => `<div class="spec-row"><div class="lab">${esc(r.k)}</div><div class="val">${esc(r.v)}</div></div>`).join("")}</div></div>
     ${M.notes.length ? `<div class="asks reveal" style="margin-top:var(--gap)"><span class="eyebrow">Notes</span><ul class="ask-list notes">${M.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul></div>` : ""}` +
-    nextLink("veneer") + footer();
+    pointers("veneer") + nextLink("veneer") + footer();
 }
 
 function lighting() {
@@ -266,7 +307,7 @@ function lighting() {
     <div class="group-label"><span class="eyebrow" data-decode>02 · By zone</span></div><div class="sheets" style="margin-top:0">${zones}</div>
     <div class="group-label"><span class="eyebrow" data-decode>03 · Switch boards</span></div><div class="sheets" style="margin-top:0">${boards}</div>
     ${(L.notes || []).length ? `<div class="asks reveal" style="margin-top:var(--gap)"><span class="eyebrow">Notes</span><ul class="ask-list notes">${L.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul></div>` : ""}` +
-    nextLink("lighting") + footer();
+    pointers("lighting") + nextLink("lighting") + footer();
 }
 
 // ── drawings: dark void (default) or light paper for reading detail; remembered in this browser ──
@@ -397,10 +438,10 @@ function onScroll() {
 window.addEventListener("scroll", onScroll, { passive: true });
 
 // ── router with a soft cross-fade ──
-const current = () => { const id = location.hash.slice(1) || "overview"; return ["veneer", "lighting", ...P.tabs.map((t) => t.id)].includes(id) ? id : "overview"; };
+const current = () => { const id = location.hash.slice(1) || "overview"; return ["veneer", "principles", "lighting", ...P.tabs.map((t) => t.id)].includes(id) ? id : "overview"; };
 function render(delayMotion = 0) {
   const id = current(), t = P.tabs.find((t) => t.id === id), main = $("#main");
-  main.innerHTML = id === "veneer" ? veneer() : id === "lighting" ? lighting() : t ? tabPage(t) : overview();
+  main.innerHTML = id === "veneer" ? veneer() : id === "principles" ? principles() : id === "lighting" ? lighting() : t ? tabPage(t) : overview();
   renderChrome(id);
   document.title = `${titleOf(id)} · ${P.name}`;
   main.classList.remove("leaving"); main.classList.add("entering");
