@@ -391,9 +391,9 @@ const WALL = {
   }
 
   // 6 — band panel, pilaster head and sconce, elevation 1:20
-  s2 += heading(18, 205, "6 · BAND PANEL + SCONCE", "ELEVATION · SCALE 1:20 · SAME PANEL OVER EVERY BAY", 80);
+  s2 += heading(18, 205, "6 · BAND PANEL + SCONCE", "ELEVATION · SCALE 1:25 · SAME PANEL OVER EVERY BAY", 80);
   {
-    const s = 20, lo = SC.y - 120, x0 = BK.w - 700, x1 = xP1[1] + 700;
+    const s = 25, lo = SC.y - 120, x0 = BK.w - 700, x1 = xP1[1] + 700;
     const v = view(28 - x0 / s, 214 - (K.H - K.H) / s, s, "Band panel and sconce");
     s2 += v.g(`<clipPath id="clipBand"><rect x="${x0}" y="${ey(K.H)}" width="${x1 - x0}" height="${K.H - lo}"/></clipPath><g clip-path="url(#clipBand)">${bookcase(v.w(0.12))}${centrePanel(v.w(0.12))}${pilaster(xP1[0], v.w(0.12))}${entablature(0, K.W, v.w(0.12))}${sconce((xP1[0] + xP1[1]) / 2, v.w(0.12))}</g>`, 0.3);
     s2 += chainV([v.Y(ey(yEnt)), v.Y(ey(yBand)), v.Y(ey(yOpen))], v.X(x1) + 5, [BD.h, BD.rail], { from: v.X(x1) + 1, size: 1.3 });
