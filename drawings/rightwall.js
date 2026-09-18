@@ -4,9 +4,9 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const RWALL = {
-  rev: "14 — the door takes the recreated casing",
-  date: "18.09.2026",
-  run: 4192,                   // corner to the door OPENING. Frame face at 4141 (13 ft 6 in) + 51 lining; the moulding sits outside it
+  rev: "15 — set out from the measured 13 ft 6 in and 18 ft 11 in",
+  date: "19.09.2026",
+  run: 4166,                   // corner to the door OPENING. Frame face at 4115 (13 ft 6 in measured) + 51 lining
   H: 2769,                     // 9 ft 1 in ceiling, level throughout
   wall: 230,
   study: { w: 280, h: 646 },   // study unit 280 (11 in) deep; cupboard carcase to 646, reeded counter 646–686 on top
@@ -17,9 +17,9 @@ const RWALL = {
   bays: 5,
   lamps: [1, 3, 5],                    // lamps centred inside tall panels 1, 3 and 5
   short: { y0: 212, y1: 546 },
-  tall: { y0: 796, top: 138 },         // 2769 − 138 = 2631: panels stop level with the TOP OF THE CASING CROWN (8 ft 8 in)
+  tall: { y0: 796, top: 139 },         // 2769 − 139 = 2630: panels stop level with the TOP OF THE CASING CROWN
   door: { w: 762, h: 2311, arch: 153 }, // dressing door 2 ft 6 × 7 ft 7 in leaf; casing 2 in frame + 4 in moulding = 153 all round
-  ret: 812,                            // little wall past the door: 2 ft 4 in (711) from the frame + 76 architrave
+  ret: 838,                            // what is left of the measured 18 ft 11 in — see the OPEN note
   lamp: { y: 1290, span: 150, proj: 230 },   // twin-arm sconce, same height and family as the study wall
 };
 
@@ -78,10 +78,7 @@ const RWALL = {
     [...bays, narrow].forEach(([a, b]) => { o += panel(a, K.short.y0, b, K.short.y1, th) + panel(a, K.tall.y0, b, yTall, th); });
     K.lamps.forEach((n) => { const [a, b] = bays[n - 1]; o += sconce((a + b) / 2, th); });
     // dressing door: the casing drawn by its own sheet, dropped into place
-    o += `<g transform="translate(${f(aL)},${f(ey(window.CASING.TOPY))})">${window.CASING.draw(D.w, th, true, false)}</g>`;
-    const px0 = K.run + 110, px1 = K.run + D.w - 110;
-    o += `<g ${W(th)}>${R(px0, 1300, px1, D.h - 150)}${R(px0 + 30, 1330, px1 - 30, D.h - 180)}${R(px0, 150, px1, 1150)}${R(px0 + 30, 180, px1 - 30, 1120)}</g>`;
-    o += R(K.run + D.w - 80, 1000, K.run + D.w - 60, 1060) + Ln(K.run + D.w - 70, 1030, K.run + D.w - 190, 1030, W(th * 3));
+    o += `<g transform="translate(${f(aL)},${f(ey(window.CASING.TOPY))})">${window.CASING.draw(D.w, th, "door-narrow", false)}</g>`;
     o += `<line x1="-150" y1="${ey(0)}" x2="${L + 150}" y2="${ey(0)}" stroke-width="${th * 5}"/><line x1="-150" y1="${ey(K.H)}" x2="${L + 150}" y2="${ey(K.H)}" stroke-width="${th * 3}" stroke-dasharray="40 20"/>`;
     return o;
   }
@@ -94,7 +91,7 @@ const RWALL = {
     // door leaf opening into the bathroom, swing dashed
     o += `<g stroke-width="${th}"><rect x="${K.run + D.w - 40}" y="-${K.wall + D.w}" width="40" height="${D.w}"/><path d="M ${K.run + D.w - 40} -${K.wall + D.w} A ${D.w} ${D.w} 0 0 0 ${K.run} -${K.wall}" stroke-dasharray="${dash}"/></g>`;
     // architraves
-    [[aL, K.run], [K.run + D.w, aR]].forEach(([a, b]) => { o += `<rect x="${a}" y="0" width="${b - a}" height="22"/>`; });
+    [[aL, K.run], [K.run + D.w, aR]].forEach(([a, b]) => { o += `<rect x="${a}" y="0" width="${b - a}" height="${window.CASING.projJ}"/>`; });
     // study cupboards return
     o += `<rect x="0" y="0" width="${K.study.w}" height="600"/><line x1="0" y1="600" x2="${K.study.w}" y2="600" stroke-dasharray="${dash}" stroke-width="${th}"/>`;
     // skirting, rail (below the cut, dashed), mouldings on the wall face
@@ -206,16 +203,16 @@ const RWALL = {
   // Notes
   s += heading(318, 180, "NOTES", `REVISION ${K.rev.split(" ")[0]}`, 40);
   ["Option C: 5 equal panels, lamps in 1, 3 and 5.",
-   "One narrow panel on the 2 ft 4 in wall past the door.",
+   "One narrow panel on the wall past the door.",
    "Moulding, rail and skirting painted the wall colour.",
-   "Rail is the study counter band carried round the",
-   "   corner — same 646–686 height, same 4 reeds.",
+   "Rail is the study counter band carried round the corner.",
    "Skirting is white marble, 4 in, already laid.",
-   "Door casing is 2 in frame + 4 in moulding = 6 in, and",
-   "   its crown is at 8 ft 8 in — the tall panels stop on",
-   "   that line, not the leaf head at 7 ft 7 in.",
-   "Casing 1068 wide (3 ft 6 in): the moulding takes 4 in",
-   "   each side, leaving about 2 ft 2 in of wall past it."]
+   "Casing 2 in lining + 4 in moulding = 6 in, 1068 overall;",
+   "   crown at 8 ft 8 in, and the tall panels stop on that",
+   "   line, not the leaf head at 7 ft 7 in.",
+   "OPEN: 13 ft 6 to the frame and 18 ft 11 overall are drawn",
+   "   exactly, so a 2 in lining leaves 2 ft 7 past the door, not",
+   "   2 ft 4. A 3 in lining fits all four readings. Laser it."]
     .forEach((n, i) => { s += text(318, 191 + i * 4.3, n, { size: 1.55 }); });
 
   // Details along the bottom

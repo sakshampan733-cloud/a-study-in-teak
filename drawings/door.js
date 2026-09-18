@@ -11,7 +11,7 @@ const DOOR_TYPES = [
 ];
 
 const DOOR = {
-  rev: "4 — casing drawn as 2 in frame + 2 in moulding",
+  rev: "5 — casing 2 in frame + 4 in moulding, matching AST-DR-011",
   date: "17.09.2026",
   // D1 main door: 8 ft × 3 ft opening (2438 × 914). D2, D3: same design, 8 ft × 2 ft 6 in (2438 × 762).
   leaves: 2,          // reference is a pair of narrow leaves — pair vs single still to confirm
@@ -33,7 +33,7 @@ const DOOR = {
   knobD: 55,
   knobFromEdge: 130,
   frame: 51,          // the lining itself, 2 in on the face
-  architrave: 51,     // the moulding laid over it, another 2 in — 4 in of casing in all
+  architrave: 102,    // the moulding laid over it, another 4 in — 6 in of casing in all
 };
 
 // The wider leaf makes every detail wider too. Pick the smallest standard scale that still
@@ -106,6 +106,19 @@ function buildDoorSheet(cfg) {
     if (active) out += hardware(x + D.knobFromEdge, x + 42, lockY, thin);
     return out;
   }
+
+  // the casing sheet draws the real leaf inside its opening rather than an empty hole
+  window.DOORCASE = { frame: D.frame, mould: D.architrave };
+  window.DOORLEAF = window.DOORLEAF || {};
+  window.DOORLEAF[cfg.key] = {
+    w: D.W * D.leaves, h: D.H,
+    draw: (thin) => {
+      let o = "";
+      for (let i = 0; i < D.leaves; i++) o += leaf(i * D.W, i === 0, thin);
+      if (D.leaves === 2) o += `<line x1="${D.W + 6}" y1="0" x2="${D.W + 6}" y2="${D.H}" stroke-width="${thin}"/>`;
+      return o;
+    },
+  };
 
   let svg = frame();
 
@@ -248,8 +261,10 @@ function buildDoorSheet(cfg) {
     `   here ${D.W - 2 * D.stile} per panel. Details A, B and C serve both doors.`,
     "Solid teak frame. Veneer and polish per",
     "   Materials; polish to match the teak desk.",
-    "Casing: 2 in frame plus 2 in moulding over it, so the",
-    `   casing head sits ${D.frame + D.architrave} (4 in) above the leaf, at 7 ft 11 in.`,
+    "Casing: 2 in frame plus 4 in moulding over it, so the",
+    `   moulding head sits ${D.frame + D.architrave} (6 in) above the leaf.`,
+    "   The scallops, small mouldings and crown stand over that —",
+    "   see AST-DR-011.",
     "Hinges and lock not yet designed.",
   ].forEach((n, i) => { svg += text(kx, 105 + i * 4.2, n, { size: 1.7 }); });
 

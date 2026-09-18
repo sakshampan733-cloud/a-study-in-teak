@@ -5,8 +5,8 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const SHELL = {
-  rev: "2 — right wall set out from the measured door frame",
-  date: "18.09.2026",
+  rev: "3 — the dressing opening set out as the right wall has it",
+  date: "19.09.2026",
   wStudy: 4547,   // 14 ft 11 in — study wall, the narrow end
   wPart: 4572,    // 15 ft 0 in — at the partition line
   wPreStep: 4597, // 15 ft 1 in — just before the step
@@ -19,7 +19,7 @@ const SHELL = {
   yStep: 4600,    // how far down the step falls — TO CONFIRM
   yPart: 2900,    // the partition line — TO CONFIRM
   win: { w: 1219 },                 // 4 ft, hard into the right-hand corner of the study wall
-  dress: { from: 4217, w: 762 },    // door opening: frame at 4141 + 76 architrave
+  dress: { from: 4166, w: 762 },    // door opening: measured frame face at 4115 + 51 lining — same as AST-DR-007
   ent: { w: 914 },                  // entrance door in the left wall, just before the step — TO CONFIRM
 };
 
@@ -118,8 +118,9 @@ const SHELL = {
   ["The room is not square. It widens about 2 in from the",
    "   study wall to the bed wall — roughly half a degree.",
    "Diagonals measured 24 ft 5 in and 23 ft 11 in.",
-   "Right wall — 13 ft 6 in to the door frame, 3 ft frame,",
-   "   2 ft 4 in return, overall 18 ft 11 in.",
+   "Right wall — 13 ft 6 in to the door frame and 18 ft 11 in",
+   "   overall are drawn exactly; the 3 ft frame and 2 ft 4 in",
+   "   return do not both fit with a 2 in lining. See AST-DR-007.",
    "The right wall is taken as the straight reference; the left",
    "   wall carries the splay and the step.",
    "Ceiling 9 ft 1 in, level throughout. The main room ceiling",

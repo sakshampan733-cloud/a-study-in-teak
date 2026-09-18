@@ -5,7 +5,7 @@ window.DRAWINGS = window.DRAWINGS || {};
 
 const WALL = {
   rev: "8 — sill confirmed at 2 ft 3 in; datum fixed at 686",
-  date: "18.09.2026",
+  date: "19.09.2026",
   W: 4547, H: 2769,            // 14 ft 11 in wall, 9 ft 1 in ceiling (measured on site)
   skirt: 120,                  // skirting line on the cupboard fronts
   base: { h: 646, top: 40, d: 255, over: 25 },   // cupboards under all three bays, 2 ft 3 in (686) to the top of the reeded counter — set by the window sill; 280 (11 in) from the wall
@@ -297,10 +297,10 @@ const WALL = {
   s1 += chainH([vS.X(0), vS.X(BK.d), vS.X(B.d + B.over)], vS.Y(ey(0)) + 6, [BK.d, B.d + B.over - BK.d], { from: vS.Y(ey(0)) + 1, size: 1.3 });
 
   // Notes
-  s1 += heading(318, 170, "NOTES", "REVISION 2", 40);
-  ["Wall 14 ft 11 in, ceiling 9 ft 1 in (measured).", "Centre panel set equal to the window bay so the two", "   pilasters frame a matched pair; the bookcase takes", "   the remainder as the anchor at the end of the wall.", "Window measured: 4 ft wide, 5 ft 5 in tall, hard into", "   the right corner. Sill 2 ft 3 in (686) floor to the", "   underside of the frame — CONFIRMED.", "Counter top is set to the sill at 686, so the two are", "   one surface; this datum runs on round to the right", "   wall rail.", "Refs: 1 fluted pilasters + moulded panel; 2 block-and-", "   dentil cornice, no carving; 3 band panels over every", "   bay, twin sconces, pedestals forward, no arch.",
+  s1 += heading(318, 166, "NOTES", `REVISION ${K.rev.split(" ")[0]}`, 40);
+  ["Wall 14 ft 11 in, ceiling 9 ft 1 in (measured).", "Centre panel set equal to the window bay so the two", "   pilasters frame a matched pair; the bookcase takes", "   the remainder as the anchor at the end of the wall.", "Window measured: 4 ft wide, 5 ft 5 in tall, hard into", "   the right corner. Sill 2 ft 3 in (686) — CONFIRMED.", "OPEN: sill 2 ft 3 + height 5 ft 5 + your 1 ft 3 to the", "   ceiling makes 8 ft 11, two inches short of the 9 ft 1", "   ceiling. Sill and height are drawn as measured, so the", "   head falls 1 ft 5 down, not 1 ft 3. Laser it.", "Counter top is set to the sill at 686, so the two are", "   one surface; this datum runs on round to the right", "   wall rail.", "Refs: 1 fluted pilasters + moulded panel; 2 block-and-", "   dentil cornice; 3 band panels, twin sconces.",
    "Cupboards under all three bays. Gold on handles only."]
-    .forEach((n, i) => { s1 += text(318, 181 + i * 4.1, n, { size: 1.55 }); });
+    .forEach((n, i) => { s1 += text(318, 177 + i * 4.1, n, { size: 1.55 }); });
   s1 += titleBlock({ title: "STUDY WALL — GENERAL ARRANGEMENT", sub: "Elevation · Plan · Section", date: K.date, rev: K.rev, dwg: "AST-DR-005" });
 
   // ═════════════ SHEET 2 — DETAILS ═════════════
