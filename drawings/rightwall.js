@@ -24,7 +24,7 @@ const RWALL = {
 };
 
 (function () {
-  const { INK, THIN, f, text, view, chainH, chainV, note, heading, frame, titleBlock, sheet } = window.DK;
+  const { INK, THIN, f, text, view, chainH, chainV, note, labels, heading, frame, titleBlock, sheet } = window.DK;
   const K = RWALL, D = K.door, M = K.mould;
 
   // ── layout along the wall ──
@@ -172,14 +172,15 @@ const RWALL = {
   s += chainV([vE.Y(ey(D.h)), vE.Y(ey(0))], vE.X(K.run) + 4, [`${D.h}`], { from: vE.X(K.run) + 1, size: 1.2 });
   s += text(vE.X(K.run + D.w / 2), vE.Y(ey(1225)), "DRESSING", { size: 1.5, anchor: "middle", fill: THIN, ls: 0.3 });
   // labels on the left margin, one line each
-  const lab = (x, y, ly, t1, t2) => note(vE.X(x), vE.Y(ey(y)), 57, vE.Y(ey(ly)), t1, t2 || "", "end");
-  s += lab(300, K.H, K.H + 40, "CEILING", "COVE LIGHT ABOVE");
-  s += lab(bays[0][0] + 18, 1900, 1900, "TALL PANEL ×6", "WALL COLOUR");
-  s += lab(lx - K.lamp.span - 60, K.lamp.y + 140, K.lamp.y + 200, "WALL LAMP ×3", "PANELS 1, 3, 5");
-  s += lab(K.study.w + 60, yDado - 10, yDado + 150, "RAIL = STUDY COUNTER", "SAME 646–686 BAND");
-  s += lab(K.study.w - 60, 300, 440, "STUDY CUPBOARDS", "END, 280 DEEP");
-  s += lab(bays[0][0] + 18, 280, 250, "SHORT PANEL ×6", "");
-  s += lab(K.study.w + 60, 60, 20, "SKIRTING", "");
+  const LE = labels(57, "left", 22, 150);
+  LE.add(vE.X(300), vE.Y(ey(K.H)), "CEILING", "COVE LIGHT ABOVE");
+  LE.add(vE.X(bays[0][0] + 18), vE.Y(ey(1900)), "TALL PANEL ×6", "WALL COLOUR");
+  LE.add(vE.X(lx - K.lamp.span - 60), vE.Y(ey(K.lamp.y + 140)), "WALL LAMP ×3", "PANELS 1, 3, 5");
+  LE.add(vE.X(K.study.w + 60), vE.Y(ey(yDado - 10)), "RAIL = STUDY COUNTER", "SAME 646–686 BAND");
+  LE.add(vE.X(K.study.w - 60), vE.Y(ey(300)), "STUDY CUPBOARDS", "END, 280 DEEP");
+  LE.add(vE.X(bays[0][0] + 18), vE.Y(ey(280)), "SHORT PANEL ×6", "");
+  LE.add(vE.X(K.study.w + 60), vE.Y(ey(60)), "SKIRTING", "");
+  s += LE.draw();
 
   // Plan 1:25
   const vP = view(ox, 205, sc, "Right wall plan"), tP = vP.w(0.1);
@@ -194,12 +195,14 @@ const RWALL = {
   s += heading(318, 17, "SECTION A–A", `THROUGH PANEL 1 · 1:${scS}`, 50);
   s += vS.g(section(tS), 0.28);
   const nx = vS.X(K.lamp.proj + 250) + 2;
-  s += note(vS.X(200), vS.Y(ey(K.H + 120)), nx, vS.Y(ey(K.H - 30)), "CEILING COVE LIGHT", "NOTHING FIXED AT THE TOP");
-  s += note(vS.X(M.proj), vS.Y(ey(yTall - 30)), nx, vS.Y(ey(yTall - 180)), "PANEL MOULDING", "DET. 1");
-  s += note(vS.X(K.lamp.proj + 30), vS.Y(ey(K.lamp.y + 140)), nx, vS.Y(ey(K.lamp.y + 280)), "WALL LAMP", "DET. 4");
-  s += note(vS.X(K.dado.proj), vS.Y(ey(K.dado.y + 22)), nx, vS.Y(ey(K.dado.y + 150)), "RAIL", "DET. 2");
+  const LS = labels(nx, "right", 22, 150);
+  LS.add(vS.X(200), vS.Y(ey(K.H + 120)), "CEILING COVE LIGHT", "NOTHING FIXED AT THE TOP");
+  LS.add(vS.X(M.proj), vS.Y(ey(yTall - 30)), "PANEL MOULDING", "DET. 1");
+  LS.add(vS.X(K.lamp.proj + 30), vS.Y(ey(K.lamp.y + 140)), "WALL LAMP", "DET. 4");
+  LS.add(vS.X(K.dado.proj), vS.Y(ey(K.dado.y + 22)), "RAIL", "DET. 2");
   s += chainV([vS.Y(ey(K.lamp.y)), vS.Y(ey(0))], vS.X(-K.wall) - 4, [`${K.lamp.y} TO LAMP CENTRE`], { from: vS.X(-K.wall) - 1, size: 1.2 });
-  s += note(vS.X(K.skirt.t), vS.Y(ey(50)), nx, vS.Y(ey(120)), "MARBLE SKIRTING", "4 IN · LAID");
+  LS.add(vS.X(K.skirt.t), vS.Y(ey(50)), "MARBLE SKIRTING", "4 IN · LAID");
+  s += LS.draw();
 
   // Notes
   s += heading(318, 180, "NOTES", `REVISION ${K.rev.split(" ")[0]}`, 40);

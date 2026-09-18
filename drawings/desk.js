@@ -534,7 +534,7 @@ const DESK = {
    "Pedestal door, moulded panel", "Carved ornament + ring pull", "Moulded plinth", "Modesty panel in kneehole"]
     .forEach((l, i) => { s1 += bubble(kx + 2, 201 + i * 5.2, i + 1) + text(kx + 6, 201.7 + i * 5.2, l, { size: 1.7 }); });
   s1 += heading(236, 190, "NOTES", "READ BEFORE MAKING", 40);
-  ["All dimensions in mm. Do not scale.", "Length 7 ft 6 in and depth 3 ft confirmed.", "   Height 750 set for a 5 ft 9 in user.",
+  ["Dimensions in feet and inches. Do not scale.", "Length 7 ft 6 in and depth 3 ft confirmed.", "   Height 750 set for a 5 ft 9 in user.",
    "Solid teak throughout; polish sets the room finish.", "Pedestals shown as doors — drawers TBC.", "Hollowed corners; moulding strip at both curve ends.",
    "Carving shown schematically — carver to", "   work from reference and Details sheet.", "First-angle projection."]
     .forEach((n, i) => { s1 += text(236, 201 + i * 4.3, n, { size: 1.6 }); });

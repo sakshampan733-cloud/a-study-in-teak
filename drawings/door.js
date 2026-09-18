@@ -255,7 +255,7 @@ const DOOR = {
   ].forEach((l, i) => { svg += bubble(kx + 2, 29 + i * 5.6, i + 1) + text(kx + 6, 29.7 + i * 5.6, l, { size: 1.8 }); });
   svg += heading(kx, 94, "NOTES", "READ BEFORE MAKING");
   [
-    "All dimensions in mm. Do not scale.",
+    "Dimensions in feet and inches. Do not scale.",
     "Proportions taken from a film-still reference;",
     "   leaf size, opening and thickness are ASSUMED.",
     "Knob height follows reference (low) — to confirm.",

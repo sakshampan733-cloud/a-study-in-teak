@@ -24,7 +24,7 @@ const SHELL = {
 };
 
 (function () {
-  const { INK, THIN, f, text, view, chainH, chainV, note, heading, frame, titleBlock, sheet } = window.DK;
+  const { INK, THIN, f, text, view, chainH, chainV, note, labels, heading, frame, titleBlock, sheet } = window.DK;
   const K = SHELL, T = K.t;
 
   // ── the shell, in plan ──
@@ -80,7 +80,7 @@ const SHELL = {
   s += `<defs><pattern id="hatchSH" patternUnits="userSpaceOnUse" width="90" height="90" patternTransform="rotate(45)">
     <line x1="0" y1="0" x2="0" y2="90" stroke="#9a9a9a" stroke-width="10"/></pattern></defs>`;
 
-  const sc = 50, ox = 60, oy = 55;
+  const sc = 40, ox = 62, oy = 54;
   const v = view(ox, oy, sc, "Room shell plan"), th = v.w(0.12);
   s += heading(18, 20, "THE ROOM AS BUILT", `PLAN · SCALE 1:${sc} · SHELL ONLY, NO FURNITURE · CEILING ${K.H} (9 FT 1 IN) LEVEL THROUGHOUT`, 120);
   s += v.g(plan(th), 0.3);
@@ -102,15 +102,16 @@ const SHELL = {
   const yP = v.Y(K.yPart);
   s += chainH([v.X(xL0 - (K.yPart / L) * (xL0 - xLs)), v.X(xR)], yP - 1.5, [`${K.wPart} — AT THE PARTITION LINE`], { from: yP, size: 1.5 });
 
-  // ── labels, kept in the column to the right of the plan ──
-  const lab = (x, y, tx, ty, a, b, anchor = "start") => note(v.X(x), v.Y(y), tx, ty, a, b, anchor);
-  s += lab(xR - K.win.w / 2, 0, 182, 36, "WINDOW", "HARD INTO THE CORNER — NO RETURN");
-  s += lab(xR, 2200, 182, 62, "RIGHT WALL", "PANELLING AND THE DRESSING DOOR");
-  s += lab(xR, K.dress.from + K.dress.w / 2, 182, 88, "DRESSING DOOR", "2 FT 6 × 8 FT · OPENS IN, HINGED RIGHT");
-  s += lab(2600, K.yPart, 182, 114, "PARTITION LINE", "SHELL REFERENCE ONLY · POSITION TO CONFIRM");
-  s += lab((xR + xLb) / 2, L, 182, 140, "BED WALL", "PARCHMENT · 15 FT 6 IN");
-  s += lab(xLs - T / 2, K.yStep - K.ent.w / 2, 54, 208, "ENTRANCE", "POSITION TO CONFIRM");
-  s += lab(xLb, K.yStep, 54, 222, "THE STEP — 5 IN", "THE LEFT WALL KICKS OUT PAST THE DOOR · POSITION TO CONFIRM");
+  // ── labels: a stack down each side, laid out so no two leaders collide ──
+  const RG = labels(206, "right", 26, 215), LG = labels(44, "left", 26, 235);
+  RG.add(v.X(xR - K.win.w / 2), v.Y(0), "WINDOW", "HARD INTO THE CORNER — NO RETURN");
+  RG.add(v.X(xR), v.Y(2200), "RIGHT WALL", "PANELLING AND THE DRESSING DOOR");
+  RG.add(v.X(xR), v.Y(K.dress.from + K.dress.w / 2), "DRESSING DOOR", "2 FT 6 × 8 FT · OPENS IN, HINGED RIGHT");
+  RG.add(v.X(2600), v.Y(K.yPart), "PARTITION LINE", "SHELL REFERENCE ONLY · TO CONFIRM");
+  RG.add(v.X((xR + xLb) / 2), v.Y(L), "BED WALL", "PARCHMENT");
+  LG.add(v.X(xLs - T / 2), v.Y(K.yStep - K.ent.w / 2), "ENTRANCE", "POSITION TO CONFIRM");
+  LG.add(v.X(xLb), v.Y(K.yStep), "THE STEP", "KICKS OUT PAST THE DOOR · TO CONFIRM");
+  s += RG.draw() + LG.draw();
 
   // ── notes ──
   s += heading(300, 20, "NOTES", `REVISION ${K.rev.split(" ")[0]}`, 80);

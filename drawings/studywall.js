@@ -19,7 +19,7 @@ const WALL = {
 };
 
 (function () {
-  const { INK, THIN, DIM, f, text, view, chainH, chainV, note, heading, frame, titleBlock, sheet } = window.DK;
+  const { INK, THIN, DIM, f, text, view, chainH, chainV, note, labels, heading, frame, titleBlock, sheet } = window.DK;
   const K = WALL, B = K.base, BK = K.book, PL = K.pil, PN = K.panel, WN = K.win, E = K.ent, BD = K.band, SC = K.sconce;
 
   // ── layout along the wall (x from the left corner) ──
@@ -255,7 +255,7 @@ const WALL = {
   let s1 = frame();
   s1 += `<defs><pattern id="hatchWall" patternUnits="userSpaceOnUse" width="40" height="40" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="40" stroke="#999" stroke-width="4"/></pattern><pattern id="hatchWall2" patternUnits="userSpaceOnUse" width="25" height="25" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="25" stroke="#999" stroke-width="3"/></pattern></defs>`;
   const sc = 25;
-  const vE = view(30, 34, sc, "Wall elevation"), tE = vE.w(0.1);
+  const vE = view(62, 34, sc, "Wall elevation"), tE = vE.w(0.1);
   s1 += heading(18, 17, "ELEVATION — STUDY WALL", `SCALE 1:${sc} · BOOKCASE · PANEL FOR PAINTING · WINDOW`, 90);
   s1 += vE.g(elevation(tE), 0.28);
   const yb = vE.Y(ey(0));
@@ -265,20 +265,21 @@ const WALL = {
   s1 += chainV([vE.Y(ey(K.H)), vE.Y(ey(0))], vE.X(K.W) + 15, [`${K.H} CEILING (9 FT)`], { from: vE.X(K.W) + 1 });
   s1 += chainV([vE.Y(ey(WN.head)), vE.Y(ey(WN.sill))], vE.X(xWin[1]) + 6, [WN.head - WN.sill], { from: vE.X(xWin[1]) + 1, size: 1.4 });
   // labels
-  const lab = (x, y, lx, ly, t1, t2, a) => note(vE.X(x), vE.Y(ey(y)), lx, ly, t1, t2, a);
-  s1 += lab(xP2[1] + 15, yCap + 70, vE.X(xP2[1] + 700), 27, "MOULDED CAPITAL", "NO CARVING — REF. 1");
-  s1 += lab(xPanel[0] + 400, (yMod + yDen) / 2, vE.X(xPanel[0] + 400) + 10, 27, "PLAIN MODILLION BLOCKS + DENTILS", "REF. 2 — NO LEAF CARVING");
-  s1 += lab(xP2[0] + 60, 1500, vE.X(xP2[1]) + 22, vE.Y(ey(1700)), "FLUTED PILASTER ×2", "ON A PANELLED PEDESTAL — REF. 1");
-  s1 += lab((xPanel[0] + xPanel[1]) / 2 + 400, 1150, vE.X(xP2[1]) + 22, vE.Y(ey(1200)), "MOULDED PANEL", "PAINTING OPTIONAL — REF. 1");
-  s1 += lab(BK.w / 2, (yBand + yEnt) / 2, vE.X(-40), vE.Y(ey(2300)), "BAND PANELS", "SAME SIZE WHERE THEY FIT", "end");
-  s1 += lab(BK.w / 2, yOpen - 13, vE.X(-40), vE.Y(ey(1850)), "FLAT HEAD, NO ARCH", "STRIP LIGHT UNDER RAIL", "end");
-  s1 += lab((xP1[0] + xP1[1]) / 2 - SC.span, SC.y + 150, vE.X(xP1[0]) - 10, vE.Y(ey(1500)) + 20, "TWIN SCONCE ×2", "ON THE PILASTERS — REF. 3", "end");
-  s1 += lab(xP2[1] + PL.ped, 450, vE.X(xP2[1]) + 22, vE.Y(ey(600)), "PEDESTAL STEPS FORWARD", "COUNTER WRAPS IT — REF. 3");
-  s1 += lab(260, 300, vE.X(-40), vE.Y(ey(300)), "CUPBOARDS 2 FT 3 IN, ALL 3 BAYS", "COUNTER TOP LEVEL WITH THE WINDOW SILL", "end");
-  s1 += lab(BK.w / 2, yTop - 10, vE.X(-40), vE.Y(ey(900)), "REEDED TOP", "MATCHES THE DESK", "end");
+  const EL = labels(58, "left", 22, 152), ER = labels(vE.X(K.W) + 18, "right", 22, 152);
+  ER.add(vE.X(xP2[1] + 15), vE.Y(ey(yCap + 70)), "MOULDED CAPITAL", "NO CARVING — REF. 1");
+  ER.add(vE.X(xPanel[0] + 400), vE.Y(ey((yMod + yDen) / 2)), "MODILLION BLOCKS + DENTILS", "REF. 2 — NO LEAF CARVING");
+  ER.add(vE.X(xP2[0] + 60), vE.Y(ey(1500)), "FLUTED PILASTER ×2", "ON A PANELLED PEDESTAL — REF. 1");
+  ER.add(vE.X((xPanel[0] + xPanel[1]) / 2 + 400), vE.Y(ey(1150)), "MOULDED PANEL", "PAINTING OPTIONAL — REF. 1");
+  ER.add(vE.X(xP2[1] + PL.ped), vE.Y(ey(450)), "PEDESTAL STEPS FORWARD", "COUNTER WRAPS IT — REF. 3");
+  EL.add(vE.X(BK.w / 2), vE.Y(ey((yBand + yEnt) / 2)), "BAND PANELS", "SAME SIZE WHERE THEY FIT");
+  EL.add(vE.X(BK.w / 2), vE.Y(ey(yOpen - 13)), "FLAT HEAD, NO ARCH", "STRIP LIGHT UNDER RAIL");
+  EL.add(vE.X((xP1[0] + xP1[1]) / 2 - SC.span), vE.Y(ey(SC.y + 150)), "TWIN SCONCE ×2", "ON THE PILASTERS — REF. 3");
+  EL.add(vE.X(BK.w / 2), vE.Y(ey(yTop - 10)), "REEDED TOP", "MATCHES THE DESK");
+  EL.add(vE.X(260), vE.Y(ey(300)), "CUPBOARDS, ALL 3 BAYS", "TOP LEVEL WITH THE WINDOW SILL");
+  s1 += EL.draw() + ER.draw();
 
   // Plan
-  const scP = 25, vP = view(30, 196, scP, "Wall plan"), tP = vP.w(0.1);
+  const scP = 25, vP = view(62, 196, scP, "Wall plan"), tP = vP.w(0.1);
   s1 += heading(18, 180, "PLAN", `CUT AT 1200 · SCALE 1:${scP} · ROOM BELOW, WALL ABOVE`, 60);
   s1 += vP.g(plan(tP, `${vP.w(1)} ${vP.w(0.7)}`), 0.28);
   s1 += chainV([vP.Y(0), vP.Y(BK.d), vP.Y(B.d + B.over + PL.pedProj)], vP.X(-150) - 4, [`${BK.d} (11 IN)`, PL.pedProj], { from: vP.X(0) - 1, size: 1.3 });
@@ -288,9 +289,11 @@ const WALL = {
   const scS = 25, vS = view(345, 34, scS, "Section through bookcase"), tS = vS.w(0.1);
   s1 += heading(318, 17, "SECTION A–A", `THROUGH BOOKCASE · 1:${scS}`, 50);
   s1 += vS.g(section(tS), 0.28);
-  s1 += note(vS.X(BK.d + 150), vS.Y(ey(yCrown + 30)), vS.X(BK.d + 190) + 8, vS.Y(ey(K.H)) + 4, "CROWN", "");
-  s1 += note(vS.X(BK.d + 65), vS.Y(ey(yMod + 40)), vS.X(BK.d + 190) + 8, vS.Y(ey(yMod)) + 2, "MODILLION", "");
-  s1 += note(vS.X(B.d + 10), vS.Y(ey(yTop - 20)), vS.X(B.d + 190) + 8, vS.Y(ey(yTop + 120)), "COUNTER", `${B.d} DEEP + ${B.over}`);
+  const SL = labels(vS.X(BK.d + 190) + 10, "right", 22, 150);
+  SL.add(vS.X(BK.d + 150), vS.Y(ey(yCrown + 30)), "CROWN", "");
+  SL.add(vS.X(BK.d + 65), vS.Y(ey(yMod + 40)), "MODILLION", "");
+  SL.add(vS.X(B.d + 10), vS.Y(ey(yTop - 20)), "COUNTER", `${B.d} DEEP + ${B.over}`);
+  s1 += SL.draw();
   s1 += chainH([vS.X(0), vS.X(BK.d), vS.X(B.d + B.over)], vS.Y(ey(0)) + 6, [BK.d, B.d + B.over - BK.d], { from: vS.Y(ey(0)) + 1, size: 1.3 });
 
   // Notes

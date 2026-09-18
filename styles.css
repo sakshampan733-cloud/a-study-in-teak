@@ -444,6 +444,8 @@ body.sheets-dark .lb-inner.is-dwg svg { filter: invert(1) hue-rotate(180deg) bri
 
 /* ── drawings: dimensions off / millimetres / feet and inches ─ */
 .dims-off .dk-dim { display: none; }
+.dims-mm .dk-mm { display: inline; }
 .dims-mm .dk-in { display: none; }
 .dims-ft .dk-mm { display: none; }
+.dims-ft .dk-in { display: inline; }
 .sheet-tools { flex-wrap: wrap; row-gap: 10px; }
