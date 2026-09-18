@@ -449,3 +449,15 @@ body.sheets-dark .lb-inner.is-dwg svg { filter: invert(1) hue-rotate(180deg) bri
 .dims-ft .dk-mm { display: none; }
 .dims-ft .dk-in { display: inline; }
 .sheet-tools { flex-wrap: wrap; row-gap: 10px; }
+
+/* ── the room in three dimensions: a line drawing you can turn ── */
+.m3d { position: relative; height: 100%; min-height: 460px; border-radius: 10px; overflow: hidden; background: #fff; touch-action: none; }
+.m3d-canvas { display: block; width: 100%; height: 100%; }
+.m3d-bar { position: absolute; left: 14px; bottom: 14px; display: flex; flex-wrap: wrap; gap: 6px; }
+.m3d-bar button { height: 28px; padding: 0 13px; border: 1px solid rgba(27, 27, 27, .3); border-radius: 1440px;
+  font: 400 11px/1 var(--mono); text-transform: uppercase; letter-spacing: -0.02em; color: #5a5a5a; background: rgba(255, 255, 255, .8);
+  transition: color .4s var(--ease), border-color .4s var(--ease); }
+.m3d-bar button:hover { color: var(--void); border-color: var(--void); }
+.m3d-bar button.on { color: var(--void); border-color: var(--ember); }
+.m3d-hint { position: absolute; right: 14px; top: 14px; font: 400 11px/1 var(--mono); text-transform: uppercase; letter-spacing: -0.02em; color: #9a9a9a; pointer-events: none; }
+@media (max-width: 760px) { .m3d { min-height: 340px; } .m3d-hint { display: none; } }

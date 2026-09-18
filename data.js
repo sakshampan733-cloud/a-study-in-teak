@@ -284,15 +284,16 @@ window.PROJECT = {
   room: {
     plan: "assets/refs/room-plan-lighting-rcp.jpg",   // source: photo of the lighting / false-ceiling plan
     facts: [
-      { k: "Plan", v: "Rectangle, roughly 14 × 18 ft read off the photo (to confirm)" },
+      { k: "Plan", v: "Measured: 14 ft 11 in wide at the study wall, 15 ft 0 in at the partition, 15 ft 6 in at the bed wall. About 18 ft 11 in long. Not square — it widens roughly 2 in end to end." },
+      { k: "Ceiling height", v: "9 ft 1 in (2769), level throughout" },
       { k: "Study end", v: "Top of the plan: study wall with shelves and cupboards; window at its right-hand end" },
       { k: "Desk", v: "Faces the partition; the study wall is behind the chair" },
-      { k: "Partition", v: "Across the middle, about 11 ft from the entrance wall, curved ends, three sections" },
+      { k: "Partition", v: "Across the middle, curved ends. Run and position still to be measured — its shape is the one thing not yet decided." },
       { k: "Bed end", v: "Bottom of the plan: 6 ft 6 in bed against the wall, curved bed back wrapping round with bedside tables" },
-      { k: "Entrance", v: "Bottom-left corner, door swings in" },
+      { k: "Entrance", v: "In the left wall near the bed end, swinging in. The wall steps out about 5 in just past it." },
       { k: "Beyond right wall", v: "Washroom and dressing (plan to come)" },
-      { k: "Ceiling", v: "Barrel vault with coffered panels; cove line and down-lights around the perimeter" },
-      { k: "Doors", v: "3 — all identical (D1 8 × 3 ft, D2/D3 8 × 2 ft 6 in)" },
+      { k: "Ceiling", v: "Plain, deliberately — a coffered grid would have shown up the splay. The barrel vault belongs to the dressing room." },
+      { k: "Doors", v: "3 — one design, two widths, all 7 ft 7 in tall. D1 is 3 ft, D2 and D3 are 2 ft 6 in." },
     ],
   },
 

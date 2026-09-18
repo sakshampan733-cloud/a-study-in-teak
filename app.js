@@ -153,10 +153,8 @@ function overview() {
   }).join("");
   const row = `<section class="section">${head("The pieces", "Drawn to be made, not just imagined.")}<div class="row reveal">${pieces}</div></section>`;
 
-  const plans = (window.PLANS || []).length
-    ? window.PLANS.map((p) => `<figure class="plan-img" data-open="img:${esc(p.src)}"><img src="${esc(p.src)}" alt=""></figure>`).join("")
-    : P.room.plan ? `<figure class="plan-img" data-open="img:${esc(P.room.plan)}"><img src="${esc(P.room.plan)}" alt="Room plan"></figure>` : `<div class="empty">Room plan — to be added</div>`;
-  const plan = `<section class="section">${head("The plan", "One room, roughly fourteen by eighteen feet.")}
+  const plans = `<div class="m3d" id="m3d"></div>`;
+  const plan = `<section class="section">${head("The room", "A drawing, in three dimensions. Drag it about.")}
     <div class="wrap"><div class="plan-grid reveal"><div class="panel" style="padding:12px">${plans}</div>
     <div class="panel"><div class="facts">${P.room.facts.map((f) => `<div class="k">${esc(f.k)}</div><div class="v">${esc(f.v)}</div>`).join("")}</div></div></div></div></section>`;
 
@@ -174,6 +172,14 @@ function pageHero(id, eyebrow, title, prose, flankR) {
       ${prose ? `<p class="prose-lg reveal">${esc(prose)}</p>` : ""}
     </div>
     <div class="hero-flank r" data-decode>${flankR || `${c.final} of ${n} final`}</div></section>`;
+}
+
+// The three-dimensional room lives on the overview; it is rebuilt whenever that page renders.
+let model = null;
+function mountModel() {
+  const el = document.getElementById("m3d");
+  model = null;
+  if (el && window.MODEL3D) { try { model = window.MODEL3D.mount(el); } catch (e) { console.error("model3d:", e); el.innerHTML = `<div class="empty">Model unavailable</div>`; } }
 }
 
 function nextLink(id) {
@@ -491,6 +497,7 @@ function render(delayMotion = 0) {
   delayMotion ? setTimeout(() => animate(main), delayMotion) : animate(main);
   applyPaper();
   applyDims();
+  mountModel();
   onScroll();
   if (pendingItem) { const it = pendingItem; pendingItem = null; setTimeout(() => { const el = document.getElementById(it); if (el) window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - 70, behavior: "smooth" }); }, 500); }
 }
