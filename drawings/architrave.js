@@ -8,7 +8,7 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const ARCH = {
-  rev: "4 — no corbels; moulding clear of the lining",
+  rev: "5 — a plain square block where the head meets each jamb",
   date: "19.09.2026",
   leaf: { w: 762, h: 2311 },     // the dressing and bathroom doors, 2 ft 6 × 7 ft 7
   wide: 914,                     // D1, the main door — a pair of leaves
@@ -68,7 +68,12 @@ const ARCH = {
     let o = "";
     o += RC(MO, ey(yFr), end ? cut : W - MO, ey(yC), t * 1.1);               // the lining head
     o += RC(0, ey(yM), x(0), ey(yFr), t * 1.2);                             // the moulding head, 4 in
-    o += reedsH(0, x(0), ey(yM), ey(yFr), K.reeds, t);                      // its reeds, turning the corner
+    // Where the head meets a jamb the reeding would cross itself, so it stops short at each end
+    // and that square is left plain — a corner block, as the moulding is mitred nowhere.
+    o += reedsH(MO, end ? cut : W - MO, ey(yM), ey(yFr), K.reeds, t);
+    const blk = (a) => LN(a, ey(yM), a, ey(yFr), t * 0.9);
+    o += blk(MO);
+    if (!end) o += blk(W - MO);
     o += RC(0, ey(yS), x(0), ey(yM), t * 0.9) + scallops(0, x(0), ey(yM), t);
     o += RC(-K.earA, ey(yA), x(K.earA), ey(yS), t * 0.9);                   // the two small mouldings
     o += RC(-K.earB, ey(yB), x(K.earB), ey(yA), t * 0.9);
@@ -95,7 +100,8 @@ const ARCH = {
       const left = a === 0, m0 = left ? a : a + FR, m1 = left ? b - FR : b, l0 = left ? b - FR : a, l1 = left ? b : a + FR;
       o += RC(l0, ey(yFr), l1, ey(0), t * 1.1);                             // the lining leg
       o += RC(m0, ey(yM), m1, ey(K.plinth), t * 1.2);                       // the moulding leg
-      o += reedsV(m0, m1, ey(yM), ey(K.plinth), K.reeds, t);
+      o += reedsV(m0, m1, ey(yFr), ey(K.plinth), K.reeds, t);               // stopping under the corner block
+      o += LN(m0, ey(yFr), m1, ey(yFr), t * 0.9);
       o += RC(a, ey(K.plinth), b, ey(0), t * 1.3);                          // the plinth block
       o += LN(a, ey(K.plinth - 14), b, ey(K.plinth - 14), t * 0.7);
       o += LN(a, ey(K.skirt), b, ey(K.skirt), t * 0.55);
@@ -172,7 +178,9 @@ const ARCH = {
     "moulding head sits 6 in ABOVE the leaf rather than on top of it.", "That clearance is the whole of the correction in this revision.",
     "The moulding is reeded and turns the corner over the head, so the", "reeding runs round the opening in one piece."],
    ["Above the moulding, and only above it: a course of scallops, two", "small mouldings, and a crown that mitres back at each end.",
-    "No corbels, no carving, no blocks at the head.", `The crown lands at ${TOPY} (8 ft 8 in), leaving 5 in to the ceiling.`,
+    "No corbels and no carving. Where the head meets a jamb the",
+    "reeding stops short and that 4 in square is left plain, so the",
+    "reeds never cross.", `The crown lands at ${TOPY} (8 ft 8 in), leaving 5 in to the ceiling.`,
     "All three doors take the identical casing; only the width changes.", "A plinth block takes each jamb down over the marble skirting."]]
     .forEach((col, c) => col.forEach((n, i) => (s += text(18 + c * 104, 214 + i * 4.6, n, { size: 1.7, fill: INK }))));
 
