@@ -192,6 +192,87 @@ window.PROJECT = {
     ],
   },
 
+  // What is actually wrong with the room as built, what it damages, and what is being done about it.
+  // status: "blocking" — work is stopped until it closes
+  //         "open"     — being worked on
+  //         "accepted" — nothing can be done; the design absorbs it
+  //         "solved"   — closed, kept for the record
+  problems: {
+    intro: "The room was not built square. This is the record of every problem that causes, what it damages, and how the design answers it.",
+    items: [
+      {
+        id: "not-square", name: "The room is not square", status: "open",
+        what: "Measured across: 14 ft 11 in at the study wall, 15 ft 0 in at the partition line, 15 ft 6 in at the bed wall. Measured along: 18 ft 11 in on one side, 19 ft 0 in on the other. The room tapers about 7 inches over its length.",
+        effect: "Nothing can be standardised. Every fitted piece has to be made to the wall it actually meets, and no dimension can be reused from one end of the room to the other. Anything that repeats — a grid, a run of equal panels, a border of constant width — will reveal the taper, because the eye counts repeats.",
+        doing: "Each wall is drawn to its own measurement: study wall 14 ft 11 in, partition 15 ft 0 in, bed wall 15 ft 6 in. All fitted joinery to be built 15 to 20 mm undersize with a scribe fillet at each end, planed on site to follow the wall. The carpenter has to be told this before he builds, not after.",
+        need: "Both diagonals, and each wall measured at floor level, waist height and near the ceiling — walls lean as well as splay.",
+      },
+      {
+        id: "ceiling-plain", name: "The ceiling was left plain on purpose", status: "solved",
+        what: "The barrel vault with coffered panels belongs to the dressing room. The main room ceiling is plain, and is 9 ft 1 in level throughout.",
+        effect: "None — and that is the point. A coffered grid or any repeating ceiling pattern in a room that tapers 7 inches would have shown the fault straight away, because the border strip round the coffers would have changed width end to end.",
+        doing: "Nothing. The decision was made on site before the problem was measured, for exactly the right reason. It is the single thing that keeps the out-of-square invisible from above.",
+        need: "",
+      },
+      {
+        id: "sill-datum", name: "The window sill height does not reconcile", status: "blocking",
+        what: "Three measurements were taken of the same window and they do not add up to the ceiling. Ceiling 9 ft 1 in (109 in). Window 5 ft 5 in tall (65 in). Wall above the window 15 in. Those two leave 29 in — 2 ft 5 in — for the sill. The sill has separately been given as 2 ft 3 in and as 3 ft 4 in.",
+        effect: "The sill sets the datum line that runs round the room — the study counter, the cupboard tops and the right wall rail all land on it. Two drawings are built on that number. It cannot be guessed.",
+        doing: "Both drawings held at their last state until one measurement is confirmed.",
+        need: "One tape measure, floor to the top of the sill. Everything else follows from it.",
+      },
+      {
+        id: "partition-square", name: "The partition sits between two walls that are not parallel", status: "open",
+        what: "It stands in the middle of the room, where the width is 15 ft 0 in, with a walk-round gap at each end. The two side walls it sits between splay apart towards the bed.",
+        effect: "It can be square to the left wall or to the right wall, but not to both. Whichever one it is not square to, the gap at that end becomes a wedge rather than a parallel opening.",
+        doing: "Bullnose ends. A curved end has no edge for the eye to measure a gap against, so the wedge cannot be read. The curve was chosen for how it looked; it now does structural work as well.",
+        need: "Which side wall the partition should be set square to, and its true run.",
+      },
+      {
+        id: "partition-arith", name: "The partition and its gaps do not add up", status: "open",
+        what: "Partition about 8 ft, with gaps of about 3 ft 6 in and 2 ft 6 in either side. That totals 14 ft, against 15 ft 0 in at the partition line. Twelve inches unaccounted for.",
+        effect: "The partition cannot be set out, and its drawers, panels and TV backing cannot be divided, until the run is known. A foot is more than rounding.",
+        doing: "Nothing until it is measured. Everything about the partition waits behind this number.",
+        need: "The partition run end to end, and both gaps, measured rather than paced.",
+      },
+      {
+        id: "centre-panel", name: "The study wall centre panel loses 14 inches", status: "open",
+        what: "The wall was drawn at 16 ft and is actually 14 ft 11 in. The window is fixed at 4 ft and the two pilasters are fixed, so the whole shortfall falls on the bookcase and the centre panel between them.",
+        effect: "On the old layout the centre panel would drop from 4 ft 9 in to 3 ft 8 in, making the focal point of the wall its narrowest bay.",
+        doing: "The centre panel stays — that is decided. Proposed instead: set the centre panel to the same width as the window bay so the two read as a matched pair framed by the pilasters, and let the bookcase take the remainder as the solid anchor at the end of the wall.",
+        need: "Agreement on that split before the wall is redrawn.",
+      },
+      {
+        id: "window-corner", name: "The window is hard into the corner", status: "accepted",
+        what: "The window is 4 ft wide and sits tight against the right-hand corner of the study wall, with no return.",
+        effect: "The moulded architrave and panelled reveal can only run down the left side of the window — there is no wall left on the right for them to land on. The curtain has no wall to stack against on that side either.",
+        doing: "Accepted; nothing can be done. The architrave runs one side only, and the curtain becomes a single curtain gathering to the left rather than a pair.",
+        need: "",
+      },
+      {
+        id: "floor-border", name: "The floor border may already carry the taper", status: "open",
+        what: "The white marble border runs parallel to the walls and is already laid. In a tapering room either the border strip changes width end to end, or it stays constant and the taupe field changes instead.",
+        effect: "Whichever it did is permanent. If the joinery then makes the opposite choice, the two will contradict each other and both become visible.",
+        doing: "Nothing yet — the joinery should repeat whatever the floor already did, not fight it.",
+        need: "Measure the border width at the study end and at the bed end and compare.",
+      },
+      {
+        id: "light-temp", name: "The lighting is specified at the wrong temperature", status: "open",
+        what: "Cove and focus lights are both specified at 4000K neutral white, in a room finished in warm teak, cream and parchment.",
+        effect: "4000K pulls the red out of teak and leaves the grain slightly grey-green, and turns parchment clinical. On its own it looks clean, because the eye adapts within a minute — it only shows against warm wood and after dark.",
+        doing: "Nothing bought yet, so it is still free to change. 2700K for the room, 3000K at the very most, CRI 90 or better on every fitting, everything dimmable.",
+        need: "Hold a 4000K and a 2700K lamp against a teak offcut after dark, and decide from that.",
+      },
+      {
+        id: "sourcing", name: "Nobody has been found to build any of it", status: "open",
+        what: "No carpenter, no veneer supplier, no source for the parchment. The master veneer, grain, polish and tone are all still unchosen, and every piece of joinery in the room inherits them.",
+        effect: "Nothing can be quoted, ordered or started. This blocks more of the room than any measurement does.",
+        doing: "One visit to a veneer and polish supplier settles veneer, grain, polish and tone together, picked by eye off the catalogue.",
+        need: "A supplier, and an afternoon.",
+      },
+    ],
+  },
+
   room: {
     plan: "assets/refs/room-plan-lighting-rcp.jpg",   // source: photo of the lighting / false-ceiling plan
     facts: [

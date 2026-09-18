@@ -419,3 +419,21 @@ body.sheets-dark .lb-inner.is-dwg svg { filter: invert(1) hue-rotate(180deg) bri
   .rule-l { position: static; }
   .pointers-top { flex-direction: column; align-items: flex-start; gap: 12px; }
 }
+
+/* ── problems: what is wrong with the room as built ────── */
+.probs { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+.prob { padding: 44px 0; border-bottom: 1px solid var(--hair); }
+.prob:last-child { border-bottom: 0; }
+.prob-head { display: flex; align-items: center; gap: 18px; margin-bottom: 26px; flex-wrap: wrap; }
+.prob-t { font: 400 28px/1.05 var(--cond); text-transform: uppercase; letter-spacing: -0.02em; margin: 0; flex: 1; min-width: 260px; }
+.pstat { display: inline-flex; align-items: center; height: 28px; padding: 0 14px; border: 1px solid var(--steel); border-radius: 1440px;
+  font: 400 12px/1 var(--mono); text-transform: uppercase; letter-spacing: -0.02em; color: var(--dim); white-space: nowrap; }
+.pstat.blocking { border-color: var(--ember); color: var(--ember); }
+.pstat.open { border-color: var(--ash); color: var(--ash); }
+.pstat.solved { border-color: #7e9e6e; color: #7e9e6e; }
+.prob.solved .prob-t { color: var(--dim); }
+.pb-row { display: grid; grid-template-columns: 200px 1fr; gap: 28px; padding: 15px 0; border-top: 1px solid var(--hair); }
+.pb-k { font: 400 12px/1.4 var(--mono); text-transform: uppercase; letter-spacing: -0.02em; color: var(--steel); padding-top: 3px; }
+.pb-v { font: 400 15px/1.55 var(--sans); color: rgba(255, 255, 255, .86); }
+.prob .pb-row:last-child .pb-k { color: var(--ember); }
+@media (max-width: 860px) { .pb-row { grid-template-columns: 1fr; gap: 8px; } .prob-t { font-size: 22px; } }

@@ -41,11 +41,12 @@ function tally(list) {
   list.forEach((x) => c[statusOf(x.key, x.s)]++);
   return c;
 }
-const allTabIds = () => ["veneer", "principles", ...P.tabs.map((t) => t.id), "lighting"];
-const titleOf = (id) => (id === "veneer" ? "Materials" : id === "principles" ? "Principles" : id === "lighting" ? "Lighting & Switches" : id === "overview" ? "Overview" : P.tabs.find((t) => t.id === id)?.title || id);
+const allTabIds = () => ["veneer", "principles", ...P.tabs.map((t) => t.id), "lighting", "problems"];
+const titleOf = (id) => (id === "veneer" ? "Materials" : id === "principles" ? "Principles" : id === "problems" ? "Problems" : id === "lighting" ? "Lighting & Switches" : id === "overview" ? "Overview" : P.tabs.find((t) => t.id === id)?.title || id);
 const IMG = {
   overview: "assets/refs/desk-ref-1.jpg", veneer: "assets/refs/desk-ref-1-detail.jpg", doors: "assets/refs/door-ref-1.jpg",
   principles: "assets/refs/paint-ref-1-warm-cream-room-sheer-curtains.jpg",
+  problems: "assets/refs/walls-ref-1-panel-moulding.jpg",
   study: "assets/refs/wall-ref-1-library-pilasters.jpg", walls: "assets/refs/walls-ref-1-panel-moulding.jpg", bedroom: "assets/refs/bed-ref-1-low-platform-bed.jpg",
   dressing: "assets/refs/wardrobe-ref-2-steel-leaded-doors-wide.jpg", bathroom: "assets/refs/bathroom-ref-1-painted-ceiling-linework.jpg", lighting: "assets/refs/wall-ref-4-dark-study-bands-sconces.jpg",
   stack: "assets/refs/wall-ref-1-library-pilasters.jpg", footer: "assets/refs/desk-ref-1-detail.jpg",
@@ -75,7 +76,7 @@ function footer() {
     <div class="footer-card">
       <span></span>
       <div style="display:flex;flex-direction:column;align-items:center;gap:18px">${mark("mk")}<div class="wordmark" data-decode>A Study in Teak</div></div>
-      <div class="footer-btns"><a class="btn" href="#overview">Overview</a><a class="btn" href="#veneer">Materials</a><a class="btn" href="#principles">Principles</a></div>
+      <div class="footer-btns"><a class="btn" href="#overview">Overview</a><a class="btn" href="#veneer">Materials</a><a class="btn" href="#principles">Principles</a><a class="btn" href="#problems">Problems</a></div>
       <div class="footer-links"><span class="dotline"></span>${P.tabs.map((t) => `<a class="nav-link" href="#${t.id}">${esc(t.title)}</a>`).join("")}<a class="nav-link" href="#lighting">Lighting</a><span class="dotline"></span></div>
       <div class="eyebrow">Rough work · finalised with the family</div>
       <div class="footer-flank l">One room, in teak</div><div class="footer-flank r">Rev. ${today}</div>
@@ -202,6 +203,23 @@ function pointers(id) {
       <p class="pointer-b">${esc(r.body)}</p>
       ${r.check ? `<p class="pointer-c"><span>Where it stands</span>${esc(r.check)}</p>` : ""}
     </article>`).join("")}</div>`;
+}
+
+const PSTAT = { blocking: "Blocking", open: "Open", accepted: "Accepted", solved: "Solved" };
+
+function problems() {
+  const PB = P.problems, c = {};
+  PB.items.forEach((i) => (c[i.status] = (c[i.status] || 0) + 1));
+  const live = (c.blocking || 0) + (c.open || 0);
+  const row = (k, v) => (v ? `<div class="pb-row"><div class="pb-k">${k}</div><div class="pb-v">${esc(v)}</div></div>` : "");
+  return pageHero("problems", "The room was not built square", "Problems", PB.intro, `${live} still live`) +
+    `<section class="bone on-bone index-strip" data-light><div class="eyebrow" style="text-align:center" data-decode>Where they stand</div>
+      <div class="index">${Object.keys(PSTAT).filter((k) => c[k]).map((k) => `<span class="btn" style="pointer-events:none">${esc(PSTAT[k])} · ${pad2(c[k])}</span>`).join("")}</div></section>` +
+    `<div class="probs">${PB.items.map((i, k) => `<article class="prob reveal ${i.status}" id="${i.id}">
+      <div class="prob-head"><span class="badge">${pad2(k + 1)}</span><h3 class="prob-t">${esc(i.name)}</h3><span class="pstat ${i.status}">${PSTAT[i.status]}</span></div>
+      ${row("What", i.what)}${row("What it damages", i.effect)}${row("What we are doing", i.doing)}${row("What is needed", i.need)}
+    </article>`).join("")}</div>` +
+    nextLink("problems") + footer();
 }
 
 function principles() {
@@ -438,10 +456,10 @@ function onScroll() {
 window.addEventListener("scroll", onScroll, { passive: true });
 
 // ── router with a soft cross-fade ──
-const current = () => { const id = location.hash.slice(1) || "overview"; return ["veneer", "principles", "lighting", ...P.tabs.map((t) => t.id)].includes(id) ? id : "overview"; };
+const current = () => { const id = location.hash.slice(1) || "overview"; return ["veneer", "principles", "lighting", "problems", ...P.tabs.map((t) => t.id)].includes(id) ? id : "overview"; };
 function render(delayMotion = 0) {
   const id = current(), t = P.tabs.find((t) => t.id === id), main = $("#main");
-  main.innerHTML = id === "veneer" ? veneer() : id === "principles" ? principles() : id === "lighting" ? lighting() : t ? tabPage(t) : overview();
+  main.innerHTML = id === "veneer" ? veneer() : id === "principles" ? principles() : id === "problems" ? problems() : id === "lighting" ? lighting() : t ? tabPage(t) : overview();
   renderChrome(id);
   document.title = `${titleOf(id)} · ${P.name}`;
   main.classList.remove("leaving"); main.classList.add("entering");
