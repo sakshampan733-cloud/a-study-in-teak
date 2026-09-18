@@ -1,5 +1,5 @@
 // The room as built — shell only, no furniture. Plan at 1:40.
-// AST-DR-001. Real-world units are mm. In this drawing x runs left-to-right along the study wall
+// AST-DR-000. Real-world units are mm. In this drawing x runs left-to-right along the study wall
 // and y runs DOWN the page, away from the study wall towards the bed wall (no flip, unlike the elevations).
 
 window.DRAWINGS = window.DRAWINGS || {};
@@ -132,6 +132,6 @@ const SHELL = {
    "Bathroom and dressing lie beyond the right wall — to come.",
   ].forEach((t, i) => (s += text(300, 32 + i * 5.4, t, { size: 1.75, fill: i > 10 ? THIN : INK })));
 
-  s += titleBlock({ title: "THE ROOM AS BUILT", sub: "Shell plan · measured on site", date: K.date, rev: K.rev, dwg: "AST-DR-001", scale: `1:${sc} @ A3` });
+  s += titleBlock({ title: "THE ROOM AS BUILT", sub: "Shell plan · measured on site", date: K.date, rev: K.rev, dwg: "AST-DR-000", scale: `1:${sc} @ A3` });
   window.DRAWINGS.roomshell = { title: "The room as built · AST-DR-001", svg: sheet(s), model: true };
 })();

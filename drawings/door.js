@@ -32,45 +32,10 @@ const DOOR = {
   const D = DOOR;
   const bottomRail = D.H - D.topRail - D.upperH - D.lockRail - D.lowerH;
   const lockY = D.topRail + D.upperH + D.lockRail / 2;   // from top of leaf
-  const INK = "#1b1b1b", THIN = "#666", DIM = "#8a3a22";
-  const FONT = "Helvetica, Arial, sans-serif";
-
-  // ── helpers ──
-  const f = (n) => +(+n).toFixed(2);
-  const text = (x, y, s, o = {}) =>
-    `<text x="${f(x)}" y="${f(y)}" font-size="${o.size || 2.2}" text-anchor="${o.anchor || "start"}" fill="${o.fill || INK}" font-weight="${o.weight || 400}" letter-spacing="${o.ls || 0}" font-family="${FONT}"${o.rot ? ` transform="rotate(-90 ${f(x)} ${f(y)})"` : ""}>${s}</text>`;
-  // A view maps real mm to paper mm at 1:s with origin (ox, oy).
-  const CAD = (window.CAD = window.CAD || { sheet: null, views: [] });
-  CAD.sheet = "door";
-  const view = (ox, oy, s, name) => ({
-    X: (x) => f(ox + x / s), Y: (y) => f(oy + y / s),
-    g: (inner, w = 0.3) => (name && CAD.views.push({ sheet: "door", name, scale: s, svg: inner }), `<g transform="translate(${ox} ${oy}) scale(${1 / s})" stroke="${INK}" stroke-width="${w * s}" fill="none" stroke-linejoin="round" stroke-linecap="round">${inner}</g>`),
-    w: (paperW) => paperW * s,   // paper stroke width -> local units
-  });
-  const tick = (x, y) => `<line x1="${f(x - 1)}" y1="${f(y + 1)}" x2="${f(x + 1)}" y2="${f(y - 1)}" stroke-width="0.3"/>`;
-  // Horizontal dim chain: xs in paper, labels = real values. ext = where extension lines reach to (paper y).
-  function chainH(xs, y, labels, o = {}) {
-    let g = `<line x1="${xs[0] - 1.5}" y1="${y}" x2="${xs[xs.length - 1] + 1.5}" y2="${y}"/>`;
-    xs.forEach((x) => { g += `<line x1="${x}" y1="${o.from ?? y - 2}" x2="${x}" y2="${y + 1.2}"/>` + tick(x, y); });
-    let t = "";
-    labels.forEach((l, i) => { t += text((xs[i] + xs[i + 1]) / 2, y - 0.8, l, { size: o.size || 1.7, anchor: "middle", fill: DIM }); });
-    return `<g stroke="${DIM}" stroke-width="0.13">${g}</g>${t}`;
-  }
-  function chainV(ys, x, labels, o = {}) {
-    let g = `<line x1="${x}" y1="${ys[0] - 1.5}" x2="${x}" y2="${ys[ys.length - 1] + 1.5}"/>`;
-    ys.forEach((y) => { g += `<line x1="${o.from ?? x - 2}" y1="${y}" x2="${x + 1.2}" y2="${y}"/>` + tick(x, y); });
-    let t = "";
-    labels.forEach((l, i) => { t += text(x - 0.8, (ys[i] + ys[i + 1]) / 2, l, { size: o.size || 1.7, anchor: "middle", fill: DIM, rot: true }); });
-    return `<g stroke="${DIM}" stroke-width="0.13">${g}</g>${t}`;
-  }
-  const bubble = (x, y, n) =>
-    `<circle cx="${f(x)}" cy="${f(y)}" r="2" fill="#fff" stroke="${INK}" stroke-width="0.2"/>${text(x, y + 0.75, n, { size: 2, anchor: "middle", weight: 700 })}`;
-  const note = (x1, y1, x2, y2, l1, l2, anchor = "start") => {
-    const tx = anchor === "end" ? x2 - 1 : x2 + 1;
-    return `<g stroke="${INK}" stroke-width="0.13"><line x1="${f(x1)}" y1="${f(y1)}" x2="${f(x2)}" y2="${f(y2)}"/></g><circle cx="${f(x1)}" cy="${f(y1)}" r="0.4" fill="${INK}"/>` +
-      text(tx, y2 + 0.2, l1, { size: 1.7, anchor }) + (l2 ? text(tx, y2 + 2.5, l2, { size: 1.45, fill: THIN, anchor }) : "");
-  };
-  const heading = (x, y, t, sub) => text(x, y, t, { size: 3.4, weight: 700, ls: 0.3 }) + `<line x1="${x}" y1="${y + 1.6}" x2="${x + 60}" y2="${y + 1.6}" stroke="${INK}" stroke-width="0.35"/>` + text(x, y + 5, sub, { size: 1.8, fill: THIN, ls: 0.2 });
+  // Drafting helpers come from the shared kit, so this sheet inherits the same dimension
+  // chains, label stacks and unit toggle as every other drawing.
+  const { INK, THIN, f, text, view, chainH, chainV, bubble, note, labels, heading, frame, titleBlock, sheet } = window.DK;
+  window.DK.begin("door");
 
   // Shaped bead: vertical sides; at head and foot a concave shoulder (around the
   // roundel) rising into a rounded crown. Real mm.
@@ -129,8 +94,7 @@ const DOOR = {
     return out;
   }
 
-  let svg = `<rect x="0" y="0" width="420" height="297" fill="#fff"/>`;
-  svg += `<rect x="8" y="8" width="404" height="281" fill="none" stroke="${INK}" stroke-width="0.5"/>`;
+  let svg = frame();
 
   // ═══ VIEW 1 · FRONT ELEVATION 1:10 ═══
   const s1 = 12, total = D.W * D.leaves, a = D.architrave;
@@ -265,22 +229,11 @@ const DOOR = {
     "Architrave, hinges and lock not yet designed.",
   ].forEach((n, i) => { svg += text(kx, 105 + i * 4.2, n, { size: 1.7 }); });
 
-  const tb = { x: 300, y: 239, w: 112, h: 50 };
-  svg += `<g stroke="${INK}" stroke-width="0.3" fill="none"><rect x="${tb.x}" y="${tb.y}" width="${tb.w}" height="${tb.h}"/>
-    <line x1="${tb.x}" y1="${tb.y + 14}" x2="${tb.x + tb.w}" y2="${tb.y + 14}"/><line x1="${tb.x}" y1="${tb.y + 30}" x2="${tb.x + tb.w}" y2="${tb.y + 30}"/>
-    <line x1="${tb.x}" y1="${tb.y + 40}" x2="${tb.x + tb.w}" y2="${tb.y + 40}"/><line x1="${tb.x + 56}" y1="${tb.y + 30}" x2="${tb.x + 56}" y2="${tb.y + 50}"/></g>`;
-  svg += text(tb.x + 3, tb.y + 6.5, "A STUDY IN TEAK", { size: 3.4, weight: 700, ls: 0.6 });
-  svg += text(tb.x + 3, tb.y + 11, "Particulars of the room", { size: 1.9, fill: THIN });
-  svg += text(tb.x + 3, tb.y + 20.5, "DOORS D1 – D3", { size: 3.4, weight: 700, ls: 0.3 });
-  svg += text(tb.x + 3, tb.y + 26, "Elevation · Panel head · Section · Lock rail", { size: 2, fill: THIN });
-  svg += text(tb.x + 3, tb.y + 34, "SCALE", { size: 1.5, fill: THIN }) + text(tb.x + 3, tb.y + 38, "AS NOTED @ A3", { size: 2.1 });
-  svg += text(tb.x + 59, tb.y + 34, "DATE", { size: 1.5, fill: THIN }) + text(tb.x + 59, tb.y + 38, D.date, { size: 2.1 });
-  svg += text(tb.x + 3, tb.y + 44, "REV", { size: 1.5, fill: THIN }) + text(tb.x + 3, tb.y + 48, D.rev, { size: 1.8 });
-  svg += text(tb.x + 59, tb.y + 44, "DWG", { size: 1.5, fill: THIN }) + text(tb.x + 59, tb.y + 48, "AST-DR-001", { size: 2.1, weight: 700 });
+  svg += titleBlock({ title: "DOORS D1 – D3", sub: "Elevation · Panel head · Section · Lock rail", date: D.date, rev: D.rev, dwg: "AST-DR-001" });
 
   window.DRAWINGS.door = {
     title: "Doors D1–D3 · AST-DR-001",
-    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 297" class="sheet">${svg}</svg>`,
+    svg: sheet(svg),
     params: DOOR,
   };
 })();
