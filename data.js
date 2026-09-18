@@ -198,14 +198,14 @@ window.PROJECT = {
   //         "accepted" — nothing can be done; the design absorbs it
   //         "solved"   — closed, kept for the record
   problems: {
-    intro: "The room was not built square. This is the record of every problem that causes, what it damages, and how the design answers it.",
+    intro: "The room is a little out of square and has a step in one wall. This is the record of every problem that causes, what it damages, and how the design answers it.",
     items: [
       {
-        id: "not-square", name: "The room is not square", status: "open",
-        what: "Measured across: 14 ft 11 in at the study wall, 15 ft 0 in at the partition line, 15 ft 6 in at the bed wall. Measured along: 18 ft 11 in on one side, 19 ft 0 in on the other. The room tapers about 7 inches over its length.",
-        effect: "Nothing can be standardised. Every fitted piece has to be made to the wall it actually meets, and no dimension can be reused from one end of the room to the other. Anything that repeats — a grid, a run of equal panels, a border of constant width — will reveal the taper, because the eye counts repeats.",
-        doing: "Each wall is drawn to its own measurement: study wall 14 ft 11 in, partition 15 ft 0 in, bed wall 15 ft 6 in. All fitted joinery to be built 15 to 20 mm undersize with a scribe fillet at each end, planed on site to follow the wall. The carpenter has to be told this before he builds, not after.",
-        need: "Both diagonals, and each wall measured at floor level, waist height and near the ceiling — walls lean as well as splay.",
+        id: "not-square", name: "The room is slightly out of square", status: "open",
+        what: "Measured across: 14 ft 11 in at the study wall, 15 ft 0 in at the partition line, 15 ft 1 in at the bed wall. Along: 18 ft 11 in on one side, 19 ft 0 in on the other. Diagonals 24 ft 5 in and 23 ft 11 in. The room widens about 2 inches from the study end to the bed end — roughly half a degree.",
+        effect: "Small, but real. No dimension can be reused from one end of the room to the other, so every fitted piece is made to the wall it actually meets. Half a degree is far too shallow to read on its own — it only shows where something repeats, or where a tight reveal runs the length of the room.",
+        doing: "Each wall drawn to its own measurement: study wall 14 ft 11 in, partition 15 ft 0 in, bed wall 15 ft 1 in. All fitted joinery built 15 to 20 mm undersize with a scribe fillet at each end, planed on site to follow the wall — the carpenter has to be told this before he builds, not after. The diagonals close against the widths and the sides, so the shell is now known.",
+        need: "Each wall at three heights — floor, waist and ceiling, since walls lean as well as splay — and whether the floor is level end to end.",
       },
       {
         id: "ceiling-plain", name: "The ceiling was left plain on purpose", status: "solved",
@@ -224,7 +224,7 @@ window.PROJECT = {
       {
         id: "partition-square", name: "The partition sits between two walls that are not parallel", status: "open",
         what: "It stands in the middle of the room, where the width is 15 ft 0 in, with a walk-round gap at each end. The two side walls it sits between splay apart towards the bed.",
-        effect: "It can be square to the left wall or to the right wall, but not to both. Whichever one it is not square to, the gap at that end becomes a wedge rather than a parallel opening.",
+        effect: "It can be square to the left wall or to the right wall, but not to both. Whichever one it is not square to, the gap at that end becomes a wedge rather than a parallel opening. Now the splay is known to be about half a degree, that wedge is well under an inch across the gap — a small problem rather than a large one, but a square end would still show a tapering reveal.",
         doing: "Bullnose ends. A curved end has no edge for the eye to measure a gap against, so the wedge cannot be read. The curve was chosen for how it looked; it now does structural work as well.",
         need: "Which side wall the partition should be set square to, and its true run.",
       },
@@ -241,6 +241,13 @@ window.PROJECT = {
         effect: "On the old layout the centre panel would drop from 4 ft 9 in to 3 ft 8 in, making the focal point of the wall its narrowest bay.",
         doing: "The centre panel stays — that is decided. Proposed instead: set the centre panel to the same width as the window bay so the two read as a matched pair framed by the pilasters, and let the bookcase take the remainder as the solid anchor at the end of the wall.",
         need: "Agreement on that split before the wall is redrawn.",
+      },
+      {
+        id: "door-step", name: "A five-inch step in the wall at the door", status: "open",
+        what: "The bed-end wall is not one plane. Past the door it steps out about five inches and then runs on. Measured to the door frame the room reads 15 ft 6 in; measured to where the wall actually sits it is 15 ft 1 in. The five inches is the step, not the room.",
+        effect: "The bed wall cannot be treated as a single flat surface. Anything spanning it — panelling, the parchment field, a headboard, a run of skirting — meets a five-inch return partway along. It also explains the reading that made the room look 7 inches out of square when it is nearer 2.",
+        doing: "Nothing yet. The step is real and has to be designed with rather than papered over — the parchment field can stop against it, or wrap it and use it.",
+        need: "How far along the wall the step falls, exactly how deep it is, and whether it runs full height.",
       },
       {
         id: "window-corner", name: "The window is hard into the corner", status: "accepted",
