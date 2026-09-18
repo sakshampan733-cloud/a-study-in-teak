@@ -23,18 +23,8 @@ window.MODEL3D = (function () {
     const P = [];
     // the two walls that are decided — their own elevations, exactly as drawn
     P.push({ id: "study", w: Wd, h: H, tf: `translate3d(0px,0px,0px)`, art: view("studywall", "Wall elevation") });
-    // The right wall sheet draws the door in outline only. The door has its own sheet, so lay
-    // that elevation over the opening — same design, same millimetres, drawn properly.
-    const D = DOOR, cas = D.frame + D.architrave, dw = D.W * D.leaves;
-    P.push({
-      id: "right", w: L, h: H, tf: `translate3d(${Wd}px,0px,0px) rotateY(-90deg)`,
-      art: view("rightwall", "Right wall elevation"),
-      over: {
-        art: view("door-narrow", "Front elevation"),
-        x: R.run - cas, y: H - R.door.h - cas, w: R.door.w + cas * 2, h: R.door.h + cas,
-        vb: `${-cas} ${-cas} ${R.door.w + cas * 2} ${R.door.h + cas}`,
-      },
-    });
+    // The right wall sheet now draws the door and its full casing, so nothing is laid over it.
+    P.push({ id: "right", w: L, h: H, tf: `translate3d(${Wd}px,0px,0px) rotateY(-90deg)`, art: view("rightwall", "Right wall elevation") });
     // the rest stay plain white, because nothing on them has been decided
     P.push({ id: "bed", w: S.wBed, h: H, tf: `translate3d(${Wd}px,0px,${L}px) rotateY(180deg)`, plain: true });
     P.push({ id: "left", w: L, h: H, tf: `translate3d(0px,0px,${L}px) rotateY(90deg)`, plain: true });
