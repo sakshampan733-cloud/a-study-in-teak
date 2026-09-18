@@ -4,20 +4,20 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const RWALL = {
-  rev: "7 — dressing door (not bathroom), panel top level with door head",
-  date: "17.09.2026",
+  rev: "8 — rail datum moved to 2 ft 3 in (686), level with the window sill",
+  date: "18.09.2026",
   run: 4420,                   // study wall to the dressing door opening, about 14.5 ft (owner's estimate — confirm)
   H: 2743,                     // 9 ft ceiling
   wall: 230,
-  study: { w: 280, h: 570 },   // study unit 280 (11 in) deep; cupboard carcase to 570, reeded counter 570–610 on top
+  study: { w: 280, h: 646 },   // study unit 280 (11 in) deep; cupboard carcase to 646, reeded counter 646–686 on top
   skirt: { h: 102, t: 20 },          // white marble skirting, 4 in, already laid
-  dado: { y: 570, h: 40, proj: 28, reeds: 4 },   // the study counter band carried round the corner: same 570–610 band, same reeds
+  dado: { y: 646, h: 40, proj: 28, reeds: 4 },   // the study counter band carried round the corner: same 646–686 band, same reeds
   mould: { w: 55, proj: 24 },          // panel moulding, painted the wall colour
   stile: 150, edge: 100,               // gap between panels; margin beside the door architrave and at the corner
   bays: 5,
   lamps: [1, 3, 5],                    // lamps centred inside tall panels 1, 3 and 5
-  short: { y0: 212, y1: 470 },
-  tall: { y0: 720, top: 305 },         // tall panels stop level with the door head (2438) — ties the panelling to the door across the wall
+  short: { y0: 212, y1: 546 },
+  tall: { y0: 796, top: 305 },         // tall panels stop level with the door head (2438) — ties the panelling to the door across the wall
   door: { w: 762, h: 2438, arch: 65 }, // dressing door 2 ft 6 × 8 ft, architrave about 2½ in
   ret: 610,                            // 2 ft of wall past the door opening to the corner
   lamp: { y: 1290, span: 150, proj: 230 },   // twin-arm sconce, same height and family as the study wall
@@ -176,7 +176,7 @@ const RWALL = {
   s += lab(300, K.H, K.H + 40, "CEILING", "COVE LIGHT ABOVE");
   s += lab(bays[0][0] + 18, 1900, 1900, "TALL PANEL ×6", "WALL COLOUR");
   s += lab(lx - K.lamp.span - 60, K.lamp.y + 140, K.lamp.y + 200, "WALL LAMP ×3", "PANELS 1, 3, 5");
-  s += lab(K.study.w + 60, yDado - 10, yDado + 150, "RAIL = STUDY COUNTER", "SAME 570–610 BAND");
+  s += lab(K.study.w + 60, yDado - 10, yDado + 150, "RAIL = STUDY COUNTER", "SAME 646–686 BAND");
   s += lab(K.study.w - 60, 300, 440, "STUDY CUPBOARDS", "END, 280 DEEP");
   s += lab(bays[0][0] + 18, 280, 250, "SHORT PANEL ×6", "");
   s += lab(K.study.w + 60, 60, 20, "SKIRTING", "");
@@ -204,7 +204,7 @@ const RWALL = {
   // Notes
   s += heading(318, 180, "NOTES", `REVISION ${K.rev.split(" ")[0]}`, 40);
   ["Option C: 5 equal panels, lamps in 1, 3 and 5.", "Skirting is white marble, 4 in, already laid.", "One narrow panel on the 2 ft wall past the door.", "Moulding, rail and skirting painted the wall colour.",
-   "Rail is the study counter band carried round the", "   corner — same 570–610 height, same 4 reeds.", "Short and tall panels share the same centres.",
+   "Rail is the study counter band carried round the", "   corner — same 646–686 height, same 4 reeds.", "Short and tall panels share the same centres.",
    "Lengths are estimates — set out from site measure,", "   keeping the stiles 150 and the panels equal."]
     .forEach((n, i) => { s += text(318, 191 + i * 4.3, n, { size: 1.55 }); });
 

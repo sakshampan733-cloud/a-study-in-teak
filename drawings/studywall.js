@@ -4,16 +4,16 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const WALL = {
-  rev: "5 — unit 280 (11 in) deep",
-  date: "17.09.2026",
+  rev: "6 — datum moved to 2 ft 3 in (686), window measured",
+  date: "18.09.2026",
   W: 4877, H: 2743,            // 16 ft wall, 9 ft ceiling (owner's measure)
   skirt: 120,                  // skirting line on the cupboard fronts
-  base: { h: 570, top: 40, d: 255, over: 25 },   // cupboards under all three bays, 2 ft to the top of the reeded counter; 280 (11 in) from the wall
+  base: { h: 646, top: 40, d: 255, over: 25 },   // cupboards under all three bays, 2 ft 3 in (686) to the top of the reeded counter — set by the window sill; 280 (11 in) from the wall
   book: { w: 1650, d: 280, stile: 60, shelves: [890, 1160, 1430, 1700] },   // flat head, no arch
   band: { h: 400, rail: 40 },   // moulded panel band under the cornice — same size over all three bays (ref. 3)
   pil: { w: 240, proj: 40, flutes: 9, capH: 130, d: 280, ped: 25, pedProj: 50 },  // ref. 1 fluted shaft; ref. 3 pedestal steps forward below the counter
   panel: { w: 1400, set: 200, frame: 70, painting: [760, 860], paintingC: 1440 },
-  win: { w: 1160, sill: 650, head: 2320, fromRight: 35, arch: 70, wall: 230 },  // read off the site photo (9 ft ceiling as scale) — confirm with a tape
+  win: { w: 1219, sill: 686, head: 2337, fromRight: 0, arch: 70, wall: 230 },  // measured: 4 ft wide, 5 ft 5 in tall, sill 2 ft 3 in, hard into the right-hand corner
   sconce: { y: 1290, span: 150 },  // twin-arm candle sconce with shade, one on each pilaster (ref. 3)
   ent: { architrave: 60, frieze: 80, mod: 70, dentil: 30, crown: 90, proj: 160, modW: 44, modPitch: 105 },
 };
@@ -274,7 +274,7 @@ const WALL = {
   s1 += lab(BK.w / 2, yOpen - 13, vE.X(-40), vE.Y(ey(1850)), "FLAT HEAD, NO ARCH", "STRIP LIGHT UNDER RAIL", "end");
   s1 += lab((xP1[0] + xP1[1]) / 2 - SC.span, SC.y + 150, vE.X(xP1[0]) - 10, vE.Y(ey(1500)) + 20, "TWIN SCONCE ×2", "ON THE PILASTERS — REF. 3", "end");
   s1 += lab(xP2[1] + PL.ped, 450, vE.X(xP2[1]) + 22, vE.Y(ey(600)), "PEDESTAL STEPS FORWARD", "COUNTER WRAPS IT — REF. 3");
-  s1 += lab(260, 300, vE.X(-40), vE.Y(ey(300)), "CUPBOARDS 2 FT, ALL 3 BAYS", "MOULDED PANEL DOORS", "end");
+  s1 += lab(260, 300, vE.X(-40), vE.Y(ey(300)), "CUPBOARDS 2 FT 3 IN, ALL 3 BAYS", "COUNTER TOP LEVEL WITH THE WINDOW SILL", "end");
   s1 += lab(BK.w / 2, yTop - 10, vE.X(-40), vE.Y(ey(900)), "REEDED TOP", "MATCHES THE DESK", "end");
 
   // Plan
@@ -282,7 +282,7 @@ const WALL = {
   s1 += heading(18, 180, "PLAN", `CUT AT 1200 · SCALE 1:${scP} · ROOM BELOW, WALL ABOVE`, 60);
   s1 += vP.g(plan(tP, `${vP.w(1)} ${vP.w(0.7)}`), 0.28);
   s1 += chainV([vP.Y(0), vP.Y(BK.d), vP.Y(B.d + B.over + PL.pedProj)], vP.X(-150) - 4, [`${BK.d} (11 IN)`, PL.pedProj], { from: vP.X(0) - 1, size: 1.3 });
-  s1 += note(vP.X(xWin[0] + 100), vP.Y(-WN.wall / 2), vP.X(xWin[0] + 100) + 4, vP.Y(-WN.wall) - 5, "WINDOW ~1160 WIDE, TIGHT TO CORNER", "FROM SITE PHOTO — CONFIRM");
+  s1 += note(vP.X(xWin[0] + 100), vP.Y(-WN.wall / 2), vP.X(xWin[0] + 100) + 4, vP.Y(-WN.wall) - 5, "WINDOW 1219 (4 FT) WIDE", "HARD INTO THE CORNER — NO RETURN ON THE RIGHT");
 
   // Section
   const scS = 25, vS = view(345, 34, scS, "Section through bookcase"), tS = vS.w(0.1);
@@ -295,7 +295,7 @@ const WALL = {
 
   // Notes
   s1 += heading(318, 170, "NOTES", "REVISION 2", 40);
-  ["Wall 16 ft wide, ceiling 9 ft (owner's measure).", "Window read off a site photo — tape-measure it.", "Elements taken from the references:",
+  ["Wall 16 ft wide, ceiling 9 ft (owner's measure).", "Window measured: 4 ft wide, 5 ft 5 in tall,", "   sill 2 ft 3 in (686), hard into the right corner.", "Counter top set to the sill at 686 — this datum", "   runs on round to the right wall rail.", "Elements taken from the references:",
    "   Ref. 1 — fluted pilasters, moulded painting panel.", "   Ref. 2 — block-and-dentil cornice, no carving.", "   Ref. 3 — band panels over every bay, twin",
    "   sconces, pedestals stepping forward, no arch.", "Cupboards under all three bays. Solid teak.", "Gold only on handles and sconces."]
     .forEach((n, i) => { s1 += text(318, 181 + i * 4.1, n, { size: 1.55 }); });
