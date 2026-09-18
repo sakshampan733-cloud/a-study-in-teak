@@ -5,7 +5,7 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const PGLASS = {
-  rev: "1 — double frame over the bay leading, no colour",
+  rev: "2 — the border only; the field inside stays clear",
   date: "18.09.2026",
   H: 2769,                 // ceiling
   W: 2438,                 // 8 ft overall, straight across the room
@@ -53,39 +53,30 @@ const PGLASS = {
       LN(cx - s / 2, cy - s / 2, cx + s / 2, cy + s / 2, t * 0.7) + LN(cx + s / 2, cy - s / 2, cx - s / 2, cy + s / 2, t * 0.7) +
       RC(cx - s * 0.13, cy - s * 0.13, cx + s * 0.13, cy + s * 0.13, t * 0.7);
   }
-  // one bay of the leading, drawn between x0 and x1
-  function bay(x0, x1, t) {
-    const m = K.marg, cap = K.cap, cx = (x0 + x1) / 2;
-    const xa = x0 + m, xb = x1 - m, iw = xb - xa;
-    const t1 = xa + iw / 3, t2 = xa + (2 * iw) / 3;
-    let o = LN(xa, 0, xa, H, t) + LN(xb, 0, xb, H, t);
-    [[0, cap, 1], [H, H - cap, -1]].forEach(([edge, band, d]) => {
-      const r1 = edge + d * m * 0.62, r2 = band - d * m;
-      o += LN(x0, band, x1, band, t) + LN(x0, r1, x1, r1, t) + LN(x0, r2, x1, r2, t);
-      for (let i = 1; i < 5; i++) { const x = xa + (iw * i) / 5; o += LN(x, edge, x, r1, t); }
-      o += LN(t1, r1, t1, r2, t) + LN(t2, r1, t2, r2, t);
-      o += LN(t1, r2, t1, band, t) + LN(t2, r2, t2, band, t);
-      const by = d > 0 ? r2 : band;
-      o += cross(x0, by + m / 2, m, t) + cross(xb, by + m / 2, m, t);
-      const len = (H - 2 * cap) * 0.128, e = band + d * len;
-      o += LN(cx - 38, band, cx - 38, e, t) + LN(cx + 38, band, cx + 38, e, t) + LN(cx - 38, e, cx + 38, e, t);
-    });
-    [0.25, 0.5, 0.75].forEach((u) => {
-      const by = cap + (H - 2 * cap) * u;
-      o += cross(x0, by, m, t) + cross(xb, by, m, t);
-    });
-    return o;
-  }
-  // the whole wall: the bays, then the border over them
+  // The border only. A ring between two rectangles carries all the leading; the field inside
+  // stays one clear sheet. The ring is divided by short bars, with crosses at the corners and
+  // at the middle of each side.
   function elevation(t, withTv) {
+    const O = K.outer, IX = K.innerX, IY = K.innerY, NT = 8, NS = 9;
     let o = `<rect x="0" y="0" width="${f(DEV)}" height="${f(H)}" fill="#f5f9fb" stroke-width="${t * 2.2}"/>`;
-    for (let i = 0; i < K.bays; i++) o += bay(BW * i, BW * (i + 1), t);
-    for (let b = 1; b < K.bays; b++) o += LN(BW * b, 0, BW * b, H, t * 1.5);
-    const O = K.outer, IX = K.innerX, IY = K.innerY;
+    for (let b = 1; b < K.bays; b++) o += LN(BW * b, 0, BW * b, H, t * 0.9);      // structural joints only
     o += RC(O, O, DEV - O, H - O, t * 2.1) + RC(IX, IY, DEV - IX, H - IY, t * 2.1);
-    o += LN(DEV / 2, O, DEV / 2, IY, t * 1.6) + LN(DEV / 2, H - IY, DEV / 2, H - O, t * 1.6);
-    o += LN(O, H / 2, IX, H / 2, t * 1.6) + LN(DEV - IX, H / 2, DEV - O, H / 2, t * 1.6);
+    for (let k = 1; k < NT; k++) {
+      const x = O + ((DEV - 2 * O) * k) / NT;
+      o += LN(x, O, x, IY, t) + LN(x, H - IY, x, H - O, t);
+    }
+    for (let k = 1; k < NS; k++) {
+      const y = O + ((H - 2 * O) * k) / NS;
+      o += LN(O, y, IX, y, t) + LN(DEV - IX, y, DEV - O, y, t);
+    }
+    // a second line inside the ring, so the border reads as two runs of panes, not one
+    o += LN(O + (IX - O) / 2, O, O + (IX - O) / 2, H - O, t * 0.85);
+    o += LN(DEV - O - (IX - O) / 2, O, DEV - O - (IX - O) / 2, H - O, t * 0.85);
+    o += LN(O, O + (IY - O) / 2, DEV - O, O + (IY - O) / 2, t * 0.85);
+    o += LN(O, H - O - (IY - O) / 2, DEV - O, H - O - (IY - O) / 2, t * 0.85);
     [[IX, IY], [DEV - IX, IY], [IX, H - IY], [DEV - IX, H - IY]].forEach(([a, b]) => (o += cross(a, b, K.blk, t * 1.4)));
+    [[DEV / 2, (O + IY) / 2], [DEV / 2, H - (O + IY) / 2], [(O + IX) / 2, H / 2], [DEV - (O + IX) / 2, H / 2]]
+      .forEach(([a, b]) => (o += cross(a, b, K.blk * 0.92, t * 1.2)));
     if (withTv) o += `<rect x="${f(DEV / 2 - K.tv.w / 2)}" y="${f(H / 2 - K.tv.h / 2)}" width="${K.tv.w}" height="${K.tv.h}" fill="#151515" stroke="none"/>`;
     return o;
   }
@@ -161,7 +152,7 @@ const PGLASS = {
   s += text(20, 249, "ALL GLASS. One composition across the whole wall — the border runs straight through the bay joints.", { size: 2 });
   s += text(20, 255, `Border: an outer rectangle ${K.outer} in from every edge and an inner one ${K.innerX} in at the sides, ${K.innerY} at head and foot,`, { size: 1.7, fill: THIN });
   s += text(20, 260, "joined by a short bar at the middle of each side, with a cross at each corner of the inner rectangle.", { size: 1.7, fill: THIN });
-  s += text(20, 265, "Within it, each bay carries a tiered head and foot, a stem into the field, and three crosses down each margin.", { size: 1.7, fill: THIN });
+  s += text(20, 265, "All the leading is in the ring between them. The field inside the inner rectangle is one clear sheet.", { size: 1.7, fill: THIN });
   s += text(20, 272, "White textured glass in lead came. No colour. The television is shown for position only — how it is carried is not drawn.", { size: 1.7, fill: THIN });
 
   s += titleBlock({ title: "PARTITION — LEADED GLASS", sub: "Plan · Elevation · With the television · Curve · Axonometric", date: K.date, rev: K.rev, dwg: "AST-DR-010", scale: "AS NOTED @ A3" });
