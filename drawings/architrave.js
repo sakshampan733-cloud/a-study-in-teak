@@ -8,7 +8,7 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const ARCH = {
-  rev: "6 — head stepped not reeded; moulded corner blocks; scallops set out to them",
+  rev: "7 — relief scheduled; final for the dressing door",
   date: "19.09.2026",
   leaf: { w: 762, h: 2311 },     // the dressing and bathroom doors, 2 ft 6 × 7 ft 7
   wide: 914,                     // D1, the main door — a pair of leaves
@@ -151,7 +151,7 @@ const ARCH = {
     s += chainV([v.Y(E(0)), v.Y(E(yC)), v.Y(E(yFr)), v.Y(E(yM)), v.Y(E(TOPY))], v.X(W) + 7, [K.leaf.h, FR, MO, TOPY - yM], { from: v.X(W) + 2, size: 1.2 });
     s += chainV([v.Y(E(0)), v.Y(E(TOPY))], v.X(W) + 16, [`${TOPY} OVERALL`], { from: v.X(W) + 2, size: 1.35 }); }
 
-  s += heading(112, 18, "MAIN DOOR", "D1 · 3 FT · A PAIR OF LEAVES · 1:20", 86);
+  s += heading(112, 18, "MAIN DOOR", "D1 · 3 FT · PROVISIONAL — A PLAINER HEAD TO COME", 86);
   { const sc = 20, v = view(136, 36, sc, "Main door casing"), t = v.w(0.12), W = K.wide + 2 * CAS;
     s += v.g(casing(K.wide, t, "door"), 0.3);
     s += chainH([v.X(0), v.X(CAS), v.X(CAS + K.wide), v.X(W)], v.Y(E(0)) + 8, [CAS, K.wide, CAS], { from: v.Y(E(0)) + 2, size: 1.25 });
@@ -181,17 +181,36 @@ const ARCH = {
     s += chainV([v.Y(0), v.Y(K.plinth)], v.X(CAS) + 5, [K.plinth], { from: v.X(CAS) + 1, size: 1.2 }); }
 
   s += heading(18, 202, "NOTES", `REVISION ${K.rev.split(" ")[0]}`, 74);
-  [["The lining is 2 in on the face. The moulding lays 4 in outside it,", "all round — so the jambs are 6 in wide, and over the opening the",
-    "moulding head sits 6 in ABOVE the leaf rather than on top of it.", "That clearance is the whole of the correction in this revision.",
-    "The moulding is reeded and turns the corner over the head, so the", "reeding runs round the opening in one piece."],
-   ["Above the moulding, and only above it: a course of scallops, two", "small mouldings, and a crown that mitres back at each end.",
-    "Across the head the moulding is STEPPED, not reeded — the",
-    "reference has no reeding there. The jambs stay reeded.",
+  [["The lining is 2 in on the face. The moulding lays 4 in outside it,",
+    "all round — so the jambs are 6 in wide, and over the opening the",
+    "moulding head sits 6 in ABOVE the leaf, not on top of it.",
+    "The jambs are reeded. Across the head the moulding is STEPPED,",
+    "not reeded — the reference has no reeding there.",
+    "A plinth block takes each jamb down over the marble skirting."],
+   ["Above the moulding, and only above it: a course of scallops, two",
+    "small mouldings, and a crown that mitres back at each end.",
     "A 4 in square block at each corner, with a small sunk moulding",
-    "inside it, takes the two together. The scallops are set out in",
-    "three runs so a joint lands on each block edge.", `The crown lands at ${TOPY} (8 ft 8 in), leaving 5 in to the ceiling.`,
-    "All three doors take the identical casing; only the width changes.", "A plinth block takes each jamb down over the marble skirting."]]
+    "inside it, ties head to jamb; the scallops run in three runs so a",
+    `joint lands on each block edge. The crown lands at ${TOPY} (8 ft 8 in).`,
+    "FINAL for the DRESSING door. Main and bathroom take a plainer head."]]
     .forEach((col, c) => col.forEach((n, i) => (s += text(18 + c * 104, 214 + i * 4.6, n, { size: 1.7, fill: INK }))));
+
+  // ═══ RELIEF — what stands out and what is cut in ═══
+  s += heading(18, 243, "RELIEF", "FACE OF THE PLASTER WALL = DATUM 0 · ALL FIGURES ARE PROJECTION FROM IT", 74);
+  [[["Lining, 2 in on the face", "6 OUT"],
+    ["Moulding, 4 in, reeded", `${K.projJ} OUT`],
+    ["Reed grooves in the moulding face", "3 IN"],
+    ["Corner block, flush with the moulding", `${K.projJ} OUT`],
+    ["Its sunk panel, two steps", "6 AND 10 IN"]],
+   [["Scallop course", `${K.projS} OUT`],
+    ["Scallops, cut back from its face", "5 IN"],
+    ["Small mouldings, over the scallops", `${K.projA} AND ${K.projB} OUT`],
+    ["Crown, the widest member", `${K.projK} OUT`],
+    ["Plinth block, so the moulding dies on it", `${K.projJ + 4} OUT`]]]
+    .forEach((col, c) => col.forEach(([a, b], i) => {
+      s += text(18 + c * 104, 255 + i * 4.4, a, { size: 1.6 });
+      s += text(112 + c * 104, 255 + i * 4.4, b, { size: 1.6, anchor: "end", fill: THIN });
+    }));
 
   // the other sheets build the same casing rather than drawing their own
   window.CASING = { CAS, FR, MO, TOPY, HEAD, yC, yM, projJ: K.projJ, earK: K.earK, draw: casing, head };

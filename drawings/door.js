@@ -11,7 +11,7 @@ const DOOR_TYPES = [
 ];
 
 const DOOR = {
-  rev: "5 — casing 2 in frame + 4 in moulding, matching AST-DR-011",
+  rev: "6 — set out on the panel square: upper two squares, lower one",
   date: "17.09.2026",
   // D1 main door: 8 ft × 3 ft opening (2438 × 914). D2, D3: same design, 8 ft × 2 ft 6 in (2438 × 762).
   leaves: 2,          // reference is a pair of narrow leaves — pair vs single still to confirm
@@ -20,14 +20,14 @@ const DOOR = {
   T: 45,              // leaf thickness
   stile: 100,
   topRail: 100,
-  upperH: 1138,       // set so the knob centre lands about 960 above the floor
+  upperH: 1124,      // exactly two panel squares on the 2 ft 6 leaf       // set so the knob centre lands about 960 above the floor
   lockRail: 230,
-  lowerH: 613,        // bottom rail = what is left, and stays the deepest
+  lowerH: 562,        // exactly one panel square; the bottom rail takes what is left, 295
   sticking: 20,       // ovolo sticking moulding around each panel
-  inset: 26,          // shaped bead line, inset from the panel field
-  notchR: 26,         // concave shoulder radius (around the roundel)
-  crown: 34,          // rise of the rounded crown above the shoulders
-  roundel: 9,         // corner roundel radius
+  inset: 30,          // shaped bead line, inset from the panel field
+  notchR: 30,         // concave shoulder radius (around the roundel)
+  crown: 38,          // rise of the rounded crown above the shoulders
+  roundel: 13,         // corner roundel radius
   panelT: 18,
   rebate: 12,         // meeting-stile rebate (pair only)
   knobD: 55,
@@ -256,17 +256,34 @@ function buildDoorSheet(cfg) {
     "   leaf size, opening and thickness are ASSUMED.",
     "Knob centre lands 958 above the floor — normal height.",
     `${cfg.name} — ${cfg.label}, ${cfg.sub}.`,
-    "Same design at both widths: stiles 100, rails and",
-    "   mouldings identical. Only the panel width changes,",
-    `   here ${D.W - 2 * D.stile} per panel. Details A, B and C serve both doors.`,
+    "Set out on the panel square. The 2 ft 6 leaf gives a",
+    "   562 panel; the upper panel is two of those squares",
+    "   (1124), the lower is one (562). Rails follow: top 100,",
+    "   lock 230, bottom 295. Knob centre 972 above the floor.",
+    "Both widths take the identical rails and mouldings, so",
+    `   only the panel width changes — here ${D.W - 2 * D.stile} per panel.`,
     "Solid teak frame. Veneer and polish per",
     "   Materials; polish to match the teak desk.",
-    "Casing: 2 in frame plus 4 in moulding over it, so the",
+    "Casing: 2 in lining plus 4 in moulding over it, so the",
     `   moulding head sits ${D.frame + D.architrave} (6 in) above the leaf.`,
-    "   The scallops, small mouldings and crown stand over that —",
-    "   see AST-DR-011.",
+    "   See AST-DR-011 (option A) and AST-DR-012 (option B).",
     "Hinges and lock not yet designed.",
   ].forEach((n, i) => { svg += text(kx, 105 + i * 4.2, n, { size: 1.7 }); });
+
+  // ═══ RELIEF — what stands out and what is cut in ═══
+  svg += heading(300, 172, "RELIEF", "FACE OF THE STILES AND RAILS = DATUM 0", 110);
+  [["Stiles and rails, 45 thick", "DATUM 0"],
+   ["Ovolo sticking, 20 wide", "WORKED ON THE FRAME EDGE"],
+   ["Panel, 18 thick, loose in a 12 groove", "—"],
+   ["Panel field", "13.5 IN (\u00bd IN)"],
+   ["Shaped bead line round the field", "2.5 IN"],
+   [`Roundel boss \u00d8${D.roundel * 2}, four per panel`, "3 OUT"],
+   ["Mitres at the sticking corners", "CUT, NOT SCRIBED"],
+   [`Knob \u00d8${D.knobD} and escutcheon \u00d834`, "SURFACE"],
+  ].forEach(([a, b], i) => {
+    svg += text(300, 184 + i * 4.4, a, { size: 1.65 });
+    svg += text(410, 184 + i * 4.4, b, { size: 1.65, anchor: "end", fill: THIN });
+  });
 
   svg += titleBlock({ title: `DOOR ${cfg.name} — ${cfg.sub.toUpperCase()}`, sub: "Elevation · Panel head · Section · Lock rail", date: D.date, rev: D.rev, dwg: cfg.dwg });
 

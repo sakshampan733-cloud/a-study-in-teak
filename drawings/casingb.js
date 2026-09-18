@@ -236,7 +236,7 @@ const CASB = {
     s += chainV([v.Y(E(0)), v.Y(E(yC)), v.Y(E(yF1)), v.Y(E(TOPY))], v.X(W) + 7, [K.leaf.h, yF1 - yC, TOPY - yF1], { from: v.X(W) + 2, size: 1.2 });
     s += chainV([v.Y(E(0)), v.Y(E(TOPY))], v.X(W) + 16, [`${TOPY} OVERALL`], { from: v.X(W) + 2, size: 1.3 }); }
 
-  s += heading(118, 18, "MAIN DOOR", "OPTION B · D1 · 3 FT · 1:20", 88);
+  s += heading(118, 18, "MAIN DOOR", "D1 · 3 FT · PROVISIONAL — A PLAINER HEAD TO COME", 88);
   { const sc = 20, v = view(144, 36, sc, "Main door casing B"), t = v.w(0.12), W = K.wide + 2 * CAS;
     s += v.g(casing(K.wide, t, "door"), 0.3);
     s += chainH([v.X(0), v.X(CAS), v.X(CAS + K.wide), v.X(W)], v.Y(E(0)) + 8, [CAS, K.wide, CAS], { from: v.Y(E(0)) + 2, size: 1.25 }); }

@@ -4,7 +4,7 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const RWALL = {
-  rev: "15 — set out from the measured 13 ft 6 in and 18 ft 11 in",
+  rev: "16 — a fourth lamp on the wall past the door",
   date: "19.09.2026",
   run: 4166,                   // corner to the door OPENING. Frame face at 4115 (13 ft 6 in measured) + 51 lining
   H: 2769,                     // 9 ft 1 in ceiling, level throughout
@@ -77,6 +77,7 @@ const RWALL = {
     // panels
     [...bays, narrow].forEach(([a, b]) => { o += panel(a, K.short.y0, b, K.short.y1, th) + panel(a, K.tall.y0, b, yTall, th); });
     K.lamps.forEach((n) => { const [a, b] = bays[n - 1]; o += sconce((a + b) / 2, th); });
+    o += sconce((narrow[0] + narrow[1]) / 2, th);        // and one on the wall past the door
     // dressing door: the casing drawn by its own sheet, dropped into place
     o += `<g transform="translate(${f(aL)},${f(ey(window.CASING.TOPY))})">${window.CASING.draw(D.w, th, "door-narrow", false)}</g>`;
     o += `<line x1="-150" y1="${ey(0)}" x2="${L + 150}" y2="${ey(0)}" stroke-width="${th * 5}"/><line x1="-150" y1="${ey(K.H)}" x2="${L + 150}" y2="${ey(K.H)}" stroke-width="${th * 3}" stroke-dasharray="40 20"/>`;
@@ -101,6 +102,10 @@ const RWALL = {
     });
     [...bays, narrow].forEach(([a, b]) => { o += `<rect x="${a}" y="0" width="${M.w}" height="${M.proj}" stroke-width="${th}"/><rect x="${b - M.w}" y="0" width="${M.w}" height="${M.proj}" stroke-width="${th}"/>`; });
     // lamps above the cut
+    [[narrow[0], narrow[1]]].forEach(([a, b]) => {
+      const cx = (a + b) / 2;
+      [-K.lamp.span / 2, K.lamp.span / 2].forEach((d) => (o += `<circle cx="${cx + d}" cy="${K.lamp.proj}" r="60" fill="none" stroke-width="${th}" stroke-dasharray="${dash}"/>`));
+    });
     K.lamps.forEach((n) => {
       const [a, b] = bays[n - 1], cx = (a + b) / 2, sp = K.lamp.span;
       o += `<g stroke-dasharray="${dash}" stroke-width="${th}"><path d="M ${cx} 0 L ${cx} 60 Q ${cx} ${K.lamp.proj - 90} ${cx - sp} ${K.lamp.proj - 60} M ${cx} 60 Q ${cx} ${K.lamp.proj - 90} ${cx + sp} ${K.lamp.proj - 60}"/><circle cx="${cx - sp}" cy="${K.lamp.proj - 60}" r="60"/><circle cx="${cx + sp}" cy="${K.lamp.proj - 60}" r="60"/></g>`;
@@ -171,7 +176,7 @@ const RWALL = {
   const LE = labels(57, "left", 22, 150);
   LE.add(vE.X(300), vE.Y(ey(K.H)), "CEILING", "COVE LIGHT ABOVE");
   LE.add(vE.X(bays[0][0] + 18), vE.Y(ey(1900)), "TALL PANEL ×6", "WALL COLOUR");
-  LE.add(vE.X(lx - K.lamp.span - 60), vE.Y(ey(K.lamp.y + 140)), "WALL LAMP ×3", "PANELS 1, 3, 5");
+  LE.add(vE.X(lx - K.lamp.span - 60), vE.Y(ey(K.lamp.y + 140)), "WALL LAMP ×4", "PANELS 1, 3, 5 AND THE RETURN");
   LE.add(vE.X(K.study.w + 60), vE.Y(ey(yDado - 10)), "RAIL = STUDY COUNTER", "SAME 646–686 BAND");
   LE.add(vE.X(K.study.w - 60), vE.Y(ey(300)), "STUDY CUPBOARDS", "END, 280 DEEP");
   LE.add(vE.X(bays[0][0] + 18), vE.Y(ey(280)), "SHORT PANEL ×6", "");
@@ -202,7 +207,7 @@ const RWALL = {
 
   // Notes
   s += heading(318, 180, "NOTES", `REVISION ${K.rev.split(" ")[0]}`, 40);
-  ["Option C: 5 equal panels, lamps in 1, 3 and 5.",
+  ["Option C: 5 equal panels, lamps in 1, 3, 5 and the return.",
    "One narrow panel on the wall past the door.",
    "Moulding, rail and skirting painted the wall colour.",
    "Rail is the study counter band carried round the corner.",
@@ -240,7 +245,7 @@ const RWALL = {
     s += chainH([v.X(0), v.X(K.skirt.t)], v.Y(ey(0)) + 4, [K.skirt.t], { from: v.Y(ey(0)) + 1, size: 1.3 });
     s += text(145, 283, "WHITE MARBLE, ALREADY LAID · SQUARE WITH A SMALL TOP CHAMFER", { size: 1.3, fill: THIN });
   }
-  s += heading(222, 238, "4 · WALL LAMP", "ELEVATION · 1:10 · ×3", 40);
+  s += heading(222, 238, "4 · WALL LAMP", "ELEVATION · 1:10 · ×4", 40);
   {
     const s4 = 10, v = view(248 - (lx - K.lamp.span - 60 - lx) / s4 - 6, 250 - ey(K.lamp.y + 200) / s4, s4, "Wall lamp elevation");
     const cx = 0;
