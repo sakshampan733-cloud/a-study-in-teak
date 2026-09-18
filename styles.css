@@ -437,3 +437,7 @@ body.sheets-dark .lb-inner.is-dwg svg { filter: invert(1) hue-rotate(180deg) bri
 .pb-v { font: 400 15px/1.55 var(--sans); color: rgba(255, 255, 255, .86); }
 .prob .pb-row:last-child .pb-k { color: var(--ember); }
 @media (max-width: 860px) { .pb-row { grid-template-columns: 1fr; gap: 8px; } .prob-t { font-size: 22px; } }
+.prob-shot { margin: 26px 0 0; max-width: 460px; cursor: zoom-in; }
+.prob-shot .frame { border: 1px solid var(--hair); overflow: hidden; }
+.prob-shot img { width: 100%; height: auto; }
+.prob-shot figcaption { margin-top: 12px; font: 400 13px/1.45 var(--sans); color: var(--dim); }

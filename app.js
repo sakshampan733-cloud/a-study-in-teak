@@ -218,6 +218,7 @@ function problems() {
     `<div class="probs">${PB.items.map((i, k) => `<article class="prob reveal ${i.status}" id="${i.id}">
       <div class="prob-head"><span class="badge">${pad2(k + 1)}</span><h3 class="prob-t">${esc(i.name)}</h3><span class="pstat ${i.status}">${PSTAT[i.status]}</span></div>
       ${row("What", i.what)}${row("What it damages", i.effect)}${row("What we are doing", i.doing)}${row("What is needed", i.need)}
+      ${i.ref ? `<figure class="prob-shot" data-open="img:${esc(i.ref.src)}"><div class="frame"><img src="${esc(i.ref.src)}" alt="" loading="lazy"></div><figcaption>${esc(i.ref.caption)}</figcaption></figure>` : ""}
     </article>`).join("")}</div>` +
     nextLink("problems") + footer();
 }

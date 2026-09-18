@@ -202,10 +202,11 @@ window.PROJECT = {
     items: [
       {
         id: "not-square", name: "The room is slightly out of square", status: "open",
-        what: "Measured across: 14 ft 11 in at the study wall, 15 ft 0 in at the partition line, 15 ft 1 in at the bed wall. Along: 18 ft 11 in on one side, 19 ft 0 in on the other. Diagonals 24 ft 5 in and 23 ft 11 in. The room widens about 2 inches from the study end to the bed end — roughly half a degree.",
+        what: "Measured across: 14 ft 11 in at the study wall, 15 ft 0 in at the partition line, 15 ft 1 in just before the step near the bed end, then 15 ft 6 in at the bed wall itself. Along: 18 ft 11 in on one side, 19 ft 0 in on the other. Diagonals 24 ft 5 in and 23 ft 11 in. Ignoring the step, the room widens about 2 inches over its whole length — roughly half a degree.",
         effect: "Small, but real. No dimension can be reused from one end of the room to the other, so every fitted piece is made to the wall it actually meets. Half a degree is far too shallow to read on its own — it only shows where something repeats, or where a tight reveal runs the length of the room.",
-        doing: "Each wall drawn to its own measurement: study wall 14 ft 11 in, partition 15 ft 0 in, bed wall 15 ft 1 in. All fitted joinery built 15 to 20 mm undersize with a scribe fillet at each end, planed on site to follow the wall — the carpenter has to be told this before he builds, not after. The diagonals close against the widths and the sides, so the shell is now known.",
+        doing: "Each wall drawn to its own measurement: study wall 14 ft 11 in, partition 15 ft 0 in, bed wall 15 ft 6 in. All fitted joinery built 15 to 20 mm undersize with a scribe fillet at each end, planed on site to follow the wall — the carpenter has to be told this before he builds, not after. The diagonals close against the widths and the sides, so the shell is now known.",
         need: "Each wall at three heights — floor, waist and ceiling, since walls lean as well as splay — and whether the floor is level end to end.",
+        ref: { src: "assets/refs/room-sketch-1-widths-and-step.jpg", caption: "The room measured — 14 ft 11 in at the study wall, 15 ft 0 in at the partition, 15 ft 1 in before the step, 15 ft 6 in at the bed wall. The step in the left wall is drawn bottom left." },
       },
       {
         id: "ceiling-plain", name: "The ceiling was left plain on purpose", status: "solved",
@@ -243,11 +244,11 @@ window.PROJECT = {
         need: "Agreement on that split before the wall is redrawn.",
       },
       {
-        id: "door-step", name: "A five-inch step in the wall at the door", status: "open",
-        what: "The bed-end wall is not one plane. Past the door it steps out about five inches and then runs on. Measured to the door frame the room reads 15 ft 6 in; measured to where the wall actually sits it is 15 ft 1 in. The five inches is the step, not the room.",
-        effect: "The bed wall cannot be treated as a single flat surface. Anything spanning it — panelling, the parchment field, a headboard, a run of skirting — meets a five-inch return partway along. It also explains the reading that made the room look 7 inches out of square when it is nearer 2.",
-        doing: "Nothing yet. The step is real and has to be designed with rather than papered over — the parchment field can stop against it, or wrap it and use it.",
-        need: "How far along the wall the step falls, exactly how deep it is, and whether it runs full height.",
+        id: "door-step", name: "A five-inch step in the left wall by the door", status: "open",
+        what: "The left wall is not one plane. Just past the entrance door, near the bed end, it steps outward about five inches and then runs on to the bed wall. So the room is 15 ft 1 in wide up to that point and 15 ft 6 in wide for the last stretch, including at the bed wall itself.",
+        effect: "The bed zone is a wider box than the rest of the room, with a five-inch return in the left wall where the two meet. The bed wall gets designed at its full 15 ft 6 in, but the left wall carries a step that panelling, skirting and anything else running along it has to turn. It also explains why the room first looked 7 inches out of square when it is really about 2, plus this step.",
+        doing: "The bed wall is drawn at 15 ft 6 in — its true width — and the parchment field runs the whole of it. The step belongs to the left wall, which is going plain, so it can simply turn the corner there.",
+        need: "How far the stepped section runs from the bed wall back along the left wall, exactly how deep the step is, and whether it goes floor to ceiling.",
       },
       {
         id: "window-corner", name: "The window is hard into the corner", status: "accepted",
