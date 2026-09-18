@@ -180,6 +180,8 @@ function mountModel() {
   const el = document.getElementById("m3d");
   model = null;
   if (el && window.MODEL3D) { try { model = window.MODEL3D.mount(el); } catch (e) { console.error("model3d:", e); el.innerHTML = `<div class="empty">Model unavailable</div>`; } }
+  const pel = document.getElementById("p3d");
+  if (pel && window.PARTITION3D) { try { window.PARTITION3D.mount(pel, { tv: true }); } catch (e) { console.error("partition3d:", e); pel.innerHTML = `<div class="empty">Model unavailable</div>`; } }
 }
 
 function nextLink(id) {
@@ -280,6 +282,7 @@ function tabPage(t) {
       ${i.refs?.length ? `<div class="gallery-label"><span class="eyebrow" data-decode>References · ${pad2(i.refs.length)}</span>${i.refs.length > 3 ? `<div class="gallery-nav"><button class="btn" data-gal="-1" aria-label="Previous">←</button><button class="btn" data-gal="1" aria-label="Next">→</button></div>` : ""}</div>
         <div class="gallery reveal${i.refs.length < 3 ? " few" : ""}">${i.refs.map((r) => `<figure class="shot" data-open="img:${esc(r.src)}"><div class="frame"><img src="${esc(r.src)}" alt="" loading="lazy"></div><figcaption>${esc(r.caption)}</figcaption></figure>`).join("")}</div>` : ""}
       ${sheets(i.drawings || i.drawing)}
+      ${i.model3d ? `<div class="wrap"><div class="m3d p3d" id="p3d"></div></div>` : ""}
       ${pointers(i.id)}
       ${i.notes?.length ? `<div class="asks reveal"><span class="eyebrow">Notes</span><ul class="ask-list notes">${i.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul></div>` : ""}
       ${i.questions?.length ? `<div class="asks reveal"><span class="eyebrow">Open questions</span><ul class="ask-list">${i.questions.map((q, n) => `<li><span class="badge">Q${pad2(n + 1)}</span><span>${esc(q)}</span></li>`).join("")}</ul></div>` : ""}

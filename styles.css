@@ -471,3 +471,6 @@ body.sheets-dark .lb-inner.is-dwg svg { filter: invert(1) hue-rotate(180deg) bri
 .m3d-bar button.on { color: var(--void); border-color: var(--ember); }
 .m3d-hint { position: absolute; right: 14px; top: 14px; font: 400 11px/1 var(--mono); text-transform: uppercase; letter-spacing: -0.02em; color: #9a9a9a; pointer-events: none; }
 @media (max-width: 760px) { .m3d { min-height: 340px; } .m3d-hint { display: none; } }
+.p3d { min-height: 520px; margin-top: 40px; }
+.m3d-w.glassbay { background: rgba(255, 255, 255, .55); outline: none; backface-visibility: visible; }
+.m3d-w.glassbay .ink { stroke: #1b1b1b; }
