@@ -307,7 +307,7 @@ window.PROJECT = {
       items: [
         {
           id: "door", name: "Doors (×3)", status: "open",
-          drawings: ["door", "door-narrow", "architrave"],
+          drawings: ["door", "door-narrow", "architrave", "casingb"],
           refs: [
             { src: "assets/refs/door-ref-1.jpg", caption: "Reference — pair of panelled doors in a library (film still)" },
             { src: "assets/refs/door-ref-1-crop.jpg", caption: "Close-up — shaped bead, corner roundels, knob on lock rail" },
@@ -318,7 +318,8 @@ window.PROJECT = {
             { label: "Polish", inherit: "polish" },
             { label: "Casing", value: "The frame is 2 in on the face; the moulding adds 4 in outside it, so the casing is 6 in all round. Crucially the moulding sits 6 in ABOVE the leaf rather than on top of it — the lining comes first, the moulding stacks clear of it. The jambs are reeded and the reeding turns the corner over the head in one piece. Above the moulding, and only above it: a course of scallops, two small mouldings, and a crown that mitres back at each end. No corbels. The crown lands at 8 ft 8 in, leaving 5 in of wall to the ceiling." },
             { label: "Blocks", value: "A plinth block takes each jamb down to the floor, so the casing meets the marble skirting square instead of scribing over it. No blocks at the head." },
-            { label: "Which is carved", value: "None of them. All three doors take the identical casing and only the width changes — the moulding is plain except for its reeding, and the only ornament is the scallop course under the crown." },
+            { label: "Two options for the head", value: "A — AST-DR-011: the corner is closed with a square block, a small moulding sunk inside it, and nothing is carved. Quieter, and 3 in shorter. B — AST-DR-012: each corner carries a carved corbel and the architrave, scallops and frieze die into it, as the brownstone reference. Everything below the corbels is identical in both." },
+            { label: "What is carved in B", value: "One corbel design serves all three doors: a palmette of five lobes with a curl at each side under a small cap, eleven chevrons on a central spine down a tapering panel, and a shield knot woven through a lozenge at the foot. It stands 14 proud of the casing on the wall side, with a serpentine edge." },
             { label: "Hardware", value: "", hint: "Handles, hinges, lock, finish (brass / antique brass / nickel)" },
             { label: "Size", value: "Two widths, one design, all three the same height. Measured 7 ft 7 in tall (2311). D1, the main door, is 3 ft wide (914). D2 and D3 — dressing and bathroom — are 2 ft 6 in (762). Thickness to confirm." },
             { label: "How the widths differ", value: "The stiles stay 100 and every rail and moulding stays the same, so the extra width goes entirely into the panels: 562 wide on D2 and D3 against 257 on a D1 leaf. That is why there are two sheets — the details A, B and C serve both, but the elevations cannot." },
