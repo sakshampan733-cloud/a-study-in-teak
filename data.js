@@ -111,7 +111,7 @@ window.PROJECT = {
           {
             id: "value", t: "Dark low, light high",
             body: "Visual weight at the bottom, lightness at the top: darkest at the floor, mid on the walls, lightest at the ceiling. It is why some rooms feel settled and others feel top-heavy. The part to protect is the middle — teak running full height on more than one wall will close the room in.",
-            check: "The floor is mid-dark and the ceiling is light, so both ends are right. The 2 ft 3 in (686) datum running through the study cupboards and the right wall rail keeps the dark band low, which is the correct instinct. Hold it.",
+            check: "The floor is mid-dark and the ceiling is light, so both ends are right. The 2 ft 3 in (686) datum running through the study cupboards keeps the dark band low, which is the correct instinct. Hold it — but it stops at the corner; the right wall no longer follows it.",
             at: ["walls", "study"],
           },
         ],
@@ -122,7 +122,7 @@ window.PROJECT = {
           {
             id: "contrast", t: "Count the contrast moments",
             body: "Every hard light-against-dark edge is a place the eye stops, and calm is a low number of stops. They are worth counting across the whole room rather than judging one at a time.",
-            check: "Five already: the white marble skirting, the white rail, white curtains against teak, the parchment-to-teak junction, and the television. Nothing new gets added without something else coming out.",
+            check: "Five already: the white marble skirting, white curtains against teak, the parchment-to-teak junction, and the television. Nothing new gets added without something else coming out.",
             at: ["walls", "right-wall"],
           },
           {
@@ -218,7 +218,7 @@ window.PROJECT = {
       {
         id: "sill-datum", name: "The window sill height did not reconcile", status: "solved",
         what: "Three measurements of the same window did not add up to the ceiling, and the sill was given variously as 2 ft 3 in and 3 ft 4 in. Re-measured properly — floor to the underside of the window frame — it is 2 ft 3 in.",
-        effect: "The sill sets the datum line that runs round the room — the study counter, the cupboard tops and the right wall rail all land on it. Two drawings are built on that number. It cannot be guessed.",
+        effect: "The sill sets the datum for the study wall — the counter and the cupboard tops both land on it. The right wall was following it too, and no longer does. Two drawings are built on that number. It cannot be guessed.",
         doing: "Closed. The datum is fixed at 686, which is what both drawings were already built on, so nothing had to be redrawn. The wall above the window works out at about 1 ft 5 in rather than the 15 in first paced — two inches, which is ordinary slack.",
         need: "",
       },
@@ -451,13 +451,13 @@ window.PROJECT = {
             { src: "assets/refs/walls-ref-1-panel-moulding.jpg", caption: "Ref. — painted panel moulding: short panels under a dado, tall panels above, cove light at the ceiling" },
           ],
           parts: [
-            { label: "Treatment", value: "Applied panel moulding painted the wall colour. Short panels below a dado rail, tall panels above, 150 stiles between" },
+            { label: "Treatment", value: "Applied panel moulding painted the wall colour. Two panels per bay — a lower and an upper — with 150 stiles between. NO DADO RAIL: the gap between the two is the door's own lock rail carried across as plain wall, so the band runs unbroken from the corner, through the door, and out the other side." },
             { label: "Length", value: "About 14–15 ft from the study wall to the dressing door (drawn at 4420 / 14 ft 6 in), then the door, then 2 ft of wall to the corner" },
             { label: "Skirting", value: "White marble, 4 in (102) high, already laid — square with a small top chamfer; the panel moulding starts above it." },
             { label: "Setting out", value: "Measured along the wall: 13 ft 6 in from the study wall corner to the door frame, 3 ft of door frame end to end (2 ft 6 in leaf), then a 2 ft 4 in return to the corner. Overall 18 ft 11 in. Panelling starts clear of the study unit — its 11 in return, then a 6 in gap, then the first panel." },
-            { label: "Heights", value: "Ceiling 9 ft 1 in (2769). Marble skirting 102 · rail 646–686, the study counter band carried round the corner unbroken · short panels 212–546 · tall panels 796–2630, level with the crown of the door casing · no crown moulding — the cove light is in the ceiling" },
+            { label: "Heights", value: "Ceiling 9 ft 1 in (2769). Marble skirting 4 in · lower panel 8⅜ in to 2 ft 9¾ in (2 ft 1 in tall) · the 9 in gap, set by the door's lock rail · upper panel 3 ft 6¾ in to 8 ft 7½ in (5 ft 1 in tall), level with the crown of the door casing · sconces at 5 ft 1 in · no crown moulding — the cove light is in the ceiling" },
             { label: "Panels", value: "Option C: 5 equal panels about 24 in (606) wide on the long run, short and tall on the same centres, plus one narrow 345 panel on the 2 ft wall past the door" },
-            { label: "Mouldings", value: "Panel moulding 55 × 24 ogee, mitred · rail 40 × 28 with the same 4 reeds as the study counter edge — painted white · marble skirting below" },
+            { label: "Mouldings", value: "Panel moulding 55 × 24 ogee, mitred — the only moulding on the wall · marble skirting below. The study counter at 2 ft 3 in is deliberately NOT carried round: it is a worktop height, not a rail height, and following it was squashing the panelling and fighting the door casing." },
             { label: "Door", value: "Dressing door 2 ft 6 in × 7 ft 7 in (measured). Casing 6 in all round — 2 in frame plus 4 in moulding — so 1068 (3 ft 6 in) overall and the head at 8 ft 1 in. Opens inward, hinged on the right; rail and skirting stop at it" },
             { label: "Lamps", value: "3 twin-arm wall lamps, brass with fabric shades, centred inside tall panels 1, 3 and 5 at 1290 — the same height as the study sconces" },
             { label: "Lighting", value: "No crown moulding on this wall — the ceiling cove light runs above it, on the room's cove dimmer" },

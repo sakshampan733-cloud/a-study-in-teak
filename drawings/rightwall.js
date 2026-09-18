@@ -4,23 +4,23 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const RWALL = {
-  rev: "16 — a fourth lamp on the wall past the door",
+  rev: "17 — the rail deleted; two panels set by the door, not the shelf",
   date: "19.09.2026",
   run: 4166,                   // corner to the door OPENING. Frame face at 4115 (13 ft 6 in measured) + 51 lining
   H: 2769,                     // 9 ft 1 in ceiling, level throughout
   wall: 230,
   study: { w: 280, h: 646 },   // study unit 280 (11 in) deep; cupboard carcase to 646, reeded counter 646–686 on top
   skirt: { h: 102, t: 20 },          // white marble skirting, 4 in, already laid
-  dado: { y: 646, h: 40, proj: 28, reeds: 4 },   // the study counter band carried round the corner: same 646–686 band, same reeds
+  band: { y0: 857, y1: 1087 },         // no rail. The gap between the panels is the DOOR'S LOCK RAIL carried across as plain wall
   mould: { w: 55, proj: 24 },          // panel moulding, painted the wall colour
   stile: 150, edge: 100,               // gap between panels; margin beside the door architrave and at the corner
   bays: 5,
   lamps: [1, 3, 5],                    // lamps centred inside tall panels 1, 3 and 5
-  short: { y0: 212, y1: 546 },
-  tall: { y0: 796, top: 139 },         // 2769 − 139 = 2630: panels stop level with the TOP OF THE CASING CROWN
+  short: { y0: 212, y1: 857 },
+  tall: { y0: 1087, top: 139 },         // 2769 − 139 = 2630: panels stop level with the TOP OF THE CASING CROWN
   door: { w: 762, h: 2311, arch: 153 }, // dressing door 2 ft 6 × 7 ft 7 in leaf; casing 2 in frame + 4 in moulding = 153 all round
   ret: 838,                            // what is left of the measured 18 ft 11 in — see the OPEN note
-  lamp: { y: 1290, span: 150, proj: 230 },   // twin-arm sconce, same height and family as the study wall
+  lamp: { y: 1550, span: 150, proj: 230 },   // twin-arm sconce, same height and family as the study wall
 };
 
 (function () {
@@ -33,7 +33,7 @@ const RWALL = {
   const pw = (aL - K.study.w - K.stile * K.bays - K.edge) / K.bays;
   const bays = Array.from({ length: K.bays }, (_, i) => { const x0 = K.study.w + K.stile + i * (pw + K.stile); return [x0, x0 + pw]; });
   const narrow = [aR + K.edge, L - K.edge];
-  const yTall = K.H - K.tall.top, yDado = K.dado.y + K.dado.h;
+  const yTall = K.H - K.tall.top;
 
   const ey = (y) => K.H - y;
   const R = (x0, y0, x1, y1, a = "") => `<rect x="${f(Math.min(x0, x1))}" y="${f(ey(Math.max(y0, y1)))}" width="${f(Math.abs(x1 - x0))}" height="${f(Math.abs(y1 - y0))}" ${a}/>`;
@@ -63,17 +63,12 @@ const RWALL = {
 
   function elevation(th) {
     let o = "";
-    // skirting and dado rail, stopping at the architrave
+    // skirting, stopping at the architrave
     [[K.study.w, aL], [aR, L]].forEach(([a, b]) => {
       o += R(a, 0, b, K.skirt.h) + Ln(a, K.skirt.h - 25, b, K.skirt.h - 25, W(th));
     });
-    // end of the study cupboards, then the counter band running on unbroken as the rail
+    // end of the study cupboards. Nothing else crosses the wall — no rail.
     o += R(0, 0, K.study.w, K.study.h) + `<g ${W(th)}>${R(40, 40, K.study.w - 40, K.study.h - 40)}</g>`;
-    const reed = K.dado.h / K.dado.reeds;
-    [[0, aL], [aR, L]].forEach(([a, b]) => {
-      o += R(a, K.dado.y, b, yDado);
-      for (let i = 1; i < K.dado.reeds; i++) o += Ln(a, K.dado.y + i * reed, b, K.dado.y + i * reed, W(th));
-    });
     // panels
     [...bays, narrow].forEach(([a, b]) => { o += panel(a, K.short.y0, b, K.short.y1, th) + panel(a, K.tall.y0, b, yTall, th); });
     K.lamps.forEach((n) => { const [a, b] = bays[n - 1]; o += sconce((a + b) / 2, th); });
@@ -95,10 +90,9 @@ const RWALL = {
     [[aL, K.run], [K.run + D.w, aR]].forEach(([a, b]) => { o += `<rect x="${a}" y="0" width="${b - a}" height="${window.CASING.projJ}"/>`; });
     // study cupboards return
     o += `<rect x="0" y="0" width="${K.study.w}" height="600"/><line x1="0" y1="600" x2="${K.study.w}" y2="600" stroke-dasharray="${dash}" stroke-width="${th}"/>`;
-    // skirting, rail (below the cut, dashed), mouldings on the wall face
+    // skirting and the mouldings on the wall face
     [[K.study.w, aL], [aR, L]].forEach(([a, b]) => {
       o += `<rect x="${a}" y="0" width="${b - a}" height="${K.skirt.t}" stroke-width="${th}"/>`;
-      o += `<line x1="${a}" y1="${K.dado.proj}" x2="${b}" y2="${K.dado.proj}" stroke-dasharray="${dash}" stroke-width="${th}"/>`;
     });
     [...bays, narrow].forEach(([a, b]) => { o += `<rect x="${a}" y="0" width="${M.w}" height="${M.proj}" stroke-width="${th}"/><rect x="${b - M.w}" y="0" width="${M.w}" height="${M.proj}" stroke-width="${th}"/>`; });
     // lamps above the cut
@@ -113,13 +107,6 @@ const RWALL = {
     return o;
   }
 
-  function dadoPath() {
-    const y = K.dado.y, p = K.dado.proj;
-    const r = K.dado.h / K.dado.reeds / 2;
-    let d = `M 0 ${ey(y)} L ${p - r} ${ey(y)}`;
-    for (let i = 0; i < K.dado.reeds; i++) d += ` A ${r} ${r} 0 0 0 ${p - r} ${ey(y + (i + 1) * 2 * r)}`;
-    return d + ` L 0 ${ey(y + K.dado.h)} Z`;
-  }
   function skirtPath() {
     const h = K.skirt.h, t = K.skirt.t;
     return `M 0 ${ey(0)} L ${t} ${ey(0)} L ${t} ${ey(h - 10)} L ${t - 10} ${ey(h)} L 0 ${ey(h)} Z`;
@@ -133,7 +120,7 @@ const RWALL = {
   // SECTION through tall panel 1 and its lamp: wall on the left, room to the right.
   function section(th) {
     let o = `<rect x="-${K.wall}" y="${ey(K.H)}" width="${K.wall}" height="${K.H}" fill="url(#hatchRW)" stroke-width="${th * 2}"/>`;
-    o += `<path d="${skirtPath()}" fill="url(#hatchRW2)"/><path d="${dadoPath()}" fill="url(#hatchRW2)"/>`;
+    o += `<path d="${skirtPath()}" fill="url(#hatchRW2)"/>`;
     // ceiling cove above (by the ceiling contractor), dashed
     o += `<path d="M 0 ${ey(K.H)} L 0 ${ey(K.H + 120)} L 350 ${ey(K.H + 120)}" stroke-dasharray="40 25" stroke-width="${th}"/>`;
     // moulding rails cut through: short panel top/bottom, tall panel top/bottom (22 proud, 55 high)
@@ -166,7 +153,7 @@ const RWALL = {
   s += chainH(xsB.map(vE.X), yb + 5, xsB.slice(1).map((x, i) => Math.round(x - xsB[i])), { from: yb + 1, size: 1.2 });
   s += chainH([0, K.study.w, K.run, K.run + D.w, L].map(vE.X), yb + 11, [`${K.study.w}`, `${K.run - K.study.w} PANELLED`, `${D.w} DOOR`, `${K.ret}`], { from: yb + 1, size: 1.4 });
   s += chainH([vE.X(0), vE.X(L)], yb + 17, [`${L} OVERALL · STUDY WALL CORNER TO THE DRESSING CORNER`], { from: yb + 1, size: 1.5 });
-  const ysV = [0, K.skirt.h, K.short.y0, K.short.y1, K.dado.y, yDado, K.tall.y0, yTall, K.H];
+  const ysV = [0, K.skirt.h, K.short.y0, K.short.y1, K.tall.y0, yTall, K.H];
   s += chainV(ysV.map((y) => vE.Y(ey(y))), vE.X(L) + 6, ysV.slice(1).map((y, i) => y - ysV[i]), { from: vE.X(L) + 1, size: 1.2 });
   s += chainV([vE.Y(ey(K.H)), vE.Y(ey(0))], vE.X(L) + 13, [`${K.H} (9 FT)`], { from: vE.X(L) + 1, size: 1.4 });
   const lx = (bays[0][0] + bays[0][1]) / 2;
@@ -175,11 +162,10 @@ const RWALL = {
   // labels on the left margin, one line each
   const LE = labels(57, "left", 22, 150);
   LE.add(vE.X(300), vE.Y(ey(K.H)), "CEILING", "COVE LIGHT ABOVE");
-  LE.add(vE.X(bays[0][0] + 18), vE.Y(ey(1900)), "TALL PANEL ×6", "WALL COLOUR");
+  LE.add(vE.X(bays[0][0] + 18), vE.Y(ey(2100)), "UPPER PANEL ×6", "5 FT 1 IN TALL");
   LE.add(vE.X(lx - K.lamp.span - 60), vE.Y(ey(K.lamp.y + 140)), "WALL LAMP ×4", "PANELS 1, 3, 5 AND THE RETURN");
-  LE.add(vE.X(K.study.w + 60), vE.Y(ey(yDado - 10)), "RAIL = STUDY COUNTER", "SAME 646–686 BAND");
   LE.add(vE.X(K.study.w - 60), vE.Y(ey(300)), "STUDY CUPBOARDS", "END, 280 DEEP");
-  LE.add(vE.X(bays[0][0] + 18), vE.Y(ey(280)), "SHORT PANEL ×6", "");
+  LE.add(vE.X(bays[0][0] + 18), vE.Y(ey(430)), "LOWER PANEL ×6", "2 FT 1 IN TALL");
   LE.add(vE.X(K.study.w + 60), vE.Y(ey(60)), "SKIRTING", "");
   s += LE.draw();
 
@@ -199,8 +185,7 @@ const RWALL = {
   const LS = labels(nx, "right", 22, 150);
   LS.add(vS.X(200), vS.Y(ey(K.H + 120)), "CEILING COVE LIGHT", "NOTHING FIXED AT THE TOP");
   LS.add(vS.X(M.proj), vS.Y(ey(yTall - 30)), "PANEL MOULDING", "DET. 1");
-  LS.add(vS.X(K.lamp.proj + 30), vS.Y(ey(K.lamp.y + 140)), "WALL LAMP", "DET. 4");
-  LS.add(vS.X(K.dado.proj), vS.Y(ey(K.dado.y + 22)), "RAIL", "DET. 2");
+  LS.add(vS.X(K.lamp.proj + 30), vS.Y(ey(K.lamp.y + 140)), "WALL LAMP", "DET. 3");
   s += chainV([vS.Y(ey(K.lamp.y)), vS.Y(ey(0))], vS.X(-K.wall) - 4, [`${K.lamp.y} TO LAMP CENTRE`], { from: vS.X(-K.wall) - 1, size: 1.2 });
   LS.add(vS.X(K.skirt.t), vS.Y(ey(50)), "MARBLE SKIRTING", "4 IN · LAID");
   s += LS.draw();
@@ -209,15 +194,16 @@ const RWALL = {
   s += heading(318, 180, "NOTES", `REVISION ${K.rev.split(" ")[0]}`, 40);
   ["Option C: 5 equal panels, lamps in 1, 3, 5 and the return.",
    "One narrow panel on the wall past the door.",
-   "Moulding, rail and skirting painted the wall colour.",
-   "Rail is the study counter band carried round the corner.",
+   "Moulding and skirting painted the wall colour.",
+   "NO RAIL. The 9 in gap between the panels is the door\u2019s own lock",
+   "   rail carried across as plain wall, so the band runs unbroken",
+   "   through the door. The study counter at 2 ft 3 in is ignored:",
+   "   it is a worktop height, not a rail height.",
    "Skirting is white marble, 4 in, already laid.",
-   "Casing 2 in lining + 4 in moulding = 6 in, 1068 overall;",
-   "   crown at 8 ft 8 in, and the tall panels stop on that",
-   "   line, not the leaf head at 7 ft 7 in.",
+   "Casing 2 in lining + 4 in moulding = 6 in; crown at 8 ft 8 in,",
+   "   and the upper panels stop on that line.",
    "OPEN: 13 ft 6 to the frame and 18 ft 11 overall are drawn",
-   "   exactly, so a 2 in lining leaves 2 ft 7 past the door, not",
-   "   2 ft 4. A 3 in lining fits all four readings. Laser it."]
+   "   exactly, so a 2 in lining leaves 2 ft 7 past the door, not 2 ft 4."]
     .forEach((n, i) => { s += text(318, 191 + i * 4.3, n, { size: 1.55 }); });
 
   // Details along the bottom
@@ -229,25 +215,17 @@ const RWALL = {
     s += chainV([v.Y(-M.proj), v.Y(0)], v.X(M.w) + 5, [M.proj], { from: v.X(M.w) + 1, size: 1.3 });
     s += text(22, 283, "WALL FACE BELOW · MITRED CORNERS", { size: 1.3, fill: THIN });
   }
-  s += heading(88, 238, "2 · RAIL", "SECTION · 1:2", 32);
+  s += heading(110, 238, "2 · SKIRTING", "MARBLE · SECTION · 1:4", 40);
   {
-    const s2 = 2, v = view(98, 252 - ey(yDado) / s2, s2, "Dado rail section");
-    s += v.g(`<rect x="-24" y="${ey(yDado + 15)}" width="24" height="${K.dado.h + 30}" fill="url(#hatchD2)" stroke="none"/><path d="${dadoPath()}" fill="url(#hatchD2)"/><line x1="0" y1="${ey(yDado + 15)}" x2="0" y2="${ey(K.dado.y - 15)}"/>`, 0.25);
-    s += chainV([v.Y(ey(yDado)), v.Y(ey(K.dado.y))], v.X(K.dado.proj) + 5, [K.dado.h], { from: v.X(K.dado.proj) + 1, size: 1.3 });
-    s += chainH([v.X(0), v.X(K.dado.proj)], v.Y(ey(yDado)) - 4, [K.dado.proj], { from: v.Y(ey(yDado)) - 1, size: 1.3 });
-    s += text(88, 283, "MATCHES THE COUNTER EDGE", { size: 1.3, fill: THIN });
-  }
-  s += heading(145, 238, "3 · SKIRTING", "MARBLE · SECTION · 1:4", 40);
-  {
-    const s3 = 4, v = view(165, 250 - ey(K.skirt.h + 15) / s3, s3, "Skirting section");
+    const s3 = 4, v = view(130, 250 - ey(K.skirt.h + 15) / s3, s3, "Skirting section");
     s += v.g(`<rect x="-40" y="${ey(K.skirt.h + 15)}" width="40" height="${K.skirt.h + 15}" fill="url(#hatchD5)" stroke="none"/><path d="${skirtPath()}" fill="url(#hatchD2)"/><line x1="0" y1="${ey(K.skirt.h + 15)}" x2="0" y2="${ey(0)}"/><line x1="-40" y1="${ey(0)}" x2="60" y2="${ey(0)}" stroke-width="${v.w(0.5)}"/>`, 0.25);
     s += chainV([v.Y(ey(K.skirt.h)), v.Y(ey(0))], v.X(K.skirt.t) + 6, [K.skirt.h], { from: v.X(K.skirt.t) + 1, size: 1.3 });
     s += chainH([v.X(0), v.X(K.skirt.t)], v.Y(ey(0)) + 4, [K.skirt.t], { from: v.Y(ey(0)) + 1, size: 1.3 });
-    s += text(145, 283, "WHITE MARBLE, ALREADY LAID · SQUARE WITH A SMALL TOP CHAMFER", { size: 1.3, fill: THIN });
+    s += text(110, 283, "WHITE MARBLE, ALREADY LAID · SQUARE WITH A SMALL TOP CHAMFER", { size: 1.3, fill: THIN });
   }
-  s += heading(222, 238, "4 · WALL LAMP", "ELEVATION · 1:10 · ×4", 40);
+  s += heading(200, 238, "3 · WALL LAMP", "ELEVATION · 1:10 · ×4", 40);
   {
-    const s4 = 10, v = view(248 - (lx - K.lamp.span - 60 - lx) / s4 - 6, 250 - ey(K.lamp.y + 200) / s4, s4, "Wall lamp elevation");
+    const s4 = 10, v = view(226 - (lx - K.lamp.span - 60 - lx) / s4 - 6, 250 - ey(K.lamp.y + 200) / s4, s4, "Wall lamp elevation");
     const cx = 0;
     s += v.g(sconce(cx, v.w(0.12)), 0.25);
     s += chainH([v.X(-K.lamp.span - 60), v.X(K.lamp.span + 60)], v.Y(ey(K.lamp.y - 90)) + 3, [2 * (K.lamp.span + 60)], { from: v.Y(ey(K.lamp.y - 60)), size: 1.3 });
