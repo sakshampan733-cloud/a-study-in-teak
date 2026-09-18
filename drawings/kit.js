@@ -119,7 +119,9 @@ window.DK = (function () {
 
   const frame = () => `<rect x="0" y="0" width="420" height="297" fill="#fff"/><rect x="8" y="8" width="404" height="281" fill="none" stroke="${INK}" stroke-width="0.5"/>`;
 
-  function titleBlock(o) {
+  // Tagged so the build can tell the title block apart from anything drifting under it.
+  const titleBlock = (o) => `<g data-tb="1">${titleBlockBody(o)}</g>`;
+  function titleBlockBody(o) {
     const x = 300, y = 239, w = 112, h = 50;
     return `<g stroke="${INK}" stroke-width="0.3" fill="none"><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#fff"/>
       <line x1="${x}" y1="${y + 14}" x2="${x + w}" y2="${y + 14}"/><line x1="${x}" y1="${y + 30}" x2="${x + w}" y2="${y + 30}"/>

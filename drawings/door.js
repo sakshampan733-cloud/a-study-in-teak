@@ -11,7 +11,7 @@ const DOOR_TYPES = [
 ];
 
 const DOOR = {
-  rev: "3 — leaf height measured at 7 ft 7 in; rails rebalanced",
+  rev: "4 — casing drawn as 2 in frame + 2 in moulding",
   date: "17.09.2026",
   // D1 main door: 8 ft × 3 ft opening (2438 × 914). D2, D3: same design, 8 ft × 2 ft 6 in (2438 × 762).
   leaves: 2,          // reference is a pair of narrow leaves — pair vs single still to confirm
@@ -32,7 +32,8 @@ const DOOR = {
   rebate: 12,         // meeting-stile rebate (pair only)
   knobD: 55,
   knobFromEdge: 130,
-  architrave: 75,
+  frame: 51,          // the lining itself, 2 in on the face
+  architrave: 51,     // the moulding laid over it, another 2 in — 4 in of casing in all
 };
 
 // The wider leaf makes every detail wider too. Pick the smallest standard scale that still
@@ -109,9 +110,11 @@ function buildDoorSheet(cfg) {
   let svg = frame();
 
   // ═══ VIEW 1 · FRONT ELEVATION 1:10 ═══
-  const s1 = 12, total = D.W * D.leaves, a = D.architrave;
+  const s1 = 12, total = D.W * D.leaves, a = D.frame + D.architrave;
   const v1 = view(50, 36, s1, "Front elevation"), t1 = v1.w(0.13);
   let e = "";
+  const fr = D.frame;
+  e += `<path d="M ${-fr} ${D.H} L ${-fr} ${-fr} L ${total + fr} ${-fr} L ${total + fr} ${D.H}" stroke-width="${t1}"/>`;
   e += `<path d="M ${-a} ${D.H} L ${-a} ${-a} L ${total + a} ${-a} L ${total + a} ${D.H}" stroke-dasharray="${v1.w(2)} ${v1.w(1)}" stroke-width="${t1}"/>`;
   for (let i = 0; i < D.leaves; i++) e += leaf(i * D.W, i === 0, t1);
   if (D.leaves === 2) e += `<line x1="${D.W + 6}" y1="0" x2="${D.W + 6}" y2="${D.H}" stroke-width="${t1}"/>`;
@@ -212,16 +215,19 @@ function buildDoorSheet(cfg) {
   }
 
   // ═══ VIEW 4 · DETAIL C — LOCK RAIL 1:5 ═══
-  const s4 = 6, y0 = D.topRail + D.upperH - 60, y1 = D.topRail + D.upperH + D.lockRail + 60;
-  const v4 = view(180, 210 - y0 / s4, s4, "Lock rail - detail C"), t4 = v4.w(0.13);
+  const s4 = fitScale(D.W, 112), y0 = D.topRail + D.upperH - 60, y1 = D.topRail + D.upperH + D.lockRail + 60;
+  const v4 = view(156, 210 - y0 / s4, s4, "Lock rail - detail C"), t4 = v4.w(0.13);
   let d4 = `<clipPath id="clipC"><rect x="-10" y="${y0}" width="${D.W + 20}" height="${y1 - y0}"/></clipPath>`;
   d4 += `<g clip-path="url(#clipC)">${leaf(0, true, t4)}</g>`;
   svg += v4.g(d4, 0.3);
-  svg += heading(170, 199, "DETAIL C — LOCK RAIL", `SCALE 1:${s4} · ACTIVE LEAF`);
+  svg += heading(150, 199, "DETAIL C — LOCK RAIL", `SCALE 1:${s4} · ACTIVE LEAF`);
   svg += chainH([0, 42, D.knobFromEdge].map(v4.X), v4.Y(y1) + 5, [42, D.knobFromEdge - 42], { from: v4.Y(lockY) });
   svg += chainV([D.topRail + D.upperH, lockY, D.topRail + D.upperH + D.lockRail].map(v4.Y), v4.X(D.W) + 6, [D.lockRail / 2, D.lockRail / 2], { from: v4.X(D.W) + 1 });
-  svg += note(v4.X(D.knobFromEdge + D.knobD / 2 - 4), v4.Y(lockY - 18), v4.X(D.W) + 12, v4.Y(lockY - 60), `KNOB Ø${D.knobD}`, "EBONISED / BRASS — TBC");
-  svg += note(v4.X(42), v4.Y(lockY + 14), v4.X(D.W) + 12, v4.Y(lockY + 60), "ESCUTCHEON Ø34", "KEYHOLE, MORTICE LOCK");
+  // Labels stack in the gutter left of the key column, clear of the title block below.
+  const LC = labels(292, "left", 206, 232);
+  LC.add(v4.X(D.knobFromEdge + D.knobD / 2 - 4), v4.Y(lockY - 18), `KNOB Ø${D.knobD}`, "EBONISED / BRASS — TBC");
+  LC.add(v4.X(42), v4.Y(lockY + 14), "ESCUTCHEON Ø34", "KEYHOLE, MORTICE LOCK");
+  svg += LC.draw();
 
   // ═══ KEY / NOTES / TITLE ═══
   const kx = 348;
@@ -242,7 +248,9 @@ function buildDoorSheet(cfg) {
     `   here ${D.W - 2 * D.stile} per panel. Details A, B and C serve both doors.`,
     "Solid teak frame. Veneer and polish per",
     "   Materials; polish to match the teak desk.",
-    "Architrave, hinges and lock not yet designed.",
+    "Casing: 2 in frame plus 2 in moulding over it, so the",
+    `   casing head sits ${D.frame + D.architrave} (4 in) above the leaf, at 7 ft 11 in.`,
+    "Hinges and lock not yet designed.",
   ].forEach((n, i) => { svg += text(kx, 105 + i * 4.2, n, { size: 1.7 }); });
 
   svg += titleBlock({ title: `DOOR ${cfg.name} — ${cfg.sub.toUpperCase()}`, sub: "Elevation · Panel head · Section · Lock rail", date: D.date, rev: D.rev, dwg: cfg.dwg });

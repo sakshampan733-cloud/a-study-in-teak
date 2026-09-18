@@ -232,6 +232,24 @@ def sheet_dxf(svg_text, out):
 
 
 FRAME = (8.0, 8.0, 412.0, 289.0)     # the printed border on a 420 x 297 sheet
+TITLE_BLOCK = (300.0, 239.0, 412.0, 289.0)   # nothing but the title block may sit here
+
+
+def text_bbox(e):
+    """svgelements treats text as a point; estimate the box it actually occupies."""
+    b = e.bbox()
+    if not b:
+        return None
+    content = (e.text or "").strip()
+    size = float(e.font_size or 2)
+    w = len(content) * size * 0.58
+    h = size * 1.1
+    anchor = str(e.values.get("text-anchor", "start"))
+    x = b[0] - (w / 2 if anchor == "middle" else w if anchor == "end" else 0)
+    rot = "rotate(-90" in str(e.values.get("transform", ""))
+    if rot:
+        return (b[0] - h * 0.8, b[1] - w, b[0] + h * 0.3, b[1])
+    return (x, b[1] - h * 0.8, x + w, b[1] + h * 0.25)
 
 
 def frame_overflow(svg_text, tol=0.6):
@@ -247,20 +265,25 @@ def frame_overflow(svg_text, tol=0.6):
             if e.values.get("data-clipdef"):
                 continue
             b = e.bbox()
-            if b and (b[2] - b[0]) >= 419 and (b[3] - b[1]) >= 296:
-                continue                                  # the page itself
+            if b and (b[2] - b[0]) >= 400 and (b[3] - b[1]) >= 275:
+                continue                                  # the page and its printed border
             clip = clips.get(e.values.get("data-clip"))
             if clip and b:
                 b = (max(b[0], clip[0]), max(b[1], clip[1]), min(b[2], clip[2]), min(b[3], clip[3]))
                 if b[0] > b[2] or b[1] > b[3]:
                     continue
         elif isinstance(e, Text):
-            b = e.bbox()
+            b = text_bbox(e)
         if not b:
             continue
+        label = (getattr(e, "text", "") or "").strip()[:34]
         if b[0] < x0 - tol or b[1] < y0 - tol or b[2] > x1 + tol or b[3] > y1 + tol:
-            label = (getattr(e, "text", "") or "").strip()[:34]
-            out.append((round(b[0], 1), round(b[1], 1), round(b[2], 1), round(b[3], 1), label))
+            out.append((round(b[0], 1), round(b[1], 1), round(b[2], 1), round(b[3], 1), label or "off-sheet"))
+            continue
+        # Drawn content that has drifted under the title block is invisible, not missing.
+        t0, u0, t1, u1 = TITLE_BLOCK
+        if e.values.get("data-tb") is None and b[0] < t1 and b[2] > t0 and b[1] < u1 and b[3] > u0:
+            out.append((round(b[0], 1), round(b[1], 1), round(b[2], 1), round(b[3], 1), (label or "shape") + " UNDER TITLE BLOCK"))
     return out
 
 

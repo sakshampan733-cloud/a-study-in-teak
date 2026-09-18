@@ -4,7 +4,7 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const RWALL = {
-  rev: "11 — door head measured at 7 ft 7 in; tall panels follow it",
+  rev: "12 — panels align with the casing head at 7 ft 11 in, not the leaf",
   date: "18.09.2026",
   run: 4217,                   // corner to the door OPENING. Frame at 4141 (13 ft 7 in) + 76 architrave; chain closes to 18 ft 11 in
   H: 2769,                     // 9 ft 1 in ceiling, level throughout
@@ -17,8 +17,8 @@ const RWALL = {
   bays: 5,
   lamps: [1, 3, 5],                    // lamps centred inside tall panels 1, 3 and 5
   short: { y0: 212, y1: 546 },
-  tall: { y0: 796, top: 458 },         // 2769 − 458 = 2311: tall panels stop exactly level with the door head, tying panelling to door
-  door: { w: 762, h: 2311, arch: 76 }, // dressing door 2 ft 6 × 7 ft 7 in leaf; frame end to end 3 ft (914) = 762 + 2 × 76
+  tall: { y0: 796, top: 356 },         // 2769 − 356 = 2413: panels stop level with the TOP OF THE CASING (7 ft 11 in), which is the line the eye reads
+  door: { w: 762, h: 2311, arch: 102 }, // dressing door 2 ft 6 × 7 ft 7 in leaf; casing 2 in frame + 2 in moulding = 102 all round
   ret: 787,                            // little wall past the door: 2 ft 4 in (711) from the frame + 76 architrave
   lamp: { y: 1290, span: 150, proj: 230 },   // twin-arm sconce, same height and family as the study wall
 };
@@ -206,9 +206,17 @@ const RWALL = {
 
   // Notes
   s += heading(318, 180, "NOTES", `REVISION ${K.rev.split(" ")[0]}`, 40);
-  ["Option C: 5 equal panels, lamps in 1, 3 and 5.", "Skirting is white marble, 4 in, already laid.", "One narrow panel on the 2 ft 4 in wall past the door.", "Moulding, rail and skirting painted the wall colour.",
-   "Rail is the study counter band carried round the", "   corner — same 646–686 height, same 4 reeds.", "Short and tall panels share the same centres.",
-   "Measured: 13 ft 6 in corner to frame, 3 ft frame,", "   2 ft 4 in return, overall 18 ft 11 in. The 1 in goes", "   into the long run to the frame.", "Panelling starts clear of the study unit: 280 (11 in)", "   return, then a 150 (6 in) gap, then panel 1.", "Rail datum 686 confirmed — set by the window sill at", "   2 ft 3 in, carried round from the study counter.", "   keeping the stiles 150 and the panels equal."]
+  ["Option C: 5 equal panels, lamps in 1, 3 and 5.",
+   "One narrow panel on the 2 ft 4 in wall past the door.",
+   "Moulding, rail and skirting painted the wall colour.",
+   "Rail is the study counter band carried round the",
+   "   corner — same 646–686 height, same 4 reeds.",
+   "Skirting is white marble, 4 in, already laid.",
+   "Door casing is 2 in frame + 2 in moulding = 4 in, so",
+   "   its head is at 7 ft 11 in — the tall panels stop on",
+   "   that line, not the leaf head at 7 ft 7 in.",
+   "Casing 966 wide against a 914 frame measured on site:",
+   "   the moulding adds 2 in each side. Confirm the frame."]
     .forEach((n, i) => { s += text(318, 191 + i * 4.3, n, { size: 1.55 }); });
 
   // Details along the bottom
