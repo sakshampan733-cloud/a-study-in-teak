@@ -338,11 +338,16 @@ td { padding: 16px 12px 16px 0; border-bottom: 1px solid var(--hair); vertical-a
 .lb-bar { display: flex; gap: 8px; padding: 16px 24px; justify-content: space-between; align-items: center; }
 .lb-bar .grp { display: flex; gap: 8px; align-items: center; }
 .lb-bar .btn { height: 36px; font-size: 11px; padding: 0 16px; }
-.lb-body { flex: 1; overflow: auto; padding: 0 24px 24px; }
-.lb-inner { width: 100%; margin: 0 auto; transition: width .6s var(--ease); }
+/* The drawing is zoomed and panned by transform; the browser must not pinch-zoom the page under it. */
+.lb-body { flex: 1; overflow: hidden; position: relative; margin: 0 16px 8px; touch-action: none; cursor: grab; }
+.lb-body:active { cursor: grabbing; }
+.lb-inner { position: absolute; left: 0; top: 0; width: 100%; transform-origin: 0 0; will-change: transform; }
+.lb-hint { text-align: center; font-size: 10px; letter-spacing: .08em; color: var(--dim); padding: 0 16px 14px; }
+html.lb-open, html.lb-open body { overflow: hidden; overscroll-behavior: none; }
+@media (max-width: 640px) { .lb-bar { padding: 12px 16px; flex-wrap: wrap; } .lb-bar .grp { flex-wrap: wrap; } }
 .lb-inner svg { width: 100%; height: auto; display: block; background: #fff; border-radius: 6px; }
 body.sheets-dark .lb-inner.is-dwg svg { filter: invert(1) hue-rotate(180deg) brightness(.93); }
-.lb-inner img { max-width: 100%; max-height: calc(100vh - 100px); margin: 0 auto; border-radius: 6px; }
+.lb-inner img { display: block; max-width: 100%; max-height: calc(100vh - 150px); margin: 0 auto; border-radius: 6px; }
 
 /* ── small screens ─────────────────────────────────────── */
 @media (max-width: 900px) {

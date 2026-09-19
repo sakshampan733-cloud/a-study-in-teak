@@ -457,28 +457,99 @@ $(".menu-mark").innerHTML = mark("", false);
 $(".loader-mark").innerHTML = mark("", false);
 
 // ── lightbox with zoom (and paper/void toggle for drawings) ──
-let zoom = 1;
+// The drawing zooms and pans inside the lightbox — pinch, drag, double-tap, wheel or the buttons —
+// so the phone never zooms the page itself. (It used to: pinching enlarged the whole site, pushed
+// Close off-screen, and left the page zoomed after closing.)
+const LB = { s: 1, x: 0, y: 0, pts: new Map(), last: null, tap: 0 };
+function lbApply(animate) {
+  const body = $("#lightbox .lb-body"), inner = $("#lightbox .lb-inner");
+  if (!body || !inner) return;
+  const bw = body.clientWidth, bh = body.clientHeight, iw = inner.offsetWidth * LB.s, ih = inner.offsetHeight * LB.s;
+  // keep the drawing on screen: centred when smaller than the window, edge-to-edge when larger
+  LB.x = iw <= bw ? (bw - iw) / 2 : Math.min(0, Math.max(bw - iw, LB.x));
+  LB.y = ih <= bh ? (bh - ih) / 2 : Math.min(0, Math.max(bh - ih, LB.y));
+  inner.style.transition = animate ? "transform .35s var(--ease)" : "none";
+  inner.style.transform = `translate(${LB.x}px,${LB.y}px) scale(${LB.s})`;
+}
+function lbZoomAt(s, cx, cy, animate) {
+  const body = $("#lightbox .lb-body"); if (!body) return;
+  const r = body.getBoundingClientRect(), px = cx - r.left, py = cy - r.top;
+  const ns = Math.max(1, Math.min(10, s));
+  LB.x = px - ((px - LB.x) * ns) / LB.s; LB.y = py - ((py - LB.y) * ns) / LB.s; LB.s = ns;
+  lbApply(animate);
+}
+function lbCentre() { const r = $("#lightbox .lb-body").getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }
+function lbClose() { const lb = $("#lightbox"); lb.hidden = true; lb.innerHTML = ""; document.documentElement.classList.remove("lb-open"); }
+
 document.addEventListener("click", (e) => {
   const lb = $("#lightbox");
   const f = e.target.closest("[data-open]");
   if (f && !e.target.closest("a.btn")) {
     const [kind, ref] = f.dataset.open.split(/:(.*)/s);
-    zoom = 1;
+    Object.assign(LB, { s: 1, x: 0, y: 0, last: null }); LB.pts.clear();
     lb.innerHTML = `<div class="lb-bar"><span class="mono" style="font-size:11px;color:var(--dim)">${kind === "dwg" ? esc(window.DRAWINGS[ref].title) : "Reference"}</span>
       <div class="grp">${kind === "dwg" ? dimToggle() + paperToggle() : ""}<button class="btn" data-z="-">−</button><button class="btn" data-z="0">Fit</button><button class="btn" data-z="+">+</button><button class="btn" data-z="x">Close</button></div></div>
-      <div class="lb-body"><div class="lb-inner${kind === "dwg" ? " is-dwg" : ""}">${kind === "dwg" ? window.DRAWINGS[ref].svg : `<img src="${ref}">`}</div></div>`;
+      <div class="lb-body"><div class="lb-inner${kind === "dwg" ? " is-dwg" : ""}">${kind === "dwg" ? window.DRAWINGS[ref].svg : `<img src="${ref}">`}</div></div>
+      <div class="lb-hint mono">Pinch or scroll to zoom · drag to move · double-tap to zoom in</div>`;
     lb.hidden = false;
+    document.documentElement.classList.add("lb-open");
+    const img = lb.querySelector(".lb-inner img");
+    if (img && !img.complete) img.addEventListener("load", () => lbApply(false), { once: true });
+    requestAnimationFrame(() => lbApply(false));
     return;
   }
   const z = e.target.closest("[data-z]");
   if (z) {
-    const inner = lb.querySelector(".lb-inner");
-    if (z.dataset.z === "x") { lb.hidden = true; lb.innerHTML = ""; return; }
-    zoom = z.dataset.z === "+" ? zoom * 1.5 : z.dataset.z === "-" ? Math.max(1, zoom / 1.5) : 1;
-    inner.style.width = zoom * 100 + "%";
+    if (z.dataset.z === "x") return lbClose();
+    const [cx, cy] = lbCentre();
+    if (z.dataset.z === "0") { LB.s = 1; lbApply(true); }
+    else lbZoomAt(z.dataset.z === "+" ? LB.s * 1.6 : LB.s / 1.6, cx, cy, true);
   }
 });
-document.addEventListener("keydown", (e) => { if (e.key === "Escape") { $("#lightbox").hidden = true; setMenu(false); } });
+
+// pinch, drag and double-tap on the drawing itself
+document.addEventListener("pointerdown", (e) => {
+  const body = e.target.closest("#lightbox .lb-body"); if (!body) return;
+  body.setPointerCapture(e.pointerId);
+  LB.pts.set(e.pointerId, [e.clientX, e.clientY]);
+  if (LB.pts.size === 1) {
+    const now = Date.now();
+    if (now - LB.tap < 300) { lbZoomAt(LB.s > 1.2 ? 1 : 2.6, e.clientX, e.clientY, true); LB.tap = 0; }
+    else LB.tap = now;
+  }
+  LB.last = null;
+});
+document.addEventListener("pointermove", (e) => {
+  if (!LB.pts.has(e.pointerId)) return;
+  LB.pts.set(e.pointerId, [e.clientX, e.clientY]);
+  const p = [...LB.pts.values()];
+  if (p.length === 1) {
+    const [x, y] = p[0];
+    if (LB.last && LB.last.n === 1) { LB.x += x - LB.last.x; LB.y += y - LB.last.y; lbApply(false); }
+    LB.last = { n: 1, x, y };
+  } else {
+    const cx = (p[0][0] + p[1][0]) / 2, cy = (p[0][1] + p[1][1]) / 2, d = Math.hypot(p[0][0] - p[1][0], p[0][1] - p[1][1]);
+    if (LB.last && LB.last.n === 2) {
+      LB.x += cx - LB.last.x; LB.y += cy - LB.last.y;
+      lbZoomAt(LB.s * (d / LB.last.d), cx, cy, false);
+    }
+    LB.last = { n: 2, x: cx, y: cy, d };
+  }
+});
+const lbUp = (e) => { LB.pts.delete(e.pointerId); LB.last = null; };
+document.addEventListener("pointerup", lbUp);
+document.addEventListener("pointercancel", lbUp);
+// mouse wheel and trackpad pinch (which arrives as a ctrl-wheel)
+document.addEventListener("wheel", (e) => {
+  if (!e.target.closest("#lightbox .lb-body")) return;
+  e.preventDefault();
+  lbZoomAt(LB.s * Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0022)), e.clientX, e.clientY, false);
+}, { passive: false });
+// old iOS Safari fires its own gesture events for a page pinch
+["gesturestart", "gesturechange"].forEach((t) => document.addEventListener(t, (e) => { if (document.documentElement.classList.contains("lb-open")) e.preventDefault(); }, { passive: false }));
+window.addEventListener("resize", () => { if (!$("#lightbox").hidden) lbApply(false); });
+
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") { lbClose(); setMenu(false); } });
 
 // ── scroll state: nav tightens; turns dark over the bone strip ──
 function onScroll() {
