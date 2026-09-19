@@ -5,7 +5,7 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const SHELL = {
-  rev: "3 — the dressing opening set out as the right wall has it",
+  rev: "4 — the entrance moved to the very end of the left wall",
   date: "19.09.2026",
   wStudy: 4547,   // 14 ft 11 in — study wall, the narrow end
   wPart: 4572,    // 15 ft 0 in — at the partition line
@@ -20,7 +20,7 @@ const SHELL = {
   yPart: 2900,    // the partition line — TO CONFIRM
   win: { w: 1219 },                 // 4 ft, hard into the right-hand corner of the study wall
   dress: { from: 4166, w: 762 },    // door opening: measured frame face at 4115 + 51 lining — same as AST-DR-007
-  ent: { w: 914 },                  // entrance door in the left wall, just before the step — TO CONFIRM
+  ent: { w: 914 },                  // entrance door, 3 ft, at the very END of the left wall; hinged on the bed-wall corner, it opens flat along the bed wall
 };
 
 (function () {
@@ -62,12 +62,13 @@ const SHELL = {
       <line x1="${f(xR)}" y1="${f(d1)}" x2="${f(xR - K.dress.w)}" y2="${f(d1)}"/>
       <path d="M ${f(xR - K.dress.w)} ${f(d1)} A ${K.dress.w} ${K.dress.w} 0 0 0 ${f(xR)} ${f(d0)}" fill="none" stroke-dasharray="${th * 8} ${th * 6}"/></g>`;
 
-    // entrance door — left wall, just before the step, swinging in
-    const e1 = K.yStep, e0 = e1 - K.ent.w;
-    o += R(xLs - T, e0, xLs, e1, `fill="#fff" stroke="none"`);
-    o += `<g ${W(th)}><line x1="${f(xLs - T)}" y1="${f(e0)}" x2="${f(xLs)}" y2="${f(e0)}"/><line x1="${f(xLs - T)}" y1="${f(e1)}" x2="${f(xLs)}" y2="${f(e1)}"/>
-      <line x1="${f(xLs)}" y1="${f(e0)}" x2="${f(xLs + K.ent.w)}" y2="${f(e0)}"/>
-      <path d="M ${f(xLs + K.ent.w)} ${f(e0)} A ${K.ent.w} ${K.ent.w} 0 0 0 ${f(xLs)} ${f(e1)}" fill="none" stroke-dasharray="${th * 8} ${th * 6}"/></g>`;
+    // entrance door — the very end of the left wall, hinged on the bed-wall corner, so when open
+    // the leaf lies flat along the bed wall and takes its first 3 ft
+    const e1 = L, e0 = e1 - K.ent.w;
+    o += R(xLb - T, e0, xLb, e1, `fill="#fff" stroke="none"`);
+    o += `<g ${W(th)}><line x1="${f(xLb - T)}" y1="${f(e0)}" x2="${f(xLb)}" y2="${f(e0)}"/>
+      <line x1="${f(xLb)}" y1="${f(e1)}" x2="${f(xLb + K.ent.w)}" y2="${f(e1)}" stroke-width="${th * 2.4}"/>
+      <path d="M ${f(xLb + K.ent.w)} ${f(e1)} A ${K.ent.w} ${K.ent.w} 0 0 0 ${f(xLb)} ${f(e0)}" fill="none" stroke-dasharray="${th * 8} ${th * 6}"/></g>`;
 
     // the partition line — shell reference only, nothing built shown
     o += `<line x1="${f(xR)}" y1="${f(K.yPart)}" x2="${f(xL0 - (K.yPart / L) * (xL0 - xLs))}" y2="${f(K.yPart)}" stroke="${THIN}" ${W(th)} stroke-dasharray="${th * 14} ${th * 10}"/>`;
@@ -109,7 +110,7 @@ const SHELL = {
   RG.add(v.X(xR), v.Y(K.dress.from + K.dress.w / 2), "DRESSING DOOR", "2 FT 6 × 8 FT · OPENS IN, HINGED RIGHT");
   RG.add(v.X(2600), v.Y(K.yPart), "PARTITION LINE", "SHELL REFERENCE ONLY · TO CONFIRM");
   RG.add(v.X((xR + xLb) / 2), v.Y(L), "BED WALL", "PARCHMENT");
-  LG.add(v.X(xLs - T / 2), v.Y(K.yStep - K.ent.w / 2), "ENTRANCE", "POSITION TO CONFIRM");
+  LG.add(v.X(xLb - T / 2), v.Y(L - K.ent.w / 2), "ENTRANCE · 3 FT", "OPENS FLAT ON THE BED WALL");
   LG.add(v.X(xLb), v.Y(K.yStep), "THE STEP", "KICKS OUT PAST THE DOOR · TO CONFIRM");
   s += RG.draw() + LG.draw();
 
@@ -134,5 +135,6 @@ const SHELL = {
   ].forEach((t, i) => (s += text(300, 32 + i * 5.4, t, { size: 1.75, fill: i > 10 ? THIN : INK })));
 
   s += titleBlock({ title: "THE ROOM AS BUILT", sub: "Shell plan · measured on site", date: K.date, rev: K.rev, dwg: "AST-DR-000", scale: `1:${sc} @ A3` });
+  window.SHELL = SHELL;   // other sheets set out from the same shell
   window.DRAWINGS.roomshell = { title: "The room as built · AST-DR-001", svg: sheet(s), model: true };
 })();

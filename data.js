@@ -499,6 +499,7 @@ window.PROJECT = {
         },
         {
           id: "bed", name: "Bed", status: "open",
+          drawings: ["bed"],
           refs: [
             { src: "assets/refs/bed-ref-1-low-platform-bed.jpg", caption: "Bed reference (Newberry Projects) — low bed with a thick upholstered base, wide wooden side ledge as a bedside table, aged metal-leaf panels behind" },
           ],
@@ -507,7 +508,10 @@ window.PROJECT = {
             { label: "Design", value: "", hint: "Frame, legs, storage (hydraulic / drawers / none)" },
             { label: "Veneer", inherit: "veneer" },
             { label: "Polish", inherit: "polish" },
-            { label: "Size", value: "", hint: "Queen / King, mattress size" },
+            { label: "Size", value: "6 ft 6 in wide, centred on an 8 ft bed back. Length (6 ft 10 in) and heights are assumed until the mattress is chosen." },
+            { label: "Bed back", value: "The partition's shape brought to the bed wall: a straight run behind the bed and a tight curl at each end turning 2 ft forward into the room, with a bedside ledge inside each curl. 8 ft overall and set on exactly the same two lines as the partition." },
+            { label: "Setting out", value: "Both the bed and the partition moved 6 in to the right, so each sits 2 ft 11 in off the right wall. At the bed wall: the entrance door opens flat over the first 3 ft, then 1 ft 7 in clear, then the 8 ft bed back, then 2 ft 11 in. Either side of the bed: 5 ft 4 in and 3 ft 8 in." },
+            { label: "Open — the ledges", value: "Inside 8 ft a 6 ft 6 bed leaves 9 in a side, so the ledges come to about 6½ in wide by 1 ft 4½ in deep — a phone and a slim lamp, not a nightstand. Real nightstands need either a wider bed back, which would break the line with the partition, or a narrower bed." },
           ],
           questions: [],
         },
@@ -532,9 +536,10 @@ window.PROJECT = {
         },
         {
           id: "partition", name: "Partition", status: "open",
-          drawings: ["partitionglass"],
+          drawings: ["partitionglass", "bed"],
           model3d: true,
           parts: [
+            { label: "Position across the room", value: "Set out from the right wall, the straight one: 2 ft 11 in from it, then 8 ft of partition, leaving about 4 ft 1 in on the left at the partition line. Moved 6 in to the right so the bed's curled back clears the entrance door, and on the same two lines as the bed back — see AST-DR-013." },
             { label: "Size", value: "About 8 ft across the room, floor to ceiling at 9 ft 1 in. Both ends turn 55° towards the bed on a 664 radius, coming 283 (about 11 in) into the room. Developed length 2625 — about 8 ft 7 in. Gaps of about 3½ ft and 2½ ft at the ends, still to be measured against the room width." },
             { label: "Material", value: "Leaded glass, not wood. White textured glass in lead came, no colour." },
             { label: "Composition", value: "One design across the whole wall rather than a panel repeated. An outer rectangle 150 in from every edge and an inner one 420 in at the sides and 460 at head and foot, joined by a short bar at the middle of each side, with a cross at each corner of the inner rectangle. The border runs straight through the bay joints." },
