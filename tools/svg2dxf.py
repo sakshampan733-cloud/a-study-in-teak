@@ -156,7 +156,8 @@ class Writer:
             stroked = is_visible_stroke(e)
             attribs = self.attribs(e)
             if isinstance(e, (Circle, Ellipse)) and clip is None and stroked and abs(e.rx - e.ry) < 1e-6:
-                self.msp.add_circle(self.pt(e.cx, e.cy), e.rx, dxfattribs=attribs)
+                # the centre goes through pt(), which scales to inches — the radius must be scaled the same way
+                self.msp.add_circle(self.pt(e.cx, e.cy), e.rx * self.k, dxfattribs=attribs)
                 continue
             if isinstance(e, SimpleLine) and clip is None:
                 if stroked:
