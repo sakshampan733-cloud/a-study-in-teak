@@ -307,13 +307,16 @@ window.PROJECT = {
       items: [
         {
           id: "door", name: "Doors (×3)", status: "open",
-          drawings: ["door", "door-narrow"],
+          drawings: ["doorveneer", "door", "door-narrow"],
           refs: [
             { src: "assets/refs/door-ref-1.jpg", caption: "Reference — pair of panelled doors in a library (film still)" },
             { src: "assets/refs/door-ref-1-crop.jpg", caption: "Close-up — shaped bead, corner roundels, knob on lock rail" },
           ],
           parts: [
             { label: "Design", value: "Four-panel leaf after the reference: tall upper panel and short lower panel, each with a sunk ovolo-moulded field, a carved shaped bead (concave shoulders rising to a rounded crown at head and foot) and four carved corner roundels. Lock rail carries knob and keyhole." },
+            { label: "How it is actually made", value: "AST-DR-015. The doors are veneered blockboard, not solid timber, and a veneer face is 0.6 mm thick — a sunk panel field or a carved boss cuts straight through it into the core. So nothing is cut INTO the leaf. The face stays flat and veneered and every line is a moulding planted on top, mitred at the corners, with a small applied block where each carved roundel was. AST-DR-001 and -009 remain as the solid-timber scheme; AST-DR-015 is the one to build from." },
+            { label: "Construction", value: "38 blockboard core, solid teak lipping 12 wide on all four edges so hinges and lock go into wood, veneer both faces and balanced so the leaf does not bow — 45 overall. Applied moulding 45 wide standing 18 proud; corner blocks 58 square standing 22 proud, both in solid teak polished to match." },
+            { label: "Lines shared across widths", value: "Both widths take the same horizontal lines, set off the 2 ft 6 leaf where the panel square works, so the three doors line up with each other on a wall. Only the panel width changes. Taking two panel squares off the 3 ft leaf would make its upper panel so tall the two frames overlap." },
             { label: "Veneer", inherit: "veneer" },
             { label: "Polish", inherit: "polish" },
             { label: "Hardware", value: "", hint: "Handles, hinges, lock, finish (brass / antique brass / nickel)" },
