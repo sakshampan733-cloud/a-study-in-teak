@@ -69,8 +69,7 @@ function buildVanity(V) {
     o += RE(V.marble[0], K.top, V.marble[1], K.counter, t * 1.3, MARBLE);                  // the marble, over the bank
     FRONTS.forEach((F) => {
       o += RE(F.x0 + gap, F.h0 + gap, F.x1 - gap, F.h1 - gap, t * 1.1, VEN);
-      if (F.kind === "door") o += pull(F.x1 > SP ? F.x0 + 70 : F.x1 - 70, F.h1 - 70, t);
-      else o += pull((F.x0 + F.x1) / 2, F.kind === "big" ? F.h1 - 80 : (F.h0 + F.h1) / 2 + 20, t);
+      if (F.kind === "door") o += pull(F.x1 > SP ? F.x0 + 70 : F.x1 - 70, F.h1 - 70, t);   // drawers have no handles: push-to-open
     });
     o += bowl(AX, t, (x) => x);
     o += RE(AX - 30, K.spout.h - 15, AX + 30, K.spout.h + 45, t, "#fff") + RE(AX - 11, K.spout.h - 40, AX + 11, K.spout.h - 15, t, "#fff");
@@ -175,7 +174,7 @@ function buildVanity(V) {
   const hs = [0, K.clear, K.big[0], K.big[1], K.top2[0], K.top2[1], K.top, K.counter];
   s += chainV(hs.map((h) => v.Y(E(h))), v.X(L) + 6, hs.slice(1).map((h, i) => h - hs[i]), { from: v.X(L) + 1, size: 1.15 });
   s += chainV([v.Y(E(0)), v.Y(E(K.counter)), v.Y(E(K.counter + K.bowl.h))], v.X(L) + 14, [`${K.counter} COUNTER`, K.bowl.h], { from: v.X(L) + 1, size: 1.3 });
-  FRONTS.forEach((F, i) => (s += bubble(v.X((F.x0 + F.x1) / 2), v.Y(E((F.h0 + F.h1) / 2 - (F.kind === "top" ? 38 : F.kind === "big" ? 40 : 0))), i + 1)));
+  FRONTS.forEach((F, i) => (s += bubble(v.X((F.x0 + F.x1) / 2), v.Y(E((F.h0 + F.h1) / 2)), i + 1)));
   s += text(v.X(AX) + 1.2, v.Y(E(K.spout.h + 90)) + 1.5, "FAUCET AXIS", { size: 1.35, fill: DIM });
   if (SP !== AX) s += text(v.X(SP) - 1.2, v.Y(E(K.spout.h + 90)) + 1.5, "VANITY CENTRE", { size: 1.35, fill: THIN, anchor: "end" });
 
@@ -225,7 +224,7 @@ function buildVanity(V) {
   s += heading(RX, 90, "FRONTS", "SIZES ARE THE FRONT ITSELF · 3 MM GAP ALL ROUND", 108);
   s += text(RX, 102, "No.", { size: 1.4, fill: THIN }) + text(RX + 8, 102, "WHAT", { size: 1.4, fill: THIN }) + text(RX + 60, 102, "W × H", { size: 1.4, fill: THIN }) + text(RX + 108, 102, "FT-IN", { size: 1.4, fill: THIN, anchor: "end" });
   FRONTS.forEach((F, i) => {
-    const y = 106.5 + i * 4.1, what = F.kind === "door" ? "Door, cup pull" : F.kind === "top" ? "Top drawer" : "Big drawer, U-box";
+    const y = 106.5 + i * 4.1, what = F.kind === "door" ? "Door, cup pull" : F.kind === "top" ? "Top drawer, push-open" : "Big drawer, U-box, push-open";
     s += text(RX, y, String(i + 1), { size: 1.55, weight: 700 }) + text(RX + 8, y, what, { size: 1.55 });
     s += text(RX + 60, y, `${Math.round(F.w)} × ${Math.round(F.h)}`, { size: 1.55 });
     s += text(RX + 108, y, `${mmToFt(F.w)} × ${mmToFt(F.h)}`, { size: 1.45, fill: THIN, anchor: "end" });
@@ -239,8 +238,9 @@ function buildVanity(V) {
    ["", "Every edge sealed — it stands in a wet room."],
    ["Fronts", "18 BWP, teak veneer, 6 solid teak lipping."],
    ...(V.ledges ? [["Ledge", `The ${V.ledges} veneer top: solid teak nosing,`], ["", "sealed like a worktop. Marble stops at the bank."]] : []),
-   ["Runners", "Full-extension soft-close, undermount."],
-   ["Fittings", "Chrome — already bought. Cup pulls to match."],
+   ["Runners", "Undermount, full extension. Drawers push-to-open —"],
+   ["", "no handles on them; the doors keep cup pulls."],
+   ["Fittings", "Chrome — already bought. Door cup pulls to match."],
    ["Hanging", "18 ply cleat on the wall, 700–760 high."]]
     .forEach(([a, b], i) => (s += text(RX, my + 11 + i * 3.9, a, { size: 1.5, weight: 700 }) + text(RX + 15, my + 11 + i * 3.9, b, { size: 1.5 })));
 
