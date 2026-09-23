@@ -18,6 +18,42 @@ window.MODEL3D = (function () {
       .replace(/\sclip-path="url\(#[^)]*\)"/g, "");
   }
 
+  // The floor carries the setting-out, so the room can be read at a glance instead of guessed at.
+  // Drawn in room coordinates: x across, y along from the study wall — which is exactly how the
+  // floor plane is laid out, so no transform is needed.
+  function floorDims(S, Wd, L) {
+    const B = BEDPLAN, G = window.PGEOM;
+    const FR = ["", "\u215b", "\u00bc", "\u215c", "\u00bd", "\u215d", "\u00be", "\u215e"];
+    const ft = (mm) => { const e = Math.round(mm / 25.4 * 8), F = Math.floor(e / 96), i = Math.floor((e - F * 96) / 8), r = e % 8;
+      return (F ? F + "'" : "") + i + FR[r] + '"'; };
+    const T = 150, RED = "#b3261e";
+    let o = `<g stroke="${RED}" fill="none" stroke-width="16">`;
+    const tick = (x, y, vert) => vert ? `<path d="M ${x - 55} ${y} L ${x + 55} ${y}"/>` : `<path d="M ${x} ${y - 55} L ${x} ${y + 55}"/>`;
+    // a run along the room (vertical on this plane)
+    const runV = (x, y0, y1, label) => `<path d="M ${x} ${y0} L ${x} ${y1}"/>` + tick(x, y0, 1) + tick(x, y1, 1)
+      + `<text x="${x + 80}" y="${(y0 + y1) / 2 + T * 0.36}" font-size="${T}" fill="${RED}" stroke="none" font-family="Helvetica" font-weight="700">${label}</text>`;
+    // a run across the room (horizontal on this plane)
+    const runH = (y, x0, x1, label) => `<path d="M ${x0} ${y} L ${x1} ${y}"/>` + tick(x0, y, 0) + tick(x1, y, 0)
+      + `<text x="${(x0 + x1) / 2}" y="${y - 70}" font-size="${T}" fill="${RED}" stroke="none" text-anchor="middle" font-family="Helvetica" font-weight="700">${label}</text>`;
+    if (!B || !G) return o + "</g>";
+    const yPart = S.yPart, face = yPart + G.PROJ + G.thick / 2;
+    const bedFoot = L - B.back.t - B.bed.l, bedHead = L - B.back.t;
+    const cup = 280, dD = 823, dBack = yPart - G.thick / 2 - dD;
+    // along the room, down the left-hand side
+    o += runV(330, 0, yPart, ft(yPart) + "  STUDY SIDE");
+    o += runV(330, yPart, L, ft(L - yPart) + "  BED SIDE");
+    // what the study side is actually holding
+    o += runV(1130, 0, cup, ft(cup));
+    o += runV(1130, cup, dBack, ft(dBack - cup) + "  CHAIR");
+    o += runV(1130, dBack, dBack + dD, ft(dD) + "  DESK");
+    // and what the bed side is holding
+    o += runV(Wd - 520, face, bedFoot, ft(bedFoot - face) + "  WALKWAY");
+    o += runV(Wd - 520, bedFoot, bedHead, ft(B.bed.l) + "  BED");
+    // the room across, at each end
+    o += runH(260, 0, Wd, ft(Wd) + " WIDE");
+    return o + "</g>";
+  }
+
   function planes() {
     const S = SHELL, R = RWALL, H = S.H, Wd = S.wStudy, L = R.run + R.door.w + R.ret;
     const B = BEDPLAN, G = window.PGEOM;
@@ -29,7 +65,8 @@ window.MODEL3D = (function () {
     // the other way round — is flipped rather than redrawn.
     P.push({ id: "left", w: S.lLeft, h: H, tf: `translate3d(0px,0px,${L}px) rotateY(90deg)`, art: view("leftwall", "Left wall elevation"), mirror: true });
     P.push({ id: "bed", w: S.wBed, h: H, tf: `translate3d(${Wd}px,0px,${L}px) rotateY(180deg)`, plain: true });
-    P.push({ id: "floor", w: Wd, h: L, tf: `translate3d(0px,${H}px,0px) rotateX(90deg)`, floor: true });
+    P.push({ id: "floor", w: Wd, h: L, tf: `translate3d(0px,${H}px,0px) rotateX(90deg)`, floor: true,
+      art: { svg: floorDims(S, Wd, L) } });
 
     // ── what stands in the room ──
     // A run of facets along a plan centreline. Each facet is a flat panel turned to follow the
@@ -67,7 +104,11 @@ window.MODEL3D = (function () {
       back.push([xPR - c, L - B.back.d]);
       run(back, B.back.h, 0, "solid");
       // the desk, behind the partition on the study side, facing it
-      const dL = 2134, dD = 823, dH = 750, dGap = 450;     // 7 ft x 2 ft 8 in, close to the partition so the chair gets the room
+      const dL = 2134, dD = 823, dH = 750;                  // 7 ft x 2 ft 8 in
+      // The desk stands AGAINST the partition — freestanding, not fixed to it, just touching.
+      // It meets the straight middle of the screen; past that the screen curves away towards the
+      // bed, so the desk's two ends stand clear of it.
+      const dGap = G.thick / 2;
       slab(xc - dL / 2, S.yPart - dGap - dD, dL, dD, dH);
       // the bed, and a bedside ledge inside each curl
       const xBR = xPR - (B.width - B.bed.w) / 2, xBL = xBR - B.bed.w;
