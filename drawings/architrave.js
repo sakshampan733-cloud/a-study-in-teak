@@ -8,7 +8,7 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const ARCH = {
-  rev: "7 — relief scheduled; final for the dressing door",
+  rev: "8 — carved head: dressing door only",
   date: "19.09.2026",
   leaf: { w: 762, h: 2311 },     // the dressing and bathroom doors, 2 ft 6 × 7 ft 7
   wide: 914,                     // D1, the main door — a pair of leaves
@@ -121,6 +121,33 @@ const ARCH = {
     return o;
   }
 
+  // ── the PLAIN casing ───────────────────────────────────────────────────────
+  // The carved head belongs to the dressing door and to that door only. The main door and the
+  // bathroom door take the same lining and the same 4 in moulding — so every opening in the room
+  // is set out alike — but the moulding runs straight across the head and stops. No scallops, no
+  // small mouldings, no crown. The profile of that 4 in band is NOT settled: it is drawn flat.
+  function plainCasing(lw, t, key, ground) {
+    const W = lw + 2 * CAS, top = yM;
+    const py = (y) => top - y;                                              // this casing's own datum
+    const r = (a, b, c, d, w) => RC(a, py(b), c, py(d), w);
+    let o = "";
+    [[0, CAS], [W - CAS, W]].forEach(([a, b]) => {
+      const left = a === 0, m0 = left ? a : a + FR, m1 = left ? b - FR : b, l0 = left ? b - FR : a, l1 = left ? b : a + FR;
+      o += r(l0, yFr, l1, 0, t * 1.1);                                      // the lining leg
+      o += r(m0, yM, m1, K.plinth, t * 1.2);                                // the moulding leg, plain
+      o += r(a, K.plinth, b, 0, t * 1.3);                                   // the plinth block
+      o += LN(a, py(K.plinth - 14), b, py(K.plinth - 14), t * 0.7);
+      o += LN(a, py(K.skirt), b, py(K.skirt), t * 0.55);
+    });
+    o += r(CAS, yC, CAS + lw, 0, t * 1.5);                                  // the opening
+    const L = key && window.DOORLEAF && window.DOORLEAF[key];
+    if (L) o += `<g transform="translate(${f(CAS)},${f(py(yC))})" stroke-width="${t}">${L.draw(t * 0.7)}</g>`;
+    o += r(0, yM, W, yFr, t * 1.2);                                         // the head, straight across
+    o += LN(0, py(yFr), W, py(yFr), t * 0.9);
+    if (ground !== false) o += LN(-190, py(0), W + 190, py(0), t * 3);
+    return o;
+  }
+
   // ── sections ──────────────────────────────────────────────────────────────
   function headSection(t) {
     const lv = [[K.crown, K.projK], [K.moB, K.projB], [K.moA, K.projA], [K.scal, K.projS], [MO, K.projJ], [FR, K.projJ * 0.3]];
@@ -144,20 +171,24 @@ const ARCH = {
   let s = frame();
   s += `<defs><pattern id="hatchAR" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#9a9a9a" stroke-width="0.9"/></pattern></defs>`;
 
-  s += heading(18, 18, "DRESSING AND BATHROOM", "D2 · D3 · 2 FT 6 · 1:20", 86);
+  s += heading(18, 18, "DRESSING DOOR", "D2 · 2 FT 6 · THE CARVED HEAD · 1:20", 86);
   { const sc = 20, v = view(40, 36, sc, "Narrow door casing"), t = v.w(0.12), W = K.leaf.w + 2 * CAS;
     s += v.g(casing(K.leaf.w, t, "door-narrow"), 0.3);
     s += chainH([v.X(0), v.X(CAS), v.X(CAS + K.leaf.w), v.X(W)], v.Y(E(0)) + 8, [CAS, K.leaf.w, CAS], { from: v.Y(E(0)) + 2, size: 1.25 });
     s += chainV([v.Y(E(0)), v.Y(E(yC)), v.Y(E(yFr)), v.Y(E(yM)), v.Y(E(TOPY))], v.X(W) + 7, [K.leaf.h, FR, MO, TOPY - yM], { from: v.X(W) + 2, size: 1.2 });
     s += chainV([v.Y(E(0)), v.Y(E(TOPY))], v.X(W) + 16, [`${TOPY} OVERALL`], { from: v.X(W) + 2, size: 1.35 }); }
 
-  s += heading(112, 18, "MAIN DOOR", "D1 · 3 FT · PROVISIONAL — A PLAINER HEAD TO COME", 86);
-  { const sc = 20, v = view(136, 36, sc, "Main door casing"), t = v.w(0.12), W = K.wide + 2 * CAS;
-    s += v.g(casing(K.wide, t, "door"), 0.3);
-    s += chainH([v.X(0), v.X(CAS), v.X(CAS + K.wide), v.X(W)], v.Y(E(0)) + 8, [CAS, K.wide, CAS], { from: v.Y(E(0)) + 2, size: 1.25 });
-    s += chainV([v.Y(E(0)), v.Y(E(K.plinth))], v.X(W) + 7, [K.plinth], { from: v.X(W) + 2, size: 1.25 }); }
+  // The carved head belongs to the dressing door and to no other opening. The main door and the
+  // bathroom door take the same lining and the same 4 in moulding, run straight across and stopped.
+  s += heading(112, 18, "MAIN AND BATHROOM", "D1 3 FT · D3 2 FT 6 · PLAIN CASING · 1:20", 86);
+  { const sc = 20, v = view(136, 36 + (TOPY - yM) / sc, sc, "Main door casing"), t = v.w(0.12), W = K.wide + 2 * CAS;
+    s += v.g(plainCasing(K.wide, t, "door"), 0.3);
+    const pY = (y) => v.Y(yM - y);
+    s += chainH([v.X(0), v.X(CAS), v.X(CAS + K.wide), v.X(W)], pY(0) + 8, [CAS, K.wide, CAS], { from: pY(0) + 2, size: 1.25 });
+    s += chainV([pY(0), pY(yC), pY(yFr), pY(yM)], v.X(W) + 7, [K.leaf.h, FR, MO], { from: v.X(W) + 2, size: 1.2 });
+    s += chainV([pY(0), pY(yM)], v.X(W) + 16, [`${yM} OVERALL`], { from: v.X(W) + 2, size: 1.35 }); }
 
-  s += heading(226, 18, "1 · THE HEAD", "LEFT END · ELEVATION 1:4 · LINING, MOULDING, SCALLOPS, CROWN", 104);
+  s += heading(226, 18, "1 · THE HEAD", "DRESSING DOOR · LEFT END · 1:4 · LINING, MOULDING, SCALLOPS, CROWN", 104);
   { const sc = 4, v = view(250, 46, sc, "Head detail"), t = v.w(0.12), CUT = 400;
     s += v.g(head(1068, t, CUT), 0.3);
     s += chainV([v.Y(E(TOPY)), v.Y(E(yB)), v.Y(E(yA)), v.Y(E(yS)), v.Y(E(yM)), v.Y(E(yFr)), v.Y(E(yC))], v.X(CUT) + 7,
@@ -192,11 +223,12 @@ const ARCH = {
     "A 4 in square block at each corner, with a small sunk moulding",
     "inside it, ties head to jamb; the scallops run in three runs so a",
     `joint lands on each block edge. The crown lands at ${TOPY} (8 ft 8 in).`,
-    "FINAL for the DRESSING door. Main and bathroom take a plainer head."]]
+    "The carved head is the DRESSING door's alone. Main and bathroom",
+    "take the same lining and moulding, run straight across and stopped."]]
     .forEach((col, c) => col.forEach((n, i) => (s += text(18 + c * 104, 214 + i * 4.6, n, { size: 1.7, fill: INK }))));
 
   // ═══ RELIEF — what stands out and what is cut in ═══
-  s += heading(18, 243, "RELIEF", "FACE OF THE PLASTER WALL = DATUM 0 · ALL FIGURES ARE PROJECTION FROM IT", 74);
+  s += heading(18, 243, "RELIEF", "DATUM 0 = FACE OF THE PLASTER · LINING AND MOULDING ARE COMMON TO ALL THREE DOORS · THE REST IS THE DRESSING DOOR'S CARVED HEAD", 74);
   [[["Lining, 2 in on the face", "6 OUT"],
     ["Moulding, 4 in, reeded", `${K.projJ} OUT`],
     ["Reed grooves in the moulding face", "3 IN"],
@@ -213,8 +245,9 @@ const ARCH = {
     }));
 
   // the other sheets build the same casing rather than drawing their own
-  window.CASING = { CAS, FR, MO, TOPY, HEAD, yC, yM, projJ: K.projJ, earK: K.earK, draw: casing, head };
+  window.CASING = { CAS, FR, MO, TOPY, HEAD, yC, yM, projJ: K.projJ, earK: K.earK, draw: casing, head,
+                    PTOP: yM, plain: plainCasing };
 
-  s += titleBlock({ title: "DOOR CASINGS", sub: "All three doors · Head · Section · Jamb · Plinth", date: K.date, rev: K.rev, dwg: "AST-DR-011", scale: "AS NOTED @ A3" });
+  s += titleBlock({ title: "DOOR CASINGS", sub: "Carved head — dressing only · Plain elsewhere · Sections", date: K.date, rev: K.rev, dwg: "AST-DR-011", scale: "AS NOTED @ A3" });
   window.DRAWINGS.architrave = { title: "Door casings · AST-DR-011", svg: sheet(s), model: true };
 })();
