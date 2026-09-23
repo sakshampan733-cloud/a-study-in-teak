@@ -9,7 +9,7 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const BEDPLAN = {
-  rev: "3 — bed 6 ft x 6 ft; partition line at 11 ft",
+  rev: "5 — the bed's clearance to each wall, splay included",
   date: "20.09.2026",
   gapR: 889,                       // 2 ft 11 in from the right wall to both pieces (3 ft 5 in, less the 6 in move)
   width: 2438,                     // 8 ft — partition and bed back alike
@@ -144,7 +144,8 @@ const BEDPLAN = {
   s += text(v.X(xc), v.Y(yHead - B.l / 2), "BED 6 FT \u00d7 6 FT", { size: 2.2, anchor: "middle", ls: 0.3 });
   // dimension chains, feet and inches
   s += chainH([v.X(leftAt(yPart)), v.X(xPL), v.X(xPR), v.X(xR)], v.Y(yPart - 420), [xPL - leftAt(yPart), K.width, K.gapR], { from: v.Y(yPart - 380), size: 1.4 });
-  s += chainH([v.X(xLb), v.X(xBL), v.X(xBR), v.X(xR)], v.Y(yHead - B.l) - 5, [xBL - xLb, B.w, xR - xBR], { from: v.Y(yHead - B.l) - 1, size: 1.4 });
+  const yFoot = yHead - B.l;
+  s += chainH([v.X(leftAt(yFoot)), v.X(xBL), v.X(xBR), v.X(xR)], v.Y(yFoot) - 5, [xBL - leftAt(yFoot), B.w, xR - xBR], { from: v.Y(yFoot) - 1, size: 1.4 });
   s += chainH([v.X(xLb), v.X(doorEnd), v.X(xPL), v.X(xPR), v.X(xR)], v.Y(L + T) + 6, [K.door, xPL - doorEnd, K.width, K.gapR], { from: v.Y(L + T) + 1, size: 1.4 });
   s += text(v.X(xLb), v.Y(L + T) + 10.5, "BED WALL · FIRST FIGURE IS THE ENTRANCE DOOR, OPEN FLAT", { size: 1.4, fill: THIN });
   s += text(v.X(leftAt(yPart)), v.Y(yPart - 420) + 4.2, "AT THE PARTITION LINE", { size: 1.4, fill: THIN });
@@ -179,22 +180,24 @@ const BEDPLAN = {
   });
 
   // ── NOTES ──
-  s += heading(150, 226, "SETTING OUT", `REVISION ${K.rev.split(" ")[0]} · FEET AND INCHES`, 118);
+  s += heading(150, 223, "SETTING OUT", `REVISION ${K.rev.split(" ")[0]} · FEET AND INCHES`, 118);
   const ledgeW = ledgeL[1] - ledgeL[0], ledgeD = ledgeY[1] - ledgeY[0];
   const curlTip = yPart + G.PROJ, bedFoot = yHead - B.l, walk = bedFoot - curlTip;
   [`Both pieces moved 6 in to the right: ${ft(K.gapR)} from the right wall to each.`,
    `Partition line: ${ft(xPL - leftAt(yPart))} · partition 8 ft · ${ft(K.gapR)}.`,
    `Bed wall: ${ft(K.door)} open door · ${ft(xPL - doorEnd)} clear · bed back 8 ft · ${ft(K.gapR)}.`,
-   `Bed: ${ft(xBL - xLb)} · bed 6 ft 6 in · ${ft(xR - xBR)}. The bed back shows ${ft(xBL - xPL)} each side.`,
-   `OPEN — THE PARTITION AT 11 FT DOES NOT LEAVE ROOM FOR THE BED. Its curls`,
-   `   reach forward to ${ft(curlTip)} from the study wall and the foot of the bed is at`,
-   `   ${ft(bedFoot)}: ${walk < 0 ? "they OVERLAP by " + ft(-walk) : "only " + ft(walk) + " between them"}. For a 2 ft walkway the`,
-   `   partition wants to be about 8 ft 11 in from the study wall — or 11 ft measured`,
-   `   from the BED wall, which leaves 3 ft 1 in. Confirm which end it is from.`,
-   `OPEN — the ledges inside the curls come to ${ft(ledgeW)} wide × ${ft(ledgeD)} deep. That holds a phone`,
-   `   and a slim lamp, not a nightstand — 9 in a side is all 8 ft leaves.`,
-   `ASSUMED — bed back 4 ft 6 tall, ledges 2 ft high. Bed and partition line measured.`]
-    .forEach((n, i) => (s += text(150, 237 + i * 4.3, n, { size: 1.55, fill: n.startsWith("OPEN") ? "#b3261e" : INK })));
+   `The bed is ${ft(B.w)} × ${ft(B.l)}, centred on the back, which shows ${ft(xBL - xPL)} each side.`,
+   `RIGHT wall to the bed: ${ft(xR - xBR)} the whole way — that wall is straight.`,
+   `LEFT wall to the bed: ${ft(xBL - leftAt(bedFoot))} at the foot, ${ft(xBL - leftAt(yStep))} at the step, ${ft(xBL - xLb)} at the head —`,
+   `   that wall carries the splay AND the step, so the gap opens out along the bed.`,
+   `The bed therefore sits off centre. Centring the 8 ft back in the ${ft(S.wBed)} bed`,
+   `   wall would move everything ${ft((S.wBed - K.width) / 2 - K.gapR)} left — but it is set off the RIGHT wall,`,
+   `   the only straight one, and moved 6 in right on purpose.`,
+   `Walkway: curls reach ${ft(curlTip)}, foot of the bed at ${ft(bedFoot)} — ${ft(walk)} between.`,
+   `OPEN — the ledges inside the curls come to ${ft(ledgeW)} × ${ft(ledgeD)}: a phone and a slim`,
+   `   lamp, not a nightstand. 9 in a side is all 8 ft leaves.`,
+   `ASSUMED — back 4 ft 6 tall, ledges 2 ft. Bed and partition line measured.`]
+    .forEach((n, i) => (s += text(150, 234 + i * 4.15, n, { size: 1.5, fill: n.startsWith("OPEN") ? "#b3261e" : INK })));
 
   s += titleBlock({ title: "BED, BED BACK AND PARTITION", sub: "Plan · Bed back · Four views", date: K.date, rev: K.rev, dwg: "AST-DR-013", scale: "AS NOTED @ A3" });
   window.DRAWINGS.bed = { title: "Bed and partition · AST-DR-013", svg: sheet(s), model: true };

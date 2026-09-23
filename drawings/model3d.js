@@ -51,6 +51,13 @@ window.MODEL3D = (function () {
     o += runV(Wd - 520, bedFoot, bedHead, ft(B.bed.l) + "  BED");
     // the room across, at each end
     o += runH(260, 0, Wd, ft(Wd) + " WIDE");
+    // across the bed: what stands either side of it. The right wall is the straight one, so that
+    // figure holds the whole length of the bed; the left wall splays and steps, so the model's
+    // square room reads it at its narrowest — the sheet AST-DR-013 carries the full range.
+    const xPR = Wd - B.gapR, xBR = xPR - (B.width - B.bed.w) / 2, xBL = xBR - B.bed.w;
+    o += runH(bedFoot + 420, 0, xBL, ft(xBL) + "+");
+    o += runH(bedFoot + 420, xBL, xBR, ft(B.bed.w) + " BED");
+    o += runH(bedFoot + 420, xBR, Wd, ft(Wd - xBR));
     return o + "</g>";
   }
 
