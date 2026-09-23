@@ -5,7 +5,7 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const SHELL = {
-  rev: "5 — the partition line set at 11 ft from the study wall",
+  rev: "6 — the partition line at 11 ft from the bed wall, 8 ft from the study wall",
   date: "19.09.2026",
   wStudy: 4547,   // 14 ft 11 in — study wall, the narrow end
   wPart: 4572,    // 15 ft 0 in — at the partition line
@@ -17,7 +17,7 @@ const SHELL = {
   t: 230,         // wall thickness
   step: 127,      // 5 in — the left wall kicks out past the entrance door
   yStep: 4600,    // how far down the step falls — TO CONFIRM
-  yPart: 3353,    // 11 ft from the study wall, as measured — see the clash note on AST-DR-013
+  yPart: 2438,    // 8 ft from the study wall — i.e. 11 ft from the BED wall, as measured
   win: { w: 1219 },                 // 4 ft, hard into the right-hand corner of the study wall
   dress: { from: 4166, w: 762 },    // door opening: measured frame face at 4115 + 51 lining — same as AST-DR-007
   ent: { w: 914 },                  // entrance door, 3 ft, at the very END of the left wall; hinged on the bed-wall corner, it opens flat along the bed wall

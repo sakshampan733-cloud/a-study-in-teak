@@ -46,7 +46,7 @@ window.MODEL3D = (function () {
     const slab = (x0, z0, w, d, h) => {                       // a box: top, and the four sides
       P.push({ id: "t" + x0 + z0, w, h: d, cls: "solid", tf: `translate3d(${x0}px,${H - h}px,${z0}px) rotateX(90deg)` });
       P.push({ id: "s1" + x0 + z0, w, h, cls: "solid", tf: `translate3d(${x0}px,${H - h}px,${z0}px)` });
-      P.push({ id: "s2" + x0 + z0, w, h, cls: "solid", tf: `translate3d(${x0 + w}px,${H - h}px,${z0}px) rotateY(180deg) translate3d(${-w}px,0px,${-d}px)` });
+      P.push({ id: "s2" + x0 + z0, w, h, cls: "solid", tf: `translate3d(${x0 + w}px,${H - h}px,${z0 + d}px) rotateY(180deg)` });
       P.push({ id: "s3" + x0 + z0, w: d, h, cls: "solid", tf: `translate3d(${x0}px,${H - h}px,${z0}px) rotateY(-90deg)` });
       P.push({ id: "s4" + x0 + z0, w: d, h, cls: "solid", tf: `translate3d(${x0 + w}px,${H - h}px,${z0}px) rotateY(-90deg)` });
     };
@@ -67,7 +67,7 @@ window.MODEL3D = (function () {
       back.push([xPR - c, L - B.back.d]);
       run(back, B.back.h, 0, "solid");
       // the desk, behind the partition on the study side, facing it
-      const dL = 2134, dD = 823, dH = 750, dGap = 620;     // 7 ft x 2 ft 8 in, as asked
+      const dL = 2134, dD = 823, dH = 750, dGap = 450;     // 7 ft x 2 ft 8 in, close to the partition so the chair gets the room
       slab(xc - dL / 2, S.yPart - dGap - dD, dL, dD, dH);
       // the bed, and a bedside ledge inside each curl
       const xBR = xPR - (B.width - B.bed.w) / 2, xBL = xBR - B.bed.w;
