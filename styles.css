@@ -289,6 +289,24 @@ body.scrolled .hero-meta { opacity: 0; }
 .dwg { margin: 0; cursor: zoom-in; border-radius: 6px; overflow: hidden; }
 .dwg svg { width: 100%; height: auto; display: block; background: #fff; transition: filter .6s var(--ease); }
 body.sheets-dark .dwg svg { filter: invert(1) hue-rotate(180deg) brightness(.93) contrast(1.05); }
+
+/* Blueprint — the drawing inverted to white line work, laid on a blue gridded sheet. The svg's own
+   white paper is dropped so the blue shows through; the grid is drawn by the wrapper behind it. */
+body.sheets-blue .dwg, body.sheets-blue .lb-inner.is-dwg {
+  --bp: #0b3a7a; --bpline: rgba(255,255,255,.13);
+  background-color: var(--bp);
+  background-image: repeating-linear-gradient(0deg, var(--bpline) 0 1px, transparent 1px 28px),
+                    repeating-linear-gradient(90deg, var(--bpline) 0 1px, transparent 1px 28px),
+                    repeating-linear-gradient(0deg, rgba(255,255,255,.07) 0 1px, transparent 1px 5.6px),
+                    repeating-linear-gradient(90deg, rgba(255,255,255,.07) 0 1px, transparent 1px 5.6px);
+  border-radius: 6px;
+}
+body.sheets-blue .dwg svg, body.sheets-blue .lb-inner.is-dwg svg {
+  background: transparent;
+  filter: invert(1) saturate(.55) brightness(1.12);
+  mix-blend-mode: screen;
+}
+
 .sheet-tools { display: flex; align-items: center; gap: 16px; }
 .seg { display: inline-flex; border: 1px solid var(--steel); border-radius: 1440px; padding: 2px; }
 .seg button { height: 28px; padding: 0 14px; border-radius: 1440px; border: 1px solid transparent; font: 400 11px/1 var(--mono); text-transform: uppercase; letter-spacing: -0.02em; color: var(--dim); transition: color .4s var(--ease), border-color .4s var(--ease); }
@@ -341,7 +359,7 @@ td { padding: 16px 12px 16px 0; border-bottom: 1px solid var(--hair); vertical-a
 /* The drawing is zoomed and panned by transform; the browser must not pinch-zoom the page under it. */
 .lb-body { flex: 1; overflow: hidden; position: relative; margin: 0 16px 8px; touch-action: none; cursor: grab; }
 .lb-body:active { cursor: grabbing; }
-.lb-inner { position: absolute; left: 0; top: 0; width: 100%; transform-origin: 0 0; will-change: transform; }
+.lb-inner { position: absolute; left: 0; top: 0; width: 100%; transform-origin: 0 0; }
 .lb-hint { text-align: center; font-size: 10px; letter-spacing: .08em; color: var(--dim); padding: 0 16px 14px; }
 html.lb-open, html.lb-open body { overflow: hidden; overscroll-behavior: none; }
 @media (max-width: 640px) { .lb-bar { padding: 12px 16px; flex-wrap: wrap; } .lb-bar .grp { flex-wrap: wrap; } }

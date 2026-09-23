@@ -346,8 +346,9 @@ function lighting() {
 
 // ── drawings: dark void (default) or light paper for reading detail; remembered in this browser ──
 const paperMode = () => { try { return localStorage.getItem("sheet-mode-v2") || "dark"; } catch { return "dark"; } };
-const paperToggle = () => `<div class="seg" role="group" aria-label="Drawing background"><button class="${paperMode() === "light" ? "on" : ""}" data-sheet="light">Light</button><button class="${paperMode() === "dark" ? "on" : ""}" data-sheet="dark">Dark</button></div>`;
-const applyPaper = () => { document.body.classList.toggle("sheets-dark", paperMode() === "dark"); $$("[data-sheet]").forEach((b) => b.classList.toggle("on", b.dataset.sheet === paperMode())); };
+const PAPERS = [["light", "Light"], ["dark", "Dark"], ["blue", "Blueprint"]];
+const paperToggle = () => `<div class="seg" role="group" aria-label="Drawing background">${PAPERS.map(([k, l]) => `<button class="${paperMode() === k ? "on" : ""}" data-sheet="${k}">${l}</button>`).join("")}</div>`;
+const applyPaper = () => { const m = paperMode(); document.body.classList.toggle("sheets-dark", m === "dark"); document.body.classList.toggle("sheets-blue", m === "blue"); $$("[data-sheet]").forEach((b) => b.classList.toggle("on", b.dataset.sheet === m)); };
 document.addEventListener("click", (e) => {
   const b = e.target.closest("[data-sheet]");
   if (!b) return;
@@ -456,29 +457,43 @@ $("#printBtn").addEventListener("click", () => { setMenu(false); setTimeout(() =
 $(".menu-mark").innerHTML = mark("", false);
 $(".loader-mark").innerHTML = mark("", false);
 
-// ── lightbox with zoom (and paper/void toggle for drawings) ──
-// The drawing zooms and pans inside the lightbox — pinch, drag, double-tap, wheel or the buttons —
-// so the phone never zooms the page itself. (It used to: pinching enlarged the whole site, pushed
-// Close off-screen, and left the page zoomed after closing.)
-const LB = { s: 1, x: 0, y: 0, pts: new Map(), last: null, tap: 0 };
-function lbApply(animate) {
-  const body = $("#lightbox .lb-body"), inner = $("#lightbox .lb-inner");
-  if (!body || !inner) return;
-  const bw = body.clientWidth, bh = body.clientHeight, iw = inner.offsetWidth * LB.s, ih = inner.offsetHeight * LB.s;
-  // keep the drawing on screen: centred when smaller than the window, edge-to-edge when larger
-  LB.x = iw <= bw ? (bw - iw) / 2 : Math.min(0, Math.max(bw - iw, LB.x));
-  LB.y = ih <= bh ? (bh - ih) / 2 : Math.min(0, Math.max(bh - ih, LB.y));
-  inner.style.transition = animate ? "transform .35s var(--ease)" : "none";
+// ── lightbox: the drawing zooms and pans, the page never does ──
+// Two zooms in play. During a gesture the drawing is scaled by TRANSFORM, which is smooth but only
+// stretches pixels; the moment the gesture ends that zoom is COMMITTED into the element's width, so
+// the SVG redraws itself at the new size and the lines come back sharp. Both scale about the
+// top-left corner, so the picture never jumps as it changes hands.
+const LB = { z: 1, s: 1, x: 0, y: 0, pts: new Map(), last: null, down: null, tap: 0, commit: 0 };
+const lbEls = () => [$("#lightbox .lb-body"), $("#lightbox .lb-inner")];
+function lbApply() {
+  const [body, inner] = lbEls(); if (!body || !inner) return;
+  // Free panning. The only limit is that a corner must stay in view so it can always be dragged
+  // back — no snapping to the middle, which is what stopped it moving before.
+  const bw = body.clientWidth, bh = body.clientHeight;
+  const iw = inner.offsetWidth * LB.s, ih = inner.offsetHeight * LB.s, m = 60;
+  LB.x = Math.min(bw - m, Math.max(m - iw, LB.x));
+  LB.y = Math.min(bh - m, Math.max(m - ih, LB.y));
   inner.style.transform = `translate(${LB.x}px,${LB.y}px) scale(${LB.s})`;
 }
-function lbZoomAt(s, cx, cy, animate) {
-  const body = $("#lightbox .lb-body"); if (!body) return;
-  const r = body.getBoundingClientRect(), px = cx - r.left, py = cy - r.top;
-  const ns = Math.max(1, Math.min(10, s));
-  LB.x = px - ((px - LB.x) * ns) / LB.s; LB.y = py - ((py - LB.y) * ns) / LB.s; LB.s = ns;
-  lbApply(animate);
+// fold the gesture's scale into the layout, so the drawing redraws sharp at its new size
+function lbCommit() {
+  const [body, inner] = lbEls(); if (!body || !inner || Math.abs(LB.s - 1) < 0.001) return;
+  LB.z = Math.max(1, Math.min(8, LB.z * LB.s)); LB.s = 1;
+  inner.style.width = LB.z * 100 + "%";
+  lbApply();
 }
-function lbCentre() { const r = $("#lightbox .lb-body").getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }
+function lbZoomAt(mult, cx, cy) {
+  const [body] = lbEls(); if (!body) return;
+  const r = body.getBoundingClientRect(), px = cx - r.left, py = cy - r.top;
+  const want = Math.max(1, Math.min(8, LB.z * LB.s * mult)), ns = want / LB.z;
+  LB.x = px - ((px - LB.x) * ns) / LB.s; LB.y = py - ((py - LB.y) * ns) / LB.s; LB.s = ns;
+  lbApply();
+}
+function lbFit() {
+  const [body, inner] = lbEls(); if (!body || !inner) return;
+  LB.z = 1; LB.s = 1; LB.x = 0; LB.y = 0; inner.style.width = "100%";
+  LB.y = Math.max(0, (body.clientHeight - inner.offsetHeight) / 2);
+  lbApply();
+}
 function lbClose() { const lb = $("#lightbox"); lb.hidden = true; lb.innerHTML = ""; document.documentElement.classList.remove("lb-open"); }
 
 document.addEventListener("click", (e) => {
@@ -486,7 +501,7 @@ document.addEventListener("click", (e) => {
   const f = e.target.closest("[data-open]");
   if (f && !e.target.closest("a.btn")) {
     const [kind, ref] = f.dataset.open.split(/:(.*)/s);
-    Object.assign(LB, { s: 1, x: 0, y: 0, last: null }); LB.pts.clear();
+    Object.assign(LB, { z: 1, s: 1, x: 0, y: 0, last: null }); LB.pts.clear();
     lb.innerHTML = `<div class="lb-bar"><span class="mono" style="font-size:11px;color:var(--dim)">${kind === "dwg" ? esc(window.DRAWINGS[ref].title) : "Reference"}</span>
       <div class="grp">${kind === "dwg" ? dimToggle() + paperToggle() : ""}<button class="btn" data-z="-">−</button><button class="btn" data-z="0">Fit</button><button class="btn" data-z="+">+</button><button class="btn" data-z="x">Close</button></div></div>
       <div class="lb-body"><div class="lb-inner${kind === "dwg" ? " is-dwg" : ""}">${kind === "dwg" ? window.DRAWINGS[ref].svg : `<img src="${ref}">`}</div></div>
@@ -494,60 +509,71 @@ document.addEventListener("click", (e) => {
     lb.hidden = false;
     document.documentElement.classList.add("lb-open");
     const img = lb.querySelector(".lb-inner img");
-    if (img && !img.complete) img.addEventListener("load", () => lbApply(false), { once: true });
-    requestAnimationFrame(() => lbApply(false));
+    if (img && !img.complete) img.addEventListener("load", lbFit, { once: true });
+    requestAnimationFrame(lbFit);
     return;
   }
   const z = e.target.closest("[data-z]");
   if (z) {
     if (z.dataset.z === "x") return lbClose();
-    const [cx, cy] = lbCentre();
-    if (z.dataset.z === "0") { LB.s = 1; lbApply(true); }
-    else lbZoomAt(z.dataset.z === "+" ? LB.s * 1.6 : LB.s / 1.6, cx, cy, true);
+    if (z.dataset.z === "0") return lbFit();
+    const [body] = lbEls(), r = body.getBoundingClientRect();
+    lbZoomAt(z.dataset.z === "+" ? 1.6 : 1 / 1.6, r.left + r.width / 2, r.top + r.height / 2);
+    lbCommit();
   }
 });
 
-// pinch, drag and double-tap on the drawing itself
 document.addEventListener("pointerdown", (e) => {
   const body = e.target.closest("#lightbox .lb-body"); if (!body) return;
+  e.preventDefault();
   body.setPointerCapture(e.pointerId);
   LB.pts.set(e.pointerId, [e.clientX, e.clientY]);
-  if (LB.pts.size === 1) {
-    const now = Date.now();
-    if (now - LB.tap < 300) { lbZoomAt(LB.s > 1.2 ? 1 : 2.6, e.clientX, e.clientY, true); LB.tap = 0; }
-    else LB.tap = now;
-  }
+  if (LB.pts.size === 1) LB.down = { x: e.clientX, y: e.clientY, t: Date.now(), moved: false };
   LB.last = null;
 });
 document.addEventListener("pointermove", (e) => {
   if (!LB.pts.has(e.pointerId)) return;
   LB.pts.set(e.pointerId, [e.clientX, e.clientY]);
   const p = [...LB.pts.values()];
+  if (LB.down && Math.hypot(e.clientX - LB.down.x, e.clientY - LB.down.y) > 8) LB.down.moved = true;
   if (p.length === 1) {
     const [x, y] = p[0];
-    if (LB.last && LB.last.n === 1) { LB.x += x - LB.last.x; LB.y += y - LB.last.y; lbApply(false); }
+    if (LB.last && LB.last.n === 1) { LB.x += x - LB.last.x; LB.y += y - LB.last.y; lbApply(); }
     LB.last = { n: 1, x, y };
   } else {
     const cx = (p[0][0] + p[1][0]) / 2, cy = (p[0][1] + p[1][1]) / 2, d = Math.hypot(p[0][0] - p[1][0], p[0][1] - p[1][1]);
     if (LB.last && LB.last.n === 2) {
-      LB.x += cx - LB.last.x; LB.y += cy - LB.last.y;
-      lbZoomAt(LB.s * (d / LB.last.d), cx, cy, false);
+      LB.x += cx - LB.last.x; LB.y += cy - LB.last.y;        // two fingers move the drawing as well as scale it
+      const k = d / LB.last.d;
+      if (Math.abs(k - 1) > 0.004) lbZoomAt(k, cx, cy); else lbApply();
     }
     LB.last = { n: 2, x: cx, y: cy, d };
   }
 });
-const lbUp = (e) => { LB.pts.delete(e.pointerId); LB.last = null; };
+const lbUp = (e) => {
+  if (!LB.pts.has(e.pointerId)) return;
+  LB.pts.delete(e.pointerId); LB.last = null;
+  if (LB.pts.size) return;
+  // A tap is a touch that did not move and did not linger. Two of them in quick succession zoom
+  // in on that spot — a drag, however fast, is never mistaken for one.
+  const d = LB.down; LB.down = null;
+  if (d && !d.moved && Date.now() - d.t < 260) {
+    const now = Date.now();
+    if (now - LB.tap < 320) { lbZoomAt(LB.z * LB.s > 1.2 ? 1 / (LB.z * LB.s) : 2.5, d.x, d.y); LB.tap = 0; }
+    else LB.tap = now;
+  }
+  lbCommit();                                                // gesture over — redraw sharp
+};
 document.addEventListener("pointerup", lbUp);
 document.addEventListener("pointercancel", lbUp);
-// mouse wheel and trackpad pinch (which arrives as a ctrl-wheel)
 document.addEventListener("wheel", (e) => {
   if (!e.target.closest("#lightbox .lb-body")) return;
   e.preventDefault();
-  lbZoomAt(LB.s * Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0022)), e.clientX, e.clientY, false);
+  lbZoomAt(Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0022)), e.clientX, e.clientY);
+  clearTimeout(LB.commit); LB.commit = setTimeout(lbCommit, 180);
 }, { passive: false });
-// old iOS Safari fires its own gesture events for a page pinch
 ["gesturestart", "gesturechange"].forEach((t) => document.addEventListener(t, (e) => { if (document.documentElement.classList.contains("lb-open")) e.preventDefault(); }, { passive: false }));
-window.addEventListener("resize", () => { if (!$("#lightbox").hidden) lbApply(false); });
+window.addEventListener("resize", () => { if (!$("#lightbox").hidden) lbApply(); });
 
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") { lbClose(); setMenu(false); } });
 
