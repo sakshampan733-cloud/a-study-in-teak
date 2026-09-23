@@ -441,14 +441,21 @@ window.PROJECT = {
       intro: "",
       items: [
         {
-          id: "left-wall", name: "Left Wall", status: "brief",
+          id: "left-wall", name: "Left Wall", status: "open",
+          drawings: ["leftwall"],
           parts: [
-            { label: "Treatment", value: "", hint: "Panelling, dado, wainscot, paint, wallpaper" },
+            { label: "Treatment", value: "Deliberately plain. Paint, the marble skirting, one painting and the air conditioner over it — nothing built in, nothing panelled. It is the quiet side opposite the panelled right wall, and it is the wall that carries the splay and the step, so anything fitted to it would have to be scribed twice." },
+            { label: "What sits here", value: "One painting, centred on the 15 ft 1 in of wall before the step — the only uninterrupted run — on a centre line 4 ft 11 in from the study corner. The air conditioner sits above it. The entrance door takes the last 3 ft, hinged on the bed-wall corner so it opens flat along the bed wall." },
+            { label: "Open — sizes", value: "The painting is drawn 2 ft 11 in × 3 ft 11 in, centred at 4 ft 11 in, and the air conditioner 3 ft 8 in × 1 ft ¾ in, 7⅞ in deep with its top 6¼ in below the ceiling. Both are assumed — send the real sizes and it is a one-line change. That setting-out leaves 7½ in of clear wall between the frame and the unit." },
+            { label: "Services", value: "The air conditioner needs a power point and a drain run before the wall is painted. Decide which side the pipework leaves on." },
             { label: "Veneer", inherit: "veneer" },
             { label: "Polish", inherit: "polish" },
-            { label: "What sits here", value: "" },
           ],
-          questions: [],
+          questions: [
+            "Size of the painting, and the height you want its centre at?",
+            "Make and size of the air-conditioner unit?",
+            "Which side does the AC pipework run out on?",
+          ],
         },
         {
           id: "right-wall", name: "Right Wall", status: "final",
