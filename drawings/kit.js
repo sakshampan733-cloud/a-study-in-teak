@@ -132,7 +132,7 @@ window.DK = (function () {
       text(x + 3, y + 26, o.sub, { size: 2, fill: THIN }) +
       text(x + 3, y + 34, "SCALE", { size: 1.5, fill: THIN }) + text(x + 3, y + 38, o.scale || "AS NOTED @ A3", { size: 2.1 }) +
       text(x + 59, y + 34, "DATE", { size: 1.5, fill: THIN }) + text(x + 59, y + 38, o.date, { size: 2.1 }) +
-      text(x + 3, y + 44, "REV", { size: 1.5, fill: THIN }) + text(x + 3, y + 48, o.rev, { size: 1.8 }) +
+      text(x + 3, y + 44, "REV", { size: 1.5, fill: THIN }) + text(x + 3, y + 48, o.rev, { size: Math.min(1.8, (1.8 * 56) / String(o.rev).length) }) +
       text(x + 59, y + 44, "DWG", { size: 1.5, fill: THIN }) + text(x + 59, y + 48, o.dwg, { size: 2.1, weight: 700 });
   }
   // Feet and inches are the default the sheet ships with, so a raw SVG or a printed sheet

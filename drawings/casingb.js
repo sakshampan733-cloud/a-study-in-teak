@@ -9,7 +9,7 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const CASB = {
-  rev: "1 — the reference recreated: palmette, chevrons, interlaced knot",
+  rev: "2 — carved head: dressing door only",
   date: "19.09.2026",
   leaf: { w: 762, h: 2311 },
   wide: 914,
@@ -229,19 +229,22 @@ const CASB = {
   let s = frame();
   s += `<defs><pattern id="hatchCB" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#9a9a9a" stroke-width="0.9"/></pattern></defs>`;
 
-  s += heading(18, 18, "DRESSING AND BATHROOM", "OPTION B · D2 · D3 · 2 FT 6 · 1:20", 92);
+  s += heading(18, 18, "DRESSING DOOR", "OPTION B · D2 · 2 FT 6 · THE CARVED HEAD · 1:20", 92);
   { const sc = 20, v = view(42, 36, sc, "Narrow door casing B"), t = v.w(0.12), W = K.leaf.w + 2 * CAS;
     s += v.g(casing(K.leaf.w, t, "door-narrow"), 0.3);
     s += chainH([v.X(0), v.X(CAS), v.X(CAS + K.leaf.w), v.X(W)], v.Y(E(0)) + 8, [CAS, K.leaf.w, CAS], { from: v.Y(E(0)) + 2, size: 1.25 });
     s += chainV([v.Y(E(0)), v.Y(E(yC)), v.Y(E(yF1)), v.Y(E(TOPY))], v.X(W) + 7, [K.leaf.h, yF1 - yC, TOPY - yF1], { from: v.X(W) + 2, size: 1.2 });
     s += chainV([v.Y(E(0)), v.Y(E(TOPY))], v.X(W) + 16, [`${TOPY} OVERALL`], { from: v.X(W) + 2, size: 1.3 }); }
 
-  s += heading(118, 18, "MAIN DOOR", "D1 · 3 FT · PROVISIONAL — A PLAINER HEAD TO COME", 88);
-  { const sc = 20, v = view(144, 36, sc, "Main door casing B"), t = v.w(0.12), W = K.wide + 2 * CAS;
-    s += v.g(casing(K.wide, t, "door"), 0.3);
-    s += chainH([v.X(0), v.X(CAS), v.X(CAS + K.wide), v.X(W)], v.Y(E(0)) + 8, [CAS, K.wide, CAS], { from: v.Y(E(0)) + 2, size: 1.25 }); }
+  // The carved head belongs to the dressing door alone — the same rule as AST-DR-011. The main and
+  // bathroom doors take the plain casing from that sheet, floor-aligned with the door beside it.
+  s += heading(118, 18, "MAIN AND BATHROOM", "D1 3 FT · D3 2 FT 6 · PLAIN CASING · 1:20", 88);
+  { const sc = 20, C = window.CASING, v = view(144, 36 + (TOPY - C.PTOP) / sc, sc, "Main door casing B"), t = v.w(0.12), W = K.wide + 2 * C.CAS;
+    const pY = (y) => v.Y(C.PTOP - y);
+    s += v.g(C.plain(K.wide, t, "door"), 0.3);
+    s += chainH([v.X(0), v.X(C.CAS), v.X(C.CAS + K.wide), v.X(W)], pY(0) + 8, [C.CAS, K.wide, C.CAS], { from: pY(0) + 2, size: 1.25 }); }
 
-  s += heading(216, 18, "1 · THE CORBEL", "ELEVATION · 1:2 · DRESSING, MAIN AND BATHROOM ALIKE", 78);
+  s += heading(216, 18, "1 · THE CORBEL", "ELEVATION · 1:2 · THE DRESSING DOOR ONLY", 78);
   { const sc = 2, v = view(238, 42, sc, "Corbel"), t = v.w(0.12);
     s += v.g(corbel(0, 0, MO, CH, t), 0.3);
     s += chainV([v.Y(0), v.Y(17), v.Y(54), v.Y(CH - 108), v.Y(CH - 20), v.Y(CH)], v.X(MO) + 6, ["CAP 17", "LEAF 37", "CHEVRONS", "KNOT 88", "FOOT 20"], { from: v.X(MO) + 1, size: 1.2 });
@@ -268,7 +271,7 @@ const CASB = {
     "outside it, a plinth block at the foot, the same leaf.", "What changes is the head. Option A closes the corner with a",
     "moulded square block. Option B carries it on a carved corbel and", "lets the architrave, scallops and frieze die into it."],
    ["Each corbel is one piece, standing 14 proud of the casing on the", "wall side with a serpentine edge: a palmette under a small cap,",
-    "eleven chevrons on a spine, and a shield knot woven through a", "lozenge at the foot. The same corbel serves all three doors.",
+    "eleven chevrons on a spine, and a shield knot woven through a", "lozenge at the foot. Dressing door only — the others go plain.",
     `The crown lands at ${TOPY} — 3 in higher than Option A — leaving`, "about 4 in of wall to the ceiling."]]
     .forEach((col, c) => col.forEach((n, i) => (s += text(18 + c * 104, 204 + i * 4.6, n, { size: 1.7, fill: INK }))));
 
