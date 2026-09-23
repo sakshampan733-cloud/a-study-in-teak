@@ -6,10 +6,10 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const LWALL = {
-  rev: "4 — the painting up to 4 ft x 5 ft; entrance takes the plain casing",
+  rev: "5 — the painting widened to 4 ft 6 in",
   date: "23.09.2026",
   skirt: 102,
-  art: { w: 1220, h: 1524, centre: 1322 },  // 4 ft x 5 ft — as big as the AC above it allows. ASSUMED
+  art: { w: 1372, h: 1524, centre: 1322 },  // 4 ft 6 x 5 ft — wider than the AC above it by 4 in a side. ASSUMED
   ac: { w: 1168, h: 305, d: 200, down: 160 },   // 3 ft 10 in x 1 ft, MEASURED; depth still assumed
   gap: 180,                                  // clear wall wanted between the AC and the top of the frame
 };
