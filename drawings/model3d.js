@@ -66,6 +66,9 @@ window.MODEL3D = (function () {
       for (let i = 0; i <= 4; i++) { const a = Math.PI / 2 - (Math.PI / 2) * (i / 4); back.push([xPR - c - r + r * Math.cos(a), L - c - r + r * Math.sin(a)]); }
       back.push([xPR - c, L - B.back.d]);
       run(back, B.back.h, 0, "solid");
+      // the desk, behind the partition on the study side, facing it
+      const dL = 2134, dD = 823, dH = 750, dGap = 620;     // 7 ft x 2 ft 8 in, as asked
+      slab(xc - dL / 2, S.yPart - dGap - dD, dL, dD, dH);
       // the bed, and a bedside ledge inside each curl
       const xBR = xPR - (B.width - B.bed.w) / 2, xBL = xBR - B.bed.w;
       slab(xBL, L - B.back.t - B.bed.l, B.bed.w, B.bed.l, B.bed.base + B.bed.matt);

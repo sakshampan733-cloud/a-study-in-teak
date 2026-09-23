@@ -6,11 +6,11 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const LWALL = {
-  rev: "1 — plain wall; painting and air conditioner ASSUMED until measured",
+  rev: "2 — air conditioner measured at 3 ft 10 in x 1 ft",
   date: "23.09.2026",
   skirt: 102,
   art: { w: 900, h: 1200, centre: 1500 },   // the painting — size and height ASSUMED
-  ac: { w: 1120, h: 320, d: 200, down: 160 },   // split unit — size ASSUMED, sits this far below the ceiling
+  ac: { w: 1168, h: 305, d: 200, down: 160 },   // 3 ft 10 in x 1 ft, MEASURED; depth still assumed
   gap: 180,                                  // clear wall wanted between the AC and the top of the frame
 };
 
@@ -83,7 +83,7 @@ const LWALL = {
 
   const LE = labels(38, "left", 24, 98);
   LE.add(v.X(xc), v.Y(ey(K.art.centre)), "PAINTING", "SIZE AND HEIGHT TO CONFIRM");
-  LE.add(v.X(xc - K.ac.w / 2), v.Y(ey(acY0 + K.ac.h / 2)), "AIR CONDITIONER", "SIZE TO CONFIRM");
+  LE.add(v.X(xc - K.ac.w / 2), v.Y(ey(acY0 + K.ac.h / 2)), "AIR CONDITIONER", "3 FT 10 IN \u00d7 1 FT");
   LE.add(v.X(xStep), v.Y(ey(1900)), "THE STEP", "5 IN FURTHER IN PAST HERE");
   LE.add(v.X(xDoor + ENT / 2), v.Y(ey(1200)), "ENTRANCE", "3 FT · OPENS FLAT ON THE BED WALL");
   LE.add(v.X(300), v.Y(ey(60)), "MARBLE SKIRTING", "4 IN");
@@ -104,8 +104,8 @@ const LWALL = {
     "uninterrupted run. Centre line 4 ft 11 in from the study corner."],
    [`OPEN — the painting is drawn ${ft(K.art.w)} × ${ft(K.art.h)}, centred at ${ft(K.art.centre)}.`,
     "   Both are assumed. Send the real size and it is a one-line change.",
-    `OPEN — the air conditioner is drawn ${ft(K.ac.w)} × ${ft(K.ac.h)}, ${ft(K.ac.d)} deep,`,
-    `   its top ${ft(K.ac.down)} below the ceiling. Also assumed.`,
+    `The air conditioner is ${ft(K.ac.w)} × ${ft(K.ac.h)} — MEASURED. Its depth (${ft(K.ac.d)})`,
+    `   and its height off the ceiling (${ft(K.ac.down)}) are still assumed.`,
     `That leaves ${ft(acY0 - artY1)} of clear wall between the frame and the unit.`,
     "The AC needs a power point and a drain run before the wall is painted —",
     "   decide the side the pipework leaves on."]]
