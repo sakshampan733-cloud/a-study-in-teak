@@ -362,12 +362,14 @@ window.PROJECT = {
       items: [
         {
           id: "desk", name: "Desk", status: "open",
-          drawings: ["desk", "desk-details", "desk-3d"],
+          drawings: ["desk", "desk-details", "desk-3d", "desk-simple", "desk-simple-details", "desk-simple-3d"],
           refs: [
             { src: "assets/refs/desk-ref-1.jpg", caption: "Reference — Tommy Shelby's desk, Peaky Blinders (screen photo)" },
             { src: "assets/refs/desk-ref-1-detail.jpg", caption: "Close-up — reeded top edge, frieze drawer, swan-neck handles, fluted corner blocks" },
           ],
           parts: [
+            { label: "Two versions", value: "AST-DR-002/3/4 is the desk as designed. AST-DR-016/17/18 is the same desk simplified, for a carpenter who does not carve. Same size, same carcase, same mouldings — only the two carved passages are reduced. Pick one; everything else on the sheets is identical." },
+            { label: "What the simplified one changes", value: "The husk drop down the kneehole stile becomes three plain husks with three reeds run out below, instead of twelve veined husks with beads between them. The pedestal ornament keeps its gadrooned boss and ring pull but loses the acanthus scrolls and the ribbon bow. Hollowed corners, the edge moulding, the reeded rail, the console brackets and the plinth are untouched — the mouldings are all still there." },
             { label: "Type", value: "Double-pedestal (kneehole) writing desk, George III / Victorian English style" },
             { label: "Construction", value: "Solid wood" },
             { label: "Wood type", inherit: "wood" },

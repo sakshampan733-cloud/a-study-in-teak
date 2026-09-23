@@ -28,9 +28,15 @@ const DESK = {
   modestyUp: 150, // modesty panel stops this far above floor
 };
 
-(function () {
+// The same desk, drawn for a carpenter who cannot carve. Nothing structural changes and no moulding
+// is lost — only the two carved passages are reduced: the long husk drop becomes three husks
+// instead of twelve, and the acanthus-and-ribbon rosette becomes a plain gadrooned boss.
+const DESK_SIMPLE = { rev: "1 — the carvable version: mouldings kept, carving reduced" };
+
+function buildDesk(VAR) {
   const { INK, THIN, DIM, f, text, view, chainH, chainV, bubble, note, heading, cutMark, frame, titleBlock, sheet } = window.DK;
-  const K = DESK;
+  const K = VAR.simple ? { ...DESK, ...DESK_SIMPLE } : DESK;
+  const SIMPLE = !!VAR.simple;
   const cx0 = K.ov, cx1 = K.L - K.ov;
   const pedL = [cx0, cx0 + K.ped], pedR = [cx1 - K.ped, cx1];
   const yF0 = K.top, yF1 = K.top + K.frz, yR1 = yF1 + K.rail, yP = K.H - K.plH;
@@ -110,13 +116,21 @@ const DESK = {
   function drop(cx, y0, len, th) {
     let o = `<ellipse cx="${cx - 9}" cy="${y0 + 8}" rx="9" ry="5.5"/><ellipse cx="${cx + 9}" cy="${y0 + 8}" rx="9" ry="5.5"/><circle cx="${cx}" cy="${y0 + 8}" r="3.5" fill="#fff"/>`;
     o += `<path stroke-width="${th}" d="M ${cx - 2} ${y0 + 11} L ${cx - 8} ${y0 + 26} M ${cx + 2} ${y0 + 11} L ${cx + 8} ${y0 + 26}"/>`;
-    let y = y0 + 30, sz = 24, i = 0;
-    while (y + sz < y0 + len && i < 12) {
+    // The carved passage. Detailed: a dozen husks, each veined. Simplified: three, plain, larger —
+    // the same idea read from across the room, a tenth of the bench time.
+    let y = y0 + 30, sz = SIMPLE ? 34 : 24, i = 0;
+    const MAXHUSK = SIMPLE ? 3 : 12;
+    while (y + sz < y0 + len && i < MAXHUSK) {
       o += `<path d="M ${cx} ${y} C ${cx + sz * 0.55} ${y} ${cx + sz * 0.5} ${y + sz * 0.75} ${cx} ${y + sz * 1.15} C ${cx - sz * 0.5} ${y + sz * 0.75} ${cx - sz * 0.55} ${y} ${cx} ${y} Z"/>`;
-      o += `<path stroke-width="${th}" d="M ${cx} ${y + sz * 0.15} L ${cx} ${y + sz * 0.9} M ${cx - sz * 0.22} ${y + sz * 0.25} Q ${cx - sz * 0.1} ${y + sz * 0.6} ${cx} ${y + sz * 0.9} M ${cx + sz * 0.22} ${y + sz * 0.25} Q ${cx + sz * 0.1} ${y + sz * 0.6} ${cx} ${y + sz * 0.9}"/>`;
+      o += SIMPLE
+        ? `<path stroke-width="${th}" d="M ${cx} ${y + sz * 0.15} L ${cx} ${y + sz * 0.9}"/>`
+        : `<path stroke-width="${th}" d="M ${cx} ${y + sz * 0.15} L ${cx} ${y + sz * 0.9} M ${cx - sz * 0.22} ${y + sz * 0.25} Q ${cx - sz * 0.1} ${y + sz * 0.6} ${cx} ${y + sz * 0.9} M ${cx + sz * 0.22} ${y + sz * 0.25} Q ${cx + sz * 0.1} ${y + sz * 0.6} ${cx} ${y + sz * 0.9}"/>`;
       y += sz * 1.15 + 4;
-      o += `<circle cx="${cx}" cy="${y}" r="2.5"/>`;
-      y += 5; sz *= 0.9; i++;
+      if (!SIMPLE) o += `<circle cx="${cx}" cy="${y}" r="2.5"/>`;
+      y += 5; sz *= SIMPLE ? 0.94 : 0.9; i++;
+    }
+    if (SIMPLE && y < y0 + len - 40) {
+      o += `<path stroke-width="${th}" fill="none" d="M ${cx - 13} ${y + 6} L ${cx - 13} ${y0 + len - 10} M ${cx} ${y + 6} L ${cx} ${y0 + len - 10} M ${cx + 13} ${y + 6} L ${cx + 13} ${y0 + len - 10}"/>`;
     }
     return o;
   }
@@ -124,7 +138,9 @@ const DESK = {
   // Pedestal ornament: rosette with acanthus scrolls and a ribbon bow, ring pull below.
   function ornament(cx, cy, th) {
     let o = "";
-    [1, -1].forEach((m) => {
+    // Simplified: the acanthus scrolls and the ribbon bow come off, the gadrooned boss and the ring
+    // pull stay. That is the piece you read; the scrollwork is what takes the week.
+    if (!SIMPLE) [1, -1].forEach((m) => {
       o += `<path d="M ${cx + m * 12} ${cy} C ${cx + m * 40} ${cy - 32} ${cx + m * 78} ${cy - 8} ${cx + m * 62} ${cy + 16} C ${cx + m * 52} ${cy + 30} ${cx + m * 34} ${cy + 18} ${cx + m * 44} ${cy + 6}"/>`;
       o += `<path stroke-width="${th}" d="M ${cx + m * 20} ${cy - 10} C ${cx + m * 38} ${cy - 24} ${cx + m * 62} ${cy - 12} ${cx + m * 60} ${cy + 6} M ${cx + m * 14} ${cy + 12} C ${cx + m * 30} ${cy + 36} ${cx + m * 60} ${cy + 44} ${cx + m * 80} ${cy + 36} C ${cx + m * 64} ${cy + 30} ${cx + m * 40} ${cy + 26} ${cx + m * 24} ${cy + 8}"/>`;
       o += `<path d="M ${cx} ${cy - 16} C ${cx + m * 10} ${cy - 34} ${cx + m * 30} ${cy - 30} ${cx + m * 18} ${cy - 20} C ${cx + m * 10} ${cy - 14} ${cx + m * 4} ${cy - 16} ${cx} ${cy - 16}"/>`;
@@ -457,10 +473,10 @@ const DESK = {
   }
   const MODEL = deskModel();
   // Renders are cached by parameters (tools/dump-cad.js writes drawings/desk-3d.cache.js) so the page loads fast.
-  const CACHE_KEY = JSON.stringify(DESK);
+  const CACHE_KEY = JSON.stringify(K) + VAR.key;
   window.ISO_CACHE = window.ISO_CACHE || {};
   function render3d(scale, flip) {
-    const key = `${scale}|${flip}`, hit = window.ISO_CACHE[key];
+    const key = `${VAR.key}|${scale}|${flip}`, hit = window.ISO_CACHE[key];
     if (hit && hit.params === CACHE_KEY) return hit;
     const r = window.ISO.render(MODEL, { scale, flip, L: K.L, D: K.D, eps: 0.35 });
     window.ISO_CACHE[key] = { ...r, params: CACHE_KEY };
@@ -474,7 +490,7 @@ const DESK = {
   }
 
   // ═════════════ SHEET 1 — GENERAL ARRANGEMENT ═════════════
-  window.DK.begin("desk");
+  window.DK.begin(VAR.key);
   let s1 = frame();
   s1 += `<defs><pattern id="hatchDesk" patternUnits="userSpaceOnUse" width="14" height="14" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="14" stroke="#888" stroke-width="1.6"/></pattern></defs>`;
   const sc = 20;
@@ -534,14 +550,21 @@ const DESK = {
    "Pedestal door, moulded panel", "Carved ornament + ring pull", "Moulded plinth", "Modesty panel in kneehole"]
     .forEach((l, i) => { s1 += bubble(kx + 2, 201 + i * 5.2, i + 1) + text(kx + 6, 201.7 + i * 5.2, l, { size: 1.7 }); });
   s1 += heading(236, 190, "NOTES", "READ BEFORE MAKING", 40);
-  ["Dimensions in feet and inches. Do not scale.", "Length 7 ft 6 in and depth 3 ft confirmed.", "   Height 750 set for a 5 ft 9 in user.",
-   "Solid teak throughout; polish sets the room finish.", "Pedestals shown as doors — drawers TBC.", "Hollowed corners; moulding strip at both curve ends.",
-   "Carving shown schematically — carver to", "   work from reference and Details sheet.", "First-angle projection."]
+  (SIMPLE
+    ? ["Dimensions in feet and inches. Do not scale.", "THE SIMPLIFIED DESK. Same size, same carcase, same", "   mouldings as AST-DR-002 — only the two carved",
+       "   passages are reduced, so a carpenter who does not", "   carve can still make it.",
+       "Husk drop: three husks, plain, then three reeds run", "   out below — not twelve veined husks and beads.",
+       "Pedestal boss: the gadrooned boss and ring pull stay,", "   the acanthus scrolls and ribbon come off.",
+       "Everything else — hollowed corners, edge moulding,", "   reeded rail, console brackets, plinth — is unchanged.", "First-angle projection."]
+    : ["Dimensions in feet and inches. Do not scale.", "Length 7 ft 6 in and depth 3 ft confirmed.", "   Height 750 set for a 5 ft 9 in user.",
+       "Solid teak throughout; polish sets the room finish.", "Pedestals shown as doors — drawers TBC.", "Hollowed corners; moulding strip at both curve ends.",
+       "Carving shown schematically — carver to", "   work from reference and Details sheet.",
+       "A simplified version of this desk is drawn on", "   AST-DR-016 for a carpenter who cannot carve.", "First-angle projection."])
     .forEach((n, i) => { s1 += text(236, 201 + i * 4.3, n, { size: 1.6 }); });
-  s1 += titleBlock({ title: "DESK — GENERAL ARRANGEMENT", sub: "Front · End · Section · Plan · Back · Axo", date: K.date, rev: K.rev, dwg: "AST-DR-002" });
+  s1 += titleBlock({ title: `DESK${VAR.suffix.toUpperCase()} — GENERAL ARRANGEMENT`, sub: "Front · End · Section · Plan · Back · Axo", date: K.date, rev: K.rev, dwg: VAR.dwg1 });
 
   // ═════════════ SHEET 2 — DETAILS ═════════════
-  window.DK.begin("desk-details");
+  window.DK.begin(VAR.key + "-details");
   let s2 = frame();
   s2 += `<defs><pattern id="hatchDesk2" patternUnits="userSpaceOnUse" width="3" height="3" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="3" stroke="#999" stroke-width="0.25"/></pattern></defs>`;
   const H2 = `fill="url(#hatchDesk2)"`;
@@ -600,9 +623,9 @@ const DESK = {
   s2 += vD4.g(`<rect x="0" y="0" width="${K.stile}" height="${yP - yR1}" stroke-width="${tD4}"/>` + drop(K.stile / 2, 14, dropLen, tD4), 0.3);
   s2 += chainH([vD4.X(0), vD4.X(K.stile)], vD4.Y(0) - 3, [K.stile], { from: vD4.Y(0) - 1, size: 1.5 });
   s2 += chainV([vD4.Y(0), vD4.Y(yP - yR1)], vD4.X(K.stile) + 6, [yP - yR1], { from: vD4.X(K.stile) + 1, size: 1.5 });
-  s2 += note(vD4.X(K.stile / 2 + 12), vD4.Y(22), vD4.X(K.stile) + 12, vD4.Y(10), "RIBBON BOW", "");
-  s2 += note(vD4.X(K.stile / 2 + 8), vD4.Y(60), vD4.X(K.stile) + 12, vD4.Y(80), "HUSKS, DIMINISHING", "EACH ~10% SMALLER");
-  s2 += note(vD4.X(K.stile / 2 + 3), vD4.Y(120), vD4.X(K.stile) + 12, vD4.Y(150), "BEAD BETWEEN HUSKS", "");
+  s2 += note(vD4.X(K.stile / 2 + 12), vD4.Y(22), vD4.X(K.stile) + 12, vD4.Y(10), SIMPLE ? "BOW, KEPT" : "RIBBON BOW", "");
+  s2 += note(vD4.X(K.stile / 2 + 8), vD4.Y(60), vD4.X(K.stile) + 12, vD4.Y(80), SIMPLE ? "THREE HUSKS ONLY" : "HUSKS, DIMINISHING", SIMPLE ? "PLAIN, NO VEINING" : "EACH ~10% SMALLER");
+  s2 += note(vD4.X(K.stile / 2 + 3), vD4.Y(120), vD4.X(K.stile) + 12, vD4.Y(150), SIMPLE ? "THREE REEDS BELOW" : "BEAD BETWEEN HUSKS", SIMPLE ? "RUN OUT, NOT CARVED" : "");
   s2 += note(vD4.X(K.stile / 2), vD4.Y(260), vD4.X(K.stile) + 12, vD4.Y(260), "CARVED IN THE SOLID", "RELIEF 6–8");
   s2 += text(vD4.X(0), vD4.Y(yP - yR1) + 6, "SMALLER DROP ALSO RUNS DOWN", { size: 1.45, fill: THIN }) + text(vD4.X(0), vD4.Y(yP - yR1) + 8.5, "EACH CORNER MOULDING", { size: 1.45, fill: THIN });
 
@@ -612,7 +635,7 @@ const DESK = {
   s2 += vD5.g(ornament(0, 0, tD5), 0.3);
   s2 += chainH([vD5.X(-80), vD5.X(80)], vD5.Y(-40) - 2, ["≈160"], { from: vD5.Y(-30) });
   s2 += note(vD5.X(0), vD5.Y(35 + 24), vD5.X(60), vD5.Y(80), "BRASS RING PULL Ø48", "HANGS FROM ROSETTE");
-  s2 += note(vD5.X(-62), vD5.Y(16), vD5.X(-90), vD5.Y(45), "ACANTHUS SCROLLS", "CARVED OR BRASS — TBC", "end");
+  s2 += note(vD5.X(-62), vD5.Y(16), vD5.X(-90), vD5.Y(45), SIMPLE ? "NO SCROLLS" : "ACANTHUS SCROLLS", SIMPLE ? "BOSS AND RING ONLY" : "CARVED OR BRASS — TBC", "end");
   s2 += note(vD5.X(-10), vD5.Y(-24), vD5.X(-90), vD5.Y(-25), "RIBBON TIE", "", "end");
 
   // 6 — swan-neck handle 1:1
@@ -682,10 +705,10 @@ const DESK = {
    "Carving (4, 5): carver to work from the reference photos;", "   sample one drop before carving the set.",
    "Hardware (6): standard 90 mm swan-neck, solid brass.", "Gold/brass on handles and ring pulls only; rest plain teak.", "Corners: clean R150 hollow, moulding at both ends (8, 8B).", "Cut a card template of the hollow to confirm."]
     .forEach((n, i) => { s2 += text(300, 171 + i * 4.3, n, { size: 1.6 }); });
-  s2 += titleBlock({ title: "DESK — DETAILS", sub: "Edge · Rail · Console · Drop · Ornament · Handle · Plinth · Corner", date: K.date, rev: K.rev, dwg: "AST-DR-003" });
+  s2 += titleBlock({ title: `DESK${VAR.suffix.toUpperCase()} — DETAILS`, sub: "Edge · Rail · Console · Drop · Ornament · Handle · Plinth · Corner", date: K.date, rev: K.rev, dwg: VAR.dwg2 });
 
   // ═════════════ SHEET 3 — 3D VIEWS ═════════════
-  window.DK.begin("desk-3d");
+  window.DK.begin(VAR.key + "-3d");
   let s3 = frame();
   s3 += heading(18, 17, "FROM THE FRONT RIGHT", "AXONOMETRIC · APPROX 1:14 · HIDDEN LINES REMOVED · SHADED", 80);
   const A = axo3d(24, 32, 14);
@@ -720,9 +743,12 @@ const DESK = {
   ["Generated from the same geometry as the plan and elevations —", "   any change to sizes, hollows or mouldings updates every view.",
    "Carving and handles shown simplified; see AST-DR-003.", "Axonometric: measure along the three axes only."]
     .forEach((n, i) => { s3 += text(18, 225 + i * 4.3, n, { size: 1.6 }); });
-  s3 += titleBlock({ title: "DESK — 3D VIEWS", sub: "Front right · Back left · Corner close-up", date: K.date, rev: K.rev, dwg: "AST-DR-004" });
-  window.DRAWINGS["desk-3d"] = { title: "Desk — 3D views · AST-DR-004", svg: sheet(s3), params: DESK, model: false };
+  s3 += titleBlock({ title: `DESK${VAR.suffix.toUpperCase()} — 3D VIEWS`, sub: "Front right · Back left · Corner close-up", date: K.date, rev: K.rev, dwg: VAR.dwg3 });
+  window.DRAWINGS[VAR.key + "-3d"] = { title: `Desk${VAR.suffix} — 3D views · ${VAR.dwg3}`, svg: sheet(s3), params: K, model: false };
 
-  window.DRAWINGS.desk = { title: "Desk — General arrangement · AST-DR-002", svg: sheet(s1), params: DESK };
-  window.DRAWINGS["desk-details"] = { title: "Desk — Details · AST-DR-003", svg: sheet(s2), params: DESK };
-})();
+  window.DRAWINGS[VAR.key] = { title: `Desk${VAR.suffix} — General arrangement · ${VAR.dwg1}`, svg: sheet(s1), params: K };
+  window.DRAWINGS[VAR.key + "-details"] = { title: `Desk${VAR.suffix} — Details · ${VAR.dwg2}`, svg: sheet(s2), params: K };
+}
+
+buildDesk({ key: "desk", suffix: "", simple: false, dwg1: "AST-DR-002", dwg2: "AST-DR-003", dwg3: "AST-DR-004" });
+buildDesk({ key: "desk-simple", suffix: " (simplified)", simple: true, dwg1: "AST-DR-016", dwg2: "AST-DR-017", dwg3: "AST-DR-018" });
