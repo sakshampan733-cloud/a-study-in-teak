@@ -11,9 +11,9 @@
   <link rel="stylesheet" href="styles.css">
   <style>html { background: #0b0b0b; color: #edebe7; }</style>
   <!-- Hide the entrance from the very first paint, so the black hold is black even on a slow connection.
-       Fail open at the reference's own introFailOpenDelayMs (5.875 s): if the engine hasn't taken over by then
-       (a script failed, or is still on its way), show the page as it is. -->
-  <script>(function(d){d.classList.add("js");setTimeout(function(){if(!d.classList.contains("intro-live"))d.classList.remove("js")},5875)})(document.documentElement)</script>
+       Fail open: at once if a script errors before the engine has taken over (a syntax error, a throw), and
+       otherwise at the reference's own introFailOpenDelayMs (5.875 s), for a script that is still on its way. -->
+  <script>(function(d){var open=function(){if(!d.classList.contains("intro-live"))d.classList.remove("js")};d.classList.add("js");addEventListener("error",function(e){if(e instanceof ErrorEvent||(e.target&&e.target.tagName==="SCRIPT"))open()},true);setTimeout(open,5875)})(document.documentElement)</script>
 </head>
 <body class="at-top">
   <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="mark" viewBox="0 0 64 64"><path d="M32 9 A23 23 0 0 0 55 32 M55 32 A23 23 0 0 0 32 55 M32 55 A23 23 0 0 0 9 32 M9 32 A23 23 0 0 0 32 9" fill="none" stroke="#fff" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M32 -0.5 C33.52 7.48 33.52 7.48 41.5 9 C33.52 10.52 33.52 10.52 32 18.5 C30.48 10.52 30.48 10.52 22.5 9 C30.48 7.48 30.48 7.48 32 -0.5 Z" fill="#fff"/><path d="M55 24.5 C56.2 30.8 56.2 30.8 62.5 32 C56.2 33.2 56.2 33.2 55 39.5 C53.8 33.2 53.8 33.2 47.5 32 C53.8 30.8 53.8 30.8 55 24.5 Z" fill="#fff"/><path d="M32 45.5 C33.52 53.48 33.52 53.48 41.5 55 C33.52 56.52 33.52 56.52 32 64.5 C30.48 56.52 30.48 56.52 22.5 55 C30.48 53.48 30.48 53.48 32 45.5 Z" fill="#fff"/><path d="M9 24.5 C10.2 30.8 10.2 30.8 16.5 32 C10.2 33.2 10.2 33.2 9 39.5 C7.8 33.2 7.8 33.2 1.5 32 C7.8 30.8 7.8 30.8 9 24.5 Z" fill="#fff"/><path d="M32 27.8 C32.67 31.33 32.67 31.33 36.2 32 C32.67 32.67 32.67 32.67 32 36.2 C31.33 32.67 31.33 32.67 27.8 32 C31.33 31.33 31.33 31.33 32 27.8 Z" fill="#fff"/></symbol></svg>

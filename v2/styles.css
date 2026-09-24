@@ -113,7 +113,7 @@ body.menu-open .menu-bottom { opacity: 1; transition: opacity .6s var(--smooth) 
 .hero-in { position: relative; z-index: 2; height: 100%; padding: 0 20px; }
 
 /* the lockup is the reference's block: 141 px wide, ~163 tall — mark over a one-line wordmark of the same width */
-.hero-logo { position: absolute; left: 50%; top: calc(50% - 4px); transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 28px; width: 141px; }   /* mark to wordmark as in the reference's logo; the block stays its 141 × 163 */
+.hero-logo { position: absolute; left: 50%; top: calc(50% - 4px); transform: translate(-50%, -50%); display: flex; flex-direction: column; justify-content: flex-start; align-items: center; gap: 25px; width: 141px; height: 163px; }   /* 29 px ink to ink, mark to wordmark, as in the reference's logo; the block stays its 141 × 163 */
 .hero-mark { display: block; width: 114px; height: 114px; }
 /* one weight throughout — the wordmark too — condensed at 400, set to the width of the mark */
 .hero-word { font: 400 21px/1 var(--cond); letter-spacing: -0.02em; text-transform: uppercase; white-space: nowrap; text-align: center; }
@@ -131,6 +131,9 @@ body.menu-open .menu-bottom { opacity: 1; transition: opacity .6s var(--smooth) 
 /* ── the entrance: hidden until the timeline runs, exactly as the reference gates it ── */
 html.js [data-intro="pending"] [data-intro-logo] { opacity: 0; visibility: hidden; }
 html.js [data-intro="pending"] [data-intro-text] { visibility: hidden; }
+/* the entrance sets these a letter at a time, where kerning can't apply; set them unkerned for good, so the
+   line doesn't close up by a few pixels the moment the scramble ends */
+[data-intro-text] { font-kerning: none; }
 html.js [data-intro="pending"] .hero-bg { opacity: 0; }
 /* the curtain stays down until media is settled, then is gone for good (reference: [data-home-hero-media]) */
 .hero[data-media] .hero-curtain { opacity: 0; visibility: hidden; }

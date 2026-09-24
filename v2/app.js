@@ -108,7 +108,9 @@
     let intro;
     const begin = () => {
       if (intro) return;
-      intro = buildIntro(hero, () => { clearTimeout(failOpen); hero.dataset.intro = "complete"; introDone = true; maybeReveal(); });
+      // if the video isn't playing when the words have landed, reveal on the poster rather than hold the page;
+      // the video keeps loading behind it and takes over from the same first frame when it plays
+      intro = buildIntro(hero, () => { clearTimeout(failOpen); hero.dataset.intro = "complete"; introDone = true; if (media) maybeReveal(); else posterForNow(); });
       failOpen = setTimeout(() => { if (!introDone) { intro.finish(); posterForNow(); } }, X.introFailOpenDelayMs);
       setTimeout(() => {
         if (source?.dataset.src) source.src = source.dataset.src;
