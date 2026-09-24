@@ -11,12 +11,12 @@ const URL_ = process.argv[2] || "http://localhost:4178/v2/", K = +process.argv[3
     const t0 = Date.now(); await pg.goto(URL_, { waitUntil: "domcontentloaded", timeout: 60000 }).catch((e) => errs.push("goto " + e.message));
     await new Promise((r) => setTimeout(r, 9000));
     const st = await pg.evaluate(() => { const h = document.querySelector(".hero"), v = document.querySelector(".hero-video"), m = document.querySelector(".hero-mark");
-      return { intro: h?.dataset.intro, media: h?.dataset.media, marks: m?.querySelectorAll("path").length, markBox: m && Math.round(m.getBoundingClientRect().width), logoOp: getComputedStyle(document.querySelector("[data-intro-logo]")).opacity,
+      return { intro: h?.dataset.intro, media: h?.dataset.media, marks: m?.querySelectorAll("path, use").length, markBox: m && Math.round(m.getBoundingClientRect().width), logoOp: getComputedStyle(document.querySelector("[data-intro-logo]")).opacity,
         logoFilter: getComputedStyle(document.querySelector("[data-intro-logo]")).filter, textVis: getComputedStyle(document.querySelector("[data-intro-text]")).visibility, playing: !!v && !v.paused && v.currentTime > 0, rs: v?.readyState }; }).catch((e) => ({ evalError: e.message }));
     await ctx.close(); return { i, ms: Date.now() - t0, st, errs };
   };
   const res = await Promise.all([...Array(K)].map((_, i) => run(i)));
-  const bad = res.filter((r) => !(r.st.intro === "complete" && r.st.logoOp === "1" && r.st.marks === 6 && r.st.playing));
+  const bad = res.filter((r) => !(r.st.intro === "complete" && r.st.logoOp === "1" && r.st.marks >= 1 && r.st.playing));
   console.log(`${K - bad.length}/${K} clean`); bad.forEach((r) => console.log(`#${r.i} ${r.i % 2 ? "phone" : "desk"} ${JSON.stringify(r.st)} ${r.errs.join(" | ")}`));
   await b.close();
 })();

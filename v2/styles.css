@@ -16,7 +16,7 @@
   /* Arimo runs ~3% wider than Pragmatica; the extra tracking lands the same line length */
   --grotesk: "Grotesk", Arial, sans-serif;
   --mono: "Mono", "Roboto Mono", monospace;
-  --ease: cubic-bezier(0.455, 0.03, 0.515, 0.955);
+  --smooth: cubic-bezier(.76, 0, .24, 1);   /* the reference's only UI easing (--smooth) */
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -25,15 +25,82 @@ body { margin: 0; background: var(--void); color: var(--ink); font-family: var(-
   -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; overflow-x: clip; }
 a { color: inherit; text-decoration: none; }
 button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
-h1, p { margin: 0; font: inherit; }
+h1, h2, p { margin: 0; font: inherit; }
 
-/* ── nav: two labels in outlines ───────────────────────────────────────────── */
-.nav { position: fixed; z-index: 10; top: 20px; left: 34px; right: 34px; display: flex; justify-content: space-between; pointer-events: none; }
-.pill { pointer-events: auto; display: inline-flex; align-items: center; justify-content: center; gap: 14px; width: 140px; height: 42px;
-  padding: 10px 18px; border: 1px solid var(--ink); border-radius: 1440px; font: 400 14px/1.1 var(--mono); letter-spacing: -0.02em;
-  text-transform: uppercase; transition: background-color .4s var(--ease), color .4s var(--ease); }
-.pill:hover { background: var(--ink); color: var(--void); }
-.burger { position: relative; width: 26px; height: 5px; border-top: 1px solid currentColor; border-bottom: 1px solid currentColor; }
+/* ── nav ─────────────────────────────────────────────────────────────────────────
+   Read from the reference's CSS (design/spec-piece2.md). A two-column bar 10 px in and 12 px down, padding
+   8 × 24, 4 px corners, frosted white-25% with a 20 px blur. On desktop it is clear at the top of the page;
+   scrolling down slides it away, scrolling up brings it back frosted. */
+.nav { position: fixed; z-index: 10; top: 12px; left: 10px; right: 10px; pointer-events: none; }
+.nav-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; padding: 8px 24px; border-radius: 4px;
+  background: color-mix(in srgb, currentColor, transparent 75%); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+  transform: translateZ(0); pointer-events: auto;
+  transition: transform .8s var(--smooth), background-color .4s var(--smooth), color .4s var(--smooth), opacity .4s var(--smooth), backdrop-filter .4s var(--smooth), -webkit-backdrop-filter .4s var(--smooth); }
+.nav-l, .nav-r { display: flex; align-items: center; }
+.nav-r { justify-content: flex-end; }
+body.scroll-down .nav-body { background-color: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; transform: translateY(-140%); }
+body.scroll-down.at-top .nav-body { transform: translateZ(0); }
+body.menu-open .nav-body { background-color: transparent !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; transform: none !important; }
+@media (min-width: 992px) {
+  body.at-top .nav-body { background-color: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; transform: translateZ(0); }
+}
+
+/* pills: 1 px outline, full radius, 140 wide; hover is a soft glow, not a fill */
+.pill { position: relative; overflow: visible; display: inline-flex; align-items: center; justify-content: center; gap: 16px; min-width: 140px; height: 42px;
+  padding: 10px 18px; border: 1px solid; border-radius: 100vw; font: 400 14px/1.1 var(--mono); letter-spacing: -0.02em; text-transform: uppercase; }
+.pill-text { position: relative; display: block; transform: translateY(7%); }
+.pill::before { content: ""; position: absolute; inset: 0; border-radius: 100vw; outline: 3px solid; box-shadow: 0 0 20px 10px, inset 0 0 20px 10px;
+  visibility: hidden; opacity: 0; transition: opacity .2s ease-in-out, visibility 0s linear .2s; }
+.pill:hover::before, .pill:focus-visible::before { visibility: visible; opacity: .12; transition: opacity .2s ease-in-out, visibility 0s linear; }
+.pill:focus-visible { outline: none; }
+
+/* the menu button: MENU ↔ CLOSE, two 25 px lines that cross into an ×; label and lines slide 10 px on open */
+.pill.is-menu { transition: padding .6s var(--smooth), border-color .4s var(--smooth) .2s, min-width .6s var(--smooth), gap .6s var(--smooth); }
+.pill-open, .pill-close { display: block; transition: opacity .3s var(--smooth); }
+.pill-close { position: absolute; top: 0; right: 0; width: max-content; opacity: 0; visibility: hidden; }
+.burger { position: relative; display: flex; align-items: center; justify-content: center; width: 25px; height: 6px; transition: transform .4s var(--smooth); }
+.burger span { position: absolute; top: 50%; left: 50%; width: 100%; height: 1px; border-radius: 1px; background: currentColor;
+  transform: translate(-50%, calc(-50% - 2.5px)) rotate(0); transition: transform .6s var(--smooth), width .6s var(--smooth); }
+.burger span + span { transform: translate(-50%, calc(2.5px - 50%)) rotate(0); }
+.pill-text { transition: transform .4s var(--smooth); }
+body.menu-open .pill.is-menu { gap: 8px; }
+body.menu-open .pill.is-menu .pill-text, body.menu-open .pill.is-menu .burger { transform: translate(10px, 7%); }
+body.menu-open .pill-open { opacity: 0; }
+body.menu-open .pill-close { opacity: 1; visibility: visible; }
+body.menu-open .burger span { width: 50%; transform: translate(-50%, -50%) rotate(45deg); }
+body.menu-open .burger span + span { transform: translate(-50%, -50%) rotate(-45deg); }
+
+/* ── menu: a full-screen charcoal overlay ─────────────────────────────────────────
+   Opens over 0.8 s, closes over 0.6 s; links fade in 0.6 s each at 0.2 s + 0.1 s × i; the footer row at 0.4 s. */
+.menu { position: fixed; inset: 0; z-index: 9; background: var(--panel); opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity .6s var(--smooth), visibility 0s linear .6s; }
+body.menu-open .menu { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity .8s var(--smooth), visibility 0s linear 0s; }
+.menu-body { height: 100dvh; padding: 30px 20px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; }
+.menu-top { flex: 1; padding-top: 60px; }
+.menu-mark { display: block; width: 88px; }
+.menu-mark svg { display: block; width: 88px; height: 88px; }
+.menu-list { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+.menu-item { position: relative; display: block; font: 400 40px/1 var(--cond); letter-spacing: -0.06em; text-transform: uppercase; opacity: 0;
+  transition: opacity .6s var(--smooth) 0s, color .4s var(--smooth) 0s; }
+.menu-item .menu-text { position: relative; display: block; }
+body.menu-open .menu-item { opacity: 1; transition: opacity .6s var(--smooth) var(--delay, 0s), color .4s var(--smooth) 0s; }
+.menu-list:has(.menu-item:hover) .menu-item:not(:hover) { color: color-mix(in srgb, currentColor, transparent 30%); }
+.menu-item .menu-text::after { content: attr(data-text); position: absolute; inset: 0; filter: blur(10px); opacity: 0; transition: opacity .3s var(--smooth); }
+.menu-item:hover .menu-text::after { opacity: .3; transition: opacity .3s var(--smooth) .3s; }
+.menu-bottom { flex: 1; align-self: stretch; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; opacity: 0; transition: opacity .6s var(--smooth) 0s; }
+body.menu-open .menu-bottom { opacity: 1; transition: opacity .6s var(--smooth) .4s; }
+.menu-foot { align-self: end; font: 400 11px/1.1 var(--mono); letter-spacing: -0.02em; text-transform: uppercase; }
+.menu-foot.is-right { text-align: right; }
+.menu-foot-mid { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 27px; }
+.menu-foot-mid .dot { width: 4px; height: 4px; border-radius: 50%; background: currentColor; }
+.menu-link { font: 400 14px/20px var(--mono); letter-spacing: -0.02em; text-transform: uppercase; margin-top: -27px; }
+.menu-link:first-of-type { margin-top: 0; }
+
+/* ── a section opening: centred eyebrow over a 32 px condensed headline ───────── */
+.statement { padding: 160px 20px 200px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px; }
+.eyebrow { font: 400 14px/1.2 var(--mono); letter-spacing: -0.02em; text-transform: uppercase; }
+.headline { font: 400 32px/1.05 var(--cond); letter-spacing: -0.02em; text-transform: uppercase; max-width: 22ch; }
+.prose { max-width: 50ch; font: 400 14px/1.4 var(--grotesk); letter-spacing: -0.02em; margin-top: 8px; }
 
 /* ── hero ──────────────────────────────────────────────────────────────────── */
 .hero { position: relative; height: 100vh; min-height: 640px; overflow: hidden; }
@@ -45,15 +112,16 @@ h1, p { margin: 0; font: inherit; }
 
 .hero-logo { position: absolute; left: 50%; top: calc(50% - 4px); transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 24px; }
 .hero-mark { display: block; width: 116px; height: 116px; }
-/* one weight throughout — the wordmark too — condensed at 400 */
-.hero-word { font: 400 28px/1 var(--cond); letter-spacing: .01em; text-transform: uppercase; white-space: nowrap; }
+/* one weight throughout — the wordmark too — condensed at 400, stacked so the lockup is the width of the mark */
+.hero-word { font: 400 30px/0.92 var(--cond); letter-spacing: .01em; text-transform: uppercase; white-space: nowrap; text-align: center; }
+.hero-word span { display: block; }
 
 .hero-flank { position: absolute; top: calc(50% - 4px); transform: translateY(-50%); font: 400 16px/1.1 var(--grotesk); text-transform: uppercase; letter-spacing: -0.022em; }
 .hero-flank.is-left { left: 20px; }
 .hero-flank.is-right { right: 20px; text-align: right; }
 
 .hero-copy { position: absolute; left: 50%; bottom: 50px; transform: translateX(-50%); width: min(50ch, 90vw); text-align: center;
-  font: 400 16px/1 var(--grotesk); text-transform: uppercase; letter-spacing: -0.05em; }
+  font: 400 16px/1 var(--grotesk); text-transform: uppercase; letter-spacing: -0.022em; }   /* the system's −0.02em: tighter made letters touch */
 /* three 16 px lines on a 27 px pitch, block ending 50 px from the bottom — measured */
 .hero-copy span, .hero-copy p { display: block; line-height: 16px; }
 .hero-copy span + span, .hero-copy h1 + p { margin-top: 11px; }
@@ -77,13 +145,16 @@ html.js.is-ready .nav { opacity: 1; visibility: visible; }
 /* phone — measured off the reference at 390 × 844: the nav sits in a white-25% panel, 10 px in and 12 px
    down, 58 px tall, 4 px corners, padding 8 × 24; BEGIN keeps its 140 × 42 pill, MENU drops to a bare
    25 px burger; the two flank labels go; logo and the centre lines are unchanged. */
+/* phone — measured off the reference at 390 × 844: the bar stays frosted even at the top; MENU drops to a bare
+   25 px burger; the flank labels go; the logo lifts to 39 px above centre. */
 @media (max-width: 767px) {
-  .nav { top: 12px; left: 10px; right: 10px; height: 58px; padding: 8px 24px; align-items: center;
-    background: rgb(255 255 255 / .25); border-radius: 4px; }
-  .pill.is-menu { width: 25px; height: 30px; padding: 12px 0; border: 0; border-radius: 0; gap: 0; }
-  .pill.is-menu:hover { background: none; color: inherit; }
-  .pill.is-menu .pill-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-  .pill.is-menu .burger { width: 25px; }
+  .pill.is-menu { min-width: auto; padding: 12px 0; border-style: none; }
+  .pill.is-menu .pill-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .pill.is-menu::before { display: none; }
+  body.menu-open .nav-l .pill { opacity: 0; pointer-events: none; }
+  .menu-bottom { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 13px; }
+  .menu-foot.is-left, .menu-foot.is-right { display: none; }
+  .menu-top { padding-top: 0; }
   .hero-flank { display: none; }
-  .hero-logo { top: calc(50% - 39px); }   /* the reference lifts its logo on phones: centre 39 px above the middle */
+  .hero-logo { top: calc(50% - 39px); }
 }
