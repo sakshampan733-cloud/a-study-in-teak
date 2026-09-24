@@ -26,7 +26,7 @@
   };
   // The reference's app takes ~1 s to boot before its intro can run, so its logo first shows at ~1.26 s.
   // This page is static and would start ~0.8 s early; hold the intro to the same moment instead.
-  const INTRO_EARLIEST_MS = 860;
+  const INTRO_EARLIEST_MS = 880;
   const SCRAMBLE_CHARS = "abcdefghijklmnopqrstuvwxyz";   // the reference's scrambleCharacters module, verbatim
   const SCRAMBLE = { chars: SCRAMBLE_CHARS, speed: X.scrambleSpeed, text: "{original}" };
   // Our copy is longer than theirs, and the intro's length is set by character count × stagger. To land every
@@ -63,7 +63,7 @@
       tl.from(split.chars, { duration: X.characterDurationSeconds, scrambleText: SCRAMBLE, stagger: st }, i === 0 ? "<0.2" : "<0.1")
         .fromTo(split.chars, { autoAlpha: 0 }, { autoAlpha: 1, duration: X.characterDurationSeconds, stagger: st }, i === 0 ? "-=0.8" : "<0.1");
     });
-    const stL = staggerFor(REF_CHARS.locked, lockedChars.length);
+    const stL = X.characterStaggerSeconds * Math.pow(Math.min(1, REF_CHARS.locked / Math.max(1, lockedChars.length)), 0.75);   // part-way: full scaling ran the centre lines ~150 ms early
     tl.from(lockedChars, { duration: X.characterDurationSeconds, scrambleText: SCRAMBLE, stagger: stL }, "<0.2")
       .fromTo(lockedChars, { autoAlpha: 0 }, { autoAlpha: 1, duration: X.characterDurationSeconds, stagger: stL }, "<");
 
