@@ -3,8 +3,11 @@
 // reference's own intro timeline: the same constants, the same positions and overlaps, the same eases.
 (() => {
   const root = document.documentElement;
+  // Fail open. The page only hides anything for the entrance once the engine is known to be here; if a
+  // script failed to load, everything simply shows, static, instead of a black screen.
+  if (!(window.gsap && window.SplitText && window.ScrambleTextPlugin)) return;
   root.classList.add("js");
-  gsap.registerPlugin(SplitText, ScrambleTextPlugin, ScrollTrigger);
+  gsap.registerPlugin(SplitText, ScrambleTextPlugin, window.ScrollTrigger || {});
 
   // ── the entrance constants, as the reference ships them ─────────────────────
   const X = {
@@ -24,16 +27,13 @@
   // The reference's app takes ~1 s to boot before its intro can run, so its logo first shows at ~1.26 s.
   // This page is static and would start ~0.8 s early; hold the intro to the same moment instead.
   const INTRO_EARLIEST_MS = 860;
-  const SCRAMBLE = { chars: "upperCase", speed: X.scrambleSpeed, text: "{original}" };
+  const SCRAMBLE_CHARS = "abcdefghijklmnopqrstuvwxyz";   // the reference's scrambleCharacters module, verbatim
+  const SCRAMBLE = { chars: SCRAMBLE_CHARS, speed: X.scrambleSpeed, text: "{original}" };
+  // Our copy is longer than theirs, and the intro's length is set by character count × stagger. To land every
+  // text's decode in the same window as the reference's, the stagger is scaled by their length over ours.
+  const REF_CHARS = { free: [20, 25], locked: 51 };   // "Automate the mundane", "Accelerate the remarkable", the three CTA lines
+  const staggerFor = (refN, ourN) => X.characterStaggerSeconds * Math.min(1, refN / Math.max(1, ourN));
 
-  // ── the mark: four stars joined by hollowed arcs — the desk's inward corner, drawn as a constellation ──
-  const star = (x, y, r, w = 0.16) => `<path d="M${x} ${y - r} C${x + r * w} ${y - r * w} ${x + r * w} ${y - r * w} ${x + r} ${y} C${x + r * w} ${y + r * w} ${x + r * w} ${y + r * w} ${x} ${y + r} C${x - r * w} ${y + r * w} ${x - r * w} ${y + r * w} ${x - r} ${y} C${x - r * w} ${y - r * w} ${x - r * w} ${y - r * w} ${x} ${y - r} Z" fill="#fff"/>`;
-  const markBody = () => {
-    const pts = [[32, 9], [55, 32], [32, 55], [9, 32]];
-    const arcs = pts.map((p, i) => { const q = pts[(i + 1) % 4]; return `M${p[0]} ${p[1]} A23 23 0 0 0 ${q[0]} ${q[1]}`; }).join(" ");
-    return `<path d="${arcs}" fill="none" stroke="#fff" stroke-width=".9"/>` + pts.map(([x, y], i) => star(x, y, i % 2 ? 7.5 : 9.5)).join("") + star(32, 32, 4.2);
-  };
-  document.querySelectorAll(".hero-mark").forEach((s) => (s.innerHTML = markBody()));
 
   const nav = document.querySelector(".nav");
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -59,11 +59,13 @@
     tl.fromTo(logo, { autoAlpha: 0 }, { autoAlpha: 1, duration: X.logoOpacityDurationSeconds }, X.logoStartSeconds)
       .to(logo, { duration: X.logoBlurDurationSeconds, filter: "blur(0px)" }, "<");
     free.forEach(({ split }, i) => {
-      tl.from(split.chars, { duration: X.characterDurationSeconds, scrambleText: SCRAMBLE, stagger: X.characterStaggerSeconds }, i === 0 ? "<0.2" : "<0.1")
-        .fromTo(split.chars, { autoAlpha: 0 }, { autoAlpha: 1, duration: X.characterDurationSeconds, stagger: X.characterStaggerSeconds }, i === 0 ? "-=0.8" : "<0.1");
+      const st = staggerFor(REF_CHARS.free[i] ?? split.chars.length, split.chars.length);
+      tl.from(split.chars, { duration: X.characterDurationSeconds, scrambleText: SCRAMBLE, stagger: st }, i === 0 ? "<0.2" : "<0.1")
+        .fromTo(split.chars, { autoAlpha: 0 }, { autoAlpha: 1, duration: X.characterDurationSeconds, stagger: st }, i === 0 ? "-=0.8" : "<0.1");
     });
-    tl.from(lockedChars, { duration: X.characterDurationSeconds, scrambleText: SCRAMBLE, stagger: X.characterStaggerSeconds }, "<0.2")
-      .fromTo(lockedChars, { autoAlpha: 0 }, { autoAlpha: 1, duration: X.characterDurationSeconds, stagger: X.characterStaggerSeconds }, "<");
+    const stL = staggerFor(REF_CHARS.locked, lockedChars.length);
+    tl.from(lockedChars, { duration: X.characterDurationSeconds, scrambleText: SCRAMBLE, stagger: stL }, "<0.2")
+      .fromTo(lockedChars, { autoAlpha: 0 }, { autoAlpha: 1, duration: X.characterDurationSeconds, stagger: stL }, "<");
 
     gsap.set(texts, { visibility: "visible" });
     const start = setTimeout(() => tl.play(), X.timelineStartDelayMs);
@@ -117,5 +119,8 @@
   }
 
   const hero = document.querySelector(".hero[data-intro]");
-  if (hero) runEntrance(hero);
+  if (hero) {
+    try { runEntrance(hero); }
+    catch (e) { console.error("entrance failed, showing static", e); root.classList.remove("js"); hero.dataset.intro = "complete"; hero.dataset.media = "poster"; }
+  }
 })();
