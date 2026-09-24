@@ -1,8 +1,8 @@
 window.PROGRESS = `
-<p><b>Round 2 of the loop</b> — from scratch in <code>v2/</code>, against the pixel-level bar (<code>design/bar.md</code>). Fonts: free stand-ins (Roboto Condensed · Arimo · Roboto Mono). Higgsfield 97.3 credits left (checked 25 Sep).</p>
+<p><b>Round 2 of the loop</b> — from scratch in <code>v2/</code>, against the pixel-level bar (<code>design/bar.md</code>). Fonts: free stand-ins (Roboto Condensed · Arimo · Roboto Mono). Higgsfield ≈ 77 credits left after the defocus stills and two start = end takes (25 Sep).</p>
 <table><tr><th>Piece</th><th>Status</th><th>Brief</th><th>System</th><th>Craft</th><th>Latest</th></tr>
-<tr><td>1 · Entrance + hero</td><td>review round 7</td>
-<td class="pending">R1 ✗ · R2 — · R3 ✗ · R4 ✗ · R5 (rate-limited) · R6 …</td><td class="pending">R1 ✗ · R2 ✗ · R3 ✗ · R4 ✓ · R5 (rate-limited) · R6 ✗ · R7 …</td><td class="pending">R1 ✗ · R2 ✗ · R3 ✗ · R4 ✗ · R5 ✗ · R6 ✗ · R7 …</td>
+<tr><td>1 · Entrance + hero</td><td>review round 8</td>
+<td class="pending">R1 ✗ · R2 — · R3 ✗ · R4 ✗ · R5 (rate-limited) · R6 ✗ · R8 …</td><td class="pending">R1 ✗ · R2 ✗ · R3 ✗ · R4 ✓ · R5 (rate-limited) · R6 ✗ · R7 ✗ · R8 …</td><td class="pending">R1 ✗ · R2 ✗ · R3 ✗ · R4 ✗ · R5 ✗ · R6 ✗ · R7 ✗ · R8 …</td>
 <td>Every entrance event within ±160 ms of the reference; 16/16 parallel loads clean; black from first paint on fast and phone-speed loads; fonts swap (never stall); only the entrance's scripts load first. Hero v4c: two abstract Higgsfield takes (macro copper liquid metal, a chrome streak), blurred, as an eased forward-and-back cycle (no seam) — 44% warm / 43% cool light (ref 55/37), mean 27.0 (24.2), dark behind mark 15 (17) and CTA 14 (14), motion 14.6 (13.4); 1.3 MB.</td></tr>
 <tr><td>2 · Nav + motion</td><td>built, unreviewed</td><td class="pending">—</td><td class="pending">—</td><td class="pending">—</td>
 <td>Menu (11 sections from data.js, 0.2 s + 0.1 s stagger, MENU↔CLOSE, Escape, focus), nav clear at top / hides scrolling down / returns frosted, pill glow, hover scramble, heading decode, Lenis at the reference's settings.</td></tr>
@@ -16,4 +16,6 @@ window.PROGRESS = `
 <tr><td>R4</td><td>brief: a stalled font leaves the hero's words invisible · craft: video a neutral column at the left edge over empty black; needs 4–6 warm and cool shapes across the frame</td><td>font-display swap + subset; loop v4 from glassware takes, colour-mapped copper/slate, light spread across the frame</td></tr>
 <tr><td>R5</td><td>craft: the loop still reads as a room (lamp shade, window, armchair); navy lifted shadows; flat orange highlights; grain on the page</td><td>two new abstract takes, no room in them; neutral shadows, cream highlights, encode grain 3 → 1</td></tr>
 <tr><td>R6</td><td>craft: loop a one-way morph with a crossfade seam, rims read as a bulb, too little cool light · system: arcs 1.6 px not hairline, wordmark untracked, 16 px text −0.022em; four live-site overrides not in the addendum</td><td>eased cycle, blur 56, second steel-blue streak; 1 px non-scaling arcs, −0.02em throughout; addendum rows for the hover glow, stand-in faces, phone burger, lockup gap</td></tr>
-<tr><td>R7</td><td colspan="2">in review (brief R6 still running)</td></tr></table>`;
+<tr><td>R6 brief</td><td>a blocked, 404, truncated or throwing app.js leaves the hero black for 5.9 s</td><td>fail open on any script error before the engine starts (~30 ms); reveal on the poster if the video is late</td></tr>
+<tr><td>R7</td><td>craft: loop lifted and blue-hazed, a uniform smear rather than lens defocus · system: mark-to-wordmark 32 px ink to ink (29), lines close up ~7 px when the scramble ends</td><td>lockup 29 px ink to ink; entrance text unkerned; new loop from defocused-in-camera stills animated start = end</td></tr>
+<tr><td>R8</td><td colspan="2">in review</td></tr></table>`;
