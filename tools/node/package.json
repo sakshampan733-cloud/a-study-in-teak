@@ -1,1 +1,1 @@
-{"name":"teak-tools","private":true,"description":"Capture + render tooling for the design loop","dependencies":{"ffmpeg-static":"^5.3.0","puppeteer-core":"^25.12.0"}}
+{"name":"teak-tools","private":true,"description":"Capture + render tooling for the design loop","dependencies":{"@fontsource-variable/roboto-condensed":"^5.3.0","@fontsource/arimo":"^5.3.0","@fontsource/roboto-mono":"^5.3.0","ffmpeg-static":"^5.3.0","gsap":"^3.15.0","lenis":"^1.3.26","puppeteer-core":"^25.12.0"}}
