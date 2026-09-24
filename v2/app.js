@@ -195,7 +195,8 @@
     addEventListener("resize", () => { if (rt) { rt.tl.kill(); rt.split.revert(); rt = null; } }, { passive: true });
   }
   document.querySelectorAll("[data-hover]").forEach((link) => {
-    const label = link.querySelector(".pill-open, .pill-text, .menu-text") || link;
+    // the menu button scrambles only its visible word (MENU), never the box that also holds CLOSE
+    const label = link.querySelector(".pill-open") || link.querySelector(".pill-text, .menu-text") || link;
     hoverScramble(link, label);
   });
 
