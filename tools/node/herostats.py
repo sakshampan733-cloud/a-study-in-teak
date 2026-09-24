@@ -25,10 +25,32 @@ def stats(fs):
                 gx += abs(a[x + 1, y] - a[x - 1, y]); gy += abs(a[x, y + 1] - a[x, y - 1])
         orient.append(gx / max(1, gy))
         sp = [p for p in im.getdata() if sum(p) < 60]; shad.append(tuple(round(sum(c[i] for c in sp) / max(1, len(sp))) for i in range(3)))
+    # the round-4 critic's measures: light shapes per frame, their coverage, highlight warmth, where the light sits, motion
+    shapes, cover, warm, cx, diff = [], [], [], [], []
+    prev = None
+    for f in fs:
+        im = Image.open(f).convert("RGB").resize((160, 90)); g = im.convert("L"); W, H = g.size; L = list(g.getdata())
+        on = [v > 45 for v in L]; cover.append(sum(on) / len(on)); seen = [False] * len(on); n = 0
+        for i in range(len(on)):
+            if on[i] and not seen[i]:
+                stack, size = [i], 0; seen[i] = True
+                while stack:
+                    j = stack.pop(); size += 1; x, y = j % W, j // W
+                    for k in ((j - 1) if x > 0 else -1, (j + 1) if x < W - 1 else -1, j - W, j + W):
+                        if 0 <= k < len(on) and on[k] and not seen[k]: seen[k] = True; stack.append(k)
+                n += size >= 12
+        shapes.append(n)
+        px = list(im.getdata()); top = sorted(px, key=sum)[-max(1, len(px) // 50):]
+        warm.append(sum(p[0] - p[2] for p in top) / len(top))
+        wsum = sum(v for v in L if v > 45) or 1; cx.append(sum((i % W) * v for i, v in enumerate(L) if v > 45) / wsum / W)
+        if prev: diff.append(sum(abs(a - b) for a, b in zip(L, prev)) / len(L))
+        prev = L
     a_ = lambda v: sum(v) / len(v)
     s0 = shad[len(shad) // 2]
+    extra = (f"\n{'':15s}shapes/frame {a_(shapes):3.1f} · light cover {a_(cover)*100:4.1f}% · highlight warm−blue {a_(warm):4.0f} · "
+             f"light centre x {min(cx):.2f}–{max(cx):.2f} · motion {a_(diff):4.1f}")
     return (f"dark {a_(dark)*100:3.0f}% · hi {a_(hi):3.0f} · mean {a_(mean):4.1f} · top/bottom {a_(topb):4.1f}/{a_(botb):4.1f} · "
-            f"behind mark {a_(mark):4.0f} · behind CTA {a_(cta):3.0f} · h/v edges {a_(orient):4.2f} · shadows {s0}")
+            f"behind mark {a_(mark):4.0f} · behind CTA {a_(cta):3.0f} · h/v edges {a_(orient):4.2f} · shadows {s0}" + extra)
 rows = [("reference", frames(os.path.join(D, "../ciridae-hero.mp4"), "ref"))]
 for m in sys.argv[1:]:
     rows.append((m, frames(os.path.join(D, m), os.path.basename(m).replace(".mp4", ""))))

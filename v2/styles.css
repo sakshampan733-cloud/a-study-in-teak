@@ -1,9 +1,11 @@
 /* A Study in Teak — v2. Built against ciridae.com (design/bar.md); every size here was measured off
    the reference at 1440 × 900 (design/ref-ciridae/measurements.json, measure-hero.json). */
 
-@font-face { font-family: "Cond"; src: url(fonts/cond.woff2) format("woff2"); font-weight: 100 900; font-display: block; }
-@font-face { font-family: "Grotesk"; src: url(fonts/grotesk.woff2) format("woff2"); font-weight: 400; font-display: block; }
-@font-face { font-family: "Mono"; src: url(fonts/mono.woff2) format("woff2"); font-weight: 400; font-display: block; }
+/* swap, as the reference ships them: the hero text is hidden until the entrance anyway, and a stalled font
+   must fall back rather than leave the words invisible. Cond is pinned to 400 and subset (design/fonts-full/). */
+@font-face { font-family: "Cond"; src: url(fonts/cond.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Grotesk"; src: url(fonts/grotesk.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Mono"; src: url(fonts/mono.woff2) format("woff2"); font-weight: 400; font-display: swap; }
 
 :root {
   --void: #0b0b0b;
@@ -111,8 +113,8 @@ body.menu-open .menu-bottom { opacity: 1; transition: opacity .6s var(--smooth) 
 .hero-in { position: relative; z-index: 2; height: 100%; padding: 0 20px; }
 
 /* the lockup is the reference's block: 141 px wide, ~163 tall — mark over a one-line wordmark of the same width */
-.hero-logo { position: absolute; left: 50%; top: calc(50% - 4px); transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 4px; width: 141px; }
-.hero-mark { display: block; width: 139px; height: 139px; }
+.hero-logo { position: absolute; left: 50%; top: calc(50% - 4px); transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 29px; width: 141px; }   /* the reference's 29 px from mark to wordmark */
+.hero-mark { display: block; width: 114px; height: 114px; }
 /* one weight throughout — the wordmark too — condensed at 400, set to the width of the mark */
 .hero-word { font: 400 20.2px/1 var(--cond); letter-spacing: 0; text-transform: uppercase; white-space: nowrap; text-align: center; }
 
