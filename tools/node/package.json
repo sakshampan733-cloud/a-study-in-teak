@@ -1,0 +1,1 @@
+{"name":"teak-tools","private":true,"description":"Capture + render tooling for the design loop","dependencies":{"ffmpeg-static":"^5.3.0","puppeteer-core":"^25.12.0"}}

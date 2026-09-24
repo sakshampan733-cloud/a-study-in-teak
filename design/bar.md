@@ -1,12 +1,53 @@
-# Bar — Ciridae (ciridae.com), recreated for A Study in Teak
+# Bar — ciridae.com, to the pixel, for A Study in Teak
 
-Reference: https://www.ciridae.com · Refero extract: design/design-system.md
-Every line is checkable by looking at a render (screenshot or filmstrip).
+Gold standard, saved locally: `design/ref-ciridae/site/` (every file the browser loads, incl. the hero
+video), `ciridae.mhtml`, `full-page.png`, section frames, and the first-load recorded at 33 fps
+(`load-ciridae/load.mp4`). Numbers below are read from their source (`_site-*.js`, the motion runtime)
+and measured off the live page at 1440 × 900. Every line is checkable on a render or a filmstrip.
+Last round's bar is kept as `bar-round1.md`.
 
-1. **Void, one flip.** Canvas is #0b0b0b; cards/panels #272a2a with 10px radius; exactly one Bone (#edebe7) full-width section per page; no box-shadow, glow or gradient fill anywhere.
-2. **Three registers, one weight.** Labels and headlines are condensed UPPERCASE at 14 / 20 / 32px (weight 400, −0.02em); prose is a grotesk at 15–24px sentence case; monospace 11–14px UPPERCASE appears only for system data (dates, codes, sizes, statuses, the top ticker). Nothing is heavier than 400.
-3. **Ghost pills and one ember.** Every control is transparent with a 1px border and full pill radius; numbered markers are "01"-style mono pills with a #cecece border. Ember #cc6437 appears as hairline or small text only — never a fill — at most twice per viewport.
-4. **Centred eyebrow → headline.** Each section opens with a centred 14px eyebrow above a 32px headline, with ≥80px vertical space between sections; content is centred inside a 1400px max width.
-5. **Ambient imagery.** The hero is a full-viewport, heavily blurred photo (≥40px blur) with a centred mark + wordmark and two 14px labels pinned to the far left and far right edges; section/card photos are dark and atmospheric behind centred type, never illustrative thumbnails in a grid.
-6. **Motion vocabulary.** Load begins with the mark blurring into focus on black; labels and headlines decode (random characters resolving left→right in ~600ms) as they enter view; all transitions use cubic-bezier(0.76, 0, 0.24, 1) at 400–800ms; a card row expands the hovered card to ~2× width over 600ms.
-7. **Stacks and overlays.** At least one scroll section pins a full-bleed image while numbered cards stack over it; navigation is two fixed ghost pills (left action, right MENU) and MENU opens a full-screen #272a2a overlay with large condensed links.
+1. **The entrance, to the millisecond.** Black `#0b0b0b` and nothing else for the first 225 ms. The mark
+   fades 0→1 over 0.75 s from 0.225 s while its blur runs 20 px→0 over 1.65 s, so it is fully sharp at
+   ~1.9 s. The five hero texts (wordmark, two edge labels, the CTA's lines) scramble in A–Z letter by
+   letter — 0.3 s per character, 7.5 ms stagger, left→right, fading in as they resolve — the first 0.2 s
+   after the mark starts, each next 0.1 s later. The background video starts at 1.875 s; a curtain
+   lifts over 0.6 s (power1) and the nav fades in with it. Entrance complete ≈ 3.2 s.
+   *Filmstrip check:* 300 ms black · 900 ms a soft blurred mark · 1.9 s sharp mark, text resolving ·
+   3.2 s video full-bleed, nav present.
+
+2. **Void, one flip.** Page `#0b0b0b`; panels `#272a2a` at 10 px radius; exactly one Bone `#edebe7`
+   full-width band per page. No box-shadow, glow or gradient fill anywhere — the only softening is
+   backdrop blur: 40–50 px on the footer, a frosted veil on the stacked cards.
+
+3. **Three registers, one weight.** Everything is weight 400. Headlines: condensed uppercase, 32 px,
+   line-height 1.05, −0.02 em. Hero labels and CTA: grotesk uppercase 16 px, −0.02 em. Eyebrows, nav and
+   data: mono uppercase 14 px, −0.02 em; card numbers mono 11 px. Prose: grotesk 14 px / 1.4, sentence
+   case, ≤ 50 ch. Nothing larger than 32 px except the hero wordmark.
+
+4. **Nav is two labels in outlines.** Fixed, text baseline ~31 px from the top, 67 px in from each edge:
+   left action, right `MENU`, 14 px mono uppercase inside 1 px pill outlines, transparent fill. `MENU`
+   opens a full-screen `#272a2a` overlay with the links in large condensed uppercase, centred.
+
+5. **Moving media, never a static hero.** The hero is a full-bleed looping video: heavily defocused,
+   warm-against-cool light, no hard edge and no recognisable object, ~8 s, seamless. Mark + wordmark
+   dead centre; two 16 px labels pinned to the far left and far right at the vertical centre; a
+   three-line CTA centred ~120 px above the bottom. Section imagery is dark and atmospheric — never a
+   thumbnail grid.
+
+6. **Text decodes, sections rise, scroll glides.** Every eyebrow and headline scrambles into place as it
+   enters view (0.3 s per character, 10–20 ms stagger, left→right). Section media: content yPercent
+   50→0 (expo.in), image scale 1.4→1 with yPercent −20→0 (power1). Default tween 0.4 s power2. Scroll
+   is inertial (lerp-smoothed), never native-jumpy.
+
+7. **The set pieces.** One scroll-pinned full-bleed backdrop with numbered frosted cards rising and
+   stacking over it; one row of cards where the hovered card grows to ~2× width over 0.6 s; one Bone
+   band with a logo/marquee strip; a footer under 40–50 px backdrop blur.
+
+## Accepted deltas — a critic must not fail on these
+
+- **Content is ours.** Room names, copy, drawings, photos: from `data.js`, never theirs.
+- **Media is ours.** Every video and image is generated for this room (Higgsfield). Match their
+  *treatment* — blur level, grade, pacing, motion — never their pixels.
+- **Typefaces**, until decided: Pragmatica / Pragmatica Cond are licensed commercial faces. Until the
+  owner buys them, the closest free substitutes stand in; judge metrics (size, tracking, case, weight),
+  not letterforms.
