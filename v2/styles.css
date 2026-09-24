@@ -74,11 +74,16 @@ html.js.is-ready .nav { opacity: 1; visibility: visible; }
   html.js .nav { opacity: 1; visibility: visible; }
 }
 
+/* phone — measured off the reference at 390 × 844: the nav sits in a white-25% panel, 10 px in and 12 px
+   down, 58 px tall, 4 px corners, padding 8 × 24; BEGIN keeps its 140 × 42 pill, MENU drops to a bare
+   25 px burger; the two flank labels go; logo and the centre lines are unchanged. */
 @media (max-width: 767px) {
-  .nav { left: 16px; right: 16px; top: 16px; }
-  .pill { width: auto; min-width: 104px; height: 38px; padding: 8px 14px; font-size: 12px; }
-  .hero-flank { top: auto; bottom: 150px; transform: none; font-size: 13px; }
-  .hero-copy { bottom: 40px; font-size: 13px; }
-  .hero-mark { width: 88px; height: 88px; }
-  .hero-word { font-size: 16px; }
+  .nav { top: 12px; left: 10px; right: 10px; height: 58px; padding: 8px 24px; align-items: center;
+    background: rgb(255 255 255 / .25); border-radius: 4px; }
+  .pill.is-menu { width: 25px; height: 30px; padding: 12px 0; border: 0; border-radius: 0; gap: 0; }
+  .pill.is-menu:hover { background: none; color: inherit; }
+  .pill.is-menu .pill-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .pill.is-menu .burger { width: 25px; }
+  .hero-flank { display: none; }
+  .hero-logo { top: calc(50% - 39px); }   /* the reference lifts its logo on phones: centre 39 px above the middle */
 }
