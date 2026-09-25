@@ -244,7 +244,12 @@
   }
 
   const hero = document.querySelector(".hero[data-intro]");
-  if (hero && !entranceAllowed) { hero.dataset.intro = "complete"; hero.dataset.media = "poster"; root.classList.add("is-ready"); }
+  if (hero && !entranceAllowed) {
+    // the page opened static (the scripts were late): still start the loop once it arrives, over its poster
+    hero.dataset.intro = "complete"; hero.dataset.media = "poster"; root.classList.add("is-ready");
+    const v = hero.querySelector(".hero-video"), src = v?.querySelector("source[data-src]");
+    if (src && !reduced) { src.src = src.dataset.src; v.preload = "auto"; v.load(); v.play().catch(() => {}); }
+  }
   else if (hero) {
     try { runEntrance(hero); }
     catch (e) { console.error("entrance failed, showing static", e); root.classList.remove("js"); hero.dataset.intro = "complete"; hero.dataset.media = "poster"; }
