@@ -21,7 +21,7 @@ const WDR = {
   nLeft: 3, nRight: 4,
   d3zone: 914,      // 3 ft 0 in left over on the left wall for the bathroom door — leaf still open
   tun: 914,         // 3 ft 0 in — the tunnel behind the hidden door
-  mirror: 914,      // 3 ft — CONFIRMED, free-standing, NOT fixed to either wardrobe run. Centred in the
+  mirror: 1067,     // 3 ft 6 in across, wings at 45° — CONFIRMED, free-standing, NOT fixed to either run. Centred in the
                     // clear corridor between the two runs, not spanning it — see AST-DR-026.
 };
 
@@ -96,7 +96,7 @@ const WDR = {
   // ── BACK WALL: the two run ends, and the mirror standing FREE between them — not spanning the gap,
   // not touching either run. Centred in the corridor, with clear floor both sides of it.
   const corridor = K.W - 2 * K.depth, mW = K.mirror, mx = K.depth + (corridor - mW) / 2;
-  const wing = mW * 0.245, ctr = mW - 2 * wing;
+  const ctr = 750, wing = (mW - ctr) / 2;   // centre frame 2 ft 5½ in; the wings, turned 45°, read narrow from the front
   s += vB.g(
     grid(0, K.W, th) +
     R(0, 0, K.depth, K.H, `fill="#e9e5dc" stroke="${STEEL}" stroke-width="${th * 1.6}"`) +
@@ -189,9 +189,9 @@ const WDR = {
     "   transom is storage, not just a band of glass. 7 bays, 14 cupboards, 28 leaves.",
     "Doors as the Wardrobes brief: blackened steel T-section, 38 face, white textured glass in linear",
     "   lead came, lit from inside, brass bar pulls, transom bar 560 down from the top."],
-   ["SETTLED — the mirror is 3 ft wide and free-standing, CONFIRMED not fixed to either run. Centred",
-    "   in the 4 ft 9 in gap it leaves about 10½ in of clear floor either side of it, and 9 ft tall — the",
-    "   same line as the top of the wardrobes. That 10½ in is why the two end bays cannot hinge open",
+   ["SETTLED — the mirror is a trifold, 3 ft 6 in across with its wings at 45°, free-standing and fixed",
+    "   to neither run. Centred in the 4 ft 9 in gap it leaves 7½ in of floor either side, and it is 9 ft tall —",
+    "   level with the top of the wardrobes. That narrow gap is why the two end bays cannot hinge open",
     "   in the ordinary way — see AST-DR-026 for the fold-slide doors that solve it.",
     "OPEN — D3, the bathroom door. 3 ft of wall is left for it, but the leaf is still not fixed. It is",
     "   drawn as an opening only.",

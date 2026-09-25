@@ -27,7 +27,8 @@ const DRESS = {
   // as a short return into the corner. The 6 in difference is an OPEN question on the sheet.
   d3: { w: 762, from: 2845 },
 
-  wd: { w: 914, d: 711 },       // each wardrobe bay — 3 ft wide, 2 ft 4 in deep. CONFIRMED
+  wd: { w: 940, d: 686 },       // wardrobe bays — each wall divided equally, about 3 ft 1 in; 2 ft 3 in deep. CONFIRMED (AST-DR-025)
+  mirror: { c: 750, w: 199, deg: 45, t: 25, off: 20 },  // trifold: centre frame 2 ft 5½ in (2 ft 3 in glass), wings 7¾ in at 45° — AST-DR-027
   tun: { w: 914, l: 2337 },     // the tunnel — 3 ft wide, 7 ft 8 in long, running east. CONFIRMED
   hSide: 2769,      // 9 ft 1 in — plain ceiling over the left and right sides, as the main room. CONFIRMED
   hDome: 3048,      // 10 ft 0 in — the domed centre, floor to the dome. CONFIRMED
@@ -81,12 +82,12 @@ const DRESS = {
     o += `<path d="M ${f(K.wd.d)} 0 L ${f(K.wd.d)} ${f(leftEnd)}" fill="none" ${Wd(th * 0.7)} stroke-dasharray="${th * 6} ${th * 5}"/>`;
     o += R(W - K.wd.d, 0, W, D, `fill="url(#hatchDR2)" stroke="none"`);
     o += `<path d="M ${f(W - K.wd.d)} 0 L ${f(W - K.wd.d)} ${f(D)}" fill="none" ${Wd(th * 0.7)} stroke-dasharray="${th * 6} ${th * 5}"/>`;
-    for (let y = K.wd.w; y < leftEnd; y += K.wd.w) o += `<line x1="0" y1="${f(y)}" x2="${f(K.wd.d)}" y2="${f(y)}" ${Wd(th * 0.5)}/>`;
-    for (let y = K.wd.w; y < D; y += K.wd.w) o += `<line x1="${f(W - K.wd.d)}" y1="${f(y)}" x2="${f(W)}" y2="${f(y)}" ${Wd(th * 0.5)}/>`;
+    for (let i = 1; i < 3; i++) { const y = (i * leftEnd) / 3; o += `<line x1="0" y1="${f(y)}" x2="${f(K.wd.d)}" y2="${f(y)}" ${Wd(th * 0.5)}/>`; }
+    for (let i = 1; i < 4; i++) { const y = (i * D) / 4; o += `<line x1="${f(W - K.wd.d)}" y1="${f(y)}" x2="${f(W)}" y2="${f(y)}" ${Wd(th * 0.5)}/>`; }
 
     // the hidden door — the last bay on the right run, hard at the far end, on to the tunnel
-    o += R(W - K.wd.d, 0, W, tunY1, `fill="#fff8ee" stroke="none"`);
-    o += `<g ${Wd(th)} stroke-dasharray="${th * 3} ${th * 2.4}"><path d="M ${f(W - K.wd.d)} ${f(tunY1)} L ${f(W)} ${f(tunY1)}"/></g>`;
+    o += R(W - K.wd.d, 0, W, D / 4, `fill="#fff8ee" stroke="none"`);
+    o += `<g ${Wd(th)} stroke-dasharray="${th * 3} ${th * 2.4}"><path d="M ${f(W - K.wd.d)} ${f(D / 4)} L ${f(W)} ${f(D / 4)}"/></g>`;
 
     // the tunnel — east off the right wall, its far side flush with the far wall.
     // The right wall is opened through for the mouth: that is what the hidden door hides.
@@ -94,8 +95,15 @@ const DRESS = {
     o += `<g ${Wd(th)}><line x1="${f(W)}" y1="${f(tunY1)}" x2="${f(W + T)}" y2="${f(tunY1)}"/></g>`;
     o += R(W + T, -T, W + T + K.tun.l, tunY1, `fill="url(#hatchDR3)" stroke="${THIN}" stroke-dasharray="${th * 4} ${th * 3}" ${Wd(th * 0.8)}`);
 
-    // the dressing mirror — on the far wall, between the two runs
-    o += `<line x1="${f(K.wd.d + 120)}" y1="${f(-18)}" x2="${f(W - K.wd.d - 120)}" y2="${f(-18)}" ${Wd(th * 2.2)}/>`;
+    // the dressing mirror — free-standing trifold, centred on the far wall, wings turned 45° into the room
+    { const M = K.mirror, hx = M.c / 2, a = M.deg * Math.PI / 180, y0 = M.off, y1 = M.off + M.t, cx = W / 2;
+      o += R(cx - hx, y0, cx + hx, y1, `fill="#3a2e22" stroke="none"`);
+      o += `<line x1="${f(cx - hx + 30)}" y1="${f(y1)}" x2="${f(cx + hx - 30)}" y2="${f(y1)}" stroke="#9fc3d0" stroke-width="${th * 2.4}"/>`;
+      [1, -1].forEach((sg) => {
+        const p0 = [cx + sg * hx, y1], d = [sg * Math.cos(a), Math.sin(a)], nb = [sg * Math.sin(a), -Math.cos(a)];
+        const p1 = [p0[0] + M.w * d[0], p0[1] + M.w * d[1]];
+        o += `<path d="M ${f(p0[0])} ${f(p0[1])} L ${f(p1[0])} ${f(p1[1])} L ${f(p1[0] + M.t * nb[0])} ${f(p1[1] + M.t * nb[1])} L ${f(p0[0] + M.t * nb[0])} ${f(p0[1] + M.t * nb[1])} Z" fill="#3a2e22"/>`;
+      }); }
 
     return o;
   }
@@ -120,15 +128,15 @@ const DRESS = {
   s += chainH([v.X(0), v.X(d2x0), v.X(d2x1), v.X(W)], yBot,
     ["", `${K.d2.w} D2 LEAF`, `${K.d2.corner} TO THE CORNER`], { from: v.Y(D + T), size: 1.3 });
   // the measured control: corner to the door FRAME, taken on both sides of the wall
-  s += chainH([v.X(d2x1 + 76), v.X(W)], yBot - 7, [`${K.d2.frame} CORNER TO THE FRAME — MEASURED`], { from: v.Y(D + T), size: 1.3 });
+  s += chainH([v.X(d2x1 + K.d2.lining), v.X(W)], yBot + 16, [`${K.d2.frame} CORNER TO THE FRAME — MEASURED`], { from: yBot + 12, size: 1.3 });
   s += chainH([v.X(0), v.X(W)], yBot + 8, [`${W} — BEDROOM WALL`], { from: yBot + 4, size: 1.5 });
   s += chainV([v.Y(0), v.Y(d3y0), v.Y(D)], v.X(-T) - 8, [`${d3y0} WALL`, `${D - d3y0} D3 + RETURN`], { from: v.X(-T), size: 1.3 });
   s += chainV([v.Y(0), v.Y(D)], v.X(-T) - 20, [`${D} — LEFT AND RIGHT WALL`], { from: v.X(-T) - 1, size: 1.6 });
   s += chainV([v.Y(0), v.Y(tunY1)], v.X(W + T + K.tun.l) + 8, [`${K.tun.w} TUNNEL WIDE`], { from: v.X(W + T + K.tun.l), size: 1.4 });
 
   const RG = labels(268, "right", 40, 200), LG = labels(50, "left", 40, 200);
-  LG.add(v.X(W / 2), v.Y(-18), "DRESSING MIRROR", "ON THE FAR WALL · SIZE STILL OPEN");
-  LG.add(v.X(K.wd.d / 2), v.Y(K.wd.w * 1.5), "WARDROBE — LEFT WALL", "3 FT BAYS · 2 FT 4 IN DEEP");
+  LG.add(v.X(W / 2), v.Y(K.mirror.off), "DRESSING MIRROR", "TRIFOLD · 3 FT 6 IN · WINGS AT 45°");
+  LG.add(v.X(K.wd.d / 2), v.Y(K.wd.w * 1.5), "WARDROBE — LEFT WALL", "3 FT 1 IN BAYS · 2 FT 3 IN DEEP");
   LG.add(v.X(-T / 2), v.Y((d3y0 + d3y1) / 2), "D3 · BATHROOM DOOR", "IN THE LEFT WALL · SWINGS OUT");
   LG.add(v.X((d2x0 + d2x1) / 2), v.Y(D + T / 2), "D2 · DRESSING DOOR", "IN FROM THE BEDROOM · SWINGS IN");
   RG.add(v.X(W - K.wd.d / 2), v.Y(K.wd.w / 2), "HIDDEN DOOR", "LAST BAY AT THE FAR END · PUSH IT AND IT OPENS");
@@ -154,15 +162,14 @@ const DRESS = {
     "   bed-wall corner are the same corner. Walls are taken at 9 in throughout. See AST-DR-024.",
     "OPEN — D3's width. It is drawn 2 ft 6 in, as the owner said, but the sketch's own 9 ft 4 in against",
     "   12 ft 4 in leaves 3 ft 0 in — so a 6 in return is shown into the corner. To confirm.",
-    "OPEN — the right-hand wardrobe run is drawn the full 12 ft 4 in, which brings it down to the",
-    "   bedroom wall and across about 4 in of D2's opening. Either the run stops a bay short or D2",
-    "   sits further left. Not resolved here.",
+    "SETTLED — the wardrobes are 2 ft 3 in deep, so the right-hand run reaches the bedroom wall and",
+    "   clears D2's frame, 2 ft 4 in off that corner, by 1 in.",
     "OPEN — the left run is drawn stopping at D3. Whether it ends there or returns over the door",
     "   is not decided.",
     "OPEN — where the tunnel leads, and what is at its far end.",
     "OPEN — the dome's own shape: how far along the room it runs, and its profile.",
-    "OPEN — wall thickness (115) and the mirror's own size are assumed or blank."]]
-    .forEach((col, c) => col.forEach((n, i) => (s += text(18 + c * 172, 238 + i * 4.6, n, { size: 1.6, fill: n.startsWith("OPEN") ? "#b3261e" : INK }))));
+    "The mirror is the confirmed trifold, 3 ft 6 in across with its wings at 45° — see AST-DR-027."]]
+    .forEach((col, c) => col.forEach((n, i) => (s += text(18 + c * 172, 237 + i * 4.1, n, { size: 1.5, fill: n.startsWith("OPEN") ? "#b3261e" : INK }))));
 
   s += titleBlock({ title: "DRESSING ROOM", sub: "Shell and layout · third pass", date: K.date, rev: K.rev, dwg: "AST-DR-023", scale: `1:${sc} @ A3` });
   window.DRESS = DRESS;

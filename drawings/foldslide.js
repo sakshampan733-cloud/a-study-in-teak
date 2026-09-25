@@ -103,7 +103,7 @@ window.DRAWINGS = window.DRAWINGS || {};
 
   s += heading(18, 226, "NOTES", "REVISION 2", 220);
   [["Why not ordinary hinges: a leaf at the back of either run swings about 1 ft 6½ in into the room, and",
-    "   the 3 ft mirror, centred, leaves only about 10½ in beside it. It would hit the mirror.",
+    "   the mirror (3 ft 6 in across, centred) leaves only 7½ in beside it. It would hit the mirror.",
     "Two leaves hinged together always fold into a triangle. A and B put the triangle INSIDE the cupboard",
     "   and push the folded pair back, so nothing ever passes the wardrobe front.",
     "C folds out into the room first, like the owner's photo, then slides back in the same way. It crosses",
