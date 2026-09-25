@@ -17,12 +17,14 @@
 #   -colorspace bt709 -color_primaries bt709 -color_trc iec61966-2-1 -color_range tv, +faststart.
 # The transfer is tagged sRGB, not BT.709: the grade was judged in sRGB, and a BT.709 (or missing) transfer tag
 # makes Chrome convert the curve and pull the near-blacks down — (7,14,19) in the file showed as (3,11,18).
-# Installed after round 8 (v2/media/hero.mp4): bok-b.mp4, with bok-a tinted steel on the right —
-#   CROP=1067:600:200:60 SLOW=1.5 BLUR=14 HUE="h=8:s=0.8" POOL=1 GLOW=0.3 \
-#   KNEE="0/0 0.27/0.015 0.64/0.29 0.92/0.68 1/0.9" \
-#   L2="bok-a.mp4|crop=1067:600:213:60,colorchannelmixer=rr=0.55:rg=0.1:gg=0.8:gb=0.1:bb=1.05:bg=0.15|0.6" \
-#   TONER="0/0.035 0.12/0.07 0.25/0.16 0.4/0.33 0.7/0.8 1/1" TONEG="0/0.055 0.12/0.1 0.25/0.21 0.4/0.37 0.7/0.68 1/0.95" \
-#   TONEB="0/0.075 0.12/0.135 0.25/0.3 0.4/0.44 0.7/0.58 1/0.86" tools/node/hero-grade.sh bok-b.mp4 bgrade14.mp4
+# Installed after round 9 (v2/media/hero.mp4): bok-b.mp4 over itself — the second layer is the same take
+# mirrored, started half a cycle on (bok-b-rot.mp4: trim 4 s → end, then 0 → 4 s; the take closes on
+# itself, so the rotated copy does too) and tinted slate, so it lights the right of the frame:
+#   CROP=1067:600:200:60 SLOW=1.5 BLUR=26 HUE="h=8:s=0.8" POOL=1 GLOW=0.3 \
+#   KNEE="0/0 0.27/0.015 0.64/0.27 0.92/0.66 1/0.9" \
+#   L2="bok-b-rot.mp4|hflip,crop=1067:600:0:60,colorchannelmixer=rr=0.75:rg=0.05:gg=0.88:gb=0.05:bb=1.0:bg=0.08|0.85" \
+#   TONER="0/0.035 0.12/0.075 0.25/0.18 0.4/0.36 0.7/0.8 1/1" TONEG="0/0.055 0.12/0.1 0.25/0.21 0.4/0.37 0.7/0.67 1/0.95" \
+#   TONEB="0/0.075 0.12/0.13 0.25/0.26 0.4/0.4 0.7/0.56 1/0.86" tools/node/hero-grade.sh bok-b.mp4 bgrade21.mp4
 set -e
 HERE="${0:A:h}"
 cd "$HERE/../../design/media/drafts"

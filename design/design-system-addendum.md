@@ -11,7 +11,7 @@ shipped CSS (`design/ref-ciridae/site/ciridae.com/index.html`). Known conflicts:
 | Hero flanking labels in Pragmatica Cond 14px | **Pragmatica** (the wide grotesk) **16px** uppercase, −0.02em | Flank labels grotesk 16px |
 | Hero CTA not specified | Pragmatica 16px uppercase, three 16px lines on a **27px pitch** | Same |
 | A top news bar in Abyss #050505 on every page | **No news bar** on the live site | None |
-| Wordmark in Pragmatica Cond 32px | The wordmark is a heavy **logotype** drawn in SVG, not type | Ours is type (no logotype exists): condensed, weight 400, sized to the reference's block |
+| Wordmark in Pragmatica Cond 32px | The wordmark is a heavy **logotype** drawn in SVG, not type | Ours is type (no logotype exists): condensed **weight 900** — the logo is the one exception to weight 400, as the live logotype is heavy — sized to the reference's block (≈139 px wide; our 15 letters to their 7 cap it at ≈14 px) |
 | Constellation mark in thin strokes | The live mark has **filled four-point stars** joined by thin strokes | Filled stars + hairline arcs |
 | Only 1440px pills and 10px cards; no other radius | The **phone** nav sits in a white-25% panel with a **4px** radius, 8 × 24 padding | 4px on that panel only |
 | No glow or box-shadow anywhere | Pills **glow on hover**: `.btn:hover::before` — `outline: 3px solid`, `box-shadow: 0 0 20px 10px, inset 0 0 20px 10px` in currentColor, at opacity 0.12 (shipped CSS; `spec-piece2.md`) | That glow on pill hover only; nothing else casts a shadow |

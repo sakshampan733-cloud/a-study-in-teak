@@ -4,6 +4,8 @@
 /* swap, as the reference ships them: the hero text is hidden until the entrance anyway, and a stalled font
    must fall back rather than leave the words invisible. Cond is pinned to 400 and subset (design/fonts-full/). */
 @font-face { font-family: "Cond"; src: url(fonts/cond.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+/* the wordmark only: the live logotype is heavy (addendum), so ours is cut at 900 — letters only, 8 KB */
+@font-face { font-family: "Cond"; src: url(fonts/cond-900.woff2) format("woff2"); font-weight: 900; font-display: swap; }
 @font-face { font-family: "Grotesk"; src: url(fonts/grotesk.woff2) format("woff2"); font-weight: 400; font-display: swap; }
 @font-face { font-family: "Mono"; src: url(fonts/mono.woff2) format("woff2"); font-weight: 400; font-display: swap; }
 
@@ -113,10 +115,10 @@ body.menu-open .menu-bottom { opacity: 1; transition: opacity .6s var(--smooth) 
 .hero-in { position: relative; z-index: 2; height: 100%; padding: 0 20px; }
 
 /* the lockup is the reference's block: 141 px wide, ~163 tall — mark over a one-line wordmark of the same width */
-.hero-logo { position: absolute; left: 50%; top: calc(50% - 4px); transform: translate(-50%, -50%); display: flex; flex-direction: column; justify-content: flex-start; align-items: center; gap: 25px; width: 141px; height: 163px; }   /* 29 px ink to ink, mark to wordmark, as in the reference's logo; the block stays its 141 × 163 */
+.hero-logo { position: absolute; left: 50%; top: calc(50% - 4px); transform: translate(-50%, -50%); display: flex; flex-direction: column; justify-content: flex-start; align-items: center; gap: 24px; width: 141px; height: 163px; }   /* 29 px ink to ink, mark to wordmark, as in the reference's logo; the block stays its 141 × 163 */
 .hero-mark { display: block; width: 114px; height: 114px; }
 /* one weight throughout — the wordmark too — condensed at 400, set to the width of the mark */
-.hero-word { font: 400 21px/1 var(--cond); letter-spacing: -0.02em; text-transform: uppercase; white-space: nowrap; text-align: center; }
+.hero-word { font: 900 20px/1 var(--cond); letter-spacing: -0.02em; text-transform: uppercase; white-space: nowrap; text-align: center; }
 
 .hero-flank { position: absolute; top: calc(50% - 4px); transform: translateY(-50%); font: 400 16px/1.1 var(--grotesk); text-transform: uppercase; letter-spacing: -0.02em; }
 .hero-flank.is-left { left: 20px; }
