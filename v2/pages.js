@@ -126,7 +126,7 @@ function overview() {
       <div class="meta">${ch.ids.map((id) => `<a class="btn" href="#${id}">${esc(titleOf(id))}</a>`).join("")}</div></div></article>`;
   }).join("");
   const stack = `<section class="section" style="padding-bottom:0">${head("The book", "Five chapters. One room.", "The study, the bedroom, the dressing room, the bathroom — and the materials that hold them together.")}</section>
-    <section class="stack"><div class="stack-bg"><div ${bg(IMG.stack)}></div></div><div class="stack-cards">${chapters}</div></section>
+    <section class="stack"><div class="stack-bg"><video class="stack-video" muted loop playsinline preload="none" poster="media/hero-poster.jpg" aria-hidden="true"><source src="media/hero.mp4" type="video/mp4"></video></div><div class="stack-cards">${chapters}</div></section>
     <section class="section">${head("The index", "Every section, and where it stands.")}<div class="wrap"><div class="ledger reveal">${allTabIds().map((id, i) => {
       const c = tally(itemsOf(id)), n = c.brief + c.open + c.final;
       return `<a class="ledger-row" href="#${id}"><span class="badge">${pad2(i + 1)}</span><span class="h-sm">${esc(titleOf(id))}</span>
@@ -590,6 +590,10 @@ function render(delayMotion = 0) {
   applyPaper();
   applyDims();
   mountModel();
+  const sv = main.querySelector(".stack-video");
+  if (sv && !document.body.classList.contains("reduced") && "IntersectionObserver" in window) {
+    new IntersectionObserver(([e]) => { if (e.isIntersecting) { if (sv.preload !== "auto") { sv.preload = "auto"; sv.load(); } sv.play().catch(() => {}); } else sv.pause(); }).observe(sv);
+  }
   onScroll();
   if (pendingItem) { const it = pendingItem; pendingItem = null; setTimeout(() => { const el = document.getElementById(it); if (el) window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - 70, behavior: "smooth" }); }, 500); }
 }

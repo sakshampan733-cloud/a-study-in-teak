@@ -97,20 +97,23 @@ body.scrolled .phero-meta { opacity: 0; }
 .tally .n { font: 400 32px/1.05 var(--cond); letter-spacing: -0.02em; }
 
 /* ── pinned image + stacking cards ─────────────────────── */
-.stack { position: relative; }
-.stack-bg { position: sticky; top: 0; height: 100vh; overflow: hidden; }
-.stack-bg > div { position: absolute; inset: 0; background-size: cover; background-position: center; filter: brightness(.42) saturate(.95) contrast(1.1); }
-.stack-cards { position: relative; margin-top: -100vh; padding: 20vh 24px 30vh; max-width: calc(var(--max) + 48px); margin-left: auto; margin-right: auto; display: flex; flex-direction: column; }
-.scard {
-  position: sticky; top: calc(104px + var(--i) * 40px); width: min(460px, 100%); margin-bottom: 38vh; border-radius: 10px; overflow: hidden;
-  background: var(--charcoal); border: 1px solid rgba(255, 255, 255, 0.1); display: flex; flex-direction: column; text-align: center;
-}
-.scard:last-child { margin-bottom: 0; }
-.scard:nth-child(1) { align-self: flex-start; } .scard:nth-child(2) { align-self: center; } .scard:nth-child(3) { align-self: flex-end; } .scard:nth-child(4) { align-self: center; } .scard:nth-child(5) { align-self: flex-start; }
-.scard .ph { height: 220px; background-size: cover; background-position: center; filter: brightness(.62) contrast(1.15) saturate(1.05); }
-.scard .body { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 26px 32px 30px; }
-.scard .prose { color: rgba(255, 255, 255, .86); max-width: 380px; font: 400 14px/1.4 var(--sans); text-transform: uppercase; letter-spacing: -0.01em; margin: 0; }
-.scard .meta { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.stack { position: relative; overflow: hidden; }
+/* behind the five chapters, the hero's own loop — copper and steel light — softened and dimmed */
+.stack-bg { position: absolute; inset: 0; }
+.stack-video { position: absolute; inset: -6%; width: 112%; height: 112%; object-fit: cover; filter: blur(22px) brightness(.72) saturate(1.05); }
+/* five equal photo tiles in one even row; the light shows in the gaps */
+.stack-cards { position: relative; max-width: calc(var(--max) + 48px); margin: 0 auto; padding: 140px 24px;
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; }
+.scard { position: relative; height: 600px; border-radius: 10px; overflow: hidden; background: var(--void); border: 1px solid rgba(255, 255, 255, 0.14);
+  display: flex; flex-direction: column; text-align: center; }
+.scard .ph { position: absolute; inset: 0; height: auto; background-size: cover; background-position: center; filter: brightness(.42) contrast(1.1) saturate(.9); }
+/* the dressing-room reference has a caption burned into its foot: crop it away */
+.scard:nth-child(4) .ph { background-size: auto 122%; background-position: 50% 0; }
+.scard .ph::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(11, 11, 11, 0) 35%, rgba(11, 11, 11, .75)); }
+/* number, title and count sit at one height on every tile; the buttons line up along the bottom */
+.scard .body { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 300px 18px 28px; }
+.scard .prose { display: none; }
+.scard .meta { margin-top: auto; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
 
 /* ── ledger: every section, always readable ───────────── */
 .ledger { max-width: 1052px; margin: 0 auto; border-top: 1px solid var(--hair); }
@@ -303,7 +306,6 @@ body.sheets-dark .lb-inner.is-dwg svg { filter: invert(1) hue-rotate(180deg) bri
   .sheet-card, .panel, .mcard { padding: 20px; }
   .footer-flank { top: auto; bottom: 64px; }
   .ask-list li { grid-template-columns: 52px 1fr; }
-  .scard { align-self: center !important; top: calc(80px + var(--i) * 14px); }
 }
 @media (max-width: 700px) {
   table thead { display: none; }
@@ -423,3 +425,15 @@ body.sheets-dark .lb-inner.is-dwg svg { filter: invert(1) hue-rotate(180deg) bri
 
 
 @media print { .nav, .menu, .hero, .footer, .next { display: none !important; } }
+
+/* the chapters: three over two, centred, on narrower screens; one column on phones */
+@media (max-width: 1199px) {
+  .stack-cards { grid-template-columns: repeat(6, minmax(0, 1fr)); grid-auto-rows: auto; }
+  .scard { grid-column: span 2; }
+  .scard:nth-child(4) { grid-column: 2 / span 2; } .scard:nth-child(5) { grid-column: 4 / span 2; }
+}
+@media (max-width: 767px) {
+  .stack-cards { padding: 64px 16px; grid-template-columns: minmax(0, 1fr); grid-auto-rows: auto; }
+  .scard, .scard:nth-child(4), .scard:nth-child(5) { grid-column: auto; }
+  .scard { height: 460px; } .scard .body { padding-top: 200px; }
+}
