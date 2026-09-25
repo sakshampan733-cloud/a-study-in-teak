@@ -12,34 +12,46 @@
   <link rel="stylesheet" href="styles.css">
   <style>html { background: #0b0b0b; color: #edebe7; }</style>
   <!-- Hide the entrance from the very first paint, so the black hold is black even on a slow connection, and
-       fetch the entrance's own scripts here, watching the bytes arrive. The page opens, static and readable:
+       fetch the entrance's own scripts here, watching the bytes arrive. The page opens, static and readable
+       on its poster, instead of holding black:
        · at once if a script fails, 404s or errors before the engine has taken over;
-       · if no bytes have arrived for 2.5 s — a script held and never coming (a slow line keeps delivering);
+       · as soon as the download can be seen to be too slow: no reply within 1.5 s, or, from the rate so far,
+         the scripts won't all be here within 1.6 s of this point (a trickle, a held script, a slow 3G line);
        · at the reference's own introFailOpenDelayMs (5.875 s) whatever else happens.
-       The scripts then run in order once the page is parsed, even if late, so the rest of the site works. -->
+       A line that will make it in time (fast, or slow 4G) gets the full entrance. Late scripts still run, in
+       order, once the page is parsed, so the rest of the site works. -->
   <script>
   (function (d) {
-    var open = function () { if (!d.classList.contains("intro-live")) d.classList.remove("js"); };
+    var doc = d.ownerDocument, open = function () { if (!d.classList.contains("intro-live")) d.classList.remove("js"); };
     d.classList.add("js");
     addEventListener("error", function (e) { if (e instanceof ErrorEvent || (e.target && e.target.tagName === "SCRIPT")) open(); }, true);
     setTimeout(open, 5875);
     var srcs = ["vendor/gsap.min.js", "vendor/SplitText.min.js", "vendor/ScrambleTextPlugin.min.js", "app.js"];
     var run = function (texts) {
-      var go = function () { texts.forEach(function (t) { if (t == null) return; var s = d.ownerDocument.createElement("script"); s.textContent = t; d.ownerDocument.body.appendChild(s); }); };
-      if (d.ownerDocument.readyState === "loading") d.ownerDocument.addEventListener("DOMContentLoaded", go); else go();
+      var go = function () { texts.forEach(function (t) { if (t == null) return; var s = doc.createElement("script"); s.textContent = t; doc.body.appendChild(s); }); };
+      if (doc.readyState === "loading") doc.addEventListener("DOMContentLoaded", go); else go();
     };
     if (!(window.fetch && window.ReadableStream && window.TextDecoder)) {   // an old browser: plain script tags
-      d.ownerDocument.addEventListener("DOMContentLoaded", function () { srcs.forEach(function (u) { var s = d.ownerDocument.createElement("script"); s.src = u; s.async = false; d.ownerDocument.body.appendChild(s); }); });
+      doc.addEventListener("DOMContentLoaded", function () { srcs.forEach(function (u) { var s = doc.createElement("script"); s.src = u; s.async = false; doc.body.appendChild(s); }); });
       return;
     }
-    var last = Date.now(), left = srcs.length, texts = [];
-    var watch = setInterval(function () { if (left === 0) return clearInterval(watch); if (Date.now() - last > 2500) { clearInterval(watch); open(); } }, 250);
+    var t0 = Date.now(), first = 0, got = 0, left = srcs.length, texts = [], size = [], known = 0;   // known: replies with headers
+    var watch = setInterval(function () {
+      var now = Date.now();
+      if (left === 0 || !d.classList.contains("js")) return clearInterval(watch);
+      if (known < srcs.length) { if (now - t0 > 1500) { clearInterval(watch); open(); } return; }   // a script not answering
+      if (now - first < 300) return;
+      var total = 0; for (var i = 0; i < srcs.length; i++) total += size[i] || 0;
+      var rate = got / (now - first), rest = Math.max(0, total - got);
+      if (rate <= 0 || now + rest / rate > t0 + 1600) { clearInterval(watch); open(); }
+    }, 100);
     srcs.forEach(function (u, i) {
       fetch(u).then(function (r) {
-        last = Date.now();
+        if (!first) first = Date.now();
         if (!r.ok) throw new Error(u + " " + r.status);
+        size[i] = +r.headers.get("content-length") || 0; known++;
         var reader = r.body.getReader(), dec = new TextDecoder(), out = "";
-        var pump = function () { return reader.read().then(function (c) { last = Date.now(); if (c.done) return out + dec.decode(); out += dec.decode(c.value, { stream: true }); return pump(); }); };
+        var pump = function () { return reader.read().then(function (c) { if (c.done) return out + dec.decode(); got += c.value.length; out += dec.decode(c.value, { stream: true }); return pump(); }); };
         return pump();
       }).then(function (t) { texts[i] = t; }, function () { texts[i] = null; open(); })
         .then(function () { if (--left === 0) run(texts); });

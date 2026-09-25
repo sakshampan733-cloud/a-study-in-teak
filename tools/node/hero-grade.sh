@@ -17,14 +17,16 @@
 #   -colorspace bt709 -color_primaries bt709 -color_trc iec61966-2-1 -color_range tv, +faststart.
 # The transfer is tagged sRGB, not BT.709: the grade was judged in sRGB, and a BT.709 (or missing) transfer tag
 # makes Chrome convert the curve and pull the near-blacks down — (7,14,19) in the file showed as (3,11,18).
-# Installed after round 10 (v2/media/hero.mp4): bok-b.mp4 over itself mirrored and half a cycle on
-# (bok-b-rot.mp4), streaked into planes, dark pools behind the flank labels, then re-paced (hero-pace.py):
-#   CROP=1067:600:200:60 SLOW=1.5 BLUR=18 STREAK="dblur=angle=20:radius=36" HUE="h=8:s=0.95" \
-#   POOL=1 POOLF=1 GLOW=0.12 KNEE="0/0 0.28/0.015 0.63/0.28 0.88/0.72 1/0.97" \
+# Installed after round 11 (v2/media/hero.mp4): bok-b.mp4 over itself mirrored and half a cycle on
+# (bok-b-rot.mp4), streaked into planes, dark pools behind the flank labels, re-paced (hero-pace.py), then
+# started 5 s in so the page's reveal lands mid-sweep rather than on the rest:
+#   CROP=1067:600:200:60 SLOW=1.5 BLUR=18 STREAK="dblur=angle=20:radius=36" HUE="h=8:s=0.7" \
+#   POOL=1 POOLF=1 GLOW=0.12 KNEE="0/0 0.26/0.015 0.6/0.3 0.86/0.76 1/0.98" \
 #   L2="bok-b-rot.mp4|hflip,crop=1067:600:0:60,colorchannelmixer=rr=0.75:rg=0.05:gg=0.88:gb=0.05:bb=1.0:bg=0.08|0.8" \
 #   TONER="0/0.035 0.12/0.075 0.25/0.18 0.4/0.36 0.7/0.8 1/1" TONEG="0/0.055 0.12/0.1 0.25/0.21 0.4/0.37 0.7/0.67 1/0.95" \
-#   TONEB="0/0.075 0.12/0.13 0.25/0.26 0.4/0.4 0.7/0.56 1/0.86" tools/node/hero-grade.sh bok-b.mp4 bgrade27.mp4
-#   tools/.venv/bin/python tools/node/hero-pace.py bgrade27.mp4 bpace27.mp4 0.7
+#   TONEB="0/0.075 0.12/0.13 0.25/0.26 0.4/0.4 0.7/0.56 1/0.86" tools/node/hero-grade.sh bok-b.mp4 bgrade29.mp4
+#   tools/.venv/bin/python tools/node/hero-pace.py bgrade29.mp4 bpace29.mp4 0.7
+#   rotate: split; trim start=5 | trim end=5; concat → brot29.mp4; web encode with noise=alls=2.
 # pool-flanks.png: two ellipses 480 × 150 at (205, 505) and (1395, 505), alpha 245, Gaussian blur 45.
 set -e
 HERE="${0:A:h}"

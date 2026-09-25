@@ -139,6 +139,8 @@ html.js [data-intro="pending"] [data-intro-text] { visibility: hidden; }
 html.js [data-intro="pending"] .hero-bg { opacity: 0; }
 /* the curtain stays down until media is settled, then is gone for good (reference: [data-home-hero-media]) */
 .hero[data-media] .hero-curtain { opacity: 0; visibility: hidden; }
+/* no engine (no script, or the head gave up on it): the static hero sits on the poster, not on black */
+html:not(.js) .hero-curtain { opacity: 0; visibility: hidden; }
 html.js .nav { opacity: 0; visibility: hidden; }
 html.js.is-ready .nav { opacity: 1; visibility: visible; }
 
