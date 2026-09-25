@@ -58,6 +58,7 @@ const IMG = {
   dressing: "assets/refs/wardrobe-ref-2-steel-leaded-doors-wide.jpg", bathroom: "assets/refs/bathroom-ref-1-painted-ceiling-linework.jpg", lighting: "assets/refs/wall-ref-4-dark-study-bands-sconces.jpg",
   stack: "assets/refs/wall-ref-1-library-pilasters.jpg", footer: "assets/refs/desk-ref-1-detail.jpg",
 };
+const blurOf = (src) => "v2/media/blur/" + src.split("/").pop().replace(/\.\w+$/, ".jpg");   // pre-blurred, pre-graded
 const bg = (src) => `style="background-image:url('${U(src)}')"`;
 const today = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase();
 
@@ -113,8 +114,7 @@ function overview() {
     </div></section>`;
 
   const chapters = [
-    { title: "The Study", ids: ["study", "walls"], img: "assets/refs/wall-ref-4-dark-study-bands-sconces.jpg", line: "The teak desk, the full-height study wall, and the panelled walls either side." },
-    { title: "The Bedroom", ids: ["bedroom"], img: "assets/refs/bed-ref-1-low-platform-bed.jpg", line: "The bed, the parchment bed wall, and the TV unit or side drawers." },
+    { title: "The Bedroom", ids: ["bedroom", "study", "walls"], img: "assets/refs/bed-ref-1-low-platform-bed.jpg", line: "The bed and the study: the parchment bed wall, the teak desk, the study wall and the panelled walls." },
     { title: "The Bathroom", ids: ["bathroom"], img: "assets/refs/bathroom-ref-1b-painted-ceiling-detail.jpg", line: "A ceiling with fine black hand-painted linework, and the vanity below." },
     { title: "The Dressing", ids: ["dressing"], img: "assets/refs/wardrobe-ref-3-steel-leaded-doors-closeup.jpg", line: "Lit white-glass wardrobes in steel frames, and a folding mirror." },
   ].map((ch, i) => {
@@ -124,8 +124,8 @@ function overview() {
       <p class="prose">${esc(ch.line)}</p><span class="mono" style="font-size:11px;color:var(--dim)">${c.final} of ${n} final</span>
       <div class="meta">${ch.ids.map((id) => `<a class="btn" href="#${id}">${esc(titleOf(id))}</a>`).join("")}</div></div></article>`;
   }).join("");
-  const stack = `<section class="section" style="padding-bottom:0">${head("The book", "Four rooms. One book.", "The study, the bedroom, the bathroom and the dressing room — each drawn, specified and decided on its own page.")}</section>
-    <section class="stack"><div class="stack-bg"><video class="stack-video" muted loop playsinline preload="none" poster="media/hero-poster.jpg" aria-hidden="true"><source src="media/hero.mp4" type="video/mp4"></video></div><div class="stack-cards">${chapters}</div></section>
+  const stack = `<section class="section" style="padding-bottom:0">${head("The book", "Three rooms. One book.", "The bedroom with its study, the bathroom and the dressing room — each drawn, specified and decided on its own page.")}</section>
+    <section class="stack"><div class="stack-pin"><div class="stack-bg"></div><div class="stack-cards">${chapters}</div></div></section>
     <section class="section">${head("The index", "Every section, and where it stands.")}<div class="wrap"><div class="ledger reveal">${allTabIds().map((id, i) => {
       const c = tally(itemsOf(id)), n = c.brief + c.open + c.final;
       return `<a class="ledger-row" href="#${id}"><span class="badge">${pad2(i + 1)}</span><span class="h-sm">${esc(titleOf(id))}</span>
@@ -162,7 +162,7 @@ function overview() {
 // ── pages ──
 function pageHero(id, eyebrow, title, prose, flankR) {
   const c = tally(itemsOf(id)), n = c.brief + c.open + c.final;
-  return `<section class="phero short page-hero"><div class="phero-bg" ${bg(IMG[id] || IMG.overview)}></div>
+  return `<section class="phero short page-hero"><div class="phero-bg" ${bg(blurOf(IMG[id] || IMG.overview))}></div>
     <div class="phero-flank l" data-decode>${esc(eyebrow)}</div>
     <div class="phero-center">
       <span class="badge">${pad2(allTabIds().indexOf(id) + 1)}</span>
@@ -589,9 +589,14 @@ function render(delayMotion = 0) {
   applyPaper();
   applyDims();
   mountModel();
-  const sv = main.querySelector(".stack-video");
-  if (sv && !document.body.classList.contains("reduced") && "IntersectionObserver" in window) {
-    new IntersectionObserver(([e]) => { if (e.isIntersecting) { if (sv.preload !== "auto") { sv.preload = "auto"; sv.load(); } sv.play().catch(() => {}); } else sv.pause(); }).observe(sv);
+  // the rooms band holds the screen while the three cards come in one after another, side by side (not on phones)
+  window.__stackST?.kill(); window.__stackST = null;
+  const band = main.querySelector(".stack");
+  if (band && window.gsap && window.ScrollTrigger && !document.body.classList.contains("reduced") && innerWidth >= 768) {
+    const tl = gsap.timeline({ defaults: { ease: "power2.out", duration: 1 } });
+    band.querySelectorAll(".scard").forEach((c, i) => tl.fromTo(c, { autoAlpha: 0, yPercent: 24 }, { autoAlpha: 1, yPercent: 0 }, i * 0.9));
+    tl.to({}, { duration: 0.9 });   // hold the full row a moment before the band scrolls on
+    window.__stackST = ScrollTrigger.create({ trigger: band, start: "top top", end: "bottom bottom", scrub: 0.6, animation: tl });
   }
   onScroll();
   if (pendingItem) { const it = pendingItem; pendingItem = null; setTimeout(() => { const el = document.getElementById(it); if (el) window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - 70, behavior: "smooth" }); }, 500); }

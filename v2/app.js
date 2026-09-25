@@ -169,7 +169,8 @@
     // ── smooth scroll: the reference's own Lenis settings ─────────────────────────
     let lenis = null;
     if (window.Lenis && !reduced) {
-      lenis = window.__lenis = new Lenis({ duration: 1.4, smoothWheel: true, wheelMultiplier: 1.6 });
+      // lighter than the reference's 1.4 s / ×1.6, which the owner found heavy and laggy: the page follows the wheel more closely
+      lenis = window.__lenis = new Lenis({ duration: 1.0, smoothWheel: true, wheelMultiplier: 1.1 });
       if (window.ScrollTrigger) lenis.on("scroll", ScrollTrigger.update);
       gsap.ticker.add((t) => lenis.raf(t * 1000));
       gsap.ticker.lagSmoothing(0);
