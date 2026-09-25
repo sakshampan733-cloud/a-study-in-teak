@@ -115,7 +115,7 @@ function overview() {
 
   const chapters = [
     { title: "The Bedroom", ids: ["bedroom", "study", "walls"], img: "assets/refs/bed-ref-1-low-platform-bed.jpg", line: "The bed and the study: the parchment bed wall, the teak desk, the study wall and the panelled walls." },
-    { title: "The Bathroom", ids: ["bathroom"], img: "assets/refs/bathroom-ref-1b-painted-ceiling-detail.jpg", line: "A ceiling with fine black hand-painted linework, and the vanity below." },
+    { title: "The Bathroom", ids: ["bathroom"], img: "assets/refs/bathroom-ref-1-painted-ceiling-linework.jpg", line: "A ceiling with fine black hand-painted linework, and the vanity below." },
     { title: "The Dressing", ids: ["dressing"], img: "assets/refs/wardrobe-ref-3-steel-leaded-doors-closeup.jpg", line: "Lit white-glass wardrobes in steel frames, and a folding mirror." },
   ].map((ch, i) => {
     const c = tally(ch.ids.flatMap(itemsOf)), n = c.brief + c.open + c.final;
