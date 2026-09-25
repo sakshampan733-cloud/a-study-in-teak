@@ -21,6 +21,8 @@ const WDR = {
   nLeft: 3, nRight: 4,
   d3zone: 914,      // 3 ft 0 in left over on the left wall for the bathroom door — leaf still open
   tun: 914,         // 3 ft 0 in — the tunnel behind the hidden door
+  mirror: 914,      // 3 ft — CONFIRMED, free-standing, NOT fixed to either wardrobe run. Centred in the
+                    // clear corridor between the two runs, not spanning it — see AST-DR-026.
 };
 
 (function () {
@@ -91,19 +93,23 @@ const WDR = {
     R(0, 0, K.d3zone, 2311, `fill="#fff" stroke="${INK}" stroke-width="${th * 1.4}"`) +
     run(K.d3zone, K.leftRun, K.nLeft, th), 0.3);
 
-  // ── BACK WALL: the two run ends, and the mirror standing between them
-  const mW = K.W - 2 * K.depth, mx = K.depth;
+  // ── BACK WALL: the two run ends, and the mirror standing FREE between them — not spanning the gap,
+  // not touching either run. Centred in the corridor, with clear floor both sides of it.
+  const corridor = K.W - 2 * K.depth, mW = K.mirror, mx = K.depth + (corridor - mW) / 2;
   const wing = mW * 0.245, ctr = mW - 2 * wing;
   s += vB.g(
     grid(0, K.W, th) +
     R(0, 0, K.depth, K.H, `fill="#e9e5dc" stroke="${STEEL}" stroke-width="${th * 1.6}"`) +
     R(K.W - K.depth, 0, K.W, K.H, `fill="#e9e5dc" stroke="${STEEL}" stroke-width="${th * 1.6}"`) +
-    // the mirror — three panels, 9 ft tall, hard back against the wall
+    // the mirror — three panels, 9 ft tall, free-standing, centred
     [[mx, wing], [mx + wing, ctr], [mx + wing + ctr, wing]].map(([x, w]) =>
       R(x, 0, x + w, K.H, `fill="#dfe4e6" stroke="${STEEL}" stroke-width="${th * 1.4}"`) +
       R(x + 55, 90, x + w - 55, K.H - 55, `fill="none" stroke="${STEEL}" stroke-width="${th * 0.7}"`)).join("") +
     // the stepped foot rail
-    R(mx, 0, mx + mW, 90, `fill="#cfd4d6" stroke="${STEEL}" stroke-width="${th * 1.2}"`), 0.3);
+    R(mx, 0, mx + mW, 90, `fill="#cfd4d6" stroke="${STEEL}" stroke-width="${th * 1.2}"`) +
+    // the clear floor either side — dashed, so it reads as space, not wall
+    `<line x1="${f(K.depth)}" y1="${f(ey(4))}" x2="${f(mx)}" y2="${f(ey(4))}" stroke="${RED}" stroke-width="${th * 0.6}" stroke-dasharray="${th * 3} ${th * 2}"/>` +
+    `<line x1="${f(mx + mW)}" y1="${f(ey(4))}" x2="${f(K.W - K.depth)}" y2="${f(ey(4))}" stroke="${RED}" stroke-width="${th * 0.6}" stroke-dasharray="${th * 3} ${th * 2}"/>`, 0.3);
 
   // ── RIGHT WALL: the hidden tunnel door at the back corner, then 3 bays to the bedroom wall
   s += vR.g(grid(0, K.D, th) + run(0, K.D, K.nRight, th), 0.3);
@@ -121,7 +127,9 @@ const WDR = {
   s += chainH([vL.X(0), vL.X(K.d3zone), vL.X(K.D)], yb, [`${K.d3zone} D3`, `${K.leftRun} — ${K.nLeft} BAYS`], { from: vL.Y(ey(0)), size: 1.3 });
   s += chainH([vL.X(K.d3zone), ...Array.from({ length: K.nLeft }, (_, i) => vL.X(K.d3zone + ((i + 1) * K.leftRun) / K.nLeft))], yb + 7,
     Array.from({ length: K.nLeft }, () => `${Math.round(K.leftRun / K.nLeft)}`), { from: yb + 3, size: 1.2 });
-  s += chainH([vB.X(0), vB.X(K.depth), vB.X(K.W - K.depth), vB.X(K.W)], yb, [`${K.depth}`, `${mW} MIRROR`, `${K.depth}`], { from: vB.Y(ey(0)), size: 1.3 });
+  s += chainH([vB.X(0), vB.X(K.depth), vB.X(mx), vB.X(mx + mW), vB.X(K.W - K.depth), vB.X(K.W)], yb,
+    [`${K.depth}`, `${Math.round(mx - K.depth)} CLEAR`, `${mW} MIRROR`, `${Math.round(K.W - K.depth - mx - mW)} CLEAR`, `${K.depth}`],
+    { from: vB.Y(ey(0)), size: 1.2 });
   s += chainH([vR.X(0), ...Array.from({ length: K.nRight }, (_, i) => vR.X(((i + 1) * K.D) / K.nRight))], yb,
     Array.from({ length: K.nRight }, () => `${Math.round(K.D / K.nRight)}`), { from: vR.Y(ey(0)), size: 1.2 });
   s += chainH([vR.X(0), vR.X(K.D)], yb + 7, [`${K.D} — ${K.nRight} BAYS, ONE OF THEM THE TUNNEL`], { from: yb + 3, size: 1.4 });
@@ -143,9 +151,9 @@ const WDR = {
     `<rect x="0" y="0" width="${K.depth}" height="${K.leftRun}" fill="#e9e5dc" stroke="none"/>` +
     `<rect x="${K.W - K.depth}" y="0" width="${K.depth}" height="${K.D}" fill="#e9e5dc" stroke="none"/>` +
     `<rect x="${K.W - K.depth}" y="0" width="${K.depth}" height="${K.tun}" fill="#fff8ee" stroke="none"/>` +
-    `<rect x="${K.depth}" y="0" width="${mW}" height="70" fill="#dfe4e6" stroke="none"/>`, 0.4);
+    `<rect x="${mx}" y="0" width="${mW}" height="70" fill="#dfe4e6" stroke="none"/>`, 0.4);
   s += text(26, 142, "KEY PLAN", { size: 1.9, weight: 700, ls: 0.3 });
-  s += text(26 + K.W / scP / 2, 146 + K.D / scP + 4, "MIRROR AT THE TOP", { size: 1.35, anchor: "middle", fill: THIN });
+  s += text(26 + K.W / scP / 2, 146 + K.D / scP + 4, "MIRROR AT THE TOP · FREE-STANDING", { size: 1.35, anchor: "middle", fill: THIN });
 
   // ── the count, as a table
   const tx = 92, ty = 146, rows = [
@@ -168,7 +176,7 @@ const WDR = {
   LG.add(vL.X(K.d3zone + 300), vL.Y(ey(K.H - K.transom / 2)), "TRANSOM BAND", "OPENS — SO IT STORES");
   RG.add(vR.X(K.D - 200), vR.Y(ey(1050)), "BRASS BAR PULL", "ON EVERY LEAF");
   RG.add(vR.X(470), vR.Y(ey(1600)), "THE HIDDEN DOOR", "BAY T · SAME DOORS · SHELVED BEHIND");
-  RG.add(vB.X(K.W / 2), vB.Y(ey(2400)), "THE MIRROR", "9 FT TALL · THREE PANELS · TO THE BACK");
+  RG.add(vB.X(K.W / 2), vB.Y(ey(2400)), "THE MIRROR", "9 FT TALL · FREE-STANDING · NOT FIXED EITHER SIDE");
   s += LG.draw() + RG.draw();
 
   s += heading(18, 226, "NOTES", `REVISION ${K.rev.split(" ")[0]}`, 210);
@@ -181,9 +189,10 @@ const WDR = {
     "   transom is storage, not just a band of glass. 7 bays, 14 cupboards, 28 leaves.",
     "Doors as the Wardrobes brief: blackened steel T-section, 38 face, white textured glass in linear",
     "   lead came, lit from inside, brass bar pulls, transom bar 560 down from the top."],
-   ["The mirror stands in the 4 ft 9 in the two runs leave between them, hard back against the wall,",
-    "   9 ft tall — the same line as the top of the wardrobes. Three panels: a wide centre and two",
-    "   wings, so it folds. Flat against the wall it fills the gap exactly.",
+   ["SETTLED — the mirror is 3 ft wide and free-standing, CONFIRMED not fixed to either run. Centred",
+    "   in the 4 ft 9 in gap it leaves about 10½ in of clear floor either side of it, and 9 ft tall — the",
+    "   same line as the top of the wardrobes. That 10½ in is why the two end bays cannot hinge open",
+    "   in the ordinary way — see AST-DR-026 for the fold-slide doors that solve it.",
     "OPEN — D3, the bathroom door. 3 ft of wall is left for it, but the leaf is still not fixed. It is",
     "   drawn as an opening only.",
     "OPEN — the tunnel bay reads as one more cupboard, but it is a door onto a passage, so the",
