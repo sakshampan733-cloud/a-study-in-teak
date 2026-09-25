@@ -45,11 +45,11 @@ window.DRAWINGS = window.DRAWINGS || {};
 
   window.DK.begin("mirror");
   let s = frame();
-  s += heading(18, 18, "DRESSING MIRROR — TRIFOLD", "CONFIRMED · CENTRE GLASS 2 FT 3 IN · WINGS AT 45° · WHOLE FRAME INSIDE 3 FT 6 IN", 220);
 
-  const CG = 686, CF = CG + 2 * FRAME, DEG = 45;                       // centre glass 2 ft 3 in → frame 2 ft 5½ in
+  const CG = 446, CF = CG + 2 * FRAME, DEG = 45;                       // centre glass 1 ft 5½ in (was 2 ft 3 in — owner wanted wider wings) → frame 1 ft 8¾ in
   const WF = ((FOOT - CF) / 2 - T * Math.sin(DEG * Math.PI / 180)) / Math.cos(DEG * Math.PI / 180);
   const OPTS = [geo(CF, Math.round(WF), DEG)];
+  s += heading(18, 18, "DRESSING MIRROR — TRIFOLD", `CONFIRMED · CENTRE GLASS ${ftin(CG)} · WING GLASS 12 IN · WINGS AT 45° · WHOLE FRAME INSIDE 3 FT 6 IN`, 220);
   OPTS.forEach((g, k) => {
     const oy = 80, v = view(128, oy, 5, "Mirror plan"), th = v.w(0.12);
     s += text(128, oy - 18, "PLAN — FROM ABOVE", { size: 2.6, anchor: "middle", weight: 700 });
@@ -88,8 +88,9 @@ window.DRAWINGS = window.DRAWINGS || {};
   s += heading(18, 226, "NOTES", "CONFIRMED", 220);
   [["CONFIRMED by the owner: centre glass 2 ft 3 in, wings at 45°, and the whole frame — wings angled —",
     "   inside 3 ft 6 in across (the red dashed box). All three panels 9 ft tall, level with the wardrobes.",
-    "The cost of a 2 ft 3 in centre inside 3 ft 6 in: the wings are small — about 5¼ in of glass each.",
-    "   A slimmer 1 in frame would give them about 6¼ in."],
+    "Wider wings, as asked: 12 in of glass each. That takes the centre down to about 1 ft 5½ in of",
+    "   glass — a real trade against the wide centre view. If it reads too narrow, a 10 in wing keeps",
+    "   the centre closer to 1 ft 8½ in."],
    ["The wings need a fixed stop at 45°. Opened any flatter, the frame gets wider than 3 ft 6 in.",
     "Hinges: two continuous piano hinges on the back, one at each joint, in the frame finish.",
     "Free-standing, centred on the far wall. 7½ in of floor either side, clear of the folding",

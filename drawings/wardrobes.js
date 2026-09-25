@@ -96,7 +96,7 @@ const WDR = {
   // ── BACK WALL: the two run ends, and the mirror standing FREE between them — not spanning the gap,
   // not touching either run. Centred in the corridor, with clear floor both sides of it.
   const corridor = K.W - 2 * K.depth, mW = K.mirror, mx = K.depth + (corridor - mW) / 2;
-  const ctr = 750, wing = (mW - ctr) / 2;   // centre frame 2 ft 5½ in; the wings, turned 45°, read narrow from the front
+  const ctr = 510, wing = (mW - ctr) / 2;   // centre frame 1 ft 8¾ in (1 ft 5½ in glass); wider wings, turned 45°
   s += vB.g(
     grid(0, K.W, th) +
     R(0, 0, K.depth, K.H, `fill="#e9e5dc" stroke="${STEEL}" stroke-width="${th * 1.6}"`) +
