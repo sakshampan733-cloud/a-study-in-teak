@@ -12,8 +12,8 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const XWALL = (function () {
-  const B = { wall: 5766, t: 230, door: { from: 4166, w: 762 } };   // from AST-DR-000
-  const Dr = { w: 2819, d: 3759, t: 115, d2: { w: 762, corner: 610 }, wd: { w: 914, d: 711 },
+  const B = { wall: 5766, t: 229, door: { from: 4217, w: 762, lining: 76 } };   // from AST-DR-000
+  const Dr = { w: 2819, d: 3759, t: 229, d2: { w: 762, corner: 787, frame: 711 }, wd: { w: 914, d: 711 },
                d3: { w: 762, from: 2845 }, tun: { w: 914, l: 2337 } };  // from AST-DR-023
   const doorEnd = B.door.from + B.door.w;
   // the dressing room's own corner, placed by lining its door up with the bedroom's
@@ -83,9 +83,11 @@ const XWALL = (function () {
     o += `<g ${Wd(th)}><line x1="${f(drLeft - Dr.t)}" y1="${f(b1)}" x2="${f(drLeft)}" y2="${f(b1)}"/>
       <line x1="${f(drLeft - Dr.t)}" y1="${f(b0)}" x2="${f(drLeft)}" y2="${f(b0)}"/></g>`;
 
-    // ── the disagreement, picked out in red: the wall the dressing room does not reach
-    o += R(drRight, -B.t, B.wall, 0, `fill="${RED}" fill-opacity="0.16" stroke="none"`);
-    o += `<g stroke="${RED}" ${Wd(th * 1.4)}><line x1="${f(drRight)}" y1="${f(-B.t)}" x2="${f(drRight)}" y2="${f(B.door.w * 0.5)}"/></g>`;
+    // ── the two corners, now one corner: marked so it is obvious they land together
+    o += `<g stroke="${RED}" ${Wd(th * 1.4)}><line x1="${f(B.wall)}" y1="${f(drFar - 400)}" x2="${f(B.wall)}" y2="${f(BED_CUT)}"/></g>`;
+    // ── the measured control: corner to the door frame, 2 ft 4 in, the same both sides
+    const fFar = B.door.from + B.door.w + B.door.lining;
+    o += `<g stroke="${RED}" ${Wd(th * 1.2)}><line x1="${f(fFar)}" y1="${f(-B.t - 260)}" x2="${f(fFar)}" y2="${f(B.t + 260)}" stroke-dasharray="${th * 5} ${th * 4}"/></g>`;
 
     return o;
   }
@@ -100,7 +102,7 @@ const XWALL = (function () {
 
   const sc = 45, ox = 116, oy = 146;
   const v = view(ox, oy, sc, "Shared wall — comparison"), th = v.w(0.12);
-  s += heading(18, 18, "THE SHARED WALL — THE TWO DRAWINGS COMPARED", "AST-DR-000 AND AST-DR-023 LANDED ON EACH OTHER BY THE DOOR — A CHECK SHEET, NOT A DESIGN", 210);
+  s += heading(18, 18, "THE SHARED WALL — RECONCILED", "AST-DR-000 AND AST-DR-023 SET OUT FROM ONE MEASUREMENT — 2 FT 4 IN, CORNER TO THE DOOR FRAME", 210);
   s += v.g(plan(th), 0.3);
 
   // ── dimensions. The bedroom's account of the wall, below it; the dressing room's, above.
@@ -114,12 +116,10 @@ const XWALL = (function () {
     [`${B.door.from - drLeft} TO THE DOOR`, `${Dr.d2.w} D2`, `${Dr.d2.corner} TO THE CORNER`], { from: v.Y(drOut), size: 1.35 });
   s += chainH([v.X(drLeft), v.X(drRight)], yD - 9, [`${Dr.w} — THE SAME WALL ON AST-DR-023`], { from: yD - 5, size: 1.6 });
 
-  // the gap, in red, right where it falls
-  const gy = v.Y(-B.t) - 5;
-  s += `<g class="dk-dim"><g stroke="${RED}" stroke-width="0.2">
-    <line x1="${f(v.X(drRight))}" y1="${f(gy)}" x2="${f(v.X(B.wall))}" y2="${f(gy)}"/>
-    <line x1="${f(v.X(drRight))}" y1="${f(gy - 1.4)}" x2="${f(v.X(drRight))}" y2="${f(gy + 1.4)}"/>
-    <line x1="${f(v.X(B.wall))}" y1="${f(gy - 1.4)}" x2="${f(v.X(B.wall))}" y2="${f(gy + 1.4)}"/></g></g>`;
+  // the measured control, red, sitting across the wall: corner to the frame, both sides
+  const fFar = B.door.from + B.door.w + B.door.lining;
+  s += chainH([v.X(fFar), v.X(B.wall)], v.Y(-B.t) - 4, [`${Dr.d2.frame} CORNER TO THE FRAME — MEASURED, BOTH SIDES`],
+    { from: v.Y(-B.t) - 1, size: 1.35 });
 
   const RG = labels(286, "right", 38, 205), LG = labels(58, "left", 38, 205);
   LG.add(v.X(1400), v.Y(BED_CUT * 0.45), "THE BEDROOM", "AST-DR-000 · AS MEASURED · CUT OFF HERE");
@@ -128,30 +128,30 @@ const XWALL = (function () {
   LG.add(v.X(drLeft + Dr.wd.d / 2), v.Y(drFar + Dr.d * 0.45), "WARDROBE RUNS", "BOTH LONG WALLS · 2 FT 4 IN DEEP");
   RG.add(v.X(drRight + Dr.t + Dr.tun.l * 0.55), v.Y(drFar + Dr.tun.w / 2), "THE TUNNEL", "RUNS OUT PAST THE BED-WALL LINE");
   RG.add(v.X((B.door.from + doorEnd) / 2), v.Y(-B.t / 2), "THE DOOR", "THE ONE FIXED POINT · BOTH SHEETS LANDED ON IT");
-  RG.add(v.X((drRight + B.wall) / 2), v.Y(-B.t / 2), "THE DISAGREEMENT", `${Math.round(gap)} MM · 9 IN OF WALL THE SKETCH DOES NOT REACH`);
-  RG.add(v.X(drLeft * 0.5), v.Y(-B.t / 2), "NOT BACKED BY THE DRESSING ROOM", "8 FT 11 IN OF THE WALL BACKS ON TO SOMETHING ELSE");
+  RG.add(v.X(B.wall), v.Y(-B.t / 2), "ONE CORNER, NOT TWO", "THE BED WALL AND THE DRESSING WALL NOW LAND TOGETHER");
+  RG.add(v.X(drLeft * 0.5), v.Y(-B.t / 2), "NOT BACKED BY THE DRESSING ROOM", "9 FT 8 IN OF THE WALL BACKS ON TO SOMETHING ELSE");
   s += RG.draw() + LG.draw();
 
-  s += heading(18, 226, "WHAT DOES NOT AGREE", "THREE THINGS, ALL ON THIS ONE WALL", 210);
-  [["1 — THE LENGTH. AST-DR-000 measures this wall at 18 ft 11 in. AST-DR-023 calls the same wall",
-    "   9 ft 3 in. Both can be true: the dressing room only covers part of it. Landed on the door, it",
-    "   covers the middle, leaving 8 ft 11 in at the study-wall end backing on to something else.",
-    "   What is behind that 8 ft 11 in has never been drawn.",
-    "2 — THE CORNER. This is the real one. AST-DR-000 puts 2 ft 9 in of wall between the door and the",
-    "   bed-wall corner. The sketch puts 2 ft 0 in. They cannot both be right: one of them is 9 in out.",
-    "   9 in is close to one wall thickness, so it may just be a case of measuring to different faces —",
-    "   but it may also be that the door, or the 2 ft 0 in, is simply in the wrong place."],
-   ["3 — THE THICKNESS. AST-DR-000 has this wall at 230 mm. AST-DR-023 assumed 115 mm. It is one",
-    "   wall, so it is one number, and the measured 230 is the one to keep. The dressing room's own",
-    "   depth of 12 ft 4 in should be checked against which face it was measured from.",
-    "",
-    "HOW THIS WAS LANDED — the two sheets are lined up on the DOOR, because the door is one opening",
-    "   in one wall and has to be common to both. The dressing room is also assumed to sit with its",
-    "   2 ft 0 in end towards the bed wall; the other way round is 2 ft worse, so this is the better fit.",
-    "   Confirm on site: door to bed-wall corner, on both sides of the wall, with one tape."]]
-    .forEach((col, c) => col.forEach((n, i) => (s += text(18 + c * 172, 238 + i * 4.6, n, { size: 1.6, fill: /^[123] —/.test(n) || n.startsWith("HOW") ? RED : INK }))));
+  s += heading(18, 226, "HOW IT WAS SETTLED", "ONE MEASUREMENT, TAKEN ON BOTH SIDES, NOW GOVERNS BOTH SHEETS", 210);
+  [["THE CONTROL — 2 ft 4 in from the dressing corner to the door FRAME, taped on both sides of the",
+    "   wall. Everything on this wall is now set out from that and nothing else. It replaced two figures",
+    "   that disagreed: 2 ft 9 in on AST-DR-000, which had been back-calculated rather than measured,",
+    "   and 2 ft 0 in on the dressing sketch, which was a reading off a hand drawing.",
+    "WHAT IT FIXED — with a 3 in lining the chain now closes: frame 13 ft 7 in from the study corner",
+    "   (the tape said 13 ft 6 in), the 3 ft frame, then 2 ft 4 in to the corner, on the measured",
+    "   18 ft 11 in overall. Both corners now fall on the same line, so the dressing room's right-hand",
+    "   wall and the bedroom's bed wall are one wall, not two a hand's width apart."],
+   ["WALLS — taken at 9 in throughout, as instructed. AST-DR-000 already carried 230 mm, which is the",
+    "   same 9 in, so the two sheets no longer differ on thickness either.",
+    "STILL OPEN — the wall is 18 ft 11 in on the bedroom side and the dressing room only covers",
+    "   9 ft 3 in of it. That leaves 9 ft 8 in at the study-wall end backing on to something that has",
+    "   never been drawn. Worth knowing what is behind it before anything is fixed to that wall.",
+    "KNOCK-ON — moving the door 2 in along the wall shifts the right wall's panel setting out, so the",
+    "   five bays and the narrow panel past the door are all slightly different from the last issue of",
+    "   AST-DR-007. That sheet has been re-cut to suit and should be reread before anything is made."]]
+    .forEach((col, c) => col.forEach((n, i) => (s += text(18 + c * 172, 238 + i * 4.6, n, { size: 1.6, fill: /^[A-Z][A-Z ]+ —/.test(n) ? RED : INK }))));
 
-  s += titleBlock({ title: "THE SHARED WALL", sub: "Bedroom / dressing room · comparison", date: "25.09.2026",
-    rev: "1 — first comparison of AST-DR-000 against AST-DR-023", dwg: "AST-DR-024", scale: `1:${sc} @ A3` });
+  s += titleBlock({ title: "THE SHARED WALL", sub: "Bedroom / dressing room · reconciled", date: "25.09.2026",
+    rev: "2 — set out from the measured 2 ft 4 in, corner to the door frame, both sides", dwg: "AST-DR-024", scale: `1:${sc} @ A3` });
   window.DRAWINGS.sharedwall = { title: "The shared wall — the two drawings compared · AST-DR-024", svg: sheet(s), model: true };
 })();
