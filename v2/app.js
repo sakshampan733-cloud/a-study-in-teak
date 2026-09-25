@@ -32,7 +32,6 @@
   // This page is static and would start ~0.8 s early; hold the intro to the same moment instead.
   const INTRO_EARLIEST_MS = 880;
   const SCRAMBLE_CHARS = "abcdefghijklmnopqrstuvwxyz";   // the reference's scrambleCharacters module, verbatim
-  const SCRAMBLE = { chars: SCRAMBLE_CHARS, speed: X.scrambleSpeed, text: "{original}" };
   // Our copy is longer than theirs, and the intro's length is set by character count × stagger. To land every
   // text's decode in the same window as the reference's, the stagger is scaled by their length over ours.
   const REF_CHARS = { free: [20, 25], locked: 51 };   // "Automate the mundane", "Accelerate the remarkable", the three CTA lines
@@ -58,18 +57,30 @@
     const lockedChars = locked.flatMap(({ split }) => split.chars);
     gsap.set(logo, { autoAlpha: 0, filter: "blur(20px)" });
     gsap.set([...free.flatMap(({ split }) => split.chars), ...lockedChars], { autoAlpha: 0 });
+    // every hidden letter starts as a random one and scrambles TO its own, so no real letter can show through
+    // in the frame or two while it fades up (spaces and punctuation stay as they are, as in the reference)
+    for (const c of [...free.flatMap(({ split }) => split.chars), ...lockedChars]) {
+      c.dataset.letter = c.textContent;
+      if (!/[a-z]/i.test(c.textContent)) continue;
+      const others = SCRAMBLE_CHARS.replace(c.textContent.toLowerCase(), "");
+      c.textContent = others[Math.floor(Math.random() * others.length)];
+    }
+    const toOwn = (i, el) => ({ text: el.dataset.letter, chars: SCRAMBLE_CHARS, speed: X.scrambleSpeed });
 
     const tl = gsap.timeline({ defaults: { duration: 0.8, ease: "power2" }, paused: true, onComplete: () => { onComplete(); cleanup(); } });
     tl.fromTo(logo, { autoAlpha: 0 }, { autoAlpha: 1, duration: X.logoOpacityDurationSeconds }, X.logoStartSeconds)
       .to(logo, { duration: X.logoBlurDurationSeconds, filter: "blur(0px)" }, "<");
     free.forEach(({ split }, i) => {
       const st = staggerFor(REF_CHARS.free[i] ?? split.chars.length, split.chars.length);
-      tl.from(split.chars, { duration: X.characterDurationSeconds, scrambleText: SCRAMBLE, stagger: st }, i === 0 ? "<0.2" : "<0.1")
-        .fromTo(split.chars, { autoAlpha: 0 }, { autoAlpha: 1, duration: X.characterDurationSeconds, stagger: st }, i === 0 ? "-=0.8" : "<0.1");
+      // Each text fades in where the reference fades it ("-=0.8" for the first; 0.2 s after the one before for the
+      // next). The reference runs the scramble 0.1–0.4 s ahead of the fade, so most letters have already resolved,
+      // unseen, when they appear; here the scramble starts with the fade, so every letter is seen decoding.
+      tl.fromTo(split.chars, { autoAlpha: 0 }, { autoAlpha: 1, duration: X.characterDurationSeconds, stagger: st }, i === 0 ? "-=0.8" : "<0.2")
+        .to(split.chars, { duration: X.characterDurationSeconds, scrambleText: toOwn, stagger: st }, "<");
     });
     const stL = X.characterStaggerSeconds * Math.pow(Math.min(1, REF_CHARS.locked / Math.max(1, lockedChars.length)), 0.75);   // part-way: full scaling ran the centre lines ~150 ms early
-    tl.from(lockedChars, { duration: X.characterDurationSeconds, scrambleText: SCRAMBLE, stagger: stL }, "<0.2")
-      .fromTo(lockedChars, { autoAlpha: 0 }, { autoAlpha: 1, duration: X.characterDurationSeconds, stagger: stL }, "<");
+    tl.fromTo(lockedChars, { autoAlpha: 0 }, { autoAlpha: 1, duration: X.characterDurationSeconds, stagger: stL }, "<0.2")
+      .to(lockedChars, { duration: X.characterDurationSeconds, scrambleText: toOwn, stagger: stL }, "<");
 
     gsap.set(texts, { visibility: "visible" });
     const start = setTimeout(() => tl.play(), X.timelineStartDelayMs);
