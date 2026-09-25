@@ -19,7 +19,7 @@ const SHELL = {
   yStep: 4600,    // how far down the step falls — TO CONFIRM
   yPart: 2438,    // 8 ft from the study wall — i.e. 11 ft from the BED wall, as measured
   win: { w: 1219 },                 // 4 ft, hard into the right-hand corner of the study wall
-  dress: { from: 4217, w: 762 },    // door leaf. Set out from the owner's own measurement — 2 ft 4 in (711) from
+  dress: { from: 4318, w: 686, frame: 51 },    // door leaf. Set out from the owner's own measurement — 2 ft 4 in (711) from
                                     // the dressing corner to the FRAME, taken on both sides of the wall — plus a
                                     // 3 in lining. Same as AST-DR-007. Was 4166, which was back-calculated.
   ent: { w: 914 },                  // entrance door, 3 ft, at the very END of the left wall; hinged on the bed-wall corner, it opens flat along the bed wall

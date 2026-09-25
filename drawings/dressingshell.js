@@ -19,7 +19,7 @@ const DRESS = {
   // 2 ft 4 in (711) from the corner to the door FRAME, taken on BOTH sides of the wall. Add the
   // 3 in lining back on and it is 787 from the corner to the leaf. That figure now governs, and it
   // matches AST-DR-000/AST-DR-007 exactly — so this corner and the bedroom's bed-wall corner coincide.
-  d2: { w: 762, corner: 787, frame: 711 },
+  d2: { w: 686, corner: 762, frame: 711, lining: 51 },
 
   // D3 — the bathroom door, in the LEFT wall, at the bedroom end. The sketch runs 9 ft 4 in of wall
   // down the left side and then opens the door, with 12 ft 4 in over the whole wall — so the sketch
