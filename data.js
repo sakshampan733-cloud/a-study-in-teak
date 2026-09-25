@@ -574,6 +574,20 @@ window.PROJECT = {
       intro: "",
       items: [
         {
+          id: "dressing-shape", name: "Room & Layout", status: "open",
+          parts: [
+            { label: "Doorway", value: "From the bedroom: the 9 ft 3 in wall is the common wall between the two rooms." },
+            { label: "Bathroom door", value: "2 ft 6 in wide, on the left — corrected from an earlier read of 2 ft 3 in. Matches D2/D3 from the main room's door schedule (2 ft 6 in, 7 ft 7 in tall)." },
+            { label: "Wardrobe walls", value: "Left and right walls take the wardrobes (3 ft wide × 2 ft 4 in deep each — see Wardrobes below); the dressing mirror faces them from the wall in between." },
+            { label: "The tunnel", value: "At the far right-hand corner: a full-height cupboard door, built and shelved exactly like the wardrobe doors on the same 2 ft 4 in depth, that is really a hidden door — push it and it swings open onto a tunnel about 7 ft 8 in long and 3 ft 6 in wide. From the room it reads as one more cupboard; nobody would guess there is a tunnel behind it." },
+          ],
+          questions: [
+            "Where does the 7 ft 8 in tunnel lead, and what is it for?",
+            "The sketch also carries about 9 ft 8 in and 12 ft 4 in on two other walls — which walls are these, and what are the room's overall width and length?",
+            "Ceiling height, and where the barrel vault starts (springing line) — needed for the wardrobe height too.",
+          ],
+        },
+        {
           id: "wardrobe", name: "Wardrobes", status: "open",
           refs: [
             { src: "assets/refs/wardrobe-options-A-C-D.svg", caption: "Glass options — A linear (chosen), C linear with four-dot jewels, D border and jewels" },
@@ -592,13 +606,11 @@ window.PROJECT = {
             { label: "Inside finish", value: "Sunmica (laminate) in a warm ivory / cream with a matte linen (fabric-texture) finish on back panels, sides and shelves. Light and matte so the glass glows evenly and creamy like parchment; the texture hides scuffs. Not white gloss (reflections, hot spots, clinical) and not dark (the glass turns grey and dead)." },
             { label: "Internals", value: "", hint: "Hanging, drawers, shoe rack, loft; brass rails; drawer fronts inside can be a contrast (e.g. walnut-tone or deep green) since they sit behind the glass" },
             { label: "Hardware", value: "", hint: "Brass only (gold on handles)" },
-            { label: "Dimensions", value: "" },
+            { label: "Dimensions", value: "Two runs, left wall and right wall: 3 ft wide × 2 ft 4 in deep each. The right-hand run ends at the hidden tunnel door (see Room & Layout) — same 2 ft 4 in depth, so it reads as one more door in the run." },
           ],
           questions: [
-            "Which wall do the wardrobes go on, its width, and how deep can they be (600 is standard)?",
+            "How many doors per run, and how much hanging vs drawers behind them?",
             "Does the vault run along the wardrobe wall or end on it (so the top would meet the arch)?",
-            "Height where the vault starts (springing line)?",
-            "How many doors / how much hanging vs drawers?",
           ],
         },
         {
@@ -610,7 +622,7 @@ window.PROJECT = {
             { label: "Design", value: "Free-standing folding mirror screen after the reference: three tall mirror panels hinged together — a wide centre panel with two narrower wings angled in so you see front and sides at once." },
             { label: "Frame", value: "Slim dark bronze / blackened metal frame round each panel, with the top outer corners cut on an angle (chamfered) and a stepped foot rail at the bottom." },
             { label: "Mirror", value: "Clear silver mirror, full height of each panel." },
-            { label: "Placement", value: "", hint: "Which wall or corner of the dressing area; free-standing or fixed to the floor" },
+            { label: "Placement", value: "In the middle of the dressing room, on the wall facing the two wardrobe runs.", hint: "Free-standing or fixed to the floor still open" },
             { label: "Dimensions", value: "", hint: "Height, centre panel width, wing width" },
             { label: "Finish", value: "", hint: "Frame finish to sit with the blackened-steel wardrobe frames and brass pulls" },
           ],
