@@ -6,7 +6,7 @@
 # (optionally tinted cool) to light the other side of the frame, a low glow so the dark isn't dead, shadows
 # to the void, dark pools behind the mark and the centre lines, and the house split-tone.
 # Both takes are the same length and slowed alike, so the composite closes on itself too.
-#   usage: [CROP=w:h:x:y SLOW=1.2 BLUR=… HUE=h=…:s=… KNEE=… POOL=… L2="take|filters|opacity" GLOW=…]
+#   usage: [CROP=w:h:x:y SLOW=1.2 BLUR=… STREAK=dblur=… HUE=h=…:s=… KNEE=… POOL=… POOLF=… L2="take|filters|opacity" GLOW=…]
 #          tools/node/hero-grade.sh <take.mp4> <out.mp4>
 #
 # Colour: every RGB↔YUV step names BT.709 and the output is tagged BT.709, limited range. Left to itself
@@ -17,14 +17,15 @@
 #   -colorspace bt709 -color_primaries bt709 -color_trc iec61966-2-1 -color_range tv, +faststart.
 # The transfer is tagged sRGB, not BT.709: the grade was judged in sRGB, and a BT.709 (or missing) transfer tag
 # makes Chrome convert the curve and pull the near-blacks down — (7,14,19) in the file showed as (3,11,18).
-# Installed after round 9 (v2/media/hero.mp4): bok-b.mp4 over itself — the second layer is the same take
-# mirrored, started half a cycle on (bok-b-rot.mp4: trim 4 s → end, then 0 → 4 s; the take closes on
-# itself, so the rotated copy does too) and tinted slate, so it lights the right of the frame:
-#   CROP=1067:600:200:60 SLOW=1.5 BLUR=26 HUE="h=8:s=0.8" POOL=1 GLOW=0.3 \
-#   KNEE="0/0 0.27/0.015 0.64/0.27 0.92/0.66 1/0.9" \
-#   L2="bok-b-rot.mp4|hflip,crop=1067:600:0:60,colorchannelmixer=rr=0.75:rg=0.05:gg=0.88:gb=0.05:bb=1.0:bg=0.08|0.85" \
+# Installed after round 10 (v2/media/hero.mp4): bok-b.mp4 over itself mirrored and half a cycle on
+# (bok-b-rot.mp4), streaked into planes, dark pools behind the flank labels, then re-paced (hero-pace.py):
+#   CROP=1067:600:200:60 SLOW=1.5 BLUR=18 STREAK="dblur=angle=20:radius=36" HUE="h=8:s=0.95" \
+#   POOL=1 POOLF=1 GLOW=0.12 KNEE="0/0 0.28/0.015 0.63/0.28 0.88/0.72 1/0.97" \
+#   L2="bok-b-rot.mp4|hflip,crop=1067:600:0:60,colorchannelmixer=rr=0.75:rg=0.05:gg=0.88:gb=0.05:bb=1.0:bg=0.08|0.8" \
 #   TONER="0/0.035 0.12/0.075 0.25/0.18 0.4/0.36 0.7/0.8 1/1" TONEG="0/0.055 0.12/0.1 0.25/0.21 0.4/0.37 0.7/0.67 1/0.95" \
-#   TONEB="0/0.075 0.12/0.13 0.25/0.26 0.4/0.4 0.7/0.56 1/0.86" tools/node/hero-grade.sh bok-b.mp4 bgrade21.mp4
+#   TONEB="0/0.075 0.12/0.13 0.25/0.26 0.4/0.4 0.7/0.56 1/0.86" tools/node/hero-grade.sh bok-b.mp4 bgrade27.mp4
+#   tools/.venv/bin/python tools/node/hero-pace.py bgrade27.mp4 bpace27.mp4 0.7
+# pool-flanks.png: two ellipses 480 × 150 at (205, 505) and (1395, 505), alpha 245, Gaussian blur 45.
 set -e
 HERE="${0:A:h}"
 cd "$HERE/../../design/media/drafts"
@@ -34,22 +35,23 @@ BLUR=${BLUR:-9}
 KNEE=${KNEE:-"0/0 0.2/0.01 0.55/0.3 0.85/0.72 1/0.95"}
 POOL=${POOL:-0.8}
 GLOW=${GLOW:-0}
+POOLF=${POOLF:-0}          # dark pools behind the two flank labels (pool-flanks.png)
 TONER=${TONER:-"0/0.035 0.12/0.085 0.35/0.32 0.7/0.74 1/1"}
 TONEG=${TONEG:-"0/0.055 0.12/0.105 0.35/0.33 0.7/0.68 1/0.96"}
 TONEB=${TONEB:-"0/0.075 0.12/0.125 0.35/0.34 0.7/0.64 1/0.92"}
 TORGB="scale=in_color_matrix=bt709:in_range=tv:flags=accurate_rnd+full_chroma_int+full_chroma_inp,format=gbrp"
 TOYUV="scale=out_color_matrix=bt709:out_range=tv:flags=accurate_rnd+full_chroma_int+full_chroma_inp,format=yuv420p"
-PRE="${SLOW:+setpts=$SLOW*PTS,minterpolate=fps=24:mi_mode=blend,}scale=1600:900:flags=bicubic,gblur=sigma=$BLUR"
+PRE="${SLOW:+setpts=$SLOW*PTS,minterpolate=fps=24:mi_mode=blend,}scale=1600:900:flags=bicubic,gblur=sigma=$BLUR${STREAK:+,$STREAK}"
 if [[ -n $L2 ]]; then
   T2=${L2%%|*}; R2=${L2#*|}; F2=${R2%%|*}; O2=${R2#*|}
   IN2=(-i $T2); P=2
   MIX="[1]${F2:+${F2},}${PRE},${TORGB}[l2];[a][l2]blend=all_mode=screen:all_opacity=${O2}[ab];"
 else IN2=(); P=1; MIX="[a]null[ab];"; fi
-$FF -loglevel error -y -i $IN $IN2 -loop 1 -i pool-centre.png -loop 1 -i pool-cta.png -filter_complex "\
+$FF -loglevel error -y -i $IN $IN2 -loop 1 -i pool-centre.png -loop 1 -i pool-cta.png -loop 1 -i pool-flanks.png -filter_complex "\
 [0]${CROP:+crop=$CROP,}${PRE}${HUE:+,hue=$HUE},${TORGB}[a];${MIX}\
 [ab]split[s][g];[g]scale=400:225,gblur=sigma=40,scale=1600:900[gl];[s][gl]blend=all_mode=screen:all_opacity=${GLOW},curves=all='${KNEE}',${TOYUV}[m];\
-[$P]format=rgba,colorchannelmixer=aa=${POOL}[pc];[$((P+1))]format=rgba,colorchannelmixer=aa=${POOL}[pt];\
-[m][pc]overlay=0:0:shortest=1[p1];[p1][pt]overlay=0:0:shortest=1,${TORGB},\
+[$P]format=rgba,colorchannelmixer=aa=${POOL}[pc];[$((P+1))]format=rgba,colorchannelmixer=aa=${POOL}[pt];[$((P+2))]format=rgba,colorchannelmixer=aa=${POOLF}[pf];\
+[m][pc]overlay=0:0:shortest=1[p1];[p1][pt]overlay=0:0:shortest=1[p2];[p2][pf]overlay=0:0:shortest=1,${TORGB},\
 curves=r='${TONER}':g='${TONEG}':b='${TONEB}',${TOYUV}[v]" \
   -map "[v]" -an -c:v libx264 -preset slow -crf 18 -profile:v high -pix_fmt yuv420p \
   -colorspace bt709 -color_primaries bt709 -color_trc iec61966-2-1 -color_range tv -movflags +faststart $OUT
