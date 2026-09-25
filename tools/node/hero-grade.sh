@@ -17,13 +17,15 @@
 #   -colorspace bt709 -color_primaries bt709 -color_trc iec61966-2-1 -color_range tv, +faststart.
 # The transfer is tagged sRGB, not BT.709: the grade was judged in sRGB, and a BT.709 (or missing) transfer tag
 # makes Chrome convert the curve and pull the near-blacks down — (7,14,19) in the file showed as (3,11,18).
-# Installed after round 13 (v2/media/hero.mp4): arcv-a.mp4 — a new take: gpt-image-2.5 still of copper and
-# steel planes and arcs, defocused in camera, animated by Seedance 1.5 (same still first and last) with a
-# sideways glide and a focus that drifts in and out. One layer, lightly softened, saturation capped at 0.40:
-#   SLOW=1.5 BLUR=4 HUE="h=4:s=0.9" POOL=1 POOLF=1 GLOW=0 KNEE="0/0 0.24/0.025 0.52/0.3 0.8/0.66 1/0.92" \
+# Installed after round 14 (v2/media/hero.mp4): arcv-a.mp4 (copper and steel planes and arcs, defocused in
+# camera, gliding, focus drifting) over arcv-b.mp4 blurred and tinted amber, so warm light is there every second;
+# a low glow so the dark isn't one flat navy; saturation capped SOFTLY at 0.40 (a hard threshold drew torn edges):
+#   SLOW=1.5 BLUR=16 HUE="h=4:s=0.9" GLOW=0.25 POOL=1 POOLF=1 KNEE="0/0 0.18/0.03 0.52/0.24 0.82/0.56 1/0.86" \
+#   L2="arcv-b.mp4|gblur=sigma=20,colorchannelmixer=rr=1.0:rg=0.1:gg=0.8:gr=0.15:bb=0.5:br=0.05|0.75" \
 #   TONER="0/0.035 0.12/0.075 0.25/0.18 0.4/0.36 0.7/0.8 1/1" TONEG="0/0.055 0.12/0.1 0.25/0.21 0.4/0.37 0.7/0.67 1/0.95" \
-#   TONEB="0/0.075 0.12/0.13 0.25/0.26 0.4/0.4 0.7/0.56 1/0.86" tools/node/hero-grade.sh arcv-a.mp4 agrade7.mp4
-#   then in gbrp: geq c' = M − (M − c)·k, k = 0.4/s where s = (M − m)/M > 0.4 and M > 60; web encode noise=alls=2.
+#   TONEB="0/0.075 0.12/0.13 0.25/0.26 0.4/0.4 0.7/0.56 1/0.86" tools/node/hero-grade.sh arcv-a.mp4 agrade12.mp4
+#   then in gbrp: geq c' = M − (M − c)·K, K = 1 − clip((M − 40)/60, 0, 1)·(1 − (s > 0.4 ? 0.4/s : 1)),
+#   s = (M − m)/M; web encode noise=alls=2.
 # pool-flanks.png: two ellipses 560 × 190 at (215, 505) and (1385, 505), alpha 250, Gaussian blur 50.
 set -e
 HERE="${0:A:h}"
