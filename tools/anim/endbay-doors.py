@@ -143,7 +143,8 @@ OPTS = (optA, optB, optC)
 
 def ease(t): t = max(0, min(1, t)); return t * t * (3 - 2 * t)
 # per option: closed 18, fold 60, slide 36, hold 36, slide out 24, unfold 36, hold 12
-SEG = [18, 60, 36, 36, 24, 36, 12]
+SEG = [12, 54, 36, 24, 24, 36, 12]
+NV = 3   # each option plays its whole cycle once per camera
 L = sum(SEG)
 def state(f):
     c = [0]
@@ -157,9 +158,10 @@ def state(f):
     return 0, 0
 
 START = 1
-sc.frame_start, sc.frame_end = START, START + 3 * L - 1
-for k, bays in enumerate(OPTS):
-    o = START + k * L
+sc.frame_start, sc.frame_end = START, START + 3 * NV * L - 1
+for m in range(3 * NV):
+    k = m // NV; bays = OPTS[k]
+    o = START + m * L
     for f in range(L):
         fa, fs = state(f)
         for b in bays:
@@ -168,7 +170,7 @@ for k, bays in enumerate(OPTS):
     for b in bays:
         b.show(False, 0)
         if k: b.show(False, START)
-        b.show(True, START + k * L); b.show(False, START + (k + 1) * L)
+        b.show(True, START + k * NV * L); b.show(False, START + (k + 1) * NV * L)
 for ob in bpy.data.objects:
     if ob.animation_data and ob.animation_data.action:
         for fc in getattr(ob.animation_data.action, "fcurves", []):
@@ -187,13 +189,13 @@ CAMS = {"top": make_cam("camTop", (1.41, 2.25, 5.3), (1.41, 0.40, 0.25)),
         "side": make_cam("camSide", (1.8, 0.95, 2.15), (0.40, 0.45, 0.85))}
 sc.camera = CAMS["top"]
 cam = bpy.data.objects.new("hud", None); sc.collection.objects.link(cam); cam.scale = (0.2, 0.2, 0.2)   # caption plane 20 cm ahead, so nothing gets between
-SHOTS = [(0, "front"), (78, "side"), (150, "top")]
+VIEWS = ["front", "side", "top"]
 def cut(f, key):
     m = sc.timeline_markers.new(key + str(f), frame=f); m.camera = CAMS[key]
     cam.location = CAMS[key].location; cam.rotation_euler = CAMS[key].rotation_euler
     cam.keyframe_insert("location", frame=f); cam.keyframe_insert("rotation_euler", frame=f)
-for k in range(3):
-    for f, key in SHOTS: cut(START + k * L + f, key)
+for m in range(3 * NV):
+    cut(START + m * L, VIEWS[m % NV])
 def all_fcurves(act):
     if hasattr(act, "layers") and len(act.layers):
         for lay in act.layers:
@@ -246,12 +248,17 @@ def vis(ob, on_ranges):
         ob.hide_render = False; ob.keyframe_insert("hide_render", frame=a)
         ob.hide_render = True; ob.keyframe_insert("hide_render", frame=b)
 for k in range(3):
-    vis(opt_caps[k], [(START + k * L, START + (k + 1) * L)])
-vis(notes[0], [(START, START + 2 * L)]); vis(notes[1], [(START + 2 * L, START + 3 * L)])
+    vis(opt_caps[k], [(START + k * NV * L, START + (k + 1) * NV * L)])
+vis(notes[0], [(START, START + 2 * NV * L)]); vis(notes[1], [(START + 2 * NV * L, START + 3 * NV * L)])
+segs = lambda ks: [k * NV + v for k in ks for v in range(NV)]
 for i, sc_ in enumerate(step_caps):
-    vis(sc_, [(START + k * L + win[i][0], START + k * L + win[i][1]) for k in range(2)])
+    vis(sc_, [(START + m * L + win[i][0], START + m * L + win[i][1]) for m in segs((0, 1))])
 for i, sc_ in enumerate(step_capsC):
-    vis(sc_, [(START + 2 * L + win[i][0], START + 2 * L + win[i][1])])
+    vis(sc_, [(START + m * L + win[i][0], START + m * L + win[i][1]) for m in segs((2,))])
+view_caps = [caption(t, -fw / 2 + 0.05, fh / 2 - 0.045, 0.024, (0.95, 0.80, 0.45), cam, "LEFT")
+             for t in ("VIEW 1 / 3  ·  FROM THE DOORWAY", "VIEW 2 / 3  ·  INTO THE BAY", "VIEW 3 / 3  ·  FROM ABOVE")]
+for v, vc in enumerate(view_caps):
+    vis(vc, [(START + m * L, START + (m + 1) * L) for m in range(3 * NV) if m % NV == v])
 for ob in bpy.data.objects:
     if ob.animation_data and ob.animation_data.action:
         for fc in getattr(ob.animation_data.action, "fcurves", []):
