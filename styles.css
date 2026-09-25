@@ -502,3 +502,8 @@ body.sheets-dark .lb-inner.is-dwg svg { filter: invert(1) hue-rotate(180deg) bri
 /* furniture stands in the room, so it is seen from both sides */
 .m3d-w.solid { background: #f4f1ea; backface-visibility: visible; border: 1px solid rgba(27,27,27,.72); }
 .m3d-w.glassbay .ink { stroke: #1b1b1b; }
+
+/* item video — sits above the spec rows, which read as its explanation */
+.vid { margin: 0 0 28px; }
+.vid video { display: block; width: 100%; border-radius: 10px; background: #111; }
+.vid figcaption { margin-top: 10px; font-size: 13px; opacity: .7; }

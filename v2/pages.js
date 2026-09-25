@@ -290,6 +290,7 @@ function tabPage(t) {
         <h2 class="headline" data-decode>${esc(i.name)}</h2>
         ${pill("i." + i.id, i.status)}
       </div>
+      ${i.video ? `<div class="wrap"><figure class="vid reveal"><video src="${esc(U(i.video.src))}" poster="${esc(U(i.video.poster))}" controls playsinline muted loop preload="metadata"></video><figcaption>${esc(i.video.caption)}</figcaption></figure></div>` : ""}
       <div class="wrap"><div class="spec reveal">${i.parts.map((p) => `<div class="spec-row"><div class="lab">${esc(p.label)}</div><div class="val">${partValue(p)}</div></div>`).join("")}</div></div>
       ${i.refs?.length ? `<div class="gallery-label"><span class="eyebrow" data-decode>References · ${pad2(i.refs.length)}</span>${i.refs.length > 3 ? `<div class="gallery-nav"><button class="btn" data-gal="-1" aria-label="Previous">←</button><button class="btn" data-gal="1" aria-label="Next">→</button></div>` : ""}</div>
         <div class="gallery reveal${i.refs.length < 3 ? " few" : ""}">${i.refs.map((r) => `<figure class="shot" data-open="img:${esc(U(r.src))}"><div class="frame"><img src="${esc(U(r.src))}" alt="" loading="lazy"></div><figcaption>${esc(r.caption)}</figcaption></figure>`).join("")}</div>` : ""}

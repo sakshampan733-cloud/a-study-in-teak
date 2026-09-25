@@ -437,3 +437,8 @@ body.sheets-dark .lb-inner.is-dwg svg { filter: invert(1) hue-rotate(180deg) bri
   .stack.is-track .scard { flex: 0 0 78vw; }
   .stack-cards .scard .body { padding-top: calc(var(--h) * .28); gap: 12px; }
 }
+
+/* item video — sits above the spec rows, which read as its explanation */
+.vid { margin: 0 0 28px; }
+.vid video { display: block; width: 100%; border-radius: 10px; background: #111; }
+.vid figcaption { margin-top: 10px; font-size: 13px; opacity: .7; }
