@@ -117,7 +117,6 @@ function overview() {
     { title: "The Bedroom", ids: ["bedroom"], img: "assets/refs/bed-ref-1-low-platform-bed.jpg", line: "The bed, the parchment bed wall, and the TV unit or side drawers." },
     { title: "The Bathroom", ids: ["bathroom"], img: "assets/refs/bathroom-ref-1b-painted-ceiling-detail.jpg", line: "A ceiling with fine black hand-painted linework, and the vanity below." },
     { title: "The Dressing", ids: ["dressing"], img: "assets/refs/wardrobe-ref-3-steel-leaded-doors-closeup.jpg", line: "Lit white-glass wardrobes in steel frames, and a folding mirror." },
-    { title: "The Fabric", ids: ["veneer", "doors", "lighting"], img: "assets/refs/door-ref-1.jpg", line: "One veneer, warm cream paint, three identical doors, and every light on one dimmer plan." },
   ].map((ch, i) => {
     const c = tally(ch.ids.flatMap(itemsOf)), n = c.brief + c.open + c.final;
     return `<article class="scard" style="--i:${i}"><div class="ph" ${bg(ch.img)}></div><div class="body">
@@ -125,7 +124,7 @@ function overview() {
       <p class="prose">${esc(ch.line)}</p><span class="mono" style="font-size:11px;color:var(--dim)">${c.final} of ${n} final</span>
       <div class="meta">${ch.ids.map((id) => `<a class="btn" href="#${id}">${esc(titleOf(id))}</a>`).join("")}</div></div></article>`;
   }).join("");
-  const stack = `<section class="section" style="padding-bottom:0">${head("The book", "Five chapters. One room.", "The study, the bedroom, the dressing room, the bathroom — and the materials that hold them together.")}</section>
+  const stack = `<section class="section" style="padding-bottom:0">${head("The book", "Four rooms. One book.", "The study, the bedroom, the bathroom and the dressing room — each drawn, specified and decided on its own page.")}</section>
     <section class="stack"><div class="stack-bg"><video class="stack-video" muted loop playsinline preload="none" poster="media/hero-poster.jpg" aria-hidden="true"><source src="media/hero.mp4" type="video/mp4"></video></div><div class="stack-cards">${chapters}</div></section>
     <section class="section">${head("The index", "Every section, and where it stands.")}<div class="wrap"><div class="ledger reveal">${allTabIds().map((id, i) => {
       const c = tally(itemsOf(id)), n = c.brief + c.open + c.final;
