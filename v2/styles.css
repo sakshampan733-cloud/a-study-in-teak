@@ -101,7 +101,6 @@ body.menu-open .menu-bottom { opacity: 1; transition: opacity .6s var(--smooth) 
 .menu-link:first-of-type { margin-top: 0; }
 
 /* ── a section opening: centred eyebrow over a 32 px condensed headline ───────── */
-.statement { padding: 160px 20px 200px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px; }
 .eyebrow { font: 400 14px/1.2 var(--mono); letter-spacing: -0.02em; text-transform: uppercase; }
 .headline { font: 400 32px/1.05 var(--cond); letter-spacing: -0.02em; text-transform: uppercase; max-width: 22ch; }
 .prose { max-width: 50ch; font: 400 14px/1.4 var(--grotesk); letter-spacing: -0.02em; margin-top: 8px; }

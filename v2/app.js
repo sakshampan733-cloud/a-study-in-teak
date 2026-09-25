@@ -140,8 +140,7 @@
   // ═════════════ PIECE 2 — navigation, menu, scroll, decode (design/spec-piece2.md) ═════════════
   // Nothing here is needed for the entrance, so its scripts load after it has started instead of competing
   // with it for the connection: on a phone-speed network that brings the entrance forward by seconds.
-  function loadRest(done) {
-    const srcs = ["../data.js", "vendor/ScrollTrigger.min.js", "vendor/lenis.min.js"];
+  function loadRest(done, srcs = ["../data.js", "vendor/ScrollTrigger.min.js", "vendor/lenis.min.js"]) {
     let left = srcs.length;
     for (const src of srcs) {
       const el = document.createElement("script");
@@ -170,7 +169,7 @@
     // ── smooth scroll: the reference's own Lenis settings ─────────────────────────
     let lenis = null;
     if (window.Lenis && !reduced) {
-      lenis = new Lenis({ duration: 1.4, smoothWheel: true, wheelMultiplier: 1.6 });
+      lenis = window.__lenis = new Lenis({ duration: 1.4, smoothWheel: true, wheelMultiplier: 1.6 });
       if (window.ScrollTrigger) lenis.on("scroll", ScrollTrigger.update);
       gsap.ticker.add((t) => lenis.raf(t * 1000));
       gsap.ticker.lagSmoothing(0);
@@ -254,5 +253,8 @@
     try { runEntrance(hero); }
     catch (e) { console.error("entrance failed, showing static", e); root.classList.remove("js"); hero.dataset.intro = "complete"; hero.dataset.media = "poster"; }
   }
-  loadRest(initSite);
+  // then the pages below the hero: the drawings (sheets, the 3D room) and the renderer (pages.js)
+  const PAGES = ["../drawings/kit.js", "../drawings/iso.js", "../drawings/roomshell.js", "../drawings/door.js", "../drawings/desk.js", "../drawings/studywall.js", "../drawings/architrave.js", "../drawings/casingb.js", "../drawings/rightwall.js", "../drawings/partitionglass.js", "../drawings/bed.js", "../drawings/leftwall.js", "../drawings/doorveneer.js", "../drawings/vanity.js", "../drawings/partition3d.js", "../drawings/model3d.js",
+    "../plans/plans.js", "pages.js"];
+  loadRest(() => { initSite(); loadRest(() => {}, PAGES); });
 })();

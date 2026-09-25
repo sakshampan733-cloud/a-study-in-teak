@@ -9,7 +9,9 @@
   <link rel="preload" href="fonts/cond-900.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/grotesk.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/mono.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="icon" href="../favicon.svg">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="pages.css">
   <style>html { background: #0b0b0b; color: #edebe7; }</style>
   <!-- Hide the entrance from the very first paint, so the black hold is black even on a slow connection, and
        fetch the entrance's own scripts here, watching the bytes arrive. The page opens, static and readable
@@ -110,12 +112,9 @@
       </div>
     </section>
 
-    <section class="statement" aria-labelledby="st-h">
-      <div class="eyebrow" data-decode>The book</div>
-      <h2 class="headline" id="st-h" data-decode>Five chapters. One room.</h2>
-      <p class="prose">The study, the bedroom, the dressing room, the bathroom — and the materials that hold them together.</p>
-    </section>
+    <div id="page"></div>
   </main>
+  <div id="lightbox" hidden></div>
 
   <!-- the entrance's scripts (gsap, SplitText, ScrambleText, app.js) are fetched and run by the head script;
        app.js fetches data.js, ScrollTrigger and Lenis once the entrance is under way -->
