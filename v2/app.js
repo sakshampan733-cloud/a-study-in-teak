@@ -256,5 +256,16 @@
   // then the pages below the hero: the drawings (sheets, the 3D room) and the renderer (pages.js)
   const PAGES = ["../drawings/kit.js", "../drawings/iso.js", "../drawings/roomshell.js", "../drawings/door.js", "../drawings/desk.js", "../drawings/studywall.js", "../drawings/architrave.js", "../drawings/casingb.js", "../drawings/rightwall.js", "../drawings/partitionglass.js", "../drawings/bed.js", "../drawings/leftwall.js", "../drawings/doorveneer.js", "../drawings/vanity.js", "../drawings/partition3d.js", "../drawings/model3d.js",
     "../plans/plans.js", "pages.js"];
-  loadRest(() => { initSite(); loadRest(() => {}, PAGES); });
+  // On the overview they wait for the hero's reveal (or 4 s), so ~20 drawing scripts never compete with the
+  // video for the line; a link straight to a room page loads them at once.
+  const loadPages = () => { if (!loadPages.done) { loadPages.done = true; loadRest(() => {}, PAGES); } };
+  const deep = location.hash && location.hash !== "#overview";
+  loadRest(() => {
+    initSite();
+    if (deep || root.classList.contains("is-ready")) return loadPages();
+    const mo = new MutationObserver(() => { if (root.classList.contains("is-ready")) { mo.disconnect(); loadPages(); } });
+    mo.observe(root, { attributes: true, attributeFilter: ["class"] });
+    setTimeout(() => { mo.disconnect(); loadPages(); }, 4000);
+    addEventListener("hashchange", loadPages, { once: true });
+  });
 })();
