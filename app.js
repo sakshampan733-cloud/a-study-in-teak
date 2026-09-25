@@ -163,7 +163,7 @@ function overview() {
     ["SHARED WALL", "9 ft 3 in — with the bedroom"],
     ["CEILING", "9 ft 1 in plain · 10 ft 0 in at the dome (centre)"],
     ["WARDROBES", "Left and right · 3 ft modules · up to 9 ft 0 in"],
-    ["THE TUNNEL", "Behind a hidden cupboard door · 3 ft 6 in × 7 ft 8 in"],
+    ["THE TUNNEL", "Behind a hidden cupboard door · 3 ft × 7 ft 8 in"],
   ] : [["STATUS", "First pass — see the Dressing tab"]];
   const dressing = `<section class="section">${head("The dressing room", "First pass, from a sketch. Drag it about.")}
     <div class="wrap"><div class="plan-grid reveal"><div class="panel" style="padding:12px"><div class="m3d" id="dress3d"></div></div>

@@ -23,12 +23,12 @@ window.DRESSING3D = (function () {
       + `<text x="${x + 80}" y="${(y0 + y1) / 2}" font-size="${T}" fill="${RED}" stroke="none" font-family="Helvetica" font-weight="700">${label}</text>`;
     return `<g stroke="${RED}" fill="none" stroke-width="16">` +
       runH(-260, 0, K.w, ft(K.w) + " — SHARED WALL") +
-      runV(K.w + 260, 0, K.d, ft(K.d) + " DEEP (ASSUMED)") +
+      runV(K.w + 260, 0, K.d, ft(K.d) + " DEEP") +
       `</g>`;
   }
 
   function build() {
-    const K = window.DRESS || { w: 2819, d: 3048, t: 115, bath: { w: 762 }, wd: { w: 914, d: 711 }, tun: { w: 1067, l: 2337 }, hWd: 2743 };
+    const K = window.DRESS || { w: 2819, d: 3759, t: 115, bath: { w: 762 }, wd: { w: 914, d: 711 }, tun: { w: 914, l: 2337 }, hWd: 2743 };
     const W = K.w, D = K.d, P = [];
     // four plain walls, open top (no ceiling, so the camera can look in and down)
     P.push({ id: "front", w: W, h: H, cls: "plain", tf: `translate3d(0px,0px,0px)` });
