@@ -592,11 +592,18 @@ function render(delayMotion = 0) {
   // the rooms band holds the screen while the three cards come in one after another, side by side (not on phones)
   window.__stackST?.kill(); window.__stackST = null;
   const band = main.querySelector(".stack");
-  if (band && window.gsap && window.ScrollTrigger && !document.body.classList.contains("reduced") && innerWidth >= 768) {
+  if (band && window.gsap && window.ScrollTrigger && !document.body.classList.contains("reduced")) {
     const tl = gsap.timeline({ defaults: { ease: "power2.out", duration: 1 } });
-    band.querySelectorAll(".scard").forEach((c, i) => tl.fromTo(c, { autoAlpha: 0, yPercent: 24 }, { autoAlpha: 1, yPercent: 0 }, i * 0.9));
-    tl.to({}, { duration: 0.9 });   // hold the full row a moment before the band scrolls on
-    window.__stackST = ScrollTrigger.create({ trigger: band, start: "top top", end: "bottom bottom", scrub: 0.6, animation: tl });
+    if (innerWidth >= 768) {
+      band.querySelectorAll(".scard").forEach((c, i) => tl.fromTo(c, { autoAlpha: 0, yPercent: 24 }, { autoAlpha: 1, yPercent: 0 }, i * 0.9));
+      tl.to({}, { duration: 0.9 });   // hold the full row a moment before the band scrolls on
+    } else {
+      // phones: the row is wider than the screen, so the scroll carries it sideways — still side by side
+      band.classList.add("is-track");
+      const track = band.querySelector(".stack-cards");
+      tl.to(track, { x: () => -(track.scrollWidth - innerWidth), ease: "none", duration: 3 });
+    }
+    window.__stackST = ScrollTrigger.create({ trigger: band, start: "top top", end: "bottom bottom", scrub: 0.6, animation: tl, invalidateOnRefresh: true });
   }
   onScroll();
   if (pendingItem) { const it = pendingItem; pendingItem = null; setTimeout(() => { const el = document.getElementById(it); if (el) window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - 70, behavior: "smooth" }); }, 500); }

@@ -39,6 +39,12 @@
 
 
   const nav = document.querySelector(".nav");
+  // If the browser won't start a video by itself (iPhone Low Power Mode, data saver), the poster shows and the
+  // video starts on the visitor's first touch, click or key — a gesture always lets it play.
+  const playOnGesture = (v) => {
+    const go = () => { v.play().catch(() => {}); ["touchend", "pointerdown", "keydown"].forEach((t) => removeEventListener(t, go, true)); };
+    ["touchend", "pointerdown", "keydown"].forEach((t) => addEventListener(t, go, { capture: true, passive: true }));
+  };
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // ── the intro timeline (reference: Z + re) ──────────────────────────────────
@@ -127,7 +133,7 @@
         if (source?.dataset.src) source.src = source.dataset.src;
         video.preload = "auto"; video.load();
         fallback = setTimeout(posterForNow, X.videoFallbackDelayMs);
-        video.play().catch(toPoster);
+        video.play().catch((e) => { if (e && e.name === "NotAllowedError") { posterForNow(); playOnGesture(video); } else toPoster(); });
       }, Math.max(0, videoAt - Date.now()));
     };
     video.addEventListener("playing", () => setMedia("playing"));
@@ -248,7 +254,7 @@
     // the page opened static (the scripts were late): still start the loop once it arrives, over its poster
     hero.dataset.intro = "complete"; hero.dataset.media = "poster"; root.classList.add("is-ready");
     const v = hero.querySelector(".hero-video"), src = v?.querySelector("source[data-src]");
-    if (src && !reduced) { src.src = src.dataset.src; v.preload = "auto"; v.load(); v.play().catch(() => {}); }
+    if (src && !reduced) { src.src = src.dataset.src; v.preload = "auto"; v.load(); v.play().catch(() => playOnGesture(v)); }
   }
   else if (hero) {
     try { runEntrance(hero); }

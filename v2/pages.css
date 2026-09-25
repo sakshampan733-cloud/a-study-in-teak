@@ -425,9 +425,15 @@ body.sheets-dark .lb-inner.is-dwg svg { filter: invert(1) hue-rotate(180deg) bri
 
 @media print { .nav, .menu, .hero, .footer, .next { display: none !important; } }
 
-/* phones: no hold — the three rooms stacked in a column */
+/* phones: the three rooms stay side by side in one row, carried sideways as the band is scrolled
+   (.is-track, set by pages.js); without the script they simply stack */
 @media (max-width: 767px) {
   .stack { height: auto; }
   .stack-pin { position: relative; height: auto; padding: 64px 0; }
   .stack-cards { --h: 470px; grid-template-columns: minmax(0, 1fr); padding: 0 16px; }
+  .stack.is-track { height: 280vh; }
+  .stack.is-track .stack-pin { position: sticky; top: 0; height: 100vh; padding: 0; }
+  .stack.is-track .stack-cards { --h: min(470px, 64vh); display: flex; width: max-content; max-width: none; margin: 0; gap: 12px; padding: 0 11vw; }
+  .stack.is-track .scard { flex: 0 0 78vw; }
+  .stack-cards .scard .body { padding-top: calc(var(--h) * .28); gap: 12px; }
 }
