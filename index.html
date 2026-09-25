@@ -1,64 +1,16 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="Cache-Control" content="no-cache" />
-  <meta name="theme-color" content="#0b0b0b" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0b0b">
   <title>A Study in Teak</title>
-  <link rel="icon" href="favicon.svg" />
-  <link rel="alternate icon" href="favicon.svg" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400&family=Inter:wght@400&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet" />
-  <script>window.__t0 = performance.now(); try { if (sessionStorage.getItem("seen") || matchMedia("(prefers-reduced-motion: reduce)").matches) document.documentElement.classList.add("skip-loader"); } catch (e) {}</script>
-  <link rel="stylesheet" href="styles.css?v=20260923191900" />
+  <link rel="icon" href="favicon.svg">
+  <!-- The front door: the redesigned site lives in v2/. Links into the old site (#study, #veneer …) carry
+       straight across; the first build stays at classic.html. -->
+  <script>location.replace("v2/" + location.search + location.hash);</script>
+  <meta http-equiv="refresh" content="0; url=v2/">
+  <style>html, body { margin: 0; background: #0b0b0b; } a { color: #edebe7; font: 14px/1 monospace; }</style>
 </head>
-<body>
-  <!-- load: the mark blurs into focus on the void, then lifts away -->
-  <div id="loader" aria-hidden="true">
-    <div class="loader-mark"></div>
-    <div class="loader-word">A STUDY IN TEAK</div>
-  </div>
-
-  <div class="ticker" id="ticker"></div>
-
-  <header class="nav">
-    <a class="btn" id="navHome" href="#overview"><span>Overview</span></a>
-    <button class="btn" id="menuBtn" aria-expanded="false"><span>Menu</span><i class="burger"></i></button>
-  </header>
-
-  <div id="menu" aria-hidden="true">
-    <div class="menu-mark"></div>
-    <nav id="menuLinks"></nav>
-    <div class="menu-foot">
-      <button class="btn" id="printBtn">Print this sheet</button>
-      <span class="tally-line" id="menuTally"></span>
-      <a class="btn" href="https://github.com/sakshampan733-cloud/a-study-in-teak" target="_blank" rel="noopener">Repository</a>
-    </div>
-  </div>
-
-  <main id="main"></main>
-  <div id="lightbox" hidden></div>
-
-  <script src="data.js?v=20260923191900"></script>
-  <script src="drawings/kit.js?v=20260923191900"></script>
-  <script src="drawings/iso.js?v=20260923191900"></script>
-  <script src="drawings/roomshell.js?v=20260923191900"></script>
-  <script src="drawings/door.js?v=20260923191900"></script>
-  <script src="drawings/desk.js?v=20260923191900"></script>
-  <script src="drawings/studywall.js?v=20260923191900"></script>
-  <script src="drawings/architrave.js?v=20260923191900"></script>
-  <script src="drawings/casingb.js?v=20260923191900"></script>
-  <script src="drawings/rightwall.js?v=20260923191900"></script>
-  <script src="drawings/partitionglass.js?v=20260923191900"></script>
-  <script src="drawings/bed.js?v=20260923191900"></script>
-  <script src="drawings/leftwall.js?v=20260923191900"></script>
-  <script src="drawings/doorveneer.js?v=20260923191900"></script>
-  <script src="drawings/vanity.js?v=20260923191900"></script>
-  <script src="drawings/partition3d.js?v=20260923191900"></script>
-  <script src="drawings/model3d.js?v=20260923191900"></script>
-  <script src="plans/plans.js?v=20260923191900"></script>
-  <script src="app.js?v=20260923191900"></script>
-</body>
+<body><noscript><a href="v2/">A Study in Teak</a></noscript></body>
 </html>
