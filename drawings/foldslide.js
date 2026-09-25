@@ -115,10 +115,10 @@ window.DRAWINGS = window.DRAWINGS || {};
     "C — while it folds, it stands about 1 ft 6 in into the room; once slid in, the corridor is clear.",
     "The tunnel bay works the same way; in A and B its folded pair can slide right back into the",
     "   tunnel, out of sight.",
-    "OPEN — A, B or C."]]
+    "CHOSEN — C, confirmed by the owner. A and B are kept here for reference."]]
     .forEach((col, c) => col.forEach((n, i) => (s += text(18 + c * 172, 238 + i * 4.4, n, { size: 1.5, fill: n.startsWith("OPEN") ? RED : INK }))));
 
   s += titleBlock({ title: "END-BAY DOORS", sub: "Dressing room · three ways to open", date: "26.09.2026",
-    rev: "2 — replaces the flat fold, which cannot be built", dwg: "AST-DR-026", scale: `1:${sc1} AND 1:${sc2} @ A3` });
+    rev: "3 — option C chosen", dwg: "AST-DR-026", scale: `1:${sc1} AND 1:${sc2} @ A3` });
   window.DRAWINGS.foldslide = { title: "End-bay doors — three ways to open · AST-DR-026", svg: sheet(s), model: true };
 })();

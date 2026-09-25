@@ -162,13 +162,12 @@ function overview() {
   const dressFacts = K ? [
     ["SHARED WALL", "9 ft 3 in — with the bedroom"],
     ["CEILING", "9 ft 1 in plain · 10 ft 0 in at the dome (centre)"],
-    ["WARDROBES", "Left and right · 3 ft modules · up to 9 ft 0 in"],
+    ["WARDROBES", "Left and right · 3 ft 1 in bays · 2 ft 3 in deep · 9 ft 0 in"],
     ["THE TUNNEL", "Behind a hidden cupboard door · 3 ft × 7 ft 8 in"],
   ] : [["STATUS", "First pass — see the Dressing tab"]];
-  const dressing = `<section class="section">${head("The dressing room", "First pass, from a sketch. Drag it about.")}
-    <div class="wrap"><div class="plan-grid reveal"><div class="panel" style="padding:12px"><div class="m3d" id="dress3d"></div></div>
-    <div class="panel"><div class="facts">${dressFacts.map(([k, v]) => `<div class="k">${esc(k)}</div><div class="v">${esc(v)}</div>`).join("")}</div>
-    <a class="btn" href="#dressing" style="margin-top:16px">Full layout, drawing and notes</a></div></div></div></section>`;
+  const dressing = `<section class="section">${head("The dressing room", "From the owner's sketch.")}
+    <div class="wrap reveal"><div class="panel"><div class="facts">${dressFacts.map(([k, v]) => `<div class="k">${esc(k)}</div><div class="v">${esc(v)}</div>`).join("")}</div>
+    <a class="btn" href="#dressing" style="margin-top:16px">Full layout, drawing and notes</a></div></div></section>`;
 
   return hero + bone + statement + stack + row + plan + dressing + footer();
 }
@@ -194,8 +193,6 @@ function mountModel() {
   if (el && window.MODEL3D) { try { model = window.MODEL3D.mount(el); } catch (e) { console.error("model3d:", e); el.innerHTML = `<div class="empty">Model unavailable</div>`; } }
   const pel = document.getElementById("p3d");
   if (pel && window.PARTITION3D) { try { window.PARTITION3D.mount(pel, { tv: true }); } catch (e) { console.error("partition3d:", e); pel.innerHTML = `<div class="empty">Model unavailable</div>`; } }
-  const del = document.getElementById("dress3d");
-  if (del && window.DRESSING3D) { try { window.DRESSING3D.mount(del); } catch (e) { console.error("dressing3d:", e); del.innerHTML = `<div class="empty">Model unavailable</div>`; } }
 }
 
 function nextLink(id) {
@@ -298,7 +295,6 @@ function tabPage(t) {
         <div class="gallery reveal${i.refs.length < 3 ? " few" : ""}">${i.refs.map((r) => `<figure class="shot" data-open="img:${esc(r.src)}"><div class="frame"><img src="${esc(r.src)}" alt="" loading="lazy"></div><figcaption>${esc(r.caption)}</figcaption></figure>`).join("")}</div>` : ""}
       ${sheets(i.drawings || i.drawing)}
       ${i.model3d ? `<div class="wrap"><div class="m3d p3d" id="p3d"></div></div>` : ""}
-      ${i.dressing3d ? `<div class="wrap"><div class="m3d p3d" id="dress3d"></div></div>` : ""}
       ${pointers(i.id)}
       ${i.notes?.length ? `<div class="asks reveal"><span class="eyebrow">Notes</span><ul class="ask-list notes">${i.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul></div>` : ""}
       ${i.questions?.length ? `<div class="asks reveal"><span class="eyebrow">Open questions</span><ul class="ask-list">${i.questions.map((q, n) => `<li><span class="badge">Q${pad2(n + 1)}</span><span>${esc(q)}</span></li>`).join("")}</ul></div>` : ""}

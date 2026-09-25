@@ -575,7 +575,7 @@ window.PROJECT = {
       items: [
         {
           id: "dressing-shape", name: "Room & Layout", status: "open",
-          drawings: ["dressingshell"], dressing3d: true,
+          drawings: ["dressingshell"],
           parts: [
             { label: "Doorway", value: "The 9 ft 3 in wall shared with the bedroom carries ONE door: D2, the existing door in from the bedroom (AST-DR-000), sitting 2 ft 4 in from the right-hand corner to its frame — measured on both sides of the wall. The bathroom door is not on this wall; it is in the LEFT wall. The mirror is on the far wall, 12 ft 4 in away." },
             { label: "Bathroom door", value: "D3 is in the LEFT wall, at the bedroom end — not in the bedroom wall, as two earlier passes had it. The sketch runs 9 ft 4 in of wall down from the far corner and then opens the door, with 12 ft 4 in over the whole wall, which leaves a 3 ft zone for it. The leaf itself is still not fixed." },
@@ -586,7 +586,7 @@ window.PROJECT = {
           questions: [
             "Where does the 7 ft 8 in tunnel lead, and what is it for?",
             "D3's exact position along the front wall, and D2's position on this sheet checked against AST-DR-000.",
-            "The dome's own shape: how far along the room it runs, and its profile (circular, segmental) — the 3D model shows it schematically as a flat 9 ft 1 in ceiling for now, not yet the true curve.",
+            "The dome's own shape: how far along the room it runs, and its profile (circular, segmental).",
           ],
         },
         {
@@ -616,9 +616,10 @@ window.PROJECT = {
           ],
         },
         {
-          id: "end-bay-doors", name: "End-Bay Doors", status: "open",
+          id: "end-bay-doors", name: "End-Bay Doors", status: "final",
           video: { src: "assets/video/dressing-endbay-foldin.mp4", poster: "assets/video/dressing-endbay-foldin.jpg", caption: "Three ways, one after another. A — folds into the cupboard, parks at the mirror end. B — folds into the cupboard, parks at the front end. C — folds out like the owner's photo, then slides back into the cupboard. Each one plays its whole movement three times: from the doorway, looking into the bay, and from above. Red line = the front of the wardrobe." },
           parts: [
+            { label: "Chosen", value: "OPTION C — CONFIRMED by the owner. The doors fold outward like the photo, then slide back into the cupboard. A and B stay in the video for reference." },
             { label: "What it does (A and B)", value: "Closed, it is an ordinary double door, the same as every other bay. To open, the pair folds INWARD at the centre joint — the triangle goes into the cupboard, never into the room — and the folded pair then pushes straight back along the side panel. Nothing ever passes the front of the wardrobe, so the free-standing mirror cannot be touched, whichever way it parks." },
             { label: "Centre hinge — where", value: "Between the two leaves, full height, on the INSIDE face (the cupboard side). Putting it on the inside is what makes the pair fold inward. From the room you only see a hairline joint down the middle, like the meeting line on every other bay." },
             { label: "Centre hinge — type", value: "One continuous piano hinge the full height of the leaf, in brass. The leaves are steel and glass, so they are heavy; a continuous hinge carries the weight along its whole length and stops the pair twisting. (Four heavy concealed hinges would also work, but the piano hinge is stiffer.)" },
@@ -629,8 +630,20 @@ window.PROJECT = {
             { label: "Option C", value: "Folds OUTWARD like the owner's photo, then slides back into the cupboard. The pair folds out into the room at the front end of the bay — so here the centre hinge goes on the OUTSIDE (room) face — and once folded, the carriage carries the pair straight back into the cupboard along the side panel, the same runner as A and B. Open, the bay is clear and the doors are tucked away inside. It crosses the front of the wardrobe only while folding, at the front end, well away from the mirror." },
             { label: "Inside the bay", value: "The parked pair takes about 3 in along the side it parks against. Stop the hanging rail about 4 in short of that side panel and everything else in the bay is unaffected." },
           ],
+        },
+        {
+          id: "hidden-door", name: "The Hidden Door", status: "open",
+          video: { src: "assets/video/dressing-hidden-door.mp4", poster: "assets/video/dressing-hidden-door.jpg", caption: "The tunnel bay, start to finish, three times: from the room, looking into the tunnel, and from above. The Option C doors fold out and slide in; the shelves behind them are the hidden door." },
+          parts: [
+            { label: "What happens", value: "Open the tunnel bay like any other (Option C: fold out, slide in). What you see at the back is a set of shelves. That is the hidden door. Push it and it swings into the tunnel, on a hinge at its LEFT edge, and comes to rest flat against the tunnel's left wall — where its shelves line up with the shelves already fixed along that wall, so the run looks complete and the tunnel is open." },
+            { label: "Hinge — where", value: "On the LEFT edge of the tunnel mouth, looking into the tunnel from the dressing room — the side the tunnel's own shelves are on. Vertical, full height." },
+            { label: "Hinge — type", value: "A pivot hinge, not ordinary butt hinges: a pin set in the floor that carries the weight, and a matching pin at the top. A door carrying shelves is heavy, and loaded shelves heavier still; a floor pivot takes that load straight down so the door never sags or drags." },
+            { label: "The catch", value: "No handle. A push-to-open touch latch on the RIGHT edge — push the shelves and the door releases. Closed, nothing gives it away." },
+            { label: "Shelves", value: "The shelves on the door are at exactly the same heights and the same depth as the shelves on the tunnel's left wall, so once the door is open they read as one continuous run. Drawn here as plain boards; their design is still open." },
+            { label: "What it leaves", value: "Door plus shelves is about 1 ft deep. The tunnel is 3 ft wide, so about 2 ft stays clear to walk through. The first 3 ft of the left wall, where the door lands, must stay empty — the tunnel's own shelves begin just after it." },
+          ],
           questions: [
-            "A, B or C? All three end up tucked inside the bay. A and B fold into the cupboard; C folds out into the room first, like the photo."
+            "Shelf heights and design, inside the door and along the tunnel — the video only shows plain boards.",
           ],
         },
         {
