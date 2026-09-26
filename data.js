@@ -14,11 +14,15 @@ window.PROJECT = {
 
   // Materials: the one veneer used across the room, plus solid wood for solid pieces.
   master: {
-    veneer: { value: "", status: "open", options: [], rule: "Chosen by look from the veneer catalogue, not by wood species.",
-              refs: [{ src: "assets/refs/veneer-ref-1-curved-walnut-gloss.jpg", caption: "Reference for veneer, grain, colour and polish — rich dark walnut-toned veneer with a straight, flowing grain and a soft gloss (not decided)" }] },
-    grain:  { value: "", status: "brief", options: ["Crown cut", "Quarter cut / straight", "Book-matched", "Slip-matched"] },
-    polish: { value: "", status: "brief", options: ["Matte PU", "Satin PU", "High-gloss PU", "Melamine", "Hand-rubbed / French polish"], rule: "Must match the solid teak desk." },
-    tone:   { value: "", status: "brief", options: ["Natural", "Warm / honeyed", "Dark stained"], rule: "Must match the solid teak desk." },
+    veneer: { value: "Royal Oak (lot OHBF-624) — its pattern, not its raw colour", status: "final", options: ["Royal Oak (grain) stained to Dark Diva Crown (colour)"],
+              rule: "CONFIRMED by the owner: the grain of Royal Oak — tight, straight, quarter-cut, almost no figure — finished with a dark stain to reach the colour of Dark Diva Crown (lot OHBF-607), not oak's own pale honey tone. Covers the three main doors (dressing, bathroom, third), the wardrobe, and the study shelf — one veneer, one tone, one polish, as the room's own rule requires.",
+              refs: [
+                { src: "assets/refs/veneer-royal-oak-OHBF-624.jpg", caption: "Royal Oak, lot OHBF-624 — the grain and pattern to use (raw colour shown is not the target)" },
+                { src: "assets/refs/veneer-dark-diva-crown-OHBF-607-color-target.jpg", caption: "Dark Diva Crown, lot OHBF-607 — the colour to stain Royal Oak toward, not its own pattern" },
+              ] },
+    grain:  { value: "Quarter cut / straight", status: "final", options: ["Crown cut", "Quarter cut / straight", "Book-matched", "Slip-matched"], rule: "Royal Oak's own grain — tight and quiet, chosen specifically because Dark Diva Crown's crown-cut pattern was too busy." },
+    polish: { value: "Satin to semi-gloss PU", status: "final", options: ["Matte PU", "Satin PU", "High-gloss PU", "Melamine", "Hand-rubbed / French polish"], rule: "Must match the solid teak desk." },
+    tone:   { value: "Dark stained — to Dark Diva Crown's colour", status: "final", options: ["Natural", "Warm / honeyed", "Dark stained"], rule: "Must match the solid teak desk." },
     // Solid timber, for pieces that are not veneered.
     wood:   { value: "Teak", status: "final", options: ["Teak"], usedFor: ["Desk"] },
     // The floor the whole scheme sits on.
@@ -497,13 +501,15 @@ window.PROJECT = {
           id: "tv-unit", name: "TV Unit / Side Drawers", status: "brief",
           refs: [
             { src: "assets/refs/bedwall-ref-5-parchment-cabinet-dark-room.jpg", caption: "Reference — parchment-fronted cabinet glowing against dark walls" },
+            { src: "assets/refs/veneer-9292-cream-burl.jpg", caption: "CONFIRMED veneer — sample 9292, the pale cream burl" },
+            { src: "assets/refs/veneer-9292-polish-gloss-reference.jpg", caption: "CONFIRMED polish — high gloss, shinier than the rest of the room" },
           ],
           parts: [
             { label: "Reference", value: "The parchment cabinet: the look for a piece under the TV, but in a drawer style rather than doors." },
             { label: "What it is", value: "", hint: "A drawer unit under the TV, or side drawers — not decided" },
             { label: "Design", value: "", hint: "How the drawers look — not decided" },
-            { label: "Veneer", inherit: "veneer" },
-            { label: "Polish", inherit: "polish" },
+            { label: "Veneer", value: "CONFIRMED — sample 9292, a pale cream burl, NOT the room's master veneer. Chosen specifically for drawer/table tops, where its pattern reads as one contained feature rather than a repeated surface — see the reference photos above." },
+            { label: "Polish", value: "CONFIRMED — high-gloss, shinier than the rest of the room's satin/semi-gloss — see the reference photos above." },
             { label: "Dimensions", value: "" },
             { label: "Services", value: "", hint: "Sockets, cable routing, set-top box space" },
           ],
@@ -514,12 +520,14 @@ window.PROJECT = {
           drawings: ["bed"],
           refs: [
             { src: "assets/refs/bed-ref-1-low-platform-bed.jpg", caption: "Bed reference (Newberry Projects) — low bed with a thick upholstered base, wide wooden side ledge as a bedside table, aged metal-leaf panels behind" },
+            { src: "assets/refs/veneer-9292-cream-burl.jpg", caption: "CONFIRMED — the bedside ledges are sample 9292, high gloss, not the room's master veneer" },
           ],
           parts: [
             { label: "Reference", value: "Low, deep bed with a thick fabric-covered base and cushion; a wide plank-like wooden ledge runs out beside it as the bedside table; behind, a framed screen of aged copper/metal-leaf panels." },
             { label: "Design", value: "", hint: "Frame, legs, storage (hydraulic / drawers / none)" },
             { label: "Veneer", inherit: "veneer" },
             { label: "Polish", inherit: "polish" },
+            { label: "Ledge veneer", value: "CONFIRMED — sample 9292 (the pale cream burl, see reference above), not the room's master veneer, in a high-gloss polish. Same choice as the TV unit's drawer tops." },
             { label: "Size", value: "6 ft × 6 ft, measured, centred on an 8 ft bed back — so the back shows 1 ft either side of it. The base and mattress heights are still assumed until the mattress is chosen." },
             { label: "Bed back", value: "The partition's shape brought to the bed wall: a straight run behind the bed and a tight curl at each end turning 2 ft forward into the room, with a bedside ledge inside each curl. 8 ft overall and set on exactly the same two lines as the partition." },
             { label: "Setting out", value: "Both the bed and the partition moved 6 in to the right, so each sits 2 ft 11 in off the right wall. At the bed wall: the entrance door opens flat over the first 3 ft, then 1 ft 7 in clear, then the 8 ft bed back, then 2 ft 11 in. Either side of the bed: 5 ft 4 in and 3 ft 8 in. The partition line is 8 ft from the study wall, which is 11 ft from the bed wall, leaving 3 ft 9 in of walkway at the foot of the bed." },
@@ -549,16 +557,19 @@ window.PROJECT = {
         {
           id: "partition", name: "Partition", status: "open",
           refs: [
-            { src: "assets/refs/partition-ref-2-backlit-glass-grid-panels.jpg", caption: "New direction — tall backlit textured glass panels in a dark grid of iron (or wood) mullions, lit from behind" },
+            { src: "assets/refs/partition-ref-2-backlit-glass-grid-panels.jpg", caption: "Option A — tall backlit textured glass panels in a dark grid of iron (or wood) mullions, lit from behind" },
+            { src: "assets/refs/veneer-9292-cream-burl.jpg", caption: "Option B — sample 9292, the pale cream burl, as one dramatic veneered surface instead of glass" },
           ],
           parts: [
             { label: "SCRAPPED", value: "The whole earlier design is withdrawn at the owner's request: the console-height leaded-glass composition (outer/inner rectangle, cross corners), the curved 55° end bays, the television built into it, the drawer question. None of it carries forward. The old geometry (about 8 ft across, set out from the right wall) is gone with it — nothing is fixed about where the partition sits any more." },
-            { label: "New direction", value: "Fresh idea, not yet a design: a wall of backlit panels behind a dark grid, like the reference — tall rectangular bays of glowing textured glass (or fabric/parchment) held in a grid of dark mullions (iron or wood), lit from behind so the whole wall glows evenly. Where the partition sits, its size, and whether it still needs to carry a television are all open again." },
+            { label: "Option A — backlit glass", value: "Tall rectangular bays of glowing textured glass (or fabric/parchment) held in a grid of dark mullions (iron or wood), lit from behind so the whole wall glows evenly." },
+            { label: "Option B — veneer burl", value: "The owner is also considering sample 9292 here — the same pale cream burl going on the tables and drawers — as one single dramatic surface. A partition is one feature, not a repeated module like the wardrobe doors, so the busy pattern that was wrong for 28 wardrobe leaves could work as the room's one big burl moment. Would be finished to match 9292's high gloss." },
           ],
           questions: [
+            "Glass (Option A) or veneer (Option B) for the partition — still open.",
             "Does the partition still need to hold the television, now that the design is starting over?",
-            "Panel material behind the glow — glass, fabric, or parchment — and mullion material, iron or wood?",
-            "Where the partition sits and how big it is: to be re-measured once a direction is chosen.",
+            "If glass: panel material behind the glow, and mullion material, iron or wood.",
+            "Where the partition sits and how big it is: to be re-measured once a direction is chosen — see the Bed item for the layout question this feeds into.",
           ],
         },
       ],
@@ -672,6 +683,9 @@ window.PROJECT = {
         {
           id: "vanity", name: "Vanity", status: "open",
           drawings: ["vanity", "vanity-b", "vanity-c", "vanity-drawer"],
+          refs: [
+            { src: "assets/refs/veneer-9292-cream-burl.jpg", caption: "CONFIRMED veneer — sample 9292, the pale cream burl, same as the bedroom's tables and drawers" },
+          ],
           parts: [
             { label: "Size", value: "5 ft long, 2 ft deep, 33 in to the top of the marble (1524 × 610 × 838). It stands 6 in clear of the floor on a support set back under the middle." },
             { label: "The problem", value: "The faucet was plumbed 6 in right of centre, for a marble shelf on the left that is no longer wanted. The bowl has to sit under the faucet, so something has to make that position look deliberate." },
@@ -680,7 +694,7 @@ window.PROJECT = {
             { label: "The drawer within", value: "The big drawer hides a second, shallower drawer at the top of the opening, on its own runners fixed to the cabinet (AST-DR-022). Open the big drawer and the inner one stays put; pull it and it slides out behind the big front, over the bottles — like the tray in a kitchen pan drawer. The big drawer\'s sides stop low so it can pass beneath. The inner one is a U-box too, so the pipe clears it; its front has a finger scoop in the top edge. Below it, 255 mm clear for tall bottles." },
             { label: "Basin & tap", value: "A vessel bowl sitting on the marble, and a wall spout — drawn Ø16 in × 5 in, both assumed. On a 33 in counter the bowl's rim is at 38 in: stand at that height once before the marble is cut." },
             { label: "Counter", value: "The beige-gold bathroom marble: an 18 slab on a 20 BWP sub-top, with a mitred 38 apron so the front reads 1½ in, oversailing the carcass 1 in." },
-            { label: "Carcass & fronts", value: "Teak veneer on 18 BWP / marine ply, every edge sealed; solid teak lipping on the fronts. Hung on a ply cleat on the wall. Undermount runners, push-to-open on the drawers." },
+            { label: "Carcass & fronts", value: "CONFIRMED — sample 9292 (the pale cream burl, see reference — same as the bedroom's tables and drawers), in high gloss, on 18 BWP / marine ply, every edge sealed — a wet area, so the ply core stays moisture-resistant regardless of veneer. Solid teak lipping on the fronts. Hung on a ply cleat on the wall. Undermount runners, push-to-open on the drawers." },
             { label: "Fittings", value: "Chrome — already bought. Brass and gold were priced out for the bathroom, so this is the one place in the room that breaks from the brass rule. Cup pulls on the doors only — the drawers have no handles and open with a push." },
             { label: "Support", value: "", hint: "The block under the middle — its design comes from reference photos, still to send" },
             { label: "A concept, parked for later", value: "A seamless push-to-open niche in the marble top: press a point on the plain surface and a section (about an inch deep) recesses to reveal hidden storage — phone, hand towels. Not being worked on yet." },
