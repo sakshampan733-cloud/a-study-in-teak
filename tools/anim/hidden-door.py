@@ -59,10 +59,10 @@ for a, b in ((0.96, 1.408), (1.412, 1.86)):
 LEVELS = [0.02, 0.45, 0.85, 1.25, 1.65, 2.05]
 SD, DT = 0.26, 0.04       # shelf depth 10¼ in, door/backing 1½ in — 11¾ in overall
 # The door is thick, so its far corner swings on a bigger radius than the door is wide. At full width
-# (894) that radius is 943 — 29 mm into the tunnel's right wall. So the door is made 845 wide and a
-# fixed 64 upright fills the rest of the mouth on the right; the corner then clears the wall by 15 mm.
-L_ = 0.845
-assert math.hypot(DT + SD, L_) <= TY - 0.015, "the door corner would hit the right wall"
+# (894) that radius is 943 — 29 mm into the tunnel's right wall. So the door is made 810 wide and a
+# fixed 99 upright fills the rest of the mouth on the right; the corner then clears the wall by 2 in (50).
+L_ = 0.810
+assert math.hypot(DT + SD, L_) <= TY - 0.050, "the door corner comes within 2 in of the right wall"
 
 # the tunnel's own shelves, on its LEFT wall, carrying on past where the door will land
 S0 = TX0 + L_ + 0.01
@@ -170,7 +170,7 @@ fw = 36 / 19; fh = fw * 9 / 16
 box("stripT", -fw, fh / 2 - 0.135, -1.01, fw, fh, -1.005, DARK, hud)
 box("stripB", -fw, -fh, -1.01, fw, -fh / 2 + 0.105, -1.005, DARK, hud)
 caption("THE HIDDEN DOOR  ·  TUNNEL BAY  ·  OPTION C", 0, fh / 2 - 0.045, 0.036, WHITE)
-caption("Hinged on the LEFT. The door is 2¾ in narrower than the opening, with a fixed upright on the right, so its corner clears the wall.",
+caption("Hinged on the LEFT. The door is 4 in narrower than the opening, with a fixed upright on the right — its corner clears the wall by 2 in.",
         0, -fh / 2 + 0.028, 0.019, (0.85, 0.85, 0.85))
 caption("Push the shelves — they are the door into the tunnel", 0, -fh / 2 + 0.072, 0.026, WHITE)
 steps = ["1   Closed — the tunnel bay reads as an ordinary double door",
