@@ -28,7 +28,7 @@ const DRESS = {
   d3: { w: 762, from: 2845 },
 
   wd: { w: 940, d: 686 },       // wardrobe bays — each wall divided equally, about 3 ft 1 in; 2 ft 3 in deep. CONFIRMED (AST-DR-025)
-  mirror: { c: 510, w: 369, deg: 45, t: 25, off: 20 },  // trifold: centre frame 1 ft 8¾ in (1 ft 5½ in glass), wings 1 ft 2½ in (12 in glass) at 45° — AST-DR-027
+  mirror: { c: 674, w: 253, deg: 45, t: 25, off: 20 },  // trifold, FINAL: centre frame 2 ft 2½ in (2 ft 0 in glass), wings 10 in (7½ in glass) at 45° — AST-DR-027
   tun: { w: 914, l: 2337 },     // the tunnel — 3 ft wide, 7 ft 8 in long, running east. CONFIRMED
   hSide: 2769,      // 9 ft 1 in — plain ceiling over the left and right sides, as the main room. CONFIRMED
   hDome: 3048,      // 10 ft 0 in — the domed centre, floor to the dome. CONFIRMED

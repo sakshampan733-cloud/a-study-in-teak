@@ -57,10 +57,15 @@ for a, b in ((0.96, 1.408), (1.412, 1.86)):
 
 # shelves: straight boards at fixed heights, the same inside the door and along the tunnel wall
 LEVELS = [0.02, 0.45, 0.85, 1.25, 1.65, 2.05]
-SD, DT = 0.26, 0.04       # shelf depth, door/backing thickness
+SD, DT = 0.26, 0.04       # shelf depth 10¼ in, door/backing 1½ in — 11¾ in overall
+# The door is thick, so its far corner swings on a bigger radius than the door is wide. At full width
+# (894) that radius is 943 — 29 mm into the tunnel's right wall. So the door is made 845 wide and a
+# fixed 64 upright fills the rest of the mouth on the right; the corner then clears the wall by 15 mm.
+L_ = 0.845
+assert math.hypot(DT + SD, L_) <= TY - 0.015, "the door corner would hit the right wall"
 
 # the tunnel's own shelves, on its LEFT wall, carrying on past where the door will land
-S0 = TX0 + TY + 0.01
+S0 = TX0 + L_ + 0.01
 box("tunBack", TX0, TY - DT, 0, TX1, TY, H, SHELF)
 for z in LEVELS:
     box("ts", S0, TY - DT - SD, z, TX1, TY - DT, z + 0.022, SHELF)
@@ -70,13 +75,15 @@ for x in (S0, TX1 - 0.02):
 # the hidden door: hinged on the LEFT edge of the tunnel mouth, shelves facing the room when closed
 hinge = bpy.data.objects.new("hinge", None); sc.collection.objects.link(hinge)
 hinge.location = (TX0, TY, 0)
-L_ = TY - 0.02
 box("door", -DT, -L_, 0, 0, -0.005, H, SHELF, hinge)
 for z in LEVELS:
     box("ds", -DT - SD, -L_, z, -DT, -0.02, z + 0.022, SHELF, hinge)
 for yy in (-0.02, -L_):
     box("du", -DT - SD, yy - 0.02, 0, -DT, yy, H, SHELF, hinge)
 box("hk", -0.015, -0.015, 0.05, 0.015, 0.015, H - 0.05, BRASS, hinge)     # the hinge line, in brass
+# the fixed upright on the right of the mouth — the door closes against it; the touch latch is on it
+box("stile", TX0 - DT - SD, 0, 0, TX0, TY - L_ - 0.005, H, SHELF)
+box("latch", TX0 - DT - SD - 0.004, TY - L_ - 0.03, 1.05, TX0 - DT - SD, TY - L_ - 0.01, 1.15, BRASS)
 
 # ── option C doors on the bay front: fold outward, then slide back in
 def leaf(name, w, sy, knuckle=False):
@@ -163,7 +170,7 @@ fw = 36 / 19; fh = fw * 9 / 16
 box("stripT", -fw, fh / 2 - 0.135, -1.01, fw, fh, -1.005, DARK, hud)
 box("stripB", -fw, -fh, -1.01, fw, -fh / 2 + 0.105, -1.005, DARK, hud)
 caption("THE HIDDEN DOOR  ·  TUNNEL BAY  ·  OPTION C", 0, fh / 2 - 0.045, 0.036, WHITE)
-caption("The door is hinged on the LEFT side of the tunnel mouth. Shelves are drawn as plain boards — indicative only.",
+caption("Hinged on the LEFT. The door is 2¾ in narrower than the opening, with a fixed upright on the right, so its corner clears the wall.",
         0, -fh / 2 + 0.028, 0.019, (0.85, 0.85, 0.85))
 caption("Push the shelves — they are the door into the tunnel", 0, -fh / 2 + 0.072, 0.026, WHITE)
 steps = ["1   Closed — the tunnel bay reads as an ordinary double door",

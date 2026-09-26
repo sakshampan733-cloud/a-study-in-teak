@@ -46,10 +46,10 @@ window.DRAWINGS = window.DRAWINGS || {};
   window.DK.begin("mirror");
   let s = frame();
 
-  const CG = 446, CF = CG + 2 * FRAME, DEG = 45;                       // centre glass 1 ft 5½ in (was 2 ft 3 in — owner wanted wider wings) → frame 1 ft 8¾ in
+  const CG = 610, CF = CG + 2 * FRAME, DEG = 45;                       // FINAL: centre glass 2 ft 0 in → frame 2 ft 2½ in; wings take whatever is left
   const WF = ((FOOT - CF) / 2 - T * Math.sin(DEG * Math.PI / 180)) / Math.cos(DEG * Math.PI / 180);
   const OPTS = [geo(CF, Math.round(WF), DEG)];
-  s += heading(18, 18, "DRESSING MIRROR — TRIFOLD", `CONFIRMED · CENTRE GLASS ${ftin(CG)} · WING GLASS 12 IN · WINGS AT 45° · WHOLE FRAME INSIDE 3 FT 6 IN`, 220);
+  s += heading(18, 18, "DRESSING MIRROR — TRIFOLD", `CONFIRMED · CENTRE GLASS ${ftin(CG)} · WINGS AS WIDE AS THE 3 FT 6 IN ALLOWS · 45° · WHOLE FRAME INSIDE 3 FT 6 IN`, 220);
   OPTS.forEach((g, k) => {
     const oy = 80, v = view(128, oy, 5, "Mirror plan"), th = v.w(0.12);
     s += text(128, oy - 18, "PLAN — FROM ABOVE", { size: 2.6, anchor: "middle", weight: 700 });
@@ -60,8 +60,8 @@ window.DRAWINGS = window.DRAWINGS || {};
     s += chainV([v.Y(0), v.Y(g.depth)], v.X(HF) + 7, [`${Math.round(g.depth)}`], { from: v.X(HF), size: 1.2 });
     s += text(v.X(g.hx + g.w * g.u[0] / 2), v.Y(g.depth) + 5, `WING ${g.w}`, { size: 1.4, anchor: "middle" });
     s += text(v.X(-g.hx - g.w * g.u[0] / 2), v.Y(g.depth) + 5, `WING ${g.w}`, { size: 1.4, anchor: "middle" });
-    s += text(v.X(g.hx + g.w * 0.95) + 1.5, v.Y(T) + 3.2, `${g.deg}°`, { size: 1.7, fill: RED, weight: 700 });
-    s += text(v.X(-g.hx - g.w * 0.95) - 1.5, v.Y(T) + 3.2, `${g.deg}°`, { size: 1.7, fill: RED, weight: 700, anchor: "end" });
+    s += text(v.X(g.hx + g.w * 0.45), v.Y(T) + 3.6, `${g.deg}°`, { size: 1.7, fill: RED, weight: 700 });
+    s += text(v.X(-g.hx - g.w * 0.45), v.Y(T) + 3.6, `${g.deg}°`, { size: 1.7, fill: RED, weight: 700, anchor: "end" });
     // front view beside it, 1:25
     const ve = view(320, 44, 25, "Mirror front"), te = ve.w(0.12);
     s += ve.g(front(g, te), 0.3);
@@ -86,17 +86,17 @@ window.DRAWINGS = window.DRAWINGS || {};
   });
 
   s += heading(18, 226, "NOTES", "CONFIRMED", 220);
-  [["CONFIRMED by the owner: centre glass 2 ft 3 in, wings at 45°, and the whole frame — wings angled —",
-    "   inside 3 ft 6 in across (the red dashed box). All three panels 9 ft tall, level with the wardrobes.",
-    "Wider wings, as asked: 12 in of glass each. That takes the centre down to about 1 ft 5½ in of",
-    "   glass — a real trade against the wide centre view. If it reads too narrow, a 10 in wing keeps",
-    "   the centre closer to 1 ft 8½ in."],
+  [["CONFIRMED by the owner: wings at 45°, and the whole frame — wings angled — inside 3 ft 6 in across",
+    "   (the red dashed box). All three panels 9 ft tall, level with the wardrobes.",
+    "FINAL: centre glass 2 ft 0 in; the wings take everything the 3 ft 6 in frame has left at 45° —",
+    "   about 7½ in of glass each. Only two things would give bigger wings: a slimmer frame (¾ in",
+    "   frame → about 9¼ in), or a steeper angle (60° → about 11¼ in)."],
    ["The wings need a fixed stop at 45°. Opened any flatter, the frame gets wider than 3 ft 6 in.",
     "Hinges: two continuous piano hinges on the back, one at each joint, in the frame finish.",
     "Free-standing, centred on the far wall. 7½ in of floor either side, clear of the folding",
     "   end-bay doors, which come out only about 3 in at this depth. Frame finish still open."]]
     .forEach((col, c) => col.forEach((n, i) => (s += text(18 + c * 172, 238 + i * 4.6, n, { size: 1.55 }))));
-  s += titleBlock({ title: "DRESSING MIRROR", sub: "Trifold · confirmed", date: "26.09.2026", rev: "4 — centre glass 2 ft 3 in, wings at 45°", dwg: "AST-DR-027", scale: "1:5 AND 1:25 @ A3" });
+  s += titleBlock({ title: "DRESSING MIRROR", sub: "Trifold · confirmed", date: "26.09.2026", rev: "5 — FINAL: centre glass 2 ft 0 in, wings at 45°", dwg: "AST-DR-027", scale: "1:5 AND 1:25 @ A3" });
   window.DRAWINGS.mirror = { title: "Dressing mirror — trifold · AST-DR-027", svg: sheet(s), model: true };
   window.MIRROR_NUMS = OPTS.map((g) => ({ deg: g.deg, foot: Math.round(g.foot), depth: Math.round(g.depth) }));
 })();
