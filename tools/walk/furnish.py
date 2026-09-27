@@ -174,18 +174,47 @@ def wardrobe(name, x0, x1, sf, sb, hidden=False):
 for i in range(3):
     wardrobe(f"wdN{i}", nx0 + i * wN, nx0 + (i + 1) * wN, DR["s0"] + WDd, DR["s0"])
 for i in range(4):
-    wardrobe(f"wdS{i}", DR["x0"] + i * wS, DR["x0"] + (i + 1) * wS, DR["s1"] - WDd, DR["s1"], hidden=(i == 3))
-# the hidden door: the last bay at the tunnel end. From the room it reads as one more pair of wardrobe doors;
-# push it and it swings back into the tunnel — 2 ft 8 in wide, hinged on the left, a fixed 4 in upright on the right
-hx0 = DR["x0"] + 3 * wS
+    if i < 3: wardrobe(f"wdS{i}", DR["x0"] + i * wS, DR["x0"] + (i + 1) * wS, DR["s1"] - WDd, DR["s1"])
+# ── the tunnel bay (the last bay on the right, at the far end) ──
+# Its doors are Option C (AST-DR-026): a pair that folds OUT into the room at the end nearest the bedroom,
+# then slides straight back into the cupboard. Behind them the back of the bay is a set of shelves — that is
+# the hidden door: pushed, it swings into the tunnel on a floor pivot at its LEFT edge (looking into the
+# tunnel), 2 ft 8 in wide with a fixed 4 in upright on the right, and lies flat against the tunnel's left wall.
+tb0, tb1, tfront = DR["x0"] + 3 * wS, DR["x1"], DR["s1"] - WDd
+wR = (tb1 - tb0 - 40 - 36) / 2
+def leafC(name):
+    e = bpy.data.objects.new(name, None); sc.collection.objects.link(e)
+    o_ = fbox(name + "_p", 0, 0, 100, wR, 20, WDh - 10, CLAY2)        # local: along +x, 20 thick into the cupboard (south)
+    o_.location = (0, 0, 0); o_.parent = e
+    return e
+LA, LB = leafC("tbA"), leafC("tbB")
+P0 = Vector(((tb0 + 20) / 1000, -tfront / 1000, 0))
+SLIDE = 0.39
+def pose_pair(alpha, sl):
+    Pp = P0 + Vector((0, -sl, 0))                                    # slides south, into the cupboard
+    dA = Vector((math.cos(alpha), math.sin(alpha), 0))               # A folds out, north, into the room
+    LA.location = Pp; LA.rotation_euler = (0, 0, alpha)
+    Hh = Pp + dA * (wR / 1000)
+    LB.location = Hh; LB.rotation_euler = (0, 0, -alpha)
+fbox("tb_track", tb0 + 10, tfront - 12, WDh - 10, tb1 - 10, tfront + 10, WDh, METAL)
+fbox("tb_runner", tb0 + 10, tfront, WDh - 10, tb0 + 34, tfront + SLIDE * 1000 + 40, WDh, METAL)
+for x0_ in (tb0, tb1 - 18): fbox(f"tb_side{x0_}", x0_, tfront, 0, x0_ + 18, DR["s1"], WDh, CLAY)
+fbox("tb_top", tb0, tfront, WDh - 18, tb1, DR["s1"], WDh, CLAY)
+# the hidden door, hinged at the tunnel mouth's left (far-wall) corner, on the tunnel side of the wall
+TS, THh = DR["s1"] + T, TUN["h"]
+LEVELS = [20, 450, 850, 1250, 1650, 2050]
 hd = bpy.data.objects.new("hidden_door", None); sc.collection.objects.link(hd)
-hd.location = P(hx0 + 6, DR["s1"] - WDd, 0); bpy.context.view_layer.update()
-hw = (DR["x1"] - 6) - (hx0 + 6) - 102
-parts = [fbox("hd_face_l", hx0 + 6, DR["s1"] - WDd, 100, hx0 + 6 + hw / 2 - 3, DR["s1"] - WDd + 20, WDh - 10, CLAY2),
-         fbox("hd_face_r", hx0 + 6 + hw / 2 + 3, DR["s1"] - WDd, 100, hx0 + 6 + hw, DR["s1"] - WDd + 20, WDh - 10, CLAY2)]
-fbox("hd_upright", DR["x1"] - 108, DR["s1"] - WDd, 100, DR["x1"] - 6, DR["s1"] - WDd + 20, WDh - 10, CLAY2)
-for o_ in parts:
-    o_.parent = hd; o_.matrix_parent_inverse = hd.matrix_world.inverted()
+hd.location = P(tb1, TS, 0); bpy.context.view_layer.update()
+hdw = 810
+parts = [fbox("hd_body", tb1 - hdw, TS - 40, 0, tb1, TS, THh - 10, CLAY2)]
+for z in LEVELS: parts.append(fbox(f"hd_s{z}", tb1 - hdw, TS - 300, z, tb1 - 20, TS - 40, z + 22, CLAY))
+for xe in (tb1 - hdw, tb1 - 40): parts.append(fbox(f"hd_u{xe}", xe, TS - 300, 0, xe + 20, TS - 40, THh - 10, CLAY))
+parts.append(fbox("hd_pivot", tb1 - 30, TS - 30, 0, tb1 - 5, TS - 5, THh, METAL))
+for o_ in parts: o_.parent = hd; o_.matrix_parent_inverse = hd.matrix_world.inverted()
+fbox("hd_upright", tun["x0"], TS - 300, 0, tb1 - hdw - 5, TS, THh - 10, CLAY)
+# the tunnel's own shelves on its left wall, starting just past where the door lands
+for z in LEVELS: fbox(f"tun_s{z}", tb1 - 300, TS + hdw + 20, z, tb1 - 40, tun["s1"], z + 22, CLAY)
+fbox("tun_back", tb1 - 40, TS + hdw + 20, 0, tb1, tun["s1"], THh, CLAY2)
 # the trifold mirror, free-standing, centred on the far (east) wall
 mc = (DR["s0"] + DR["s1"]) / 2; mxf = DR["x1"] - 20; mxb = mxf - 25
 fbox("mirror_c", mxb, mc - 337, 0, mxf, mc + 337, WDh, DARK)
@@ -194,6 +223,12 @@ for i, sg in enumerate((-1, 1)):
     ang = math.pi / 4; p0 = (mxb, mc + sg * 337); p1 = (mxb - 253 * math.sin(ang), mc + sg * (337 + 253 * math.cos(ang)))
     band(f"mirror_w{i}", [p0, p1], 25, 0, WDh, DARK)
 
+# a stretch of corridor outside the front door, so the tour can start there (its layout is not drawn — neutral)
+cxw = xLb_ - T
+fbox("cor_floor", cxw - 2800, 4250, -150, cxw, 6250, 0, FLOOR)
+fbox("cor_wallN", cxw - 2800, 4250 - 120, 0, cxw, 4250, H, WALL); fbox("cor_wallS", cxw - 2800, 6250, 0, cxw, 6250 + 120, H, WALL)
+fbox("cor_wallW", cxw - 2920, 4130, 0, cxw - 2800, 6370, H, WALL); fbox("cor_ceil", cxw - 2920, 4130, H, cxw, 6370, H + 150, CEIL)
+area("L_cor", cxw - 2800, 4250, cxw, 6250, 120)
 # light: the partition now splits the bedroom, so each half gets its own ceiling light; the windows glow
 for o_ in [o for o in sc.objects if o.name == "L_bed"]: bpy.data.objects.remove(o_)
 area("L_study", 0, 0, xRr, yP, 300); area("L_bedz", 0, yP, xRr, Lb, 340)
@@ -213,79 +248,92 @@ labels_hide = [o for o in sc.objects if o.name.startswith("lbl_")]
 for o in labels_hide: o.hide_render = True; o.hide_viewport = True
 for o in [ceiling, *ceiling.children]: o.hide_render = False
 
-# ── the tour ───────────────────────────────────────────────────────────────────
-EYE = 1650
-def tour_cameras():
-    walk = cam("walk", 20)
+# ── the tour: calm stops at standing eye height, a pause at each, no orbit ─────
+EYE, LENS = 1650, 21
+STOPS = [  # name, camera (x, s[, z]), looking at (x, s, z), hold frames, what happens while it holds
+    ("door", (-2400, 5258), (-177, 5258, 1150), 48, "d1"),
+    ("in", (350, 5150), (3300, 3500, 1000), 30, None),
+    ("tv", (1000, 4500), (2340, 2450, 1050), 36, None),
+    (None, (2340, 3250, 1750), (2340, 5000, 700), 0, None),
+    ("bed", (4000, 2950), (2200, 5400, 650), 39, None),
+    (None, (4150, 2400), (2500, 1000, 1200), 0, None),
+    ("study", (4000, 1650), (1600, 0, 1300), 39, None),
+    ("window", (3940, 1650), (3940, 0, 1350), 33, None),
+    ("book", (1900, 1150), (700, 0, 1300), 33, None),
+    ("desk", (650, 900), (2340, 2000, 800), 36, None),
+    (None, (500, 2400), (500, 4000, 1300), 0, None),
+    (None, (700, 3350), (3000, 3300, 1300), 0, None),
+    (None, (2340, 3250), (4600, 4300, 1300), 0, None),
+    ("d2", (4000, 4450), (5600, 4500, 1350), 36, "d2"),
+    ("dress", (5000, 4450), (8400, 4356, 1500), 36, None),
+    ("dome", (5900, 4380), (7800, 4356, 3000), 27, None),
+    ("mech", (6900, 3900), (8100, 5550, 1200), 260, "mech"),
+    ("tunnel", (7700, 4650), (8100, 7800, 1250), 36, None),
+    (None, (6000, 4050), (5158, 2000, 1500), 0, None),
+    ("d3", (5158, 3700), (5158, 1500, 1500), 36, "d3"),
+    ("bath", (5250, 2400), (8200, 600, 1300), 39, None),
+    ("corner", (8150, 450), (5200, 2400, 1100), 39, None),
+    ("pier", (6000, 700), (7450, 2400, 1100), 33, None),
+    ("wc", (7000, 1450), (4777, 600, 1300), 36, None),
+    ("end", (6600, 1550), (5158, 2718, 1200), 30, None),
+]
+def ease(t): t = max(0.0, min(1.0, t)); return t * t * (3 - 2 * t)
+
+def animate():
+    walk = cam("walk", LENS)
     tgt = bpy.data.objects.new("look", None); sc.collection.objects.link(tgt)
     con = walk.constraints.new("TRACK_TO"); con.target = tgt; con.track_axis = "TRACK_NEGATIVE_Z"; con.up_axis = "UP_Y"
-    return walk, tgt
-ORB = 90
-K = [(0, (-1300, 5258), (2000, 4600, 1200)),
-     (40, (450, 5000), (2600, 4950, 800)),        # in at the entrance: the bed from its side
-     (85, (700, 4200), (2340, 5500, 700)),        # the bed and its curved back
-     (125, (700, 3600), (2340, 2500, 1100)),      # the partition, the TV, the drawers
-     (165, (550, 2750), (600, 800, 1400)),        # round the partition's left end
-     (205, (700, 1750), (2500, 1650, 850)),       # the desk, in the partition's curve
-     (250, (850, 1500), (900, 0, 1500)),          # the bookcase
-     (295, (3950, 2150), (1700, 0, 1350)),        # the whole study wall
-     (335, (4080, 1950), (3800, 0, 1500)),        # the window and its curtain
-     (370, (4150, 3000), (4100, 4700, 1300)),     # round the partition's right end
-     (405, (4150, 4350), (4700, 4620, 1400)),     # D2
-     (450, (5300, 4450), (8536, 4356, 1900)),     # into the dressing: the mirror
-     (490, (6300, 4356), (7500, 4356, 3100)),     # the dome
-     (530, (7250, 4450), (8067, 5400, 1200)),     # the hidden door
-     (575, (7700, 4550), (8079, 8000, 1300)),     # through it, the tunnel
-     (620, (6100, 4300), (5158, 2000, 1500)),     # back towards the bathroom
-     (665, (5158, 3700), (5158, 1500, 1500)),     # D3
-     (715, (5260, 1950), (5500, 200, 1400)),      # in: the far wall and the window
-     (770, (5750, 1800), (8350, 1100, 1300)),     # the east wall
-     (825, (6350, 1450), (7450, 2650, 1100)),     # the pier
-     (880, (6350, 1300), (4777, 650, 1300)),      # the WC wall and its 7 in wall
-     (935, (6050, 1250), (4950, 2650, 1300)),     # back to the door
-     (970, (6050, 1250), (4950, 2650, 1300))]
-DOORS = {"door_d1": (5, 35), "door_d2": (385, 425), "door_d3": (640, 680)}
-
-def animate(walk, tgt, orb):
-    for i, fr in enumerate(range(1, ORB + 1, 10)):
-        a = math.radians(-65 + 120 * (fr - 1) / (ORB - 1))
-        orb.location = centre + Vector((14 * math.cos(a), 14 * math.sin(a), 13 - 2 * (fr - 1) / (ORB - 1)))
-        aim(orb, centre + Vector((0, 0, 0.3)))
-        orb.keyframe_insert("location", frame=fr); orb.keyframe_insert("rotation_euler", frame=fr)
-    for o in [ceiling, *ceiling.children]:
-        o.hide_render = True; o.keyframe_insert("hide_render", frame=1)
-        o.hide_render = False; o.keyframe_insert("hide_render", frame=ORB + 1)
-    for fr, (x, s_), t in K:
-        walk.location = P(x, s_, EYE); tgt.location = P(*t)
-        walk.keyframe_insert("location", frame=ORB + 1 + fr); tgt.keyframe_insert("location", frame=ORB + 1 + fr)
-    for d in doors:
-        f0, f1 = DOORS[d.name]; rot = d["open"]
-        d.rotation_euler.z = 0; d.keyframe_insert("rotation_euler", index=2, frame=1); d.keyframe_insert("rotation_euler", index=2, frame=ORB + 1 + f0)
-        d.rotation_euler.z = rot; d.keyframe_insert("rotation_euler", index=2, frame=ORB + 1 + f1)
-    hd.rotation_euler.z = 0; hd.keyframe_insert("rotation_euler", index=2, frame=ORB + 1 + 520)
-    hd.rotation_euler.z = math.radians(-92); hd.keyframe_insert("rotation_euler", index=2, frame=ORB + 1 + 560)
-    sc.frame_start, sc.frame_end = 1, ORB + 1 + K[-1][0]
-    mk = sc.timeline_markers.new("orbit", frame=1); mk.camera = orb
-    mk = sc.timeline_markers.new("walk", frame=ORB + 1); mk.camera = walk
-    sc.camera = orb
+    f, prev, marks, acts = 1, None, {}, {}
+    for name, cp, tp, hold, act in STOPS:
+        pos = Vector(P(cp[0], cp[1], cp[2] if len(cp) > 2 else EYE))
+        if prev is not None:
+            d = (pos - prev[0]).length + 0.5 * (Vector(P(*tp)) - prev[1]).length
+            f += max(30, int(d / 0.05))                             # the page's height, not the frame count, sets the pace
+        walk.location = pos; tgt.location = P(*tp)
+        walk.keyframe_insert("location", frame=f); tgt.keyframe_insert("location", frame=f)
+        if name: marks[name] = f
+        if hold:
+            if act: acts[act] = (f, f + hold)
+            f += hold
+            walk.keyframe_insert("location", frame=f); tgt.keyframe_insert("location", frame=f)
+        prev = (pos, Vector(P(*tp)))
+    end = f
+    # doors: each opens while the camera waits in front of it
+    for dname, key in (("door_d1", "d1"), ("door_d2", "d2"), ("door_d3", "d3")):
+        d = sc.objects[dname]; a, b = acts[key]; rot = d["open"]
+        d.rotation_euler.z = 0; d.keyframe_insert("rotation_euler", index=2, frame=1); d.keyframe_insert("rotation_euler", index=2, frame=a + 10)
+        d.rotation_euler.z = rot; d.keyframe_insert("rotation_euler", index=2, frame=min(b, a + 55))
+    # the tunnel bay: fold out, slide in, then the shelves swing into the tunnel — keyed every frame
+    a, b = acts["mech"]
+    seg = [15, 65, 50, 25, 75]                                          # wait, fold, slide, look, swing
+    c = [a]
+    for x in seg: c.append(c[-1] + x)
+    for fr in range(1, end + 1):
+        if fr < c[1]: al, sl, sw = 0, 0, 0
+        elif fr < c[2]: al, sl, sw = ease((fr - c[1]) / seg[1]), 0, 0
+        elif fr < c[3]: al, sl, sw = 1, ease((fr - c[2]) / seg[2]), 0
+        elif fr < c[4]: al, sl, sw = 1, 1, 0
+        else: al, sl, sw = 1, 1, ease((fr - c[4]) / seg[4])
+        if fr in (1, c[1], c[5], end) or c[1] <= fr <= c[5]:
+            pose_pair(math.radians(90) * al, SLIDE * sl); hd.rotation_euler.z = math.radians(90) * sw
+            for o in (LA, LB): o.keyframe_insert("location", frame=fr); o.keyframe_insert("rotation_euler", frame=fr)
+            hd.keyframe_insert("rotation_euler", index=2, frame=fr)
+    sc.frame_start, sc.frame_end = 1, end
+    sc.camera = walk
+    return marks, end
 
 if MODEF == "stills":
     for d in doors: d.rotation_euler.z = d["open"]
-    hd.rotation_euler.z = math.radians(-92)
+    pose_pair(math.radians(90), SLIDE); hd.rotation_euler.z = math.radians(90)
     sc.render.resolution_x, sc.render.resolution_y = 1600, 900
-    shots = [("f_bed", (500, 4700), (2500, 5300, 700)), ("f_partition", (1200, 3900), (2340, 2400, 1100)),
-             ("f_desk", (650, 1700), (2500, 1700, 850)), ("f_study", (3950, 2150), (1700, 0, 1350)),
-             ("f_window", (4080, 1950), (3800, 0, 1500)), ("f_dressing", (5300, 4450), (8536, 4356, 1900)),
-             ("f_hidden", (7250, 4450), (8067, 5400, 1200)), ("f_bath", (5260, 2000), (5600, 200, 1400))]
-    for nm, (x, s_), t in shots:
-        c_ = cam("c_" + nm, 20); c_.location = P(x, s_, EYE); aim(c_, P(*t)); still(nm, c_)
-    for o in [ceiling, *ceiling.children]: o.hide_render = True
-    ax = cam("axon_f", 35); ax.location = centre + Vector((9.0, -13.0, 13.0)); aim(ax, centre + Vector((0, 0.3, 0.5)))
-    still("f_axon", ax)
+    for name, cp, tp, hold, act in STOPS:
+        if not name: continue
+        c_ = cam("c_" + name, LENS); c_.location = P(cp[0], cp[1], cp[2] if len(cp) > 2 else EYE); aim(c_, P(*tp)); still("s_" + name, c_)
 
 if MODEF == "frames":
-    walk, tgt = tour_cameras(); orb = cam("orbit", 30)
-    animate(walk, tgt, orb)
+    marks, end = animate()
+    import json
+    json.dump({"frames": end, "stops": marks}, open(os.path.join(OUTF, "tour.json"), "w"))
     sc.render.resolution_x, sc.render.resolution_y = 1280, 720
     ims = sc.render.image_settings
     ims.file_format = "WEBP"; ims.quality = 72; ims.color_mode = "RGB"

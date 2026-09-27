@@ -511,7 +511,7 @@ body.sheets-dark .lb-inner.is-dwg svg { filter: invert(1) hue-rotate(180deg) bri
 @media (max-width: 760px) { .p2d-bar { padding: 12px; gap: 10px; } .p2d-theme { margin-left: 0; } .p2d-stage { padding: 4px 4px 0; } }
 
 /* the walk-through — a Blender sequence scrubbed by the scroll */
-.walk { position: relative; height: 1100vh; background: var(--void); }
+.walk { position: relative; height: 1100vh; background: var(--void); }   /* walk.js sets the real height from the frame count */
 .walk-pin { position: sticky; top: 0; height: 100vh; overflow: hidden; }
 .walk-cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .walk-top { position: absolute; left: 24px; right: 24px; top: 96px; display: flex; justify-content: space-between; align-items: center; pointer-events: none; }
