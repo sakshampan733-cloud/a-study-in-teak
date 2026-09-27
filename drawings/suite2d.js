@@ -101,13 +101,13 @@
       `<path class="sw" d="M ${f(ax)} ${f(ay)} A ${w} ${w} 0 0 ${sweep} ${f(ox)} ${f(oy)}"/><line class="door" x1="${f(hx)}" y1="${f(hy)}" x2="${f(ox)}" y2="${f(oy)}"/>`;
     o += swing(xLb, D1.y1 - LIN, xLb, D1.y1 - LIN - D1.leaf, xLb + D1.leaf, D1.y1 - LIN, D1.leaf, 0);
     o += swing(DR.x0, D2.y1 - LIN, DR.x0, D2.y1 - LIN - D2.leaf, DR.x0 + D2.leaf, D2.y1 - LIN, D2.leaf, 1);
-    o += swing(D3.x1 - 38, BA.y1, D3.x1 - 38 - D3.leaf, BA.y1, D3.x1 - 38, BA.y1 - D3.leaf, D3.leaf, 1);
+    o += swing(D3.x0 + 38, BA.y1, D3.x0 + 38 + D3.leaf, BA.y1, D3.x0 + 38, BA.y1 - D3.leaf, D3.leaf, 0);   // hinged on the left as you go in
     const dc = (DR.y0 + DR.y1) / 2;
     o += R(DR.x0, dc - 762, DR.x1, dc + 762, "hid");
     o += Tx(700, 3330, "BEDROOM", "rn", { size: 150 }) + Tx((DR.x0 + DR.x1) / 2 - 300, dc - 170, "DRESSING", "rn", { size: 130 }) +
       Tx(BA.x0 + 1700, 560, "BATHROOM", "rn", { size: 130 }) + Tx((TUN.x0 + TUN.x1) / 2 + 40, (TUN.y0 + TUN.y1) / 2, "TUNNEL", "rn", { size: 110, rot: true }) +
       Tx((DR.x0 + DR.x1) / 2 - 300, dc + 10, "DOME ABOVE", "tx2", { size: 85 }) + Tx(xLb + 470, L - 330, "D1", "tx2", { size: 85 }) +
-      Tx(DR.x0 + 330, D2.y1 - 300, "D2", "tx2", { size: 85 }) + Tx(D3.x0 + 300, BA.y1 - 250, "D3", "tx2", { size: 85 });
+      Tx(DR.x0 + 330, D2.y1 - 300, "D2", "tx2", { size: 85 }) + Tx(D3.x0 + 480, BA.y1 - 170, "D3", "tx2", { size: 85 });
     return o;
   }
 
@@ -220,7 +220,7 @@
     s += cl(["bed"], dimH(xLb, cx - bedW / 2, bedFoot + 1250, null, ftin(cx - bedW / 2 - xLb), o) + dimH(cx + bedW / 2, xR, bedFoot + 1250, null, ftin(xR - cx - bedW / 2), o));
     s += cl(["bed"], dimH(doorEnd, bx0, L - 120, null, ftin(bx0 - doorEnd), os) + dimH(bx1, xR, L - 120, null, ftin(xR - bx1), os));
     s += cl(["bed", "partition"], `<line class="cld" x1="${f(cx)}" y1="${f(desk.front - 200)}" x2="${f(cx)}" y2="${f(L + 60)}"/>` + Tx(cx - 45, (cav.yF + bedFoot) / 2, "CENTRELINE", "clt", { size: 62, rot: true }));
-    s += cl(["wardrobes"], dimV(DR.y0 + WD.d, DR.y1 - WD.d, DR.x0 + 1500, null, `${ftin(DR.y1 - DR.y0 - 2 * WD.d)} AISLE`, o));
+    s += cl(["wardrobes"], dimV(DR.y0 + WD.d, DR.y1 - WD.d, DR.x0 + 2650, null, `${ftin(DR.y1 - DR.y0 - 2 * WD.d)} AISLE`, o));
     return s;
   }
 

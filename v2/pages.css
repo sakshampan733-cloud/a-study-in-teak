@@ -509,3 +509,22 @@ body.sheets-dark .lb-inner.is-dwg svg { filter: invert(1) hue-rotate(180deg) bri
 .p2d-key i.k-lt.dash { border-style: dashed; }
 .p2d-key i.k-dash { height: 0; width: 18px; border-top: 2px dashed var(--thin); vertical-align: 3px; }
 @media (max-width: 760px) { .p2d-bar { padding: 12px; gap: 10px; } .p2d-theme { margin-left: 0; } .p2d-stage { padding: 4px 4px 0; } }
+
+/* the walk-through — a Blender sequence scrubbed by the scroll */
+.walk { position: relative; height: 1100vh; background: var(--void); }
+.walk-pin { position: sticky; top: 0; height: 100vh; overflow: hidden; }
+.walk-cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.walk-top { position: absolute; left: 24px; right: 24px; top: 96px; display: flex; justify-content: space-between; align-items: center; pointer-events: none; }
+.walk-top .eyebrow { font-size: 12px; color: rgba(255, 255, 255, .8); text-shadow: 0 1px 12px rgba(0, 0, 0, .35); }
+.walk-hint { font: 400 11px/1 var(--mono); text-transform: uppercase; letter-spacing: -0.02em; color: rgba(255, 255, 255, .7); }
+.walk-cap { position: absolute; left: 24px; bottom: 44px; max-width: min(560px, 80vw); padding: 16px 20px; border-radius: 10px;
+  background: rgba(11, 11, 11, .55); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); pointer-events: none; }
+.walk-t { font: 400 clamp(22px, 2.4vw, 34px)/1.05 var(--cond); text-transform: uppercase; letter-spacing: -0.02em; color: #fff; }
+.walk-s { margin-top: 8px; font: 400 12px/1.35 var(--mono); text-transform: uppercase; letter-spacing: -0.02em; color: rgba(255, 255, 255, .7); }
+.walk-cap.in .walk-t, .walk-cap.in .walk-s { animation: walkIn .6s var(--ease) both; }
+.walk-cap.in .walk-s { animation-delay: .06s; }
+@keyframes walkIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.walk-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(255, 255, 255, .12); }
+.walk-bar i { position: absolute; inset: 0; background: var(--ember); transform-origin: 0 50%; transform: scaleX(0); }
+@media (max-width: 760px) { .walk { height: 900vh; } .walk-top { top: 84px; left: 16px; right: 16px; } .walk-cap { left: 16px; bottom: 28px; } }
+@media (prefers-reduced-motion: reduce) { .walk-cap.in .walk-t, .walk-cap.in .walk-s { animation: none; } }

@@ -144,8 +144,8 @@ lining_s("lin_d3", d3x0, d3x1, BA["s1"], DR["s0"], oh, (D3["open"] - 686) / 2)
 # ── door leaves, 40 thick, each pivoting on its hinge. rot = the Z turn that swings it fully open.
 DOOR = (0.52, 0.36, 0.22)
 def leaf(name, hx, hs, w, local, rot):
-    """local: 'y' = leaf runs along +Y (north) from the hinge, thickness to −X; '-x' = along −X, thickness to −Y."""
-    x0, x1, y0, y1 = (-0.04, 0, 0, w / 1000) if local == "y" else (-w / 1000, 0, -0.04, 0)
+    """local: 'y' = leaf runs along +Y (north) from the hinge, thickness to −X; '-x' / 'x' = along −X / +X, thickness to −Y."""
+    x0, x1, y0, y1 = {"y": (-0.04, 0, 0, w / 1000), "-x": (-w / 1000, 0, -0.04, 0), "x": (0, w / 1000, -0.04, 0)}[local]
     me = bpy.data.meshes.new(name); z1 = LEAF_H / 1000
     v = [(x0, y0, 0), (x1, y0, 0), (x1, y1, 0), (x0, y1, 0), (x0, y0, z1), (x1, y0, z1), (x1, y1, z1), (x0, y1, z1)]
     me.from_pydata(v, [], [(0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)]); me.update()
@@ -155,7 +155,7 @@ def leaf(name, hx, hs, w, local, rot):
 d3lin = (D3["open"] - 686) / 2
 doors = [leaf("door_d1", xLb, d1s1 - LIN, D1["leaf"], "y", -math.pi / 2),            # entrance: hinged on the bed-wall side, lies flat along the bed wall
          leaf("door_d2", DR["x0"], d2s1 - LIN, D2["leaf"], "y", -math.pi / 2),       # dressing: hinged on the bed-wall side, swings into the dressing
-         leaf("door_d3", d3x1 - d3lin, BA["s1"], 686, "-x", -math.pi / 2)]            # bathroom: hinged on its east jamb, swings into the bathroom
+         leaf("door_d3", d3x0 + d3lin, BA["s1"], 686, "x", math.pi / 2)]              # bathroom: hinged on the LEFT (west) jamb as you go in, swings into the bathroom
 box("glass_win", WIN["x0"], -T / 2 - 6, WIN["sill"], WIN["x1"], -T / 2 + 6, WIN["head"], GLASS)
 box("glass_bwin", BWIN["x0"], -T / 2 - 6, BWIN["sill"], BWIN["x0"] + BWIN["w"], -T / 2 + 6, BWIN["sill"] + BWIN["h"], OPEN)
 
@@ -291,9 +291,10 @@ if MODE == "video":
          (840, (8079, 6900, 1600), (6500, 7000, 1400)),
          (900, (8079, 5300, 1600), (5158, 2400, 1400)),
          (990, (5158, 3550, 1600), (5158, 1400, 1400)),
-         (1080, (5300, 2250, 1600), (7600, 1300, 1300)),
-         (1170, (5550, 1950, 1600), (4777, 500, 1300)),
-         (1230, (5550, 1950, 1600), (4777, 500, 1300))]
+         (1080, (5200, 1800, 1600), (5300, 300, 1400)),     # through D3 and past its open leaf, looking north
+         (1160, (5600, 1700, 1600), (8200, 2300, 1300)),    # turn east: the pier and the east wall
+         (1250, (5700, 1500, 1600), (4777, 300, 1300)),     # turn back to the WC wall, the 7 in wall and the window
+         (1300, (5700, 1500, 1600), (4777, 300, 1300))]
     for fr, p, t in K:
         f = ORB + 1 + fr
         walk.location = P(*p); tgt.location = P(*t)

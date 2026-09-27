@@ -156,6 +156,8 @@ function overview() {
     <div class="wrap"><div class="plan-grid reveal"><div class="panel" style="padding:12px">${plans}</div>
     <div class="panel"><div class="facts">${P.room.facts.map((f) => `<div class="k">${esc(f.k)}</div><div class="v">${esc(f.v)}</div>`).join("")}</div></div></div></div></section>`;
 
+  const walk = `<section class="section" style="padding-bottom:24px">${head("The walk-through", "Scroll, and walk the rooms.", "Rendered in Blender from the drawings — every wall to the inch, every piece where it has been decided. Clay for now; the materials go on next.")}</section>
+    <section class="walk" id="walk"></section>`;
   const plan2d = `<section class="section">${head("The plan", "Switch things on and off.", "The whole suite from above. Show the measurements and the lights, and put each piece of furniture in or take it out, one at a time.")}
     <div class="wrap reveal"><div class="p2d" id="p2d"></div></div></section>`;
 
@@ -170,7 +172,7 @@ function overview() {
     <div class="wrap reveal"><div class="panel"><div class="facts">${dressFacts.map(([k, v]) => `<div class="k">${esc(k)}</div><div class="v">${esc(v)}</div>`).join("")}</div>
     <a class="btn" href="#dressing" style="margin-top:16px">Full layout, drawing and notes</a></div></div></section>`;
 
-  return bone + statement + stack + row + plan + plan2d + dressing + footer();
+  return bone + statement + stack + row + walk + plan + plan2d + dressing + footer();
 }
 
 // ── pages ──
@@ -192,6 +194,8 @@ function mountModel() {
   const el = document.getElementById("m3d");
   model = null;
   if (el && window.MODEL3D) { try { model = window.MODEL3D.mount(el); } catch (e) { console.error("model3d:", e); el.innerHTML = `<div class="empty">Model unavailable</div>`; } }
+  const wel = document.getElementById("walk");
+  if (wel && window.WALK) { try { window.WALK.mount(wel); } catch (e) { console.error("walk:", e); } }
   const qel = document.getElementById("p2d");
   if (qel && window.SUITE2D) { try { window.SUITE2D.mount(qel); } catch (e) { console.error("suite2d:", e); qel.innerHTML = `<div class="empty">Plan unavailable</div>`; } }
   const pel = document.getElementById("p3d");
