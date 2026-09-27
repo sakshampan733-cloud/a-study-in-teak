@@ -31,7 +31,9 @@
   const bedW = 1829, bedL = 1981, BT = 50, bedFoot = L - BT - 10 - bedL;
   // partition: 8 ft, 11 ft off the bed wall. A straight middle, and at each end two matching curves —
   // one turning towards the bed, one towards the desk (the same curve turned through 180°).
-  const pT = 70, PW = 2438 - pT, yP = L - 3353, pR = 664, pTurn = 0.96;   // PW on the centreline, so it is 8 ft over the outside
+  const pT = 70, PW = 2438 - pT, yP = L - 3353, pTurn = 0.96;   // PW on the centreline, so it is 8 ft over the outside
+  const REACH = 381;                                          // each curve comes out 15 in from the common line — both sides (owner, 27.09)
+  const pR = REACH / (1 - Math.cos(pTurn));                   // same 55° turn as before, so the curve radius grows to suit
   const st = PW / 2 - pR * Math.sin(pTurn);                 // half the straight middle
   const reach = pR * (1 - Math.cos(pTurn));                  // how far each curve comes out
   const ri = pR - pT / 2;                                    // the curve's inside face
@@ -154,12 +156,13 @@
       };
       o += side(1) + side(-1);
       o += R(cx - tv.w / 2, yP + pT / 2, cx + tv.w / 2, yP + pT / 2 + tv.d, "tv");
-      o += Tx(cx, cav.yF - 110, "DRAWERS ×4 · TV ABOVE", "tx2", { size: 70 });
+      o += Tx(cx, cav.yF - 110, `DRAWERS ×4 · ${ftin(cav.yF - yP - pT / 2)} DEEP · TV ABOVE`, "tx2", { size: 70 });
       o += `<g class="fdim">` +
-        dimH(cx - PW / 2 - pT / 2, cx + PW / 2 + pT / 2, yP - reach - 250, yP - reach, `${ftin(PW + pT)} PARTITION`, { size: 90 }) +
+        dimH(cx - PW / 2 - pT / 2, cx + PW / 2 + pT / 2, cav.yF + 430, yP, `${ftin(PW + pT)} PARTITION`, { size: 90 }) +
         dimH(cx - cav.half, cx + cav.half, cav.yF + 200, cav.yF, `${ftin(2 * cav.half)} DRAWERS`, { size: 85 }) +
-        dimV(yP + pT / 2, cav.yF, cx + cav.half + 200, cx + cav.half - 60, `${ftin(cav.yF - yP - pT / 2)} DEEP`, { size: 80 }) +
-        dimV(yP - reach - pT / 2, yP + reach + pT / 2, cx - PW / 2 - 330, cx - PW / 2 - 60, ftin(2 * reach + pT), { size: 80 }) + `</g>`;
+        dimV(yP, cav.yF, cx + cav.half + 200, cx + cav.half - 60, `${ftin(reach)} OUT`, { size: 80 }) +
+        dimV(yP - reach, yP, cx - cav.half - 200, cx - cav.half + 60, `${ftin(reach)} OUT`, { size: 80 }) +
+        `<line class="thin" x1="${f(cx - PW / 2 - 300)}" y1="${f(yP)}" x2="${f(cx - PW / 2 + 60)}" y2="${f(yP)}"/>` + `</g>`;
       return o;
     },
     desk() {
@@ -216,7 +219,7 @@
     s += cl(["desk", "partition"], dimV(desk.back, yP - pT / 2, cx - 700, null, ftin(yP - pT / 2 - desk.back), os));
     s += cl(["bed"], dimH(xLb, cx - bedW / 2, bedFoot + 1250, null, ftin(cx - bedW / 2 - xLb), o) + dimH(cx + bedW / 2, xR, bedFoot + 1250, null, ftin(xR - cx - bedW / 2), o));
     s += cl(["bed"], dimH(doorEnd, bx0, L - 120, null, ftin(bx0 - doorEnd), os) + dimH(bx1, xR, L - 120, null, ftin(xR - bx1), os));
-    s += cl(["bed", "partition"], `<line class="cld" x1="${f(cx)}" y1="${f(yP - 900)}" x2="${f(cx)}" y2="${f(L + 60)}"/>` + Tx(cx + 60, yP - 940, "ONE CENTRELINE — BED, TV, PARTITION", "clt", { size: 66, anchor: "start" }));
+    s += cl(["bed", "partition"], `<line class="cld" x1="${f(cx)}" y1="${f(desk.front - 200)}" x2="${f(cx)}" y2="${f(L + 60)}"/>` + Tx(cx - 45, (cav.yF + bedFoot) / 2, "CENTRELINE", "clt", { size: 62, rot: true }));
     s += cl(["wardrobes"], dimV(DR.y0 + WD.d, DR.y1 - WD.d, DR.x0 + 1500, null, `${ftin(DR.y1 - DR.y0 - 2 * WD.d)} AISLE`, o));
     return s;
   }
