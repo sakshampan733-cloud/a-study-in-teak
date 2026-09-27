@@ -443,25 +443,69 @@ body.sheets-dark .lb-inner.is-dwg svg { filter: invert(1) hue-rotate(180deg) bri
 .vid video { display: block; width: 100%; border-radius: 10px; background: #111; }
 .vid figcaption { margin-top: 10px; font-size: 13px; opacity: .7; }
 
-/* the plan with switches — overview, under the 3D room */
-.p2d { position: relative; background: #fff; border-radius: 10px; overflow: hidden; color: var(--void); }
-.p2d-bar { display: flex; flex-wrap: wrap; gap: 10px 28px; padding: 16px 18px; border-bottom: 1px solid rgba(27, 27, 27, .12); }
+/* the plan with switches — overview, under the 3D room. Three looks: light, dark, blueprint. */
+.p2d { --bg: #fff; --ink: #141414; --wall: #141414; --fu: #f1f1ef; --fu3: #e4e4e1; --thin: #9d9d9d; --txt: #6b6b6b; --lbl: #2a2a2a;
+  --dim: #b4532b; --clr: #2c62a8; --lt: #d19a00; --tvc: #141414; --ui: rgba(20, 20, 20, .22); --uiT: #8a8a8a; --uiOn: #141414; --grid: transparent;
+  position: relative; background: var(--bg); border-radius: 10px; overflow: hidden; color: var(--ink); transition: background .5s var(--ease); }
+.p2d[data-theme="dark"] { --bg: #121314; --ink: #ececea; --wall: #ececea; --fu: #202224; --fu3: #2b2e31; --thin: #6c7075; --txt: #9ea2a6; --lbl: #dcdcdc;
+  --dim: #f0915f; --clr: #7fb0ff; --lt: #f3c34e; --tvc: #ececea; --ui: rgba(236, 236, 234, .22); --uiT: #8d9195; --uiOn: #fff; }
+.p2d[data-theme="blue"] { --bg: #0e3d7a; --ink: #e9f1ff; --wall: #e9f1ff; --fu: rgba(233, 241, 255, .07); --fu3: rgba(233, 241, 255, .14); --thin: rgba(233, 241, 255, .5);
+  --txt: #b9cff0; --lbl: #e9f1ff; --dim: #ffd6a3; --clr: #9fe7ff; --lt: #ffd166; --tvc: #e9f1ff; --ui: rgba(233, 241, 255, .3); --uiT: #b9cff0; --uiOn: #fff;
+  --grid: rgba(233, 241, 255, .07); }
+.p2d-bar { display: flex; flex-wrap: wrap; gap: 12px 28px; padding: 16px 18px; border-bottom: 1px solid var(--ui); }
 .p2d-grp { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
-.p2d-lbl { font: 400 11px/1 var(--mono); text-transform: uppercase; letter-spacing: -0.02em; color: #9a9a9a; margin-right: 6px; }
-.p2d-bar button { height: 30px; padding: 0 14px; border: 1px solid rgba(27, 27, 27, .25); border-radius: 1440px; background: #fff; cursor: pointer;
-  font: 400 11px/1 var(--mono); text-transform: uppercase; letter-spacing: -0.02em; color: #8a8a8a;
+.p2d-theme { margin-left: auto; }
+.p2d-lbl { font: 400 11px/1 var(--mono); text-transform: uppercase; letter-spacing: -0.02em; color: var(--uiT); opacity: .75; margin-right: 6px; }
+.p2d-bar button { height: 30px; padding: 0 14px; border: 1px solid var(--ui); border-radius: 1440px; background: transparent; cursor: pointer;
+  font: 400 11px/1 var(--mono); text-transform: uppercase; letter-spacing: -0.02em; color: var(--uiT);
   transition: color .4s var(--ease), border-color .4s var(--ease), background .4s var(--ease); }
-.p2d-bar button:hover { color: var(--void); border-color: var(--void); }
-.p2d-bar button.on { color: var(--void); border-color: var(--ember); background: rgba(204, 100, 55, .07); }
-.p2d-bar button.act { color: #5a5a5a; border-style: dashed; }
-.p2d-stage { padding: 8px 12px 0; }
-.p2d-svg { display: block; width: 100%; max-width: 980px; height: auto; margin: 0 auto; }
-.p2d .L { transition: opacity .45s var(--ease); }
-.p2d.off-dims .L-dims, .p2d.off-dims .fdim, .p2d.off-lights .L-lights,
+.p2d-bar button:hover { color: var(--uiOn); border-color: var(--uiOn); }
+.p2d-bar button.on { color: var(--uiOn); border-color: var(--ember); background: rgba(204, 100, 55, .09); }
+.p2d-bar button.act { border-style: dashed; }
+.p2d-stage { padding: 10px 12px 0; background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size: 24px 24px; }
+.p2d-svg { display: block; width: 100%; max-width: 1000px; height: auto; margin: 0 auto; }
+/* drawing */
+.p2d .w { fill: var(--wall); }
+.p2d .gap { fill: var(--bg); }
+.p2d .win line { stroke: var(--ink); stroke-width: 10; }
+.p2d .win.hidw line { stroke-dasharray: 40 30; }
+.p2d .lin { fill: var(--ink); }
+.p2d .door { stroke: var(--ink); stroke-width: 34; }
+.p2d .sw { fill: none; stroke: var(--thin); stroke-width: 9; stroke-dasharray: 45 32; }
+.p2d .fu { fill: var(--fu); stroke: var(--ink); stroke-width: 14; }
+.p2d .fu2 { fill: var(--bg); stroke: var(--thin); stroke-width: 9; }
+.p2d .fu3 { fill: var(--fu3); stroke: var(--ink); stroke-width: 14; }
+.p2d .fu.hidd { stroke-dasharray: 40 25; }
+.p2d .solid { fill: none; stroke: var(--ink); stroke-linecap: round; stroke-linejoin: round; }
+.p2d .thin { stroke: var(--thin); stroke-width: 9; }
+.p2d .hid { fill: none; stroke: var(--thin); stroke-width: 9; stroke-dasharray: 60 40; }
+.p2d .tv { fill: var(--tvc); }
+.p2d .mir { fill: var(--ink); }
+.p2d text { font-family: var(--mono); letter-spacing: -2px; paint-order: stroke; stroke: var(--bg); stroke-width: 26px; stroke-linejoin: round; }
+.p2d .rn { fill: var(--lbl); font-weight: 400; letter-spacing: 6px; }
+.p2d .lb { fill: var(--lbl); }
+.p2d .tx2 { fill: var(--txt); }
+.p2d .dm line { stroke: var(--dim); stroke-width: 9; }
+.p2d .dm .tk, .p2d .cl .tk { stroke-width: 16; }
+.p2d .dmt { fill: var(--dim); }
+.p2d .cl line { stroke: var(--clr); stroke-width: 9; }
+.p2d .clt { fill: var(--clr); }
+.p2d .cld { stroke: var(--clr); stroke-width: 8; stroke-dasharray: 90 40 20 40; opacity: .7; }
+.p2d .lt { fill: var(--bg); stroke: var(--lt); stroke-width: 20; }
+.p2d .lt.ltn { stroke-dasharray: 28 20; stroke-width: 16; }
+.p2d .ltd { fill: var(--lt); }
+/* layers */
+.p2d .L, .p2d .fdim, .p2d .clg { transition: opacity .45s var(--ease); }
+.p2d.off-room .L-room, .p2d.off-fsize .fdim, .p2d.off-clr .L-clr, .p2d.off-lights .L-lights,
 .p2d.off-bed .L-bed, .p2d.off-partition .L-partition, .p2d.off-desk .L-desk, .p2d.off-study .L-study,
-.p2d.off-wardrobes .L-wardrobes, .p2d.off-mirror .L-mirror { opacity: 0; pointer-events: none; }
-.p2d-key { display: flex; flex-wrap: wrap; gap: 8px 22px; padding: 12px 18px 16px; font: 400 11px/1.3 var(--mono); text-transform: uppercase; letter-spacing: -0.02em; color: #8a8a8a; }
-.p2d-key i { display: inline-block; width: 11px; height: 11px; margin-right: 7px; vertical-align: -1px; border-radius: 50%; border: 2px solid var(--ember); }
-.p2d-key i.dash { border-style: dashed; }
-.p2d-key i.k-dash { border-radius: 0; border: 0; border-top: 2px dashed #8c8c8c; height: 0; width: 18px; vertical-align: 3px; }
-@media (max-width: 760px) { .p2d-bar { padding: 12px; gap: 10px; } .p2d-stage { padding: 4px 4px 0; } }
+.p2d.off-wardrobes .L-wardrobes, .p2d.off-mirror .L-mirror,
+.p2d.off-bed .need-bed, .p2d.off-partition .need-partition, .p2d.off-desk .need-desk, .p2d.off-study .need-study,
+.p2d.off-wardrobes .need-wardrobes { opacity: 0; pointer-events: none; }
+.p2d-key { display: flex; flex-wrap: wrap; gap: 8px 22px; padding: 12px 18px 16px; font: 400 11px/1.3 var(--mono); text-transform: uppercase; letter-spacing: -0.02em; color: var(--uiT); }
+.p2d-key i { display: inline-block; width: 11px; height: 11px; margin-right: 7px; vertical-align: -1px; }
+.p2d-key i.k-dm { height: 0; width: 18px; border-top: 2px solid var(--dim); vertical-align: 3px; }
+.p2d-key i.k-cl { height: 0; width: 18px; border-top: 2px solid var(--clr); vertical-align: 3px; }
+.p2d-key i.k-lt { border-radius: 50%; border: 2px solid var(--lt); }
+.p2d-key i.k-lt.dash { border-style: dashed; }
+.p2d-key i.k-dash { height: 0; width: 18px; border-top: 2px dashed var(--thin); vertical-align: 3px; }
+@media (max-width: 760px) { .p2d-bar { padding: 12px; gap: 10px; } .p2d-theme { margin-left: 0; } .p2d-stage { padding: 4px 4px 0; } }
