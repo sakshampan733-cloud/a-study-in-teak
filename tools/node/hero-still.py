@@ -60,6 +60,8 @@ HOT = S * hot[..., None]
 TIN = np.array([1.0, 0.62, 0.40], np.float32)                                # the highlight's tint when it is not catching
 
 ys, xs = np.mgrid[0:H, 0:W].astype(np.float32)
+_wm = lens(warmth, 60)[:H, :W] if E("WARP", 0) else None                     # where the copper light is, very soft
+WM = None if _wm is None else np.clip(_wm / max(float(_wm.max()), 1e-3), 0, 1)
 rng = np.random.default_rng(int(E("SEED", 4)))
 
 
@@ -101,7 +103,18 @@ G_AT = E("GLINT_AT", 0.31)
 for i in range(N):
     t = i / N; a = 2 * np.pi * t
     x = np.zeros((H, W, 3), np.float32)
-    for j, (img, ((ax, ay), rip, fph)) in enumerate(zip(LAYERS, PATHS)):
+    if E("WARP", 0):
+        # one continuous image, warped: the copper region drifts further than the slate (parallax) through a smooth
+        # field, so nothing separates and no seam can open; the focus breathes between the two
+        dx0, dy0 = PATHS[0][1](t); dx1, dy1 = PATHS[1][1](t)
+        (ax0, ay0), (ax1, ay1) = PATHS[0][0], PATHS[1][0]
+        mx0 = ax0 * np.sin(a + PH[0, 0]) + dx0; my0 = ay0 * np.sin(a + PH[0, 1]) + dy0
+        mx1 = ax1 * np.sin(a + PH[1, 0]) + dx1; my1 = ay1 * np.sin(a + PH[1, 1]) + dy1
+        X = xs + ox0 + WM * mx0 + (1 - WM) * mx1; Y = ys + oy0 + WM * my0 + (1 - WM) * my1
+        L = sample(S, X, Y)
+        f = 0.5 + 0.5 * np.cos(a)
+        x = L * (0.55 + 0.45 * f) + lens(L, E("DEFOCUS", 10)) * (0.45 * (1 - f))
+    for j, (img, ((ax, ay), rip, fph)) in enumerate(zip(LAYERS, PATHS) if not E("WARP", 0) else []):
         dx, dy = rip(t)
         X = xs + ox0 + ax * np.sin(a + PH[j, 0]) + dx; Y = ys + oy0 + ay * np.sin(a + PH[j, 1]) + dy
         L = sample(img, X, Y)
