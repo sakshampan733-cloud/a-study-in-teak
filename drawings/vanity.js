@@ -40,14 +40,25 @@ function innerOutline(open, AX) {
   return { x0, x1, d0, d1, arm: "", path: `M ${x0} ${d0} L ${n0} ${d0} L ${n0} ${nd} L ${n1} ${nd} L ${n1} ${d0} L ${x1} ${d0} L ${x1} ${d1} L ${x0} ${d1} Z` };
 }
 
+// Scheme C, as chosen (30.09): the middle bank is beige marble and runs to the FLOOR — it is the support —
+// and it uses its full 33 in. The top pair of drawers grows to 6½ in fronts, the drawer within the big one
+// to a 5½ in box, and the big drawer takes the rest. The two ends are pull-out cabinets, unchanged in height.
+const VANITY_C = {
+  top2: [591, 762], big: [38, 566],
+  inner: { h0: 377, h1: 537, bot: 387, side: 527, back: 115, notch: 125, notchD: 355 },
+  bigSide: 347,
+};
+
 function buildVanity(V) {
   const { INK, THIN, DIM, f, text, mmToFt, view, chainH, chainV, bubble, heading, cutMark, frame, titleBlock, sheet } = window.DK;
-  const K = VANITY, L = K.L, D = K.D, AX = K.AX;
+  const K = { ...VANITY, ...(V.dims || {}) }, L = K.L, D = K.D, AX = K.AX;
+  const FLOOR = !!V.toFloor, BOT = FLOOR ? 0 : K.clear;             // where the drawer bank starts
   const ft = (mm) => mmToFt(mm).replace("'-", " ft ").replace('"', " in").replace(/^0 ft /, "").replace(/ 0 in$/, "");
   const bank = V.bank, mid = (bank[0] + bank[1]) / 2;
   const SP = Math.abs(mid - AX) < 3 ? AX : mid;                        // the drawers split on the bank's centre
   const open = [bank[0] + K.stile, bank[1] - K.stile];
   const MARBLE = "#efede7", VEN = "#f3ead8", id = V.key.replace(/\W/g, "");
+  const FF = FLOOR ? MARBLE : VEN;                                      // the bank's face frame and fronts
 
   const TOPH = 1130, E = (h) => TOPH - h;                                  // elevation and section: y down from 1130
   const LN = (a, b, c, d, w, x = "") => `<line x1="${f(a)}" y1="${f(b)}" x2="${f(c)}" y2="${f(d)}" stroke-width="${f(w)}" ${x}/>`;
@@ -60,7 +71,7 @@ function buildVanity(V) {
   // ── the fronts: every door and drawer, numbered, so the schedule can carry their sizes ──
   const FRONTS = [];
   const gap = 3;
-  (V.doors || []).forEach(([a, b, st]) => FRONTS.push({ kind: "door", x0: a + (st || K.stile), x1: b - (st || K.stile), h0: K.clear + K.rail, h1: K.top - K.rail }));
+  (V.doors || []).forEach(([a, b, st]) => FRONTS.push({ kind: V.pullouts ? "pullout" : "door", x0: a + (st || K.stile), x1: b - (st || K.stile), h0: K.clear + K.rail, h1: K.top - K.rail }));
   FRONTS.push({ kind: "top", x0: open[0], x1: SP - K.muntin / 2, h0: K.top2[0], h1: K.top2[1] });
   FRONTS.push({ kind: "top", x0: SP + K.muntin / 2, x1: open[1], h0: K.top2[0], h1: K.top2[1] });
   FRONTS.push({ kind: "big", x0: open[0], x1: open[1], h0: K.big[0], h1: K.big[1] });
@@ -79,11 +90,14 @@ function buildVanity(V) {
   function front(t) {
     let o = "";
     if (V.support) o += RE(V.support[0], 0, V.support[1], K.clear, t, "#fff", dash(t));
-    o += RE(0, K.clear, L, K.top, t * 1.3, VEN);                                           // the carcass
+    if (FLOOR) {                                                                          // veneer ends, marble bank to the floor
+      o += RE(0, K.clear, bank[0], K.top, t * 1.3, VEN) + RE(bank[1], K.clear, L, K.top, t * 1.3, VEN);
+      o += RE(bank[0], 0, bank[1], K.top, t * 1.3, MARBLE);
+    } else o += RE(0, K.clear, L, K.top, t * 1.3, VEN);                                    // the carcass
     o += RE(V.marble[0], K.top, V.marble[1], K.counter, t * 1.3, MARBLE);                  // the marble, over the bank
     FRONTS.forEach((F) => {
-      o += RE(F.x0 + gap, F.h0 + gap, F.x1 - gap, F.h1 - gap, t * 1.1, VEN);
-      if (F.kind === "door") o += pull(F.x1 > SP ? F.x0 + 70 : F.x1 - 70, F.h1 - 70, t);   // drawers have no handles: push-to-open
+      o += RE(F.x0 + gap, F.h0 + gap, F.x1 - gap, F.h1 - gap, t * 1.1, F.kind === "door" || F.kind === "pullout" ? VEN : FF);
+      if (F.kind === "door" || F.kind === "pullout") o += pull(F.x1 > SP ? F.x0 + 70 : F.x1 - 70, F.h1 - 70, t);   // drawers have no handles: push-to-open
     });
     o += RE(open[0] + 13 + 18, K.inner.h0, open[1] - 13 - 18, K.inner.h1, t * 0.7, "none", dash(t));   // the inner drawer, behind
     o += bowl(AX, t, (x) => x);
@@ -116,17 +130,18 @@ function buildVanity(V) {
     o += LN(-60, E(0), D + 60, E(0), t * 3.5);
     // hanging rail, back, top, bottom, face
     o += RE(0, 700, 18, 760, t, VEN);
-    o += RE(18, K.clear + 18, 30, K.top - 18, t * 0.8, VEN);
-    o += RE(0, K.top - 18, D, K.top, t, VEN) + RE(0, K.clear, D, K.clear + 18, t, VEN);
+    o += RE(18, BOT + 18, 30, K.top - 18, t * 0.8, VEN);
+    o += RE(0, K.top - 18, D, K.top, t, VEN) + RE(0, BOT, D, BOT + 18, t, VEN);
     // sub-top, slab, and the mitred apron that hides both edges
     o += RE(0, K.top, D + K.over - K.slab, K.top + K.sub, t * 0.8, VEN);
     o += PT(`M 0 ${f(E(K.counter))} L ${f(D + K.over)} ${f(E(K.counter))} L ${f(D + K.over)} ${f(E(K.top))} L ${f(D + K.over - K.slab)} ${f(E(K.top))} L ${f(D + K.over - K.slab)} ${f(E(K.counter - K.slab))} L 0 ${f(E(K.counter - K.slab))} Z`, t * 1.2, MARBLE);
     o += LN(D + K.over - K.slab, E(K.counter - K.slab), D + K.over, E(K.counter), t * 0.6);
     // face frame: top rail, mid rail, bottom rail
-    [[K.top - K.rail, K.top - 18], [K.big[1], K.top2[0]], [K.clear + 18, K.big[0]]].forEach(([a, b]) => (o += RE(D - 18, a, D, b, t, VEN)));
+    [[K.top - K.rail, K.top - 18], [K.big[1], K.top2[0]], [BOT + 18, K.big[0]]].forEach(([a, b]) => (o += RE(D - 18, a, D, b, t, FF)));
+    if (FLOOR) o += RE(D - 18, 0, D, BOT + 18, t, FF);
     // top drawer: cut if the pipe goes through it, seen beyond if the pipe drops beside it
     const box = (h0, h1, cut, low) => {
-      let g = RE(D - 18, h0 + gap, D, h1 - gap, t, VEN);                                  // the front
+      let g = RE(D - 18, h0 + gap, D, h1 - gap, t, FF);                                   // the front
       const b0 = h0 + 20, b1 = low || h1 - 22;
       if (cut) g += RE(330, b0, D - 18, b0 + 12, t * 0.8, VEN) + RE(330, b0, 345, b1, t * 0.8, VEN)
         + RE(92, b0, 330, b1, t * 0.6, "none", dash(t));
@@ -136,7 +151,7 @@ function buildVanity(V) {
     o += box(K.top2[0], K.top2[1], SP !== AX);
     o += box(K.big[0], K.big[1], true, K.bigSide);
     { const I = K.inner;
-      o += RE(D - 58, I.h0, D - 40, I.h1, t, VEN);                                          // its front
+      o += RE(D - 58, I.h0, D - 40, I.h1, t, VEN);                                          // its front (inside — veneer)
       o += RE(I.notchD, I.bot, D - 58, I.bot + 12, t * 0.8, VEN) + RE(I.notchD, I.bot, I.notchD + 12, I.side, t * 0.8, VEN);
       o += RE(I.back, I.bot, I.notchD, I.side, t * 0.6, "none", dash(t)); }
     // waste and trap, back to the wall
@@ -154,8 +169,8 @@ function buildVanity(V) {
   function edge(t) {
     const x0 = D - 70, x1 = D + K.over;
     let o = RE(x0, K.top - 18, D, K.top, t, VEN);                                          // carcass top
-    o += RE(D - 18, K.top - K.rail, D, K.top - 18, t, VEN);                               // top rail
-    o += RE(D - 18, K.top - 55, D, K.top - K.rail - gap, t, VEN, dash(t));               // drawer front, below
+    o += RE(D - 18, K.top - K.rail, D, K.top - 18, t, FF);                                // top rail
+    o += RE(D - 18, K.top - 55, D, K.top - K.rail - gap, t, FF, dash(t));                // drawer front, below
     o += RE(x0, K.top, x1 - K.slab, K.top + K.sub, t * 0.8, VEN);                         // ply sub-top
     o += PT(`M ${x0} ${f(E(K.counter))} L ${x1} ${f(E(K.counter))} L ${x1} ${f(E(K.top))} L ${x1 - K.slab} ${f(E(K.top))} L ${x1 - K.slab} ${f(E(K.counter - K.slab))} L ${x0} ${f(E(K.counter - K.slab))}`, t * 1.2, MARBLE);
     o += LN(x1 - K.slab, E(K.counter - K.slab), x1, E(K.counter), t * 0.7);              // the mitre
@@ -192,7 +207,7 @@ function buildVanity(V) {
   s += chainH(V.stations.map(v.X), yF + 5.5, V.spans, { from: yF + 1, size: 1.25 });
   s += chainH([bank[0], open[0], SP - K.muntin / 2, SP + K.muntin / 2, open[1], bank[1]].map(v.X), yF + 11.5, [K.stile, SP - K.muntin / 2 - open[0], K.muntin, open[1] - SP - K.muntin / 2, K.stile], { from: yF + 1, size: 1.15 });
   s += chainH([v.X(0), v.X(L)], yF + 17.5, [`${L} OVERALL`], { from: yF + 1, size: 1.35 });
-  const hs = [0, K.clear, K.big[0], K.big[1], K.top2[0], K.top2[1], K.top, K.counter];
+  const hs = FLOOR ? [0, K.big[0], K.big[1], K.top2[0], K.top2[1], K.top, K.counter] : [0, K.clear, K.big[0], K.big[1], K.top2[0], K.top2[1], K.top, K.counter];
   s += chainV(hs.map((h) => v.Y(E(h))), v.X(L) + 6, hs.slice(1).map((h, i) => h - hs[i]), { from: v.X(L) + 1, size: 1.15 });
   s += chainV([v.Y(E(0)), v.Y(E(K.counter)), v.Y(E(K.counter + K.bowl.h))], v.X(L) + 14, [`${K.counter} COUNTER`, K.bowl.h], { from: v.X(L) + 1, size: 1.3 });
   FRONTS.forEach((F, i) => (s += bubble(v.X((F.x0 + F.x1) / 2), v.Y(E((F.h0 + F.h1) / 2)), i + 1)));
@@ -245,7 +260,7 @@ function buildVanity(V) {
   s += heading(RX, 90, "FRONTS", "SIZES ARE THE FRONT ITSELF · 3 MM GAP ALL ROUND", 108);
   s += text(RX, 102, "No.", { size: 1.4, fill: THIN }) + text(RX + 8, 102, "WHAT", { size: 1.4, fill: THIN }) + text(RX + 60, 102, "W × H", { size: 1.4, fill: THIN }) + text(RX + 108, 102, "FT-IN", { size: 1.4, fill: THIN, anchor: "end" });
   FRONTS.forEach((F, i) => {
-    const y = 106.5 + i * 4.1, what = F.kind === "door" ? "Door, cup pull" : F.kind === "top" ? "Top drawer, push-open" : "Big drawer, U-box, push-open";
+    const y = 106.5 + i * 4.1, what = F.kind === "door" ? "Door, cup pull" : F.kind === "pullout" ? "Pull-out cabinet, cup pull" : (F.kind === "top" ? "Top drawer, push-open" : "Big drawer, U-box, push-open") + (FLOOR ? " · marble" : "");
     s += text(RX, y, String(i + 1), { size: 1.55, weight: 700 }) + text(RX + 8, y, what, { size: 1.55 });
     s += text(RX + 60, y, `${Math.round(F.w)} × ${Math.round(F.h)}`, { size: 1.55 });
     s += text(RX + 108, y, `${mmToFt(F.w)} × ${mmToFt(F.h)}`, { size: 1.45, fill: THIN, anchor: "end" });
@@ -256,7 +271,7 @@ function buildVanity(V) {
     s += text(RX + 60, y, `${iw} × ${ih}`, { size: 1.55, fill: DIM }) + text(RX + 108, y, `${mmToFt(iw)} × ${mmToFt(ih)}`, { size: 1.45, fill: THIN, anchor: "end" }); }
   const my = 110 + (FRONTS.length + 1) * 4.1 + 6;
   s += heading(RX, my, "MATERIALS", "THE ROOM'S PALETTE — NOTHING NEW", 108);
-  [["Top", "Beige-gold marble, the bathroom stone. 18 slab"],
+  (V.materials || [["Top", "Beige-gold marble, the bathroom stone. 18 slab"],
    ["", "on a 20 BWP sub-top, mitred 38 apron, polished."],
    ["Carcass", "18 BWP / marine ply, teak veneer both faces."],
    ["", "Every edge sealed — it stands in a wet room."],
@@ -267,7 +282,7 @@ function buildVanity(V) {
    ["Fittings", "Chrome — already bought. Door cup pulls to match."],
    ["Hanging", "18 ply cleat on the wall, 700–760 high."],
    ["Inner", "A U-box on its own runners, above the big"],
-   ["", "drawer's low sides — see AST-DR-022."]]
+   ["", "drawer's low sides — see AST-DR-022."]])
     .forEach(([a, b], i) => (s += text(RX, my + 11 + i * 3.9, a, { size: 1.5, weight: 700 }) + text(RX + 15, my + 11 + i * 3.9, b, { size: 1.5 })));
 
   // key to the section, and notes, along the foot
@@ -279,7 +294,7 @@ function buildVanity(V) {
   s += heading(96, 262, "NOTES", `REVISION ${V.rev.split(" ")[0]}`, 190);
   V.notes.forEach((n, i) => (s += text(96 + (i >= 4 ? 96 : 0), 270 + (i % 4) * 4.2, n, { size: 1.45, fill: n.startsWith("OPEN") ? "#b3261e" : INK })));
 
-  s += titleBlock({ title: V.title, sub: V.sub, date: K.date, rev: V.rev, dwg: V.dwg, scale: "AS NOTED @ A3" });
+  s += titleBlock({ title: V.title, sub: V.sub, date: V.date || K.date, rev: V.rev, dwg: V.dwg, scale: "AS NOTED @ A3" });
   window.DRAWINGS[V.key] = { title: `${V.name} · ${V.dwg}`, svg: sheet(s), model: true };
 }
 
@@ -320,19 +335,30 @@ buildVanity({
   ],
 });
 buildVanity({
-  key: "vanity-c", dwg: "AST-DR-021", name: "Vanity — scheme C", rev: "1 — as sketched",
-  title: "VANITY — SCHEME C", sub: "1 ft 6 left · 6 in right · 3 ft marble on the faucet",
-  headline: "1 FT 6 LEFT, 6 IN RIGHT · 3 FT OF MARBLE CENTRED ON THE FAUCET",
-  bank: [457, 1371], marble: [457, 1371], support: [559, 1269], ledges: "two",
+  key: "vanity-c", dwg: "AST-DR-021", name: "Vanity — scheme C (chosen)", date: "30.09.2026", rev: "2 — chosen: marble bank to the floor",
+  title: "VANITY — SCHEME C", sub: "Chosen · marble bank to the floor · pull-outs each end",
+  headline: "CHOSEN · 1 FT 6 LEFT, 6 IN RIGHT · 3 FT MARBLE BANK ON THE FAUCET, DOWN TO THE FLOOR",
+  bank: [457, 1371], marble: [457, 1371], support: null, ledges: "two", toFloor: true, pullouts: true, dims: VANITY_C,
   doors: [[0, 457], [1371, 1524, 19]],
   stations: [0, 457, 1371, 1524], spans: [457, "914 MARBLE", 153],
+  materials: [
+    ["Top", "Beige-gold marble, the bathroom stone. 18 slab"], ["", "on a 20 BWP sub-top, mitred 38 apron, polished."],
+    ["Bank", "The same beige marble on the face frame and on"], ["", "every drawer front, floor to counter. It stands"],
+    ["", "on the floor and carries the top — no support."],
+    ["Ends", "Two pull-out cabinets, 9292 cream burl veneer,"], ["", "high gloss, 18 BWP, edges sealed. 6 in off the floor."],
+    ["Ledges", "The two veneer tops: solid nosing, sealed."],
+    ["Runners", "Drawers: undermount, push-to-open. Pull-outs:"], ["", "heavy full-extension runners, cup pull."],
+    ["Fittings", "Chrome — already bought."],
+    ["Inner", "U-box, 5½ in deep, on its own runners — AST-DR-022."]],
   notes: [
-    "The two ends differ by exactly 1 ft, so the marble's",
-    "centre lands on the faucet. The top drawers split on it.",
-    "The 6 in end takes a 108 door on 19 stiles: about 110",
-    "clear inside — a hair dryer on its side, not much more.",
-    ...VANITY_OPEN,
-    "OPEN — the support's design: reference photos to come.",
+    "The marble bank now runs to the floor and is the support.",
+    "Top drawers: 6½ in fronts. Drawer within: a 5½ in box.",
+    "The big drawer takes the rest: 20½ in front, 12¾ in clear",
+    "under the inner drawer for tall bottles.",
+    "OPEN — bowl Ø406 × 127 and the spout are assumed.",
+    "OPEN — marble front thickness and how it is bonded to the",
+    "   drawer boxes: stone supplier to confirm.",
+    "The ends are pull-outs, the same height as before.",
   ],
 });
 
@@ -343,9 +369,10 @@ buildVanity({
 // version are the same drawer at a different width — the table gives all three.
 (function () {
   const { INK, THIN, DIM, f, text, mmToFt, view, chainH, chainV, heading, frame, titleBlock, sheet } = window.DK;
-  const K = VANITY, D = K.D, AX = K.AX, I = K.inner, P = K.pullOut, gap = 3;
+  const K = { ...VANITY, ...VANITY_C }, D = K.D, AX = K.AX, I = K.inner, P = K.pullOut, gap = 3;
   const MARBLE = "#efede7", VEN = "#f3ead8";
   const E = (h) => 1130 - h;
+  const RUN = [I.bot + 22, I.bot + 32];                                                  // the inner drawer's runners
   const LN = (a, b, c, d, w, x = "") => `<line x1="${f(a)}" y1="${f(b)}" x2="${f(c)}" y2="${f(d)}" stroke-width="${f(w)}" ${x}/>`;
   const RC = (a, b, c, d, w, fl = "none", x = "") => `<rect x="${f(Math.min(a, c))}" y="${f(Math.min(b, d))}" width="${f(Math.abs(c - a))}" height="${f(Math.abs(d - b))}" fill="${fl}" stroke-width="${f(w)}" ${x}/>`;
   const RE = (x0, h0, x1, h1, w, fl, x) => RC(x0, E(h1), x1, E(h0), w, fl, x);
@@ -358,25 +385,25 @@ buildVanity({
   // po: how far the big drawer is out; pi: how much further the inner one is out.
   function side(t, po, pi) {
     let o = "";
-    o += RE(0, K.clear, D, K.clear + 18, t, VEN);                                           // carcass bottom
-    o += RE(18, K.clear + 18, 30, 650, t * 0.8, VEN);                                      // carcass back
-    o += RE(D - 18, K.big[1], D, K.top2[0], t, VEN);                                       // mid rail
-    o += RE(D - 18, K.clear + 18, D, K.big[0], t, VEN);                                    // bottom rail
-    o += RE(D - 18, K.top2[0] + gap, D, 650, t, VEN);                                      // top drawer front, broken
+    o += RE(0, 0, D, 18, t, VEN);                                                          // carcass bottom, on the floor
+    o += RE(18, 18, 30, 650, t * 0.8, VEN);                                                // carcass back
+    o += RE(D - 18, K.big[1], D, K.top2[0], t, MARBLE);                                    // mid rail
+    o += RE(D - 18, 0, D, K.big[0], t, MARBLE);                                            // bottom rail
+    o += RE(D - 18, K.top2[0] + gap, D, 650, t, MARBLE);                                   // top drawer front, broken
     o += RE(92, K.top2[0] + 20, D - 18, 650, t * 0.6, "none", dash(t));                    // top drawer box, broken
     o += LN(-40, E(650), D + 40, E(650), t * 0.5, dash(t));
     // the big drawer
     const q = po, bo = K.big[0] + 13, bs = K.bigSide;
     o += RE(92 + q, bo, D - 18 + q, bo + 12, t, VEN) + RE(92 + q, bo, 107 + q, bs, t, VEN);
     o += RE(107 + q, bo + 12, D - 18 + q, bs, t * 0.45, "none");                           // its side, beyond
-    o += RE(D - 18 + q, K.big[0] + gap, D + q, K.big[1] - gap, t * 1.2, VEN);              // its front
+    o += RE(D - 18 + q, K.big[0] + gap, D + q, K.big[1] - gap, t * 1.2, MARBLE);           // its front, marble
     o += RE(110 + q, bo - 7, D - 40 + q, bo, t * 0.5, "none", dash(t));                    // undermount runner
     // the inner drawer, riding on the big drawer's sides
     const r = pi;                                                                        // the inner drawer moves on its own
     o += RE(I.back + r, I.bot, D - 58 + r, I.bot + 12, t, VEN) + RE(I.back + r, I.bot, I.back + 12 + r, I.side, t, VEN);
     o += RE(I.back + 12 + r, I.bot + 12, D - 58 + r, I.side, t * 0.45, "none");
     o += PT(`M ${f(D - 58 + r)} ${f(E(I.h0))} L ${f(D - 40 + r)} ${f(E(I.h0))} L ${f(D - 40 + r)} ${f(E(I.h1 - 22))} Q ${f(D - 40 + r)} ${f(E(I.h1))} ${f(D - 58 + r)} ${f(E(I.h1))} Z`, t * 1.2, VEN);   // front, top edge scooped
-    o += RE(I.back + 20, 492, D - 70, 502, t * 0.5, "none", dash(t));                     // side runner, fixed to the carcass
+    o += RE(I.back + 20, RUN[0], D - 70, RUN[1], t * 0.5, "none", dash(t));               // side runner, fixed to the carcass
     return o;
   }
 
@@ -388,7 +415,7 @@ buildVanity({
     const io = innerOutline(openC, AX);
     o += PT(io.path, t * 1.1, "#fbf6ec", `stroke="${DIM}"`);
     o += RC(x0 + 18, D - 58, x1 - 18, D - 40, t, VEN, `stroke="${DIM}"`);
-    o += RC(openC[0] - gap, d1, openC[1] + gap, D, t * 1.2, VEN);
+    o += RC(openC[0] - gap, d1, openC[1] + gap, D, t * 1.2, MARBLE);
     o += `<circle cx="${AX}" cy="${K.bowl.c}" r="20" fill="#fff" stroke-width="${f(t)}"/>` + PT(`M ${AX} ${K.bowl.c} L ${AX} 0`, t * 2.6, "none", `stroke="${THIN}"`);
     o += LN(AX, -50, AX, D + 50, t * 0.6, `stroke="${DIM}" ${cen(t)}`);
     return o;
@@ -396,9 +423,10 @@ buildVanity({
 
   // front: the bank, with the inner drawer seen through the big front
   function front(t) {
-    let o = RE(bankC[0], K.clear, bankC[1], K.top, t * 1.2, VEN);
+    let o = RE(bankC[0], 0, bankC[1], K.top, t * 1.2, MARBLE);
     [[openC[0], AX - 12.5, K.top2[0], K.top2[1]], [AX + 12.5, openC[1], K.top2[0], K.top2[1]], [openC[0], openC[1], K.big[0], K.big[1]]]
-      .forEach(([a, b, h0, h1]) => (o += RE(a + gap, h0 + gap, b - gap, h1 - gap, t, VEN)));
+      .forEach(([a, b, h0, h1]) => (o += RE(a + gap, h0 + gap, b - gap, h1 - gap, t, MARBLE)));
+    o += `<line x1="${f(bankC[0] - 120)}" y1="${f(E(0))}" x2="${f(bankC[1] + 120)}" y2="${f(E(0))}" stroke-width="${f(t * 3.5)}"/>`;   // the floor it stands on
     o += RE(openC[0] + 31, I.h0, openC[1] - 31, I.h1, t * 0.9, "none", `stroke="${DIM}" ${dash(t)}`);
     o += RE(bankC[0], K.top, bankC[1], K.counter, t * 1.2, MARBLE);
     return o;
@@ -408,7 +436,7 @@ buildVanity({
   let s = frame();
 
   // 1 · closed, 1:5
-  s += heading(18, 17, "1 · CLOSED", "SECTION THROUGH ONE ARM · 1:5 · SCHEME C", 120);
+  s += heading(18, 17, "1 · CLOSED", "SECTION THROUGH ONE ARM · 1:5 · SCHEME C, CHOSEN — BANK TO THE FLOOR", 120);
   const sc1 = 5, v1 = view(30, 30 - E(650) / sc1, sc1, "Drawer within, closed"), t1 = v1.w(0.12);
   s += v1.g(side(t1, 0, 0), 0.3);
   s += chainV([v1.Y(E(K.big[0] + 13 + 12)), v1.Y(E(I.bot)), v1.Y(E(I.h1)), v1.Y(E(K.big[1] - gap))], v1.X(D) + 7,
@@ -436,28 +464,28 @@ buildVanity({
   s += text(v3.X(AX), v3.Y(D) + 5.5, "INNER DRAWER · RED", { size: 1.4, anchor: "middle", fill: DIM });
 
   // 4 · front, 1:10
-  s += heading(18, 150, "4 · FRONT", "THE INNER DRAWER HIDES BEHIND THE BIG FRONT · 1:10", 120);
-  const v4 = view(30 - bankC[0] / 10, 160 - E(K.counter + 20) / 10, 10, "Drawer within, front"), t4 = v4.w(0.12);
+  s += heading(18, 172, "4 · FRONT", "THE INNER DRAWER HIDES BEHIND THE BIG FRONT · 1:10 · MARBLE BANK, FLOOR TO COUNTER", 120);
+  const v4 = view(30 - bankC[0] / 10, 184 - E(K.counter + 20) / 10, 10, "Drawer within, front"), t4 = v4.w(0.12);
   s += v4.g(front(t4), 0.3);
 
   // the right-hand column: sizes, hardware
   const RX = 302;
   s += heading(RX, 17, "SIZES", "THE SAME DRAWER IN ALL THREE SCHEMES", 108);
   s += text(RX, 29, "", { size: 1.4 }) + ["SCHEME", "BIG FRONT", "INNER FRONT", "INNER BOX W"].map((h, i) => text(RX + [0, 22, 50, 80][i], 29, h, { size: 1.35, fill: THIN })).join("");
-  [["Normal", [419, 1105]], ["B", [342, 1486]], ["C", openC]].forEach(([n, o], i) => {
+  [["Normal", [419, 1105], VANITY], ["B", [342, 1486], VANITY], ["C", openC, K]].forEach(([n, o, Q], i) => {
     const W = o[1] - o[0], y = 34 + i * 4.4, io = innerOutline(o, AX);
-    s += text(RX, y, n, { size: 1.55, weight: 700 }) + text(RX + 22, y, `${W - 6} × ${K.big[1] - K.big[0] - 6}`, { size: 1.5 })
-      + text(RX + 50, y, `${W - 62} × ${I.h1 - I.h0}`, { size: 1.5, fill: DIM }) + text(RX + 80, y, `${io.x1 - io.x0}${io.arm ? " · L" : " · U"}`, { size: 1.5 });
+    s += text(RX, y, n, { size: 1.55, weight: 700 }) + text(RX + 22, y, `${W - 6} × ${Q.big[1] - Q.big[0] - 6}`, { size: 1.5 })
+      + text(RX + 50, y, `${W - 62} × ${Q.inner.h1 - Q.inner.h0}`, { size: 1.5, fill: DIM }) + text(RX + 80, y, `${io.x1 - io.x0}${io.arm ? " · L" : " · U"}`, { size: 1.5 });
   });
-  s += text(RX, 50, `Inner box ${D - 58 - I.back} deep, ${I.side - I.bot} high, 12 ply; notch ${I.notch * 2} wide.`, { size: 1.45, fill: THIN });
+  s += text(RX, 50, `Scheme C (chosen): inner box ${D - 58 - I.back} deep, ${I.side - I.bot} high (5½ in), 12 ply; notch ${I.notch * 2} wide.`, { size: 1.45, fill: THIN });
 
   s += heading(RX, 60, "HARDWARE", "", 108);
   [["Big drawer", "Undermount runners, full extension, push-to-"], ["", `open. Its sides stop at ${K.bigSide} to pass under the inner.`],
-   ["Inner drawer", "Side-mounted runners 400, full extension, on"], ["", "the carcass partitions at 492–502. Independent."],
+   ["Inner drawer", "Side-mounted runners 400, full extension, on"], ["", `the carcass partitions at ${RUN[0]}–${RUN[1]}. Independent.`],
    ["Inner front", "18 BWP, teak veneer both faces, top edge"], ["", "scooped for a finger. No handle."]]
     .forEach(([a, b], i) => (s += text(RX, 70 + i * 4, a, { size: 1.5, weight: 700 }) + text(RX + 22, 70 + i * 4, b, { size: 1.5 })));
 
-  s += heading(RX, 102, "NOTES", "REVISION 1", 108);
+  s += heading(RX, 102, "NOTES", "REVISION 2", 108);
   ["Open the big drawer: the inner one stays put. Pull it",
    `and it comes out ${P.inner} behind the big front, over the`,
    "bottles — the tray in the kitchen drawer photographed.",
@@ -476,6 +504,6 @@ buildVanity({
    "arm is left off and the inner drawer is an L.",
   ].forEach((n, i) => (s += text(RX, 114 + i * 4.2, n, { size: 1.5, fill: n.startsWith("OPEN") ? "#b3261e" : INK })));
 
-  s += titleBlock({ title: "VANITY — DRAWER WITHIN", sub: "The big drawer, and a drawer inside it", date: K.date, rev: "1 — the concept", dwg: "AST-DR-022", scale: "AS NOTED @ A3" });
+  s += titleBlock({ title: "VANITY — DRAWER WITHIN", sub: "The big drawer, and a drawer inside it", date: "30.09.2026", rev: "2 — scheme C: 5½ in inner box, bank to the floor", dwg: "AST-DR-022", scale: "AS NOTED @ A3" });
   window.DRAWINGS["vanity-drawer"] = { title: "Vanity — drawer within · AST-DR-022", svg: sheet(s), model: true };
 })();
