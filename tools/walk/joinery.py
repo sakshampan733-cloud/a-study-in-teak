@@ -196,10 +196,10 @@ dbox("st_wrev", w0, 0, CTOP, WIN["x0"], CASE, 2439, M_VEN)
 dbox("st_whead", WIN["x0"], 0, WIN["head"], xR, CASE, 2439, M_VEN)
 for k in range(1, 4):
     gx = WIN["x0"] + (WIN["x1"] - WIN["x0"]) * k / 4
-    dbox(f"st_gbv{k}", gx - 12, -T / 2 - 18, WIN["sill"], gx + 12, -T / 2 + 18, WIN["head"], M_IRON)
+    dbox(f"st_gbv{k}", gx - 9, -T / 2 - 14, WIN["sill"], gx + 9, -T / 2 + 14, WIN["head"], M_BRONZE)
 for k in range(1, 3):
     gz = WIN["sill"] + (WIN["head"] - WIN["sill"]) * k / 3
-    dbox(f"st_gbh{k}", WIN["x0"], -T / 2 - 18, gz - 12, WIN["x1"], -T / 2 + 18, gz + 12, M_IRON)
+    dbox(f"st_gbh{k}", WIN["x0"], -T / 2 - 14, gz - 9, WIN["x1"], -T / 2 + 14, gz + 9, M_BRONZE)
 # band panels over every bay, 400 high, in ogee frames
 for i, (a, b) in enumerate(bays):
     zb0 = 2039 if i < 2 else WIN["head"]

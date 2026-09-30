@@ -57,7 +57,7 @@ def veneer(name="teak_veneer", gloss=0.32, coat=0.35, val=0.78, sat=0.72, tex="v
     b.inputs["Roughness"].default_value = gloss; b.inputs["Coat Weight"].default_value = coat
     b.inputs["Coat Roughness"].default_value = 0.12
     return m
-M_VEN = veneer("royal_oak_diva", 0.34, 0.35, 0.7, 0.92, "royal_oak_diva.jpg", (0.55, 0.55, 1.1))   # Royal Oak grain, stained to Dark Diva Crown
+M_VEN = veneer("dark_diva_crown", 0.32, 0.4, 1.12, 1.0, "dark_diva_crown.jpg", (0.9, 0.9, 1.1))   # Dark Diva Crown, from the owner's sample (OHBF-607), book-matched
 M_DESK = veneer("teak_desk", gloss=0.18, coat=1.0, val=0.82, sat=0.78)      # French-polish look: the room's gloss is set here
 def marble(name, fname, scale, rough, val=1.0, sat=1.0):
     m, nt, b = node_mat(name)
@@ -96,9 +96,18 @@ M_LINEN_WHITE = fabric("linen_white", (0.86, 0.84, 0.80), 0.8)
 M_LINEN_IVORY = fabric("linen_ivory", (0.78, 0.73, 0.64), 0.8)
 def sheer():
     m, nt, b = node_mat("sheer")
-    b.inputs["Base Color"].default_value = (0.93, 0.91, 0.87, 1); b.inputs["Roughness"].default_value = 1.0
-    b.inputs["Transmission Weight"].default_value = 0.35; b.inputs["Sheen Weight"].default_value = 0.5
-    b.inputs["Specular IOR Level"].default_value = 0.15
+    b.inputs["Base Color"].default_value = (0.90, 0.87, 0.82, 1); b.inputs["Roughness"].default_value = 1.0
+    b.inputs["Sheen Weight"].default_value = 0.8; b.inputs["Sheen Roughness"].default_value = 0.5; b.inputs["Specular IOR Level"].default_value = 0.0
+    out = nt.nodes["Material Output"]
+    tl = nt.nodes.new("ShaderNodeBsdfTranslucent"); tl.inputs["Color"].default_value = (0.95, 0.90, 0.82, 1)
+    tp = nt.nodes.new("ShaderNodeBsdfTransparent")
+    m1 = nt.nodes.new("ShaderNodeMixShader"); m1.inputs["Fac"].default_value = 0.45
+    m2 = nt.nodes.new("ShaderNodeMixShader"); m2.inputs["Fac"].default_value = 0.38     # a sheer: the window shows through
+    nt.links.new(b.outputs["BSDF"], m1.inputs[1]); nt.links.new(tl.outputs["BSDF"], m1.inputs[2])
+    nt.links.new(m1.outputs["Shader"], m2.inputs[1]); nt.links.new(tp.outputs["BSDF"], m2.inputs[2])
+    nt.links.new(m2.outputs["Shader"], out.inputs["Surface"])
+    w = nt.nodes.new("ShaderNodeTexNoise"); w.inputs["Scale"].default_value = 900; bp = nt.nodes.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = 0.05
+    nt.links.new(w.outputs["Fac"], bp.inputs["Height"]); nt.links.new(bp.outputs["Normal"], b.inputs["Normal"])
     return m
 M_SHEER = sheer()
 def shade():
@@ -129,9 +138,19 @@ def night():
     b.inputs["Base Color"].default_value = (0, 0, 0, 1); b.inputs["Roughness"].default_value = 1
     tc = nt.nodes.new("ShaderNodeTexCoord"); sep = nt.nodes.new("ShaderNodeSeparateXYZ"); ramp = nt.nodes.new("ShaderNodeValToRGB")
     nt.links.new(tc.outputs["Generated"], sep.inputs["Vector"]); nt.links.new(sep.outputs["Y"], ramp.inputs["Fac"])
-    ramp.color_ramp.elements[0].position = 0.25; ramp.color_ramp.elements[0].color = (0.30, 0.17, 0.09, 1)   # a warm city glow low down
-    ramp.color_ramp.elements[1].position = 0.75; ramp.color_ramp.elements[1].color = (0.015, 0.025, 0.06, 1)  # night above
-    nt.links.new(ramp.outputs["Color"], b.inputs["Emission Color"]); b.inputs["Emission Strength"].default_value = 1.4
+    ramp.color_ramp.elements[0].position = 0.2; ramp.color_ramp.elements[0].color = (0.22, 0.12, 0.06, 1)    # a warm city glow low down
+    ramp.color_ramp.elements[1].position = 0.7; ramp.color_ramp.elements[1].color = (0.012, 0.02, 0.05, 1)   # night above
+    vor = nt.nodes.new("ShaderNodeTexVoronoi"); vor.inputs["Scale"].default_value = 60
+    lr = nt.nodes.new("ShaderNodeValToRGB"); lr.color_ramp.elements[0].position = 0.0; lr.color_ramp.elements[0].color = (1.0, 0.75, 0.45, 1)
+    lr.color_ramp.elements[1].position = 0.035; lr.color_ramp.elements[1].color = (0, 0, 0, 1)
+    nt.links.new(tc.outputs["Generated"], vor.inputs["Vector"]); nt.links.new(vor.outputs["Distance"], lr.inputs["Fac"])
+    mask = nt.nodes.new("ShaderNodeMath"); mask.operation = "LESS_THAN"; mask.inputs[1].default_value = 0.42
+    nt.links.new(sep.outputs["Y"], mask.inputs[0])
+    lights = nt.nodes.new("ShaderNodeMixRGB"); lights.blend_type = "MULTIPLY"; lights.inputs["Fac"].default_value = 1.0
+    nt.links.new(lr.outputs["Color"], lights.inputs[1]); nt.links.new(mask.outputs["Value"], lights.inputs[2])
+    add = nt.nodes.new("ShaderNodeMixRGB"); add.blend_type = "ADD"; add.inputs["Fac"].default_value = 1.0
+    nt.links.new(ramp.outputs["Color"], add.inputs[1]); nt.links.new(lights.outputs["Color"], add.inputs[2])
+    nt.links.new(add.outputs["Color"], b.inputs["Emission Color"]); b.inputs["Emission Strength"].default_value = 1.6
     return m
 M_SKY = night()
 BOOKS = [flat(f"book{i}", c, r) for i, (c, r) in enumerate([((0.30, 0.06, 0.05), 0.5), ((0.06, 0.13, 0.09), 0.55), ((0.06, 0.08, 0.16), 0.5),
@@ -396,32 +415,39 @@ sky = bpy.context.active_object; sky.scale = (4, 3, 1); sky.rotation_euler = (ma
 for (a, b, c_, d_) in ((WIN["x0"], WIN["x0"] + 50, WIN["sill"], WIN["head"]), (WIN["x1"] - 50, WIN["x1"], WIN["sill"], WIN["head"]),
                        (WIN["x0"], WIN["x1"], WIN["sill"], WIN["sill"] + 50), (WIN["x0"], WIN["x1"], WIN["head"] - 50, WIN["head"]),
                        ((WIN["x0"] + WIN["x1"]) / 2 - 20, (WIN["x0"] + WIN["x1"]) / 2 + 20, WIN["sill"], WIN["head"])):
-    dbox(f"wf{a}{c_}", a, -T / 2 - 30, c_, b, -T / 2 + 30, d_, M_IRON)
+    dbox(f"wf{a}{c_}", a, -T / 2 - 22, c_, b, -T / 2 + 22, d_, M_BRONZE)
 
 # ── the curtain: one sheer, floor to ceiling, gathered to the left of the window and pinched at the tieback ──
 def curtain():
+    """A pinch-pleated sheer, ceiling track to floor, drawn across the window for the evening: deep, uneven folds
+    at the heading that soften and flare toward a weighted hem."""
     me = bpy.data.meshes.new("curtain"); bm = bmesh.new()
-    NXc, NZc = 90, 60; xa, xb = xP2 - 40, xP2 + 520; zt, zb = H - 70, 15; ztie = 1000
+    xa, xb = WIN["x0"] - 260, xR - 12; zt, zb = H - 55, 12
+    NXc, NZc = 260, 70; npl = int((xb - xa) / 105)
+    rng_c = random.Random(3); ph = [rng_c.uniform(-0.35, 0.35) for _ in range(npl + 2)]; dep = [rng_c.uniform(0.75, 1.25) for _ in range(npl + 2)]
     rows = []
     for j in range(NZc + 1):
-        z = zb + (zt - zb) * j / NZc
-        pinch = 1 - 0.42 * math.exp(-((z - ztie) / 420) ** 2)        # gathered in at the tieback
+        z = zb + (zt - zb) * j / NZc; t = (z - zb) / (zt - zb)            # 0 at the hem, 1 at the heading
         row = []
         for i in range(NXc + 1):
-            u = i / NXc
-            x = xa + (xb - xa) * (0.5 + (u - 0.5) * pinch) - (1 - pinch) * 120
-            amp = 55 + 20 * math.sin(u * 5.3 + 1.3) + 10 * math.sin(u * 17.0)
-            ph = u * 2 * math.pi * 7 + 0.9 * math.sin(u * 9.0) + 0.35 * math.sin(z / 420 + u * 3)
-            sv = 400 + amp * math.sin(ph) * (0.65 + 0.35 * pinch) + 30 * (1 - pinch)
+            u = i / NXc; k = u * npl; kk = int(k)
+            a_ = 34 * dep[kk] * (0.75 + 0.35 * (1 - t))                  # folds flare toward the floor
+            wob = 0.25 * math.sin(k * 0.7 + z / 500) + ph[kk] * (1 - t)
+            sv = 385 + a_ * math.sin(2 * math.pi * (k + wob * 0.3))
+            if t > 0.93: sv = 385 + 22 * math.sin(2 * math.pi * k) * (1 if (k % 1) < 0.5 else 0.35)   # pinch pleats at the heading
+            x = xa + (xb - xa) * u + 6 * math.sin(z / 300 + u * 9) * (1 - t)
             row.append(bm.verts.new(P(x, sv, z)))
         rows.append(row)
-    for a, b in zip(rows, rows[1:]):
-        for i in range(NXc): bm.faces.new((a[i], a[i + 1], b[i + 1], b[i]))
+    for a_, b_ in zip(rows, rows[1:]):
+        for i in range(NXc): bm.faces.new((a_[i], a_[i + 1], b_[i + 1], b_[i]))
     bm.to_mesh(me); bm.free()
     o = bpy.data.objects.new("curtain", me); DET.objects.link(o); setmat(o, M_SHEER)
-    so = o.modifiers.new("t", "SOLIDIFY"); so.thickness = 0.0015
-    sd = o.modifiers.new("s", "SUBSURF"); sd.levels = 1; sd.render_levels = 2
+    so = o.modifiers.new("t", "SOLIDIFY"); so.thickness = 0.0012
+    sd = o.modifiers.new("s", "SUBSURF"); sd.levels = 1; sd.render_levels = 1
     for p_ in me.polygons: p_.use_smooth = True
+    hem = dbox("curtain_hem", xa, 360, zb, xb, 410, zb + 1, M_SHEER)
+    tr = dbox("curtain_track2", xa - 40, 360, H - 40, xb + 5, 410, H - 20, M_BRONZE); bevel(tr, 0.004, 2)
+    for o_ in [o for o in sc.objects if o.name.startswith("curtain_track") and o.name != "curtain_track2"]: bpy.data.objects.remove(o_, do_unlink=True)
 curtain()
 
 # ── world and render ───────────────────────────────────────────────────────────
@@ -469,6 +495,7 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
     "deskclose": ((2600, 700, 1250), (1900, 1500, 600)),
     "deskfront": ((1500, 420, 1050), (2350, 1600, 480)),
     "d2head": ((3300, 4650, 1700), (4547, 4650, 2450)),
+    "window": ((3000, 1900, 1550), (3950, 0, 1450)),
 }
 def shoot(name):
     cp, tp = VIEWS[name]
