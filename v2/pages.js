@@ -189,17 +189,28 @@ function pageHero(id, eyebrow, title, prose, flankR) {
 }
 
 // The three-dimensional room lives on the overview; it is rebuilt whenever that page renders.
-let model = null;
+// Each viewer is built only as it comes within a screen of view: all four sit below the hero, and building them at
+// once was an 80 ms frame (on a slow phone) in the middle of the hero loop.
+let mounts;
 function mountModel() {
-  const el = document.getElementById("m3d");
-  model = null;
-  if (el && window.MODEL3D) { try { model = window.MODEL3D.mount(el); } catch (e) { console.error("model3d:", e); el.innerHTML = `<div class="empty">Model unavailable</div>`; } }
-  const wel = document.getElementById("walk");
-  if (wel && window.WALK) { try { window.WALK.mount(wel); } catch (e) { console.error("walk:", e); } }
-  const qel = document.getElementById("p2d");
-  if (qel && window.SUITE2D) { try { window.SUITE2D.mount(qel); } catch (e) { console.error("suite2d:", e); qel.innerHTML = `<div class="empty">Plan unavailable</div>`; } }
-  const pel = document.getElementById("p3d");
-  if (pel && window.PARTITION3D) { try { window.PARTITION3D.mount(pel, { tv: true }); } catch (e) { console.error("partition3d:", e); pel.innerHTML = `<div class="empty">Model unavailable</div>`; } }
+  mounts?.disconnect();
+  const jobs = [
+    ["m3d", () => window.MODEL3D?.mount, (el) => window.MODEL3D.mount(el), "Model unavailable"],
+    ["walk", () => window.WALK?.mount, (el) => window.WALK.mount(el), null],
+    ["p2d", () => window.SUITE2D?.mount, (el) => window.SUITE2D.mount(el), "Plan unavailable"],
+    ["p3d", () => window.PARTITION3D?.mount, (el) => window.PARTITION3D.mount(el, { tv: true }), "Model unavailable"],
+  ];
+  const run = new Map();
+  mounts = new IntersectionObserver((es) => es.forEach((e) => {
+    if (!e.isIntersecting) return;
+    mounts.unobserve(e.target);
+    const [id, , mount, fail] = run.get(e.target);
+    try { mount(e.target); } catch (err) { console.error(id + ":", err); if (fail) e.target.innerHTML = `<div class="empty">${fail}</div>`; }
+  }), { rootMargin: "100% 0px" });
+  for (const job of jobs) {
+    const el = document.getElementById(job[0]);
+    if (el && job[1]()) { run.set(el, job); mounts.observe(el); }
+  }
 }
 
 function nextLink(id) {
@@ -635,7 +646,8 @@ function render(delayMotion = 0, spread = false) {
     if (pendingItem) { const it = pendingItem; pendingItem = null; setTimeout(() => { const el = document.getElementById(it); if (el) window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - 70, behavior: "smooth" }); }, 500); }
   }];
   if (!spread) return steps.forEach((f) => f());
-  const next = () => { const f = steps.shift(); if (f) { f(); setTimeout(next, 16); } };
+  let k = 0;
+  const next = () => { const f = steps.shift(); if (f) { const t = performance.now(); f(); performance.measure(`render step ${k++}`, { start: t }); setTimeout(next, 16); } };
   next();
 }
 window.addEventListener("hashchange", () => {
