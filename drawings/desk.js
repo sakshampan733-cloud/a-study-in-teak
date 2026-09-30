@@ -771,11 +771,22 @@ function buildDesk(VAR) {
    "Carving and handles shown simplified; see AST-DR-003.", "Axonometric: measure along the three axes only."]
     .forEach((n, i) => { s3 += text(18, 225 + i * 4.3, n, { size: 1.6 }); });
   s3 += titleBlock({ title: `DESK${VAR.suffix.toUpperCase()} — 3D VIEWS`, sub: "Front right · Back left · Corner close-up", date: K.date, rev: K.rev, dwg: VAR.dwg3 });
-  window.DRAWINGS[VAR.key + "-3d"] = { title: `Desk${VAR.suffix} — 3D views · ${VAR.dwg3}`, svg: sheet(s3), params: K, model: false };
 
-  window.DRAWINGS[VAR.key] = { title: `Desk${VAR.suffix} — General arrangement · ${VAR.dwg1}`, svg: sheet(s1), params: K };
-  window.DRAWINGS[VAR.key + "-details"] = { title: `Desk${VAR.suffix} — Details · ${VAR.dwg2}`, svg: sheet(s2), params: K };
+  return { [VAR.key]: sheet(s1), [VAR.key + "-details"]: sheet(s2), [VAR.key + "-3d"]: sheet(s3), params: K };
 }
 
-buildDesk({ key: "desk", suffix: "", simple: false, dwg1: "AST-DR-002", dwg2: "AST-DR-003", dwg3: "AST-DR-004" });
-buildDesk({ key: "desk-square", suffix: " (square corners)", square: true, dwg1: "AST-DR-028", dwg2: "AST-DR-029", dwg3: "AST-DR-030" });
+// The six desk sheets take about a second to draw (the 3D views above all), which froze the front page's
+// hero for that long when this script loaded. They are drawn only the first time a sheet is asked for —
+// the Study page, the lightbox or the CAD export — and kept after that.
+function registerDesk(VAR) {
+  let built = null;
+  const get = () => built || (built = buildDesk(VAR));
+  const titles = { [VAR.key]: `Desk${VAR.suffix} — General arrangement · ${VAR.dwg1}`, [VAR.key + "-details"]: `Desk${VAR.suffix} — Details · ${VAR.dwg2}`,
+    [VAR.key + "-3d"]: `Desk${VAR.suffix} — 3D views · ${VAR.dwg3}` };
+  for (const [k, title] of Object.entries(titles)) {
+    window.DRAWINGS[k] = { title, get svg() { return get()[k]; }, get params() { return get().params; }, ...(k.endsWith("-3d") ? { model: false } : {}) };
+  }
+}
+
+registerDesk({ key: "desk", suffix: "", simple: false, dwg1: "AST-DR-002", dwg2: "AST-DR-003", dwg3: "AST-DR-004" });
+registerDesk({ key: "desk-square", suffix: " (square corners)", square: true, dwg1: "AST-DR-028", dwg2: "AST-DR-029", dwg3: "AST-DR-030" });

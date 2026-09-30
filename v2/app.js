@@ -265,14 +265,22 @@
     "../plans/plans.js", "pages.js"];
   // On the overview they wait for the hero's reveal (or 4 s), so ~20 drawing scripts never compete with the
   // video for the line; a link straight to a room page loads them at once.
-  const loadPages = () => { if (!loadPages.done) { loadPages.done = true; loadRest(() => {}, PAGES); } };
+  // …and then only once the browser is idle, a moment after the reveal has settled, so their parse never lands
+  // on a frame of the hero video (a deep link still loads them straight away).
+  const loadPages = (now) => {
+    if (loadPages.done) return; loadPages.done = true;
+    const go = () => loadRest(() => {}, PAGES);
+    if (now === true || !window.requestIdleCallback) return go();
+    setTimeout(() => requestIdleCallback(go, { timeout: 1500 }), 700);
+  };
   const deep = location.hash && location.hash !== "#overview";
   loadRest(() => {
     initSite();
-    if (deep || root.classList.contains("is-ready")) return loadPages();
+    if (deep) return loadPages(true);
+    if (root.classList.contains("is-ready")) return loadPages();
     const mo = new MutationObserver(() => { if (root.classList.contains("is-ready")) { mo.disconnect(); loadPages(); } });
     mo.observe(root, { attributes: true, attributeFilter: ["class"] });
     setTimeout(() => { mo.disconnect(); loadPages(); }, 4000);
-    addEventListener("hashchange", loadPages, { once: true });
+    addEventListener("hashchange", () => loadPages(true), { once: true });
   });
 })();

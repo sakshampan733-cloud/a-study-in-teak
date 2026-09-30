@@ -43,11 +43,32 @@ Last round's bar is kept as `bar-round1.md`.
    stacking over it; one row of cards where the hovered card grows to ~2× width over 0.6 s; one Bone
    band with a logo/marquee strip; a footer under 40–50 px backdrop blur.
 
+## Piece 1, round 15 on — the hero loop by the numbers (30.09)
+
+The owner restarted the frozen loop against the **saved 23 Sep version** (the live site has since been
+redesigned; it is not the bar). Entrance timing and layout passed brief and system in rounds 8–12 and
+are regression checks only. What failed every craft round is the loop's *feel*. These are measured off
+`site/ciridae.com/marketing/media/hero_web.mp4` (1 fps, 480 px wide) and are checkable on ours the same way:
+
+8. **Mostly dark.** 60–72% of the frame below luma 20; mean luma 20–28. Lit area small: warm (r > b) 4–8%
+   of the frame, cool (b > r) 3–6%. Shadows near-neutral, faintly blue (≈ 7, 11, 14). No green cast (0%).
+9. **Mixed focus, not one blur.** In every second at least one form is only softly defocused — a curved
+   edge readable as glass or metal, a surface you could name the shape of — in front of forms that are
+   fully dissolved. Edge density (gradient > 18) varies 0.3–1.0% second to second; a flat 0.4% is fog.
+10. **Glints.** At least once per loop a small near-white specular (luma > 225, 0.1–0.6% of the frame,
+    cream not pure white) catches on a curved surface, then passes. Never a disc, never a light bulb.
+11. **Forms, not shapes.** The light sits on 3–5 translucent objects — cylinders, shards, lips of glass —
+    lit copper from one side and steel-blue from the other, turning slowly so their highlights travel.
+    No ring or arc spanning half the frame; nothing reads as a bubble, orb, lamp, room or face.
+12. **Pace and loop.** 8–9 s, 24 fps, 1600 × 850. Composition changes by 10–16 luma levels a second
+    (forms enter, cross, leave), with the loop point invisible: no jump, no crossfade ghost.
+
 ## Accepted deltas — a critic must not fail on these
 
 - **Content is ours.** Room names, copy, drawings, photos: from `data.js`, never theirs.
 - **Media is ours.** Every video and image is generated for this room (Higgsfield). Match their
-  *treatment* — blur level, grade, pacing, motion — never their pixels.
+  *treatment* — blur level, grade, pacing, motion — never their pixels. The objects in ours may be the
+  room's own (teak, brass, glass) as long as they read as abstract forms, per 11.
 - **Typefaces**, until decided: Pragmatica / Pragmatica Cond are licensed commercial faces. Until the
   owner buys them, the closest free substitutes stand in; judge metrics (size, tracking, case, weight),
   not letterforms.

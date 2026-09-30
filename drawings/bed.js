@@ -19,7 +19,9 @@ const BEDPLAN = {
   door: 914,
 };
 
-(function () {
+// Drawn the first time the sheet is asked for (the Bedroom page, the lightbox, the CAD export) — at load it
+// cost the front page a visible hitch just as the hero video came up.
+function buildBedSheet() {
   const { INK, THIN, f, text, mmToFt, view, chainH, chainV, heading, frame, titleBlock, sheet } = window.DK;
   const K = BEDPLAN, S = window.SHELL, G = window.PGEOM;
   const ft = (mm) => mmToFt(mm).replace("'-", " ft ").replace('"', " in").replace(/^0 ft /, "");
@@ -200,5 +202,6 @@ const BEDPLAN = {
     .forEach((n, i) => (s += text(150, 234 + i * 4.15, n, { size: 1.5, fill: n.startsWith("OPEN") ? "#b3261e" : INK })));
 
   s += titleBlock({ title: "BED, BED BACK AND PARTITION", sub: "Plan · Bed back · Four views", date: K.date, rev: K.rev, dwg: "AST-DR-013", scale: "AS NOTED @ A3" });
-  window.DRAWINGS.bed = { title: "Bed and partition · AST-DR-013", svg: sheet(s), model: true };
-})();
+  return sheet(s);
+}
+{ let svg = null; window.DRAWINGS.bed = { title: "Bed and partition · AST-DR-013", get svg() { return svg || (svg = buildBedSheet()); }, model: true }; }
