@@ -221,9 +221,7 @@ function buildDesk(VAR) {
     o += topShade(K.L, th);
     [[cx0 + SO, pedL[1] - K.stile], [pedL[1], pedR[0]], [pedR[0] + K.stile, cx1 - SO]].forEach(([a, b]) => {
       o += `<rect x="${a + 5}" y="${yF0 + 6}" width="${b - a - 10}" height="${K.frz - 12}" stroke-width="${th}"/><rect x="${a + 8}" y="${yF0 + 9}" width="${b - a - 16}" height="${K.frz - 18}"/>`;
-      const hy = yF0 + K.frz / 2 - 10, mid = (a + b) / 2;
-      o += b - a > 500 ? handle(mid - 200, hy, th) + handle(mid + 200, hy, th) : handle(mid, hy, th);
-      o += `<path stroke-width="${th}" d="M ${mid - 5} ${yF0 + 18} a 4 4 0 1 1 10 0 l 2 10 l -14 0 z"/>`; // keyhole
+      // frieze drawers: no handles, no keyholes — push-to-open (owner, 30.09); the handles are on the pedestal drawers
     });
     o += `<rect x="${cx0}" y="${yF1}" width="${cx1 - cx0}" height="${K.rail}"/><g stroke-width="${th}"><line x1="${cx0}" y1="${yF1 + 5}" x2="${cx1}" y2="${yF1 + 5}"/><line x1="${cx0}" y1="${yF1 + 10}" x2="${cx1}" y2="${yF1 + 10}"/></g>`;
     // modesty panel seen through kneehole
@@ -362,13 +360,6 @@ function buildDesk(VAR) {
       const e0 = yF0 + 16, e1 = yF1 - 4;
       slab(fy, a + 3, e0, b - 3, e1, 0, 2.5, { hatch: false });
       frameOn(fy, a + 3, e0, b - 3, e1, 3, 5.5);                              // cockbead
-      const eh = (e0 + e1) / 2 - 8, mid = (a + b) / 2, yf = ov - 2.5;
-      (b - a > 600 ? [mid - 230, mid + 230] : [mid]).forEach((hx) => {
-        [-45, 45].forEach((dx) => { onY(yf, -1, circPts(hx + dx, eh, 9, 14), { closed: true, w: 1 }); onY(yf, -1, circPts(hx + dx, eh, 4, 10), { closed: true }); });
-        const zh = Z(eh), bail = Array.from({ length: 17 }, (_, i) => { const t = i / 16; return [hx - 45 + 90 * t, yf - 16, zh - 4 - 20 * Math.pow(Math.sin(Math.PI * t), 0.75)]; });
-        lines.push({ n: [0, -1, 0], w: 1, pts: [[hx - 45, yf, zh], [hx - 45, yf - 16, zh - 3], ...bail, [hx + 45, yf - 16, zh - 3], [hx + 45, yf, zh]] });
-      });
-      onY(ov - 2.5, -1, [[mid - 3.5, yF0 + 22], [mid + 3.5, yF0 + 22], [mid + 4.5, yF0 + 32], [mid - 4.5, yF0 + 32]], { closed: true });
     });
     // frieze back and ends: sunk panels as mouldings
     [[ov + SO, pedL[1]], [pedL[1], pedR[0]], [pedR[0], L - ov - SO]].forEach(([a, b]) => frameOn({ axis: "y", at: yb, dir: 1 }, a + 16, yF0 + 18, b - 16, yF1 - 6, 3, 4));
@@ -550,7 +541,7 @@ function buildDesk(VAR) {
   // Key + notes
   const kx = 160;
   s1 += heading(kx, 190, "KEY", "PARTS OF THE DESK", 30);
-  ["Top — plain teak, reeded edge", "Reeded console bracket", "Frieze drawer, swan-neck handles", "Reeded rail", SQUARE ? "Square corner, moulding on each face at the corner" : "Hollow corner, moulding at each end of the curve",
+  ["Top — plain teak, reeded edge", "Reeded console bracket", "Frieze drawer, push-to-open", "Reeded rail", SQUARE ? "Square corner, moulding on each face at the corner" : "Hollow corner, moulding at each end of the curve",
    "Pedestal — three drawers each side", "Swan-neck handle + keyhole, every drawer", "Moulded plinth", "Modesty panel in kneehole"]
     .forEach((l, i) => { s1 += bubble(kx + 2, 201 + i * 5.2, i + 1) + text(kx + 6, 201.7 + i * 5.2, l, { size: 1.7 }); });
   s1 += heading(236, 190, "NOTES", "READ BEFORE MAKING", 40);
