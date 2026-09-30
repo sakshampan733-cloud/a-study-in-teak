@@ -22,7 +22,7 @@ TEX = os.path.join(HERE, "tex")
 rng = random.Random(7)
 
 # ── what is not part of this tour ─────────────────────────────────────────────
-KILL = ("bed_back", "table0", "table1", "partition_", "drawers", "dr_gap", "dr_pull", "tv", "chair_", "chase", "pier",
+KILL = ("chair_", "chase", "pier",
         "glass_bwin", "lbl_", "painting", "desk_top", "desk_frieze", "sconce", "dome", "cor_", "L_cor")
 for o in list(sc.objects):
     if o.name.startswith(KILL) or o.type == "LIGHT": bpy.data.objects.remove(o, do_unlink=True)
@@ -58,7 +58,8 @@ def veneer(name="teak_veneer", gloss=0.32, coat=0.35, val=0.78, sat=0.72, tex="v
     b.inputs["Coat Roughness"].default_value = 0.12
     return m
 M_VEN = veneer("dark_diva_crown", 0.32, 0.4, 1.12, 1.0, "dark_diva_crown.jpg", (0.9, 0.9, 1.1))   # Dark Diva Crown, from the owner's sample (OHBF-607), book-matched
-M_DESK = veneer("teak_desk", gloss=0.18, coat=1.0, val=0.82, sat=0.78)      # French-polish look: the room's gloss is set here
+M_DESK = veneer("teak_desk", gloss=0.18, coat=1.0, val=0.82, sat=0.78)
+M_BURL = veneer("burl_diva", 0.14, 1.0, 0.46, 0.9, "burl_diva.jpg", 0.75)          # the 9292 burl, polished to the Dark Diva colour      # French-polish look: the room's gloss is set here
 def marble(name, fname, scale, rough, val=1.0, sat=1.0):
     m, nt, b = node_mat(name)
     t = img(nt, fname, scale, blend=0.1)
@@ -178,7 +179,12 @@ for o in list(sc.objects):
     elif n == "glass_win":
         mg, ntg, bg_ = node_mat("glass"); bg_.inputs["Transmission Weight"].default_value = 1.0; bg_.inputs["Roughness"].default_value = 0.0; bg_.inputs["IOR"].default_value = 1.45; setmat(o, mg)
     elif n in ("bed_base",): setmat(o, M_DARK)
-    elif n == "bed_frame": setmat(o, M_LINEN_TAUPE)
+    elif n in ("bed_frame", "bed_back", "table0", "table1", "partition_bed", "partition_desk", "drawers"): setmat(o, M_BURL)
+    elif n.startswith("dr_pull"): setmat(o, M_BRASS)
+    elif n.startswith("dr_gap") or n == "drawers_plinth": setmat(o, M_DARK)
+    elif n == "tv":
+        mt, ntt, bt = node_mat("tv_glass"); bt.inputs["Base Color"].default_value = (0.004, 0.004, 0.005, 1); bt.inputs["Roughness"].default_value = 0.04
+        bt.inputs["Coat Weight"].default_value = 1.0; setmat(o, mt)
     elif n in ("mattress", "pillow0", "pillow1"): setmat(o, M_LINEN_WHITE)
     elif n == "duvet": setmat(o, M_LINEN_IVORY)
     elif n.startswith(("ped", "plinth", "modesty")): setmat(o, M_DESK)
@@ -309,6 +315,23 @@ exec(compile(open(os.path.join(HERE, "joinery.py")).read(), "joinery.py", "exec"
 # ── the bed wall: parchment plaster, seamless, over the whole 15 ft 6 in wall, skirting to ceiling ──
 pw_ = dbox("parchment_wall", xLb + 16, Lb - 21, SK, xR - 1, Lb - 15, H - 1, M_PARCH)
 
+# ── the bed back (the owner's curved one) in the burl: a brass inlay line and a brass cap along its curve,
+# a hidden warm strip on top washing up the parchment wall; the bedside tables get a brass edge ──
+band("bb_inlay", bp, BT + 4, 1000, 1012, CLAY); setmat(sc.objects["bb_inlay"], M_BRASS)
+band("bb_cap", bp, BT + 10, 1372, 1384, CLAY); setmat(sc.objects["bb_cap"], M_BRASS)
+ld = bpy.data.lights.new("bb_glow", "AREA"); ld.shape = "RECTANGLE"; ld.size, ld.size_y = 2.2, 0.03; ld.energy = 55; warm(ld, 2600)
+lo = bpy.data.objects.new("bb_glow", ld); sc.collection.objects.link(lo); lo.location = P(cx, Lb - 45, 1392); lo.rotation_euler = (math.radians(180 - 12), 0, 0)
+lo.visible_camera = False
+for i_, sg in enumerate((-1, 1)):
+    ccx, ccs = cx + sg * bs, Lb - bR
+    tr_ = bR - BT / 2 - 25                                           # the tables' radius (furnish.py)
+    q = [(ccx + sg * (tr_ + 6) * math.sin(math.pi / 2 * k / 24), ccs + (tr_ + 6) * math.cos(math.pi / 2 * k / 24)) for k in range(25)]
+    band(f"tb_edge{i_}", q, 8, 588, 602, CLAY); setmat(sc.objects[f"tb_edge{i_}"], M_BRASS)
+# the partition: a brass inlay on both faces at the same height as the bed back's
+band("pt_inlay_b", pside(1), pT + 4, 1000, 1012, CLAY); setmat(sc.objects["pt_inlay_b"], M_BRASS)
+band("pt_inlay_d", pside(-1), pT + 4, 1000, 1012, CLAY); setmat(sc.objects["pt_inlay_d"], M_BRASS)
+tvf = dbox("tv_frame", cx - 622, yP + pT / 2 - 2, 842, cx + 622, yP + pT / 2 + 40, 1553, M_DARK)
+
 # ── left wall: the air conditioner, measured 3 ft 10 × 1 ft, on the painting's centre line ──
 acs = 2299
 ac = dbox("ac", xLs, acs - 584, 2240, xLs + 220, acs + 584, 2545, M_AC); bevel(ac, 0.02, 4)
@@ -419,23 +442,24 @@ for (a, b, c_, d_) in ((WIN["x0"], WIN["x0"] + 50, WIN["sill"], WIN["head"]), (W
 
 # ── the curtain: one sheer, floor to ceiling, gathered to the left of the window and pinched at the tieback ──
 def curtain():
-    """A pinch-pleated sheer, ceiling track to floor, drawn across the window for the evening: deep, uneven folds
-    at the heading that soften and flare toward a weighted hem."""
+    """The sheer, open: pinch-pleated on a slim bronze track, gathered in a stack to the left of the window and held
+    at the tieback by the black volute hook — so the window shows."""
     me = bpy.data.meshes.new("curtain"); bm = bmesh.new()
-    xa, xb = WIN["x0"] - 260, xR - 12; zt, zb = H - 55, 12
-    NXc, NZc = 260, 70; npl = int((xb - xa) / 105)
-    rng_c = random.Random(3); ph = [rng_c.uniform(-0.35, 0.35) for _ in range(npl + 2)]; dep = [rng_c.uniform(0.75, 1.25) for _ in range(npl + 2)]
+    xa, xb = WIN["x0"] - 470, WIN["x0"] + 110; zt, zb = H - 55, 12; ztie = 1000
+    NXc, NZc = 150, 80; npl = 12
+    rng_c = random.Random(5); dep = [rng_c.uniform(0.8, 1.2) for _ in range(npl + 2)]
     rows = []
     for j in range(NZc + 1):
-        z = zb + (zt - zb) * j / NZc; t = (z - zb) / (zt - zb)            # 0 at the hem, 1 at the heading
+        z = zb + (zt - zb) * j / NZc; t = (z - zb) / (zt - zb)
+        pinch = 1 - 0.55 * math.exp(-((z - ztie) / 380) ** 2)            # gathered in at the tieback
+        belly = 0.25 * math.exp(-((z - (ztie - 380)) / 300) ** 2)         # the fabric blousing out just below it
         row = []
         for i in range(NXc + 1):
             u = i / NXc; k = u * npl; kk = int(k)
-            a_ = 34 * dep[kk] * (0.75 + 0.35 * (1 - t))                  # folds flare toward the floor
-            wob = 0.25 * math.sin(k * 0.7 + z / 500) + ph[kk] * (1 - t)
-            sv = 385 + a_ * math.sin(2 * math.pi * (k + wob * 0.3))
-            if t > 0.93: sv = 385 + 22 * math.sin(2 * math.pi * k) * (1 if (k % 1) < 0.5 else 0.35)   # pinch pleats at the heading
-            x = xa + (xb - xa) * u + 6 * math.sin(z / 300 + u * 9) * (1 - t)
+            x = xa + (xb - xa) * (u * pinch) + (xb - xa) * (1 - pinch) * 0.08
+            a_ = 55 * dep[kk] * (0.8 + 0.4 * (1 - t)) * (0.7 + 0.3 * pinch)
+            sv = 390 + a_ * math.sin(2 * math.pi * (k + 0.15 * math.sin(z / 400 + k))) + 60 * belly
+            if t > 0.94: sv = 390 + 26 * math.sin(2 * math.pi * k)
             row.append(bm.verts.new(P(x, sv, z)))
         rows.append(row)
     for a_, b_ in zip(rows, rows[1:]):
@@ -445,9 +469,10 @@ def curtain():
     so = o.modifiers.new("t", "SOLIDIFY"); so.thickness = 0.0012
     sd = o.modifiers.new("s", "SUBSURF"); sd.levels = 1; sd.render_levels = 1
     for p_ in me.polygons: p_.use_smooth = True
-    hem = dbox("curtain_hem", xa, 360, zb, xb, 410, zb + 1, M_SHEER)
-    tr = dbox("curtain_track2", xa - 40, 360, H - 40, xb + 5, 410, H - 20, M_BRONZE); bevel(tr, 0.004, 2)
+    tr = dbox("curtain_track2", xa - 40, 365, H - 40, xR - 12, 405, H - 20, M_BRONZE); bevel(tr, 0.004, 2)
     for o_ in [o for o in sc.objects if o.name.startswith("curtain_track") and o.name != "curtain_track2"]: bpy.data.objects.remove(o_, do_unlink=True)
+    tb = sc.objects.get("tieback")
+    if tb: tb.location = (0, 0, 0)
 curtain()
 
 # ── world and render ───────────────────────────────────────────────────────────
@@ -484,7 +509,8 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
     "study": ((3300, 2900), (1500, 0, 1250)),
     "desk": ((3900, 700, 1350), (2000, 2300, 700)),
     "right": ((700, 1800), (4547, 3300, 1300)),
-    "bed": ((3700, 2800), (1900, 5766, 900)),
+    "bed": ((3300, 3350), (2100, 5766, 900)),
+    "tvside": ((1100, 4250), (2337, 2450, 1100)),
     "door": ((2600, 3500), (-177, 5200, 1250)),
     "dress": ((4900, 4450), (8400, 4356, 1500)),
     "vault": ((5100, 4356, 1450), (7600, 4356, 3000)),
@@ -504,15 +530,17 @@ def shoot(name):
     bpy.ops.render.render(write_still=True)
 
 TOUR = [  # name, camera (x, s[, z]), looking at (x, s, z), hold frames, what happens while it holds
-    ("in", (250, 5200), (3100, 2400, 1150), 20, None),
-    ("room", (1300, 4200), (2400, 300, 1250), 26, None),
-    ("study", (2300, 2000), (1800, 0, 1350), 26, None),
+    ("in", (300, 5200), (2337, 2600, 1150), 20, None),
+    ("tv", (1100, 4250), (2337, 2450, 1100), 26, None),
+    ("bed", (3300, 3350), (2100, 5766, 900), 30, None),
+    ("right", (1500, 3550), (4547, 3200, 1400), 22, None),
+    (None, (4150, 3150), (4150, 1000, 1300), 0, None),
+    ("study", (4100, 1900), (1600, 0, 1300), 26, None),
+    ("window", (3600, 1500), (3950, 0, 1450), 20, None),
     ("book", (1500, 1150), (600, 0, 1300), 20, None),
-    ("desk", (3500, 820, 1300), (2300, 2100, 720), 26, None),
-    ("window", (3700, 1500), (3940, 0, 1450), 20, None),
-    ("right", (1200, 2400), (4547, 3000, 1400), 26, None),
-    ("bed", (3600, 3100), (2000, 5766, 900), 30, None),
-    (None, (3300, 4300), (4547, 4650, 1300), 0, None),
+    ("desk", (3300, 780, 1300), (2337, 2000, 720), 26, None),
+    (None, (650, 1300), (650, 3000, 1300), 0, None),
+    (None, (700, 3350), (2500, 4300, 1300), 0, None),
     ("d2", (3450, 4650), (5400, 4650, 1400), 34, "d2"),
     ("dress", (5100, 4450), (8400, 4356, 1500), 26, None),
     ("vault", (5900, 4356, 1500), (7700, 4356, 3000), 26, None),
