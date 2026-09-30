@@ -156,7 +156,7 @@ function overview() {
     <div class="wrap"><div class="plan-grid reveal"><div class="panel" style="padding:12px">${plans}</div>
     <div class="panel"><div class="facts">${P.room.facts.map((f) => `<div class="k">${esc(f.k)}</div><div class="v">${esc(f.v)}</div>`).join("")}</div></div></div></div></section>`;
 
-  const walk = `<section class="section" style="padding-bottom:24px">${head("The walk-through", "Scroll, and walk the rooms.", "Rendered in Blender from the drawings — every wall to the inch, every piece where it has been decided. Clay for now; the materials go on next.")}</section>
+  const walk = `<section class="section" style="padding-bottom:24px">${head("The walk-through", "Scroll, and walk the rooms.", "Rendered in Blender from the drawings — every wall to the inch, every moulding to its profile, in its real finish and light — the bedroom, the study, the dressing room and the bathroom vanity.")}</section>
     <section class="walk" id="walk"></section>`;
   const plan2d = `<section class="section">${head("The plan", "Switch things on and off.", "The whole suite from above. Show the measurements and the lights, and put each piece of furniture in or take it out, one at a time.")}
     <div class="wrap reveal"><div class="p2d" id="p2d"></div></div></section>`;

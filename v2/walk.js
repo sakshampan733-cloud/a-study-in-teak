@@ -6,31 +6,29 @@
   const BASE = "media/walk/", SRC = (i) => `${BASE}w${String(i).padStart(4, "0")}.webp`;
   const PX_PER_FRAME = 24;              // page height per frame — the walking pace: a wheel notch moves about 20 cm
   const TEXT = {
-    door: ["The front door", "Where it all starts"],
-    in: ["The bedroom", "In through the door, which lies flat along the bed wall"],
-    tv: ["The partition, bed side", "8 ft · the TV · drawers filling the curve, 15 in out"],
-    bed: ["The bed", "6 ft × 6 ft 6 · the curved bed-back · quarter-circle tables"],
-    study: ["The study wall", "Bookcase, two fluted pilasters, the panelled centre, the cornice"],
-    window: ["The window", "One white curtain, floor to ceiling, gathered to the left"],
-    book: ["The bookcase", "Open shelves over cupboards and a reeded counter"],
-    desk: ["The desk", "7 ft 6 × 3 ft · sitting in the partition's desk-side curve"],
-    d2: ["The dressing room door", "2 ft 6 in · it swings into the dressing room"],
-    dress: ["The dressing room", "Wardrobes both sides, 9 ft tall · the trifold mirror at the end"],
-    dome: ["The dome", "10 ft at the crown — its shape still open"],
-    mech: ["The tunnel bay", "The doors fold out, slide back in — then the shelves swing into the tunnel"],
+    in: ["The bedroom", "In through the front door — the partition ahead, the panelled wall on the right"],
+    tv: ["The partition", "Burl, polished to the Dark Diva colour · a 55 in TV over the drawers · brass inlay and pulls"],
+    room: ["The study end", "Teak panelling, the bookcase, the window and its one white curtain"],
+    study: ["The study wall", "Dark Diva Crown · cornice with modillions and dentils, fluted pilasters, the bolection centre panel"],
+    book: ["The bookcase", "Open shelves over cupboards, a strip light under the head rail"],
+    desk: ["The desk", "7 ft 6 × 3 ft in solid teak, French-polished · square corners · brass handles"],
+    window: ["The window", "4 ft × 5 ft 5 · slim bronze bars · one pleated sheer, gathered to the left at the tieback"],
+    right: ["The right wall", "Painted panel moulding · three brass twin-arm lamps · the cove above"],
+    bed: ["The bed", "The curved bed back and its tables in burl, a brass inlay and cap · parchment plaster, wall to wall"],
+    d2: ["The dressing room door", "Four panels, a reeded casing and crown — it swings into the dressing room"],
+    dress: ["The dressing room", "Teak wardrobes both sides, 9 ft tall · the folding mirror at the end"],
+    vault: ["The vault", "Coffered, three across and five along, lit from its cove — as built"],
+    mirror: ["The mirror", "Three panels, the wings at 45° · the bedroom behind you in it"],
+    mech: ["The tunnel bay", "The doors fold out and slide back — then the shelves swing into the tunnel"],
     tunnel: ["The tunnel", "3 ft wide, 7 ft 8 in long · the door lies against its left wall"],
-    d3: ["The bathroom door", "Hinged on the left, it opens in"],
-    bath: ["The bathroom", "12 ft 3 × 8 ft 11 · the shower and WC still to be placed"],
-    corner: ["From the far corner", "The door, the WC wall, the 7 in wall"],
-    pier: ["The pier", "10 in thick, 3 ft out from the door wall"],
-    wc: ["The WC wall", "The 7 in wall starts 5 ft 4 in from the door"],
-    end: ["Back to the door", "Clay model · the materials go on next"],
+    d3: ["The bathroom door", "Four panels, hinged on the left — into the bathroom"],
+    vanity: ["The vanity", "Scheme C · the beige-gold marble bank to the floor · dark burl pull-outs · the vessel bowl on the tap line"],
   };
 
   function mount(el) {
     el.innerHTML = `<div class="walk-pin">
         <canvas class="walk-cv"></canvas>
-        <div class="walk-top"><span class="eyebrow">Walk-through · clay</span><span class="walk-hint">Scroll to walk</span></div>
+        <div class="walk-top"><span class="eyebrow">Walk-through</span><span class="walk-hint">Scroll to walk</span></div>
         <div class="walk-cap"><div class="walk-t"></div><div class="walk-s"></div></div>
         <div class="walk-bar"><i></i></div>
       </div>`;
