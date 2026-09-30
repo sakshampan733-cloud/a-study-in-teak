@@ -304,6 +304,25 @@ window.PROJECT = {
 
   // Tabs. Each item is a spec sheet built from parts.
   // A part with inherit:"veneer" / "polish" pulls from the master unless overridden.
+  // material swatches for the glance cards: a photo where we have one, a colour where we do not
+  swatches: {
+    teak: { name: "Teak, dark stain", img: "assets/refs/veneer-dark-diva-crown-OHBF-607-color-target.jpg", pos: "22% 86%", zoom: 5 },
+    burl: { name: "9292 cream burl", img: "assets/refs/veneer-9292-cream-burl.jpg" },
+    taupeMarble: { name: "Taupe marble floor", img: "assets/refs/floor-ref-2-taupe-brown-marble-slab.jpg" },
+    whiteMarble: { name: "White marble", img: "assets/refs/stone-ref-2-white-brown-border-skirting.jpg" },
+    beigeMarble: { name: "Beige-gold marble", img: "assets/refs/stone-ref-3-beige-gold-bathroom-marble.jpg" },
+    parchment: { name: "Parchment", img: "assets/refs/bedwall-ref-3-parchment-large-panels.jpg" },
+    lining: { name: "Cream lining, lit", img: "assets/refs/wardrobe-ref-4-inside-finish-lit-niche.jpg" },
+    blackLine: { name: "Black linework", img: "assets/refs/bathroom-ref-1b-painted-ceiling-detail.jpg" },
+    cream: { name: "Warm cream paint", color: "#e7dcc6" },
+    brass: { name: "Polished brass", color: "linear-gradient(135deg, #7d5f28, #e4c679 48%, #9a7833)" },
+    chrome: { name: "Chrome", color: "linear-gradient(135deg, #8e9398, #f1f3f5 48%, #9ba0a5)" },
+    iron: { name: "Black iron", color: "#1d1c1b" },
+    linen: { name: "White sheer", color: "#f2eee6" },
+    mirror: { name: "Silver mirror", color: "linear-gradient(135deg, #7f8a93, #dfe6eb 50%, #8a959e)" },
+    bronze: { name: "Dark bronze", color: "#3b2f26" },
+    glass: { name: "Backlit glass", color: "linear-gradient(180deg, #f6ecd6, #d9c9a8)" },
+  },
   tabs: [
     {
       id: "doors", title: "Doors & Moulding", kicker: "Three doors, one design",
@@ -311,6 +330,7 @@ window.PROJECT = {
       items: [
         {
           id: "door", name: "Doors (×3)", status: "open",
+          glance: {"line": "One four-panel teak door design, in two widths.", "facts": [["7 ft 7 in", "tall"], ["3 ft", "main door"], ["2 ft 6 in", "dressing & bath"], ["45 mm", "veneered blockboard"]], "mats": ["teak"]},
           drawings: ["doorveneer", "door", "door-narrow"],
           refs: [
             { src: "assets/refs/door-ref-1.jpg", caption: "Reference — pair of panelled doors in a library (film still)" },
@@ -340,6 +360,7 @@ window.PROJECT = {
         },
         {
           id: "moulding", name: "Door Moulding / Architrave", status: "open",
+          glance: {"line": "A reeded 6 in casing with a crown above each door.", "facts": [["6 in", "casing, all round"], ["8 ft 8 in", "crown (option A)"], ["A / B", "plain block or carved corbel"]], "mats": ["teak", "whiteMarble"]},
           drawings: ["architrave", "casingb"],
           refs: [
             { src: "assets/refs/moulding-ref-1-brownstone-doorway.jpg", caption: "The reference — brownstone doorway: reeded jambs, carved corbels, scallop course, crown mitred back at each end" },
@@ -366,6 +387,7 @@ window.PROJECT = {
       items: [
         {
           id: "desk", name: "Desk", status: "open",
+          glance: {"line": "Tommy Shelby's double-pedestal desk, in solid teak.", "facts": [["7 ft 6 × 3 ft", "top"], ["750 mm", "high"], ["6 + 3", "drawers, pedestal + frieze"], ["2", "versions: curved or square corners"]], "mats": ["teak", "brass"]},
           drawings: ["desk", "desk-details", "desk-3d", "desk-square", "desk-square-details", "desk-square-3d"],
           refs: [
             { src: "assets/refs/desk-ref-1.jpg", caption: "Reference — Tommy Shelby's desk, Peaky Blinders (screen photo)" },
@@ -397,6 +419,7 @@ window.PROJECT = {
         },
         {
           id: "shelf", name: "Study Wall — Bookcase, Panelled Centre, Window", status: "open",
+          glance: {"line": "A full-height teak study wall: bookcase, panel, window.", "facts": [["14 ft 11 in", "wide"], ["2 ft 3 in", "counter = window sill"], ["11 in", "deep"], ["2", "fluted pilasters"]], "mats": ["teak"]},
           drawings: ["studywall", "studywall-details"],
           refs: [
             { src: "assets/refs/wall-ref-0-study-layout.jpg", caption: "Layout reference — bookcase, panelled centre with painting, desk in front" },
@@ -428,6 +451,7 @@ window.PROJECT = {
         },
         {
           id: "curtains", name: "Window Curtains", status: "open",
+          glance: {"line": "One white sheer curtain, gathered to the left.", "facts": [["1", "curtain, left side only"], ["White", "light-filtering"], ["Iron", "volute tieback"]], "mats": ["linen", "iron"]},
           refs: [
             { src: "assets/refs/paint-ref-1-warm-cream-room-sheer-curtains.jpg", caption: "Curtain reference — white, light-filtering curtains in soft folds, floor to ceiling" },
             { src: "assets/refs/curtain-ref-1-volute-tieback.jpg", caption: "Tieback — a black iron volute (spiral) hook holding the curtain back" },
@@ -450,6 +474,7 @@ window.PROJECT = {
       items: [
         {
           id: "left-wall", name: "Left Wall", status: "open",
+          glance: {"line": "Kept plain on purpose: paint, one painting, the AC.", "facts": [["4 ft 6 × 5 ft", "painting (as drawn)"], ["3 ft 10 × 1 ft", "air conditioner, measured"], ["0", "built-ins"]], "mats": ["cream", "whiteMarble"], "img": "assets/refs/paint-ref-1-warm-cream-room-sheer-curtains.jpg"},
           drawings: ["leftwall"],
           parts: [
             { label: "Treatment", value: "Deliberately plain. Paint, the marble skirting, one painting and the air conditioner over it — nothing built in, nothing panelled. It is the quiet side opposite the panelled right wall, and it is the wall that carries the splay and the step, so anything fitted to it would have to be scribed twice." },
@@ -467,6 +492,7 @@ window.PROJECT = {
         },
         {
           id: "right-wall", name: "Right Wall", status: "final",
+          glance: {"line": "Painted panel moulding with three brass wall lamps.", "facts": [["5", "tall panels"], ["2 ft 3 in", "rail = study counter"], ["3", "twin-arm lamps"], ["4 in", "white marble skirting"]], "mats": ["cream", "whiteMarble", "brass"]},
           drawings: ["rightwall"],
           refs: [
             { src: "assets/refs/rightwall-iter-1-rail-2ft3.jpg", caption: "Iteration 1 — SELECTED. Rail at 2 ft 3 in, the study counter carried round the corner so one line runs round both walls. This is what AST-DR-007 draws." },
@@ -498,6 +524,7 @@ window.PROJECT = {
       items: [
         {
           id: "tv-unit", name: "TV Unit / Side Drawers", status: "brief",
+          glance: {"line": "A drawer unit under the TV, in pale cream burl.", "facts": [["9292", "cream burl veneer"], ["High gloss", "polish"], ["Drawers", "not doors"]], "mats": ["burl"]},
           refs: [
             { src: "assets/refs/bedwall-ref-5-parchment-cabinet-dark-room.jpg", caption: "Reference — parchment-fronted cabinet glowing against dark walls" },
             { src: "assets/refs/veneer-9292-cream-burl.jpg", caption: "CONFIRMED veneer — sample 9292, the pale cream burl" },
@@ -516,6 +543,7 @@ window.PROJECT = {
         },
         {
           id: "bed", name: "Bed", status: "open",
+          glance: {"line": "A low 6 ft bed against a curled 8 ft bed back.", "facts": [["6 × 6 ft", "bed"], ["8 ft", "bed back"], ["2 ft", "curls forward"], ["9⅜ in", "bedside ledges"]], "mats": ["burl", "teak"]},
           drawings: ["bed"],
           refs: [
             { src: "assets/refs/bed-ref-1-low-platform-bed.jpg", caption: "Bed reference (Newberry Projects) — low bed with a thick upholstered base, wide wooden side ledge as a bedside table, aged metal-leaf panels behind" },
@@ -536,6 +564,7 @@ window.PROJECT = {
         },
         {
           id: "headboard", name: "Bed Wall", status: "open",
+          glance: {"line": "Parchment on the wall behind the bed.", "facts": [["Parchment", "pale, warm, like vellum"], ["Panels", "probably, symmetrical"], ["One shade", "across every panel"]], "mats": ["parchment"]},
           refs: [
             { src: "assets/refs/bedwall-ref-1-parchment-dressing-room.jpg", caption: "Your ref — tall parchment panels, pale and warm, fine joints, dark cornice line" },
             { src: "assets/refs/bedwall-ref-3-parchment-large-panels.jpg", caption: "Your ref — large parchment panels with soft cloudy tone, joints kept hairline" },
@@ -555,6 +584,7 @@ window.PROJECT = {
         },
         {
           id: "partition", name: "Partition", status: "open",
+          glance: {"line": "Still open: backlit glass bays, or one burl surface.", "facts": [["A", "backlit glass in a grid"], ["B", "9292 cream burl"]], "mats": ["glass", "burl"]},
           refs: [
             { src: "assets/refs/partition-ref-2-backlit-glass-grid-panels.jpg", caption: "Option A — tall backlit textured glass panels in a dark grid of iron (or wood) mullions, lit from behind" },
             { src: "assets/refs/veneer-9292-cream-burl.jpg", caption: "Option B — sample 9292, the pale cream burl, as one dramatic veneered surface instead of glass" },
@@ -579,6 +609,7 @@ window.PROJECT = {
       items: [
         {
           id: "dressing-shape", name: "Room & Layout", status: "open",
+          glance: {"line": "Wardrobes both sides, a vaulted ceiling down the middle.", "facts": [["9 ft 3 × 12 ft 4", "room"], ["10 ft", "vault crown"], ["9 ft 1 in", "ceiling at the sides"], ["3 × 7 ft 8", "hidden tunnel"]], "mats": ["teak", "cream"], "img": "assets/refs/ceiling-barrel-vault-coffers.jpg"},
           drawings: ["dressingshell"],
           parts: [
             { label: "Doorway", value: "The 9 ft 3 in wall shared with the bedroom carries ONE door: D2, the existing door in from the bedroom (AST-DR-000), sitting 2 ft 4 in from the right-hand corner to its frame — measured on both sides of the wall. The bathroom door is not on this wall; it is in the LEFT wall. The mirror is on the far wall, 12 ft 4 in away." },
@@ -595,6 +626,7 @@ window.PROJECT = {
         },
         {
           id: "wardrobe", name: "Wardrobes", status: "open",
+          glance: {"line": "Two teak runs, warm-lit and cream-lined inside. No glass.", "facts": [["7", "bays, 28 leaves"], ["9 ft", "tall"], ["2 ft 3 in", "deep"], ["535½ sq ft", "of lining"]], "mats": ["teak", "lining"]},
           refs: [
             { src: "assets/refs/wardrobe-ref-4-inside-finish-lit-niche.jpg", caption: "CONFIRMED — the owner's own reference for the inside finish: warm lit niche, cream/beige lining, dark wood surround" },
           ],
@@ -612,6 +644,7 @@ window.PROJECT = {
         },
         {
           id: "end-bay-doors", name: "End-Bay Doors", status: "final",
+          glance: {"line": "The end bays fold out, then slide back inside.", "facts": [["C", "chosen"], ["1 ft 6½ in", "folded depth"], ["Brass", "piano hinge"]], "mats": ["teak", "brass"]},
           video: { src: "assets/video/dressing-endbay-foldin.mp4", poster: "assets/video/dressing-endbay-foldin.jpg", caption: "Three ways, one after another. A — folds into the cupboard, parks at the mirror end. B — folds into the cupboard, parks at the front end. C — folds out like the owner's photo, then slides back into the cupboard. Each one plays its whole movement three times: from the doorway, looking into the bay, and from above. Red line = the front of the wardrobe." },
           parts: [
             { label: "Chosen", value: "OPTION C — CONFIRMED by the owner. The doors fold outward like the photo, then slide back into the cupboard. A and B stay in the video for reference." },
@@ -628,6 +661,7 @@ window.PROJECT = {
         },
         {
           id: "hidden-door", name: "The Hidden Door", status: "open",
+          glance: {"line": "Shelves at the back of the last bay swing open to a tunnel.", "facts": [["Push", "touch latch, no handle"], ["2 ft 8 in", "door"], ["11¾ in", "door + shelves"], ["Floor pivot", "hinge"]], "mats": ["teak"]},
           video: { src: "assets/video/dressing-hidden-door.mp4", poster: "assets/video/dressing-hidden-door.jpg", caption: "The tunnel bay, start to finish, three times: from the room, looking into the tunnel, and from above. The Option C doors fold out and slide in; the shelves behind them are the hidden door." },
           parts: [
             { label: "What happens", value: "Open the tunnel bay like any other (Option C: fold out, slide in). What you see at the back is a set of shelves. That is the hidden door. Push it and it swings into the tunnel, on a hinge at its LEFT edge, and comes to rest flat against the tunnel's left wall — where its shelves line up with the shelves already fixed along that wall, so the run looks complete and the tunnel is open." },
@@ -644,6 +678,7 @@ window.PROJECT = {
         },
         {
           id: "dressing-mirror", name: "Dressing Mirror", status: "open",
+          glance: {"line": "A free-standing, three-panel folding mirror.", "facts": [["9 ft", "tall"], ["3 ft 6 in", "wide, wings at 45°"], ["2 ft", "centre glass"], ["7½ in", "clear each side"]], "mats": ["mirror", "bronze"]},
           drawings: ["mirror"],
           refs: [
             { src: "assets/refs/dressing-mirror-ref-1-folding-screen.jpg", caption: "Chosen reference — free-standing three-panel mirror screen in slim dark bronze frames with cut top corners" },
@@ -668,6 +703,7 @@ window.PROJECT = {
       items: [
         {
           id: "bath-ceiling", name: "Painted Ceiling", status: "open",
+          glance: {"line": "Fine black linework painted on a light ceiling.", "facts": [["Done", "ceiling"], ["Black", "hand-painted lines"], ["Rosettes", "swags, border"]], "mats": ["blackLine"]},
           refs: [
             { src: "assets/refs/bathroom-ref-1-painted-ceiling-linework.jpg", caption: "Reference (@katrin_dib) — a light ceiling with fine dark hand-painted linework over a dark bathroom" },
             { src: "assets/refs/bathroom-ref-1b-painted-ceiling-detail.jpg", caption: "Close-up — rosettes, garlands and a border drawn in thin black lines, like embroidery" },
@@ -682,6 +718,7 @@ window.PROJECT = {
         },
         {
           id: "vanity", name: "Vanity", status: "open",
+          glance: {"line": "A marble bank to the floor, with burl pull-outs each side.", "facts": [["5 × 2 ft", "top"], ["33 in", "to the marble"], ["3 ft", "marble bank, centred on the tap"], ["C", "scheme chosen"]], "mats": ["beigeMarble", "burl", "chrome"]},
           drawings: ["vanity", "vanity-b", "vanity-c", "vanity-drawer"],
           refs: [
             { src: "assets/refs/veneer-9292-cream-burl.jpg", caption: "CONFIRMED veneer — sample 9292, the pale cream burl, same as the bedroom's tables and drawers" },
@@ -707,6 +744,7 @@ window.PROJECT = {
         },
         {
           id: "fittings", name: "Fittings & Fixtures", status: "brief",
+          glance: {"line": "Shower glass, WC and bath position still to decide.", "facts": [["Done", "floor, niche, walls"], ["3", "left: shower, WC, bath"]], "mats": ["beigeMarble", "chrome"], "img": "assets/refs/stone-ref-3-beige-gold-bathroom-marble.jpg"},
           parts: [
             { label: "Status", value: "Everything else in the bathroom is done — floor, niche, walls, ceiling. Only the vanity, the shower glass enclosure, the WC and the bathtub position are left." },
             { label: "Shower", value: "", hint: "Glass enclosure — size and where it stands" },

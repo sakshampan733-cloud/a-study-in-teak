@@ -528,3 +528,59 @@ body.sheets-dark .lb-inner.is-dwg svg { filter: invert(1) hue-rotate(180deg) bri
 .walk-bar i { position: absolute; inset: 0; background: var(--ember); transform-origin: 0 50%; transform: scaleX(0); }
 @media (max-width: 760px) { .walk { height: 900vh; } .walk-top { top: 84px; left: 16px; right: 16px; } .walk-cap { left: 16px; bottom: 28px; } }
 @media (prefers-reduced-motion: reduce) { .walk-cap.in .walk-t, .walk-cap.in .walk-s { animation: none; } }
+
+/* ── room tabs at a glance (30.09): a card per piece — picture, one line, the numbers, the materials — then its
+   drawings, and the full spec folded under "All details" ── */
+.gl-index-strip { padding: 40px 0 8px; }
+.gl-index { display: flex; gap: 12px; overflow-x: auto; padding: 0 24px 8px; max-width: var(--max); margin: 0 auto; scrollbar-width: none; scroll-snap-type: x proximity; }
+.gl-index::-webkit-scrollbar { display: none; }
+.gl-idx { flex: 0 0 auto; width: 184px; display: grid; grid-template-rows: 112px auto; gap: 10px; color: var(--white); text-decoration: none; scroll-snap-align: start; position: relative; }
+.gl-idx-pic { border-radius: 8px; background: var(--charcoal) center / cover no-repeat; filter: saturate(.9); transition: filter .3s var(--ease), transform .4s var(--ease); }
+.gl-idx:hover .gl-idx-pic { filter: saturate(1.1) brightness(1.08); transform: translateY(-2px); }
+.gl-idx-t { display: flex; gap: 8px; font: 400 14px/1.25 var(--cond); text-transform: uppercase; letter-spacing: -0.02em; }
+.gl-idx-t .mono { font-size: 11px; color: var(--dim); padding-top: 2px; }
+.gl-idx .status { position: absolute; top: 8px; right: 8px; padding: 5px; gap: 0; background: rgba(5, 5, 5, .55); border-width: 0; }
+.gl-tally { text-align: center; font-size: 11px; color: var(--dim); text-transform: uppercase; margin-top: 18px; }
+
+.item.gl { padding-top: 56px; }
+.item.gl + .item.gl { margin-top: 56px; }
+.gl-card { max-width: 1180px; margin: 0 auto 32px; width: calc(100% - 48px); display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 0;
+  background: var(--charcoal); border-radius: 12px; overflow: hidden; }
+.gl-pic { margin: 0; min-height: 380px; position: relative; background: #1b1d1d; cursor: zoom-in; }
+.gl-pic img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.gl-pic-sw { position: absolute; inset: 0; display: grid; place-items: center; }
+.gl-pic-sw .sw i { width: 120px; height: 120px; }
+.gl-body { padding: 36px 40px 36px; display: flex; flex-direction: column; gap: 22px; }
+.gl-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.gl-name { margin: 0; font: 400 clamp(28px, 3.2vw, 44px)/1.02 var(--cond); text-transform: uppercase; letter-spacing: -0.02em; }
+.gl-line { margin: -8px 0 0; font: 400 17px/1.4 var(--grotesk); color: rgba(255, 255, 255, .86); max-width: 34ch; }
+.gl-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--hair); border: 1px solid var(--hair); border-radius: 10px; overflow: hidden; }
+.gl-fact { background: var(--charcoal); padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }
+.gl-fact b { font: 400 22px/1.05 var(--cond); text-transform: uppercase; letter-spacing: -0.02em; color: var(--white); }
+.gl-fact span { font: 400 11px/1.35 var(--mono); text-transform: uppercase; letter-spacing: -0.02em; color: var(--dim); }
+.gl-mats { display: flex; flex-wrap: wrap; gap: 10px 18px; margin-top: auto; }
+.sw { display: inline-flex; align-items: center; gap: 10px; font: 400 12px/1.2 var(--mono); text-transform: uppercase; letter-spacing: -0.02em; color: rgba(255, 255, 255, .8); }
+.sw i { width: 34px; height: 34px; border-radius: 50%; background-size: cover; background-position: center; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .18); flex: none; }
+
+.gl-more { max-width: 1180px; width: calc(100% - 48px); margin: 24px auto 0; border-top: 1px solid var(--hair); border-bottom: 1px solid var(--hair); }
+.gl-more > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 16px; padding: 20px 4px; }
+.gl-more > summary::-webkit-details-marker { display: none; }
+.gl-more-t { font: 400 18px/1 var(--cond); text-transform: uppercase; letter-spacing: -0.02em; }
+.gl-more > summary .mono { font-size: 11px; color: var(--dim); text-transform: uppercase; flex: 1; }
+.gl-more-i { width: 28px; height: 28px; border: 1px solid var(--ash); border-radius: 50%; position: relative; flex: none; transition: transform .3s var(--ease); }
+.gl-more-i::before, .gl-more-i::after { content: ""; position: absolute; left: 50%; top: 50%; width: 11px; height: 1px; background: currentColor; transform: translate(-50%, -50%); }
+.gl-more-i::after { transform: translate(-50%, -50%) rotate(90deg); transition: transform .3s var(--ease); }
+.gl-more[open] .gl-more-i::after { transform: translate(-50%, -50%) rotate(0deg); }
+.gl-more > summary:hover .gl-more-t { color: var(--ember); }
+.gl-more-body { padding: 8px 0 40px; }
+.gl-more-body .spec { margin-top: 8px; }
+
+@media (max-width: 860px) {
+  .gl-card { grid-template-columns: 1fr; width: calc(100% - 32px); }
+  .gl-pic { min-height: 0; aspect-ratio: 4 / 3; }
+  .gl-body { padding: 24px 22px 26px; gap: 18px; }
+  .gl-line { font-size: 16px; }
+  .gl-fact b { font-size: 19px; }
+  .gl-more { width: calc(100% - 32px); }
+  .gl-idx { width: 150px; grid-template-rows: 92px auto; }
+}

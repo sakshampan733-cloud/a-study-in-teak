@@ -294,29 +294,53 @@ function partValue(p) {
   return (p.value ? esc(p.value) : `<span class="tbd">To brief</span>`) + (p.hint && !p.value ? `<span class="hint">${esc(p.hint)}</span>` : "");
 }
 
+// A tab reads at a glance: for each piece a picture, one line, the numbers that matter and the materials as
+// swatches — then its drawings — and everything else folded away under "All details" until it is wanted.
+function swatch(k) {
+  const w = P.swatches?.[k];
+  if (!w) return "";
+  const fill = w.img ? `background-image:url('${esc(U(w.img))}');background-size:${w.zoom ? w.zoom * 100 + "%" : "cover"};background-position:${w.pos || "center"}` : `background:${w.color}`;
+  return `<span class="sw"><i style="${fill}"></i>${esc(w.name)}</span>`;
+}
 function tabPage(t) {
   const c = tally(itemsOf(t.id));
-  const index = `<section class="bone on-bone index-strip" data-light><div class="eyebrow" style="text-align:center" data-decode>In this section</div>
-    <div class="index">${t.items.map((i, k) => `<a class="btn" href="#${t.id}" data-item="${i.id}">${pad2(k + 1)} · ${esc(i.name)}</a>`).join("")}</div>
-    <div class="tally-ink">${c.final} final · ${c.open} deciding · ${c.brief} to brief</div></section>`;
-  const items = t.items.map((i, k) => `
-    <section class="item" id="${i.id}">
-      <div class="item-head">
-        <span class="badge">${pad2(k + 1)} / ${pad2(t.items.length)}</span>
-        <div class="eyebrow" data-decode>${esc(t.title)}</div>
-        <h2 class="headline" data-decode>${esc(i.name)}</h2>
-        ${pill("i." + i.id, i.status)}
+  const pic = (i) => i.glance?.img || i.refs?.[0]?.src || i.video?.poster || null;
+  const index = `<section class="gl-index-strip"><div class="gl-index">${t.items.map((i, k) => {
+    const im = pic(i);
+    return `<a class="gl-idx" href="#${t.id}" data-item="${i.id}"><span class="gl-idx-pic"${im ? ` style="background-image:url('${esc(U(im))}')"` : ""}></span>
+      <span class="gl-idx-t"><span class="mono">${pad2(k + 1)}</span>${esc(i.name)}</span><span class="status ${i.status}"></span></a>`;
+  }).join("")}</div><div class="gl-tally mono">${c.final} final · ${c.open} deciding · ${c.brief} to brief</div></section>`;
+  const items = t.items.map((i, k) => {
+    const g = i.glance || { line: "", facts: [], mats: [] }, im = pic(i);
+    const counts = [`${i.parts.length} specs`, i.refs?.length ? `${i.refs.length} references` : "", i.questions?.length ? `${i.questions.length} open questions` : ""].filter(Boolean).join(" · ");
+    return `
+    <section class="item gl" id="${i.id}">
+      <div class="gl-card reveal">
+        <figure class="gl-pic"${im ? ` data-open="img:${esc(U(im))}"` : ""}>${im ? `<img src="${esc(U(im))}" alt="" loading="lazy">` : `<div class="gl-pic-sw">${(g.mats || []).slice(0, 1).map(swatch).join("")}</div>`}</figure>
+        <div class="gl-body">
+          <div class="gl-top"><span class="badge">${pad2(k + 1)} / ${pad2(t.items.length)}</span>${pill("i." + i.id, i.status)}</div>
+          <h2 class="gl-name">${esc(i.name)}</h2>
+          ${g.line ? `<p class="gl-line">${esc(g.line)}</p>` : ""}
+          ${g.facts?.length ? `<div class="gl-facts">${g.facts.map(([v, l]) => `<div class="gl-fact"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join("")}</div>` : ""}
+          ${g.mats?.length ? `<div class="gl-mats">${g.mats.map(swatch).join("")}</div>` : ""}
+        </div>
       </div>
       ${i.video ? `<div class="wrap"><figure class="vid reveal"><video src="${esc(U(i.video.src))}" poster="${esc(U(i.video.poster))}" controls playsinline muted loop preload="metadata"></video><figcaption>${esc(i.video.caption)}</figcaption></figure></div>` : ""}
-      <div class="wrap"><div class="spec reveal">${i.parts.map((p) => `<div class="spec-row"><div class="lab">${esc(p.label)}</div><div class="val">${partValue(p)}</div></div>`).join("")}</div></div>
-      ${i.refs?.length ? `<div class="gallery-label"><span class="eyebrow" data-decode>References · ${pad2(i.refs.length)}</span>${i.refs.length > 3 ? `<div class="gallery-nav"><button class="btn" data-gal="-1" aria-label="Previous">←</button><button class="btn" data-gal="1" aria-label="Next">→</button></div>` : ""}</div>
-        <div class="gallery reveal${i.refs.length < 3 ? " few" : ""}">${i.refs.map((r) => `<figure class="shot" data-open="img:${esc(U(r.src))}"><div class="frame"><img src="${esc(U(r.src))}" alt="" loading="lazy"></div><figcaption>${esc(r.caption)}</figcaption></figure>`).join("")}</div>` : ""}
       ${sheets(i.drawings || i.drawing)}
       ${i.model3d ? `<div class="wrap"><div class="m3d p3d" id="p3d"></div></div>` : ""}
-      ${pointers(i.id)}
-      ${i.notes?.length ? `<div class="asks reveal"><span class="eyebrow">Notes</span><ul class="ask-list notes">${i.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul></div>` : ""}
-      ${i.questions?.length ? `<div class="asks reveal"><span class="eyebrow">Open questions</span><ul class="ask-list">${i.questions.map((q, n) => `<li><span class="badge">Q${pad2(n + 1)}</span><span>${esc(q)}</span></li>`).join("")}</ul></div>` : ""}
-    </section>`).join("");
+      <details class="gl-more">
+        <summary><span class="gl-more-t">All details</span><span class="mono">${counts}</span><span class="gl-more-i" aria-hidden="true"></span></summary>
+        <div class="gl-more-body">
+          <div class="wrap"><div class="spec">${i.parts.map((p) => `<div class="spec-row"><div class="lab">${esc(p.label)}</div><div class="val">${partValue(p)}</div></div>`).join("")}</div></div>
+          ${i.refs?.length ? `<div class="gallery-label"><span class="eyebrow">References · ${pad2(i.refs.length)}</span>${i.refs.length > 3 ? `<div class="gallery-nav"><button class="btn" data-gal="-1" aria-label="Previous">←</button><button class="btn" data-gal="1" aria-label="Next">→</button></div>` : ""}</div>
+            <div class="gallery${i.refs.length < 3 ? " few" : ""}">${i.refs.map((r) => `<figure class="shot" data-open="img:${esc(U(r.src))}"><div class="frame"><img src="${esc(U(r.src))}" alt="" loading="lazy"></div><figcaption>${esc(r.caption)}</figcaption></figure>`).join("")}</div>` : ""}
+          ${pointers(i.id)}
+          ${i.notes?.length ? `<div class="asks"><span class="eyebrow">Notes</span><ul class="ask-list notes">${i.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul></div>` : ""}
+          ${i.questions?.length ? `<div class="asks"><span class="eyebrow">Open questions</span><ul class="ask-list">${i.questions.map((q, n) => `<li><span class="badge">Q${pad2(n + 1)}</span><span>${esc(q)}</span></li>`).join("")}</ul></div>` : ""}
+        </div>
+      </details>
+    </section>`;
+  }).join("");
   return pageHero(t.id, t.kicker, t.title, t.intro) + index + pointers(t.id) + items + nextLink(t.id) + footer();
 }
 
