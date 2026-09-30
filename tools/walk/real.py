@@ -22,7 +22,7 @@ TEX = os.path.join(HERE, "tex")
 rng = random.Random(7)
 
 # ── what is not part of this tour ─────────────────────────────────────────────
-KILL = ("chair_", "chase", "pier",
+KILL = ("chair_",
         "glass_bwin", "lbl_", "painting", "desk_top", "desk_frieze", "sconce", "dome", "cor_", "L_cor")
 for o in list(sc.objects):
     if o.name.startswith(KILL) or o.type == "LIGHT": bpy.data.objects.remove(o, do_unlink=True)
@@ -66,8 +66,10 @@ def marble(name, fname, scale, rough, val=1.0, sat=1.0):
     nt.links.new(tone(nt, t.outputs["Color"], 0.5, sat, val), b.inputs["Base Color"])
     b.inputs["Roughness"].default_value = rough; b.inputs["Coat Weight"].default_value = 0.6; b.inputs["Coat Roughness"].default_value = 0.03
     return m
-M_FLOOR = marble("taupe_marble", "taupe.jpg", 1.6, 0.12, 0.92, 0.95)
+M_FLOOR = marble("taupe_marble", "taupe.jpg", 1.6, 0.12, 0.5, 1.05)          # the laid floor is a deep taupe-brown
 M_WHITE = marble("white_marble", "white.jpg", 0.7, 0.1)
+M_BEIGE = marble("beige_marble", "beige_marble.jpg", 1.1, 0.08, 1.0, 1.0)      # the bathroom stone (the owner's slab)
+M_CHROME = None
 def flat(name, col, rough=0.8, metal=0.0, bump=0.0, coat=0.0):
     m, nt, b = node_mat(name)
     b.inputs["Base Color"].default_value = (*col, 1); b.inputs["Roughness"].default_value = rough
@@ -235,6 +237,18 @@ skirt("sk_bed", xLb + 15, Lb - 15, xR, Lb)
 skirt("sk_right_a", xR - 15, STUDY, xR, d2s0 - 102)
 skirt("sk_right_b", xR - 15, d2s1 + 102, xR, Lb - 15)
 skirt("sk_dress_far", DR["x1"] - 15, DR["s0"] + WDd, DR["x1"], DR["s1"] - WDd)
+# ── the floor border: a 5 in strip of the same white marble along every wall, the skirting standing on it ──
+BW = 127
+def border(name, x0, s0, x1, s1):
+    o = dbox(name, x0, s0, 0.3, x1, s1, 1.4, M_WHITE)
+    for p_ in o.data.polygons: p_.use_smooth = False
+border("bd_study", xLs, 255, xR, 255 + BW)                              # in front of the study joinery
+border("bd_left_a", xLs, 255 + BW, xLs + BW, yS)
+border("bd_left_b", xLb, yS, xLb + BW, Lb - BW)
+border("bd_left_step", xLb, yS - BW, xLs, yS)
+border("bd_bed", xLb, Lb - BW, xR, Lb)
+border("bd_right", xR - BW, 255 + BW, xR, Lb - BW)
+border("bd_dress_far", DR["x1"] - BW, DR["s0"] + WDd, DR["x1"], DR["s1"] - WDd)
 
 # ── the right wall: painted panel moulding, the rail carried on from the study counter, three brass lamps ──
 MOUL, PRJ, STILE = 55, 24, 150
@@ -331,6 +345,46 @@ for i_, sg in enumerate((-1, 1)):
 band("pt_inlay_b", pside(1), pT + 4, 1000, 1012, CLAY); setmat(sc.objects["pt_inlay_b"], M_BRASS)
 band("pt_inlay_d", pside(-1), pT + 4, 1000, 1012, CLAY); setmat(sc.objects["pt_inlay_d"], M_BRASS)
 tvf = dbox("tv_frame", cx - 622, yP + pT / 2 - 2, 842, cx + 622, yP + pT / 2 + 40, 1553, M_DARK)
+
+# ── the bathroom, as far as it is known: its stone, and the vanity (scheme C, AST-DR-021) on the door wall,
+# between the door and the pier, facing into the room ─────────────────────────
+M_CHROME = flat("chrome", (0.9, 0.9, 0.92), 0.06, 1.0)
+M_BURL_DARK = veneer("burl_dark", 0.12, 1.0, 0.36, 0.9, "burl_diva.jpg", 0.75)                 # the 9292 burl, darkened
+for o_ in list(sc.objects):
+    if o_.type == "MESH" and o_.name == "floor": pass
+bfl = dbox("bath_floor", BA["x0"], BA["s0"], 0.2, BA["x1"], BA["s1"], 1.2, M_BEIGE)
+pxr = BA["x1"] - PIER["east"]; pxl = pxr - PIER["w"]
+VX1 = pxl; VX0 = VX1 - 1524; VS1 = BA["s1"]; VS0 = VS1 - 610                            # 5 ft × 2 ft, against the pier
+TOPZ, SLAB = 838, 38
+# the ends: pull-outs in the dark burl, 1 ft 6 in at the pier end (the vanity's left, facing it) and 6 in at the door end
+for (x0_, x1_, nm) in ((VX1 - 457, VX1, "L"), (VX0, VX0 + 152, "R")):
+    e = dbox(f"van_end{nm}", x0_ + 2, VS0 + 25, 90, x1_ - 2, VS1, TOPZ - SLAB, M_BURL_DARK); bevel(e, 0.003, 2)
+    dbox(f"van_kick{nm}", x0_ + 2, VS0 + 70, 0, x1_ - 2, VS1, 90, M_DARK)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.02, depth=0.012, location=P((x0_ + x1_) / 2, VS0 + 22, TOPZ - SLAB - 120))
+    cp = bpy.context.active_object; cp.rotation_euler = (math.pi / 2, 0, 0); setmat(cp, M_CHROME)            # cup pull
+# the 3 ft marble bank, floor to counter, centred on the faucet: two drawers over the big one, all marble fronts
+bx0, bx1 = VX1 - 457 - 914, VX1 - 457
+dbox("van_bank", bx0, VS0 + 25, 0, bx1, VS1, TOPZ - SLAB, M_BEIGE)
+AXx = bx0 + 457
+for (x0_, x1_, z0_, z1_) in ((bx0 + 20, AXx - 3, 591, 762), (AXx + 3, bx1 - 20, 591, 762), (bx0 + 20, bx1 - 20, 38, 566)):
+    f_ = dbox(f"van_df{x0_:.0f}{z0_}", x0_, VS0 + 22, z0_, x1_, VS0 + 26, z1_, M_BEIGE); bevel(f_, 0.002, 2)
+# the top: 18 slab on a sub-top, a mitred 38 apron, oversailing 1 in; the vessel bowl on the tap line; the wall spout
+top = dbox("van_top", VX0 - 5, VS0, TOPZ - SLAB, VX1, VS1, TOPZ, M_BEIGE); bevel(top, 0.004, 3)
+bpy.ops.mesh.primitive_uv_sphere_add(segments=64, ring_count=32, radius=0.203, location=P(AXx, VS0 + 290, TOPZ + 126))
+bowl = bpy.context.active_object; bowl.name = "van_bowl"; bowl.scale = (1, 1, 0.62)
+bs_ = bmesh.new(); bs_.from_mesh(bowl.data)
+bmesh.ops.bisect_plane(bs_, geom=bs_.verts[:] + bs_.edges[:] + bs_.faces[:], plane_co=(0, 0, 0.05), plane_no=(0, 0, 1), clear_outer=True)
+bs_.to_mesh(bowl.data); bs_.free()
+so_ = bowl.modifiers.new("t", "SOLIDIFY"); so_.thickness = 0.008
+for p_ in bowl.data.polygons: p_.use_smooth = True
+setmat(bowl, flat("ceramic", (0.93, 0.92, 0.89), 0.08, coat=0.6))
+sp = dbox("van_spout", AXx - 18, VS1 - 180, 1110, AXx + 18, VS1, 1140, M_CHROME); bevel(sp, 0.01, 4)
+dbox("van_spout_plate", AXx - 35, VS1 - 6, 1085, AXx + 35, VS1, 1165, M_CHROME)
+# the bathroom's light: soft, from the ceiling
+ld = bpy.data.lights.new("bath_ceiling", "AREA"); ld.size, ld.size_y = 1.2, 0.8; ld.shape = "RECTANGLE"; ld.energy = 120; warm(ld, 2900)
+lo = bpy.data.objects.new("bath_ceiling", ld); sc.collection.objects.link(lo); lo.location = P((BA["x0"] + BA["x1"]) / 2, (BA["s0"] + BA["s1"]) / 2, H - 20)
+ld = bpy.data.lights.new("van_light", "AREA"); ld.size, ld.size_y = 1.0, 0.1; ld.shape = "RECTANGLE"; ld.energy = 45; warm(ld, 2800)
+lo = bpy.data.objects.new("van_light", ld); sc.collection.objects.link(lo); lo.location = P(AXx, VS1 - 250, 2100)
 
 # ── left wall: the air conditioner, measured 3 ft 10 × 1 ft, on the painting's centre line ──
 acs = 2299
@@ -511,6 +565,7 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
     "right": ((700, 1800), (4547, 3300, 1300)),
     "bed": ((3300, 3350), (2100, 5766, 900)),
     "tvside": ((1100, 4250), (2337, 2450, 1100)),
+    "vanity": ((5500, 1350, 1500), (6600, 2500, 850)),
     "door": ((2600, 3500), (-177, 5200, 1250)),
     "dress": ((4900, 4450), (8400, 4356, 1500)),
     "vault": ((5100, 4356, 1450), (7600, 4356, 3000)),
@@ -547,7 +602,10 @@ TOUR = [  # name, camera (x, s[, z]), looking at (x, s, z), hold frames, what ha
     ("mirror", (6800, 4400), (8536, 4356, 1300), 20, None),
     ("mech", (6900, 3950), (8100, 5550, 1200), 150, "mech"),
     ("tunnel", (7700, 4700), (8100, 7800, 1250), 26, None),
-    ("end", (6500, 4350), (4000, 4450, 1300), 20, None),
+    (None, (6000, 4000), (5158, 2400, 1400), 0, None),
+    ("d3", (5158, 3600), (5158, 1500, 1400), 34, "d3"),
+    (None, (5158, 2250), (5300, 800, 1300), 0, None),
+    ("vanity", (5500, 1350, 1500), (6600, 2500, 850), 40, None),
 ]
 FPM = float(os.environ.get("FPM", 15))                                # frames per metre walked: the scroll's pace
 def animate_real():
@@ -570,6 +628,9 @@ def animate_real():
         prev = (pos, Vector(P(*tp)))
     end = f
     d = sc.objects["door_d2"]; a, b = acts["d2"]; rot = d["open"]
+    d.rotation_euler.z = 0; d.keyframe_insert("rotation_euler", index=2, frame=1); d.keyframe_insert("rotation_euler", index=2, frame=a + 4)
+    d.rotation_euler.z = rot; d.keyframe_insert("rotation_euler", index=2, frame=b - 2)
+    d = sc.objects["door_d3"]; a, b = acts["d3"]; rot = d["open"]
     d.rotation_euler.z = 0; d.keyframe_insert("rotation_euler", index=2, frame=1); d.keyframe_insert("rotation_euler", index=2, frame=a + 4)
     d.rotation_euler.z = rot; d.keyframe_insert("rotation_euler", index=2, frame=b - 2)
     a, b = acts["mech"]; seg = [10, 38, 30, 14, 50]; c = [a]
