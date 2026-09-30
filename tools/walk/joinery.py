@@ -360,7 +360,7 @@ def casing(tag, xwall, s0, s1, face, carved, jambs=(True, True)):
         srun(f"{tag}_sm2", P_steps([(0, 25, 68)]), zH + 63, A - 28, B_ + 28)
         srun(f"{tag}_crown", P_cyma(2630 - (zH + 88), 68, 112), zH + 88, A - 72, B_ + 72)
 
-casing("jc_d1", xLb, d1s0, d1s1 - 10, 1, False, (True, False))
+# the main door has no casing (the owner, 30.09) — only its frame, inside the opening
 casing("jc_d2", xR, d2s0, d2s1, -1, True)
 
 # ═══════════════════════════ THE DESK: AST-DR-028 / -029, square corners ═══════════════

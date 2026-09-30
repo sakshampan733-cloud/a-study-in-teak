@@ -35,7 +35,8 @@ def node_mat(name):
     return m, nt, b
 def img(nt, fname, scale, proj="BOX", blend=0.25, rot=0.0):
     tc = nt.nodes.new("ShaderNodeTexCoord"); mp = nt.nodes.new("ShaderNodeMapping")
-    mp.inputs["Scale"].default_value = (1 / scale, 1 / scale, 1 / scale); mp.inputs["Rotation"].default_value = (0, 0, rot)
+    sx, sy, sz = scale if isinstance(scale, tuple) else (scale, scale, scale)
+    mp.inputs["Scale"].default_value = (1 / sx, 1 / sy, 1 / sz); mp.inputs["Rotation"].default_value = (0, 0, rot)
     t = nt.nodes.new("ShaderNodeTexImage"); t.image = bpy.data.images.load(os.path.join(TEX, fname), check_existing=True)
     t.projection = proj; t.projection_blend = blend
     nt.links.new(tc.outputs["Object"], mp.inputs["Vector"]); nt.links.new(mp.outputs["Vector"], t.inputs["Vector"])
@@ -49,15 +50,15 @@ def noise_bump(nt, b, scale=80, strength=0.05, dist=0.001):
     bp = nt.nodes.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = strength; bp.inputs["Distance"].default_value = dist
     nt.links.new(n.outputs["Fac"], bp.inputs["Height"]); nt.links.new(bp.outputs["Normal"], b.inputs["Normal"])
 
-def veneer(name="teak_veneer", gloss=0.32, coat=0.35, val=0.78, sat=0.72):
+def veneer(name="teak_veneer", gloss=0.32, coat=0.35, val=0.78, sat=0.72, tex="veneer.jpg", scale=0.9):
     m, nt, b = node_mat(name)
-    t = img(nt, "veneer.jpg", 0.9, blend=0.15)
+    t = img(nt, tex, scale, blend=0.15)
     nt.links.new(tone(nt, t.outputs["Color"], 0.5, sat, val), b.inputs["Base Color"])
     b.inputs["Roughness"].default_value = gloss; b.inputs["Coat Weight"].default_value = coat
     b.inputs["Coat Roughness"].default_value = 0.12
     return m
-M_VEN = veneer()
-M_DESK = veneer("teak_desk", gloss=0.18, coat=1.0, val=0.9, sat=0.82)      # French-polish look: the room's gloss is set here
+M_VEN = veneer("royal_oak_diva", 0.34, 0.35, 0.7, 0.92, "royal_oak_diva.jpg", (0.55, 0.55, 1.1))   # Royal Oak grain, stained to Dark Diva Crown
+M_DESK = veneer("teak_desk", gloss=0.18, coat=1.0, val=0.82, sat=0.78)      # French-polish look: the room's gloss is set here
 def marble(name, fname, scale, rough, val=1.0, sat=1.0):
     m, nt, b = node_mat(name)
     t = img(nt, fname, scale, blend=0.1)
@@ -109,10 +110,11 @@ def shade():
     return m
 M_SHADE = shade()
 def parchment():
-    m, nt, b = node_mat("parchment")
-    t = img(nt, "parchment.jpg", 1.4, blend=0.1)
-    nt.links.new(tone(nt, t.outputs["Color"], 0.5, 0.55, 0.92), b.inputs["Base Color"])
-    b.inputs["Roughness"].default_value = 0.55; b.inputs["Subsurface Weight"].default_value = 0.08
+    m, nt, b = node_mat("parchment_plaster")
+    t = img(nt, "parchment.jpg", 2.2, blend=0.1)
+    nt.links.new(tone(nt, t.outputs["Color"], 0.5, 0.62, 0.9), b.inputs["Base Color"])
+    b.inputs["Roughness"].default_value = 0.42; b.inputs["Coat Weight"].default_value = 0.15; b.inputs["Coat Roughness"].default_value = 0.35
+    noise_bump(nt, b, 14, 0.06, 0.002)                              # a trowelled, waxed plaster, not a flat paint
     return m
 M_PARCH = parchment()
 def glow(name, col, strength):
@@ -120,7 +122,7 @@ def glow(name, col, strength):
     b.inputs["Base Color"].default_value = (*col, 1); b.inputs["Emission Color"].default_value = (*col, 1)
     b.inputs["Emission Strength"].default_value = strength
     return m
-M_STRIP = glow("cove_strip", (1.0, 0.60, 0.28), 2.2)
+M_STRIP = glow("cove_strip", (1.0, 0.55, 0.22), 2.2)
 M_DISC = glow("spot_disc", (1.0, 0.80, 0.55), 12.0)
 def night():
     m, nt, b = node_mat("night_sky")
@@ -285,13 +287,8 @@ def dress_leaf(dname, w):
     d.data.materials.clear(); d.data.materials.append(M_VEN); bevel(d, 0.003)
 exec(compile(open(os.path.join(HERE, "joinery.py")).read(), "joinery.py", "exec"))    # the joinery at drawing depth
 
-# ── the bed wall: parchment in large panels, symmetrical on the bed, one shade ──
-PX0, PX1 = cx - 1219, cx + 1219
-for i in range(3):
-    for j in range(2):
-        a = PX0 + i * (PX1 - PX0) / 3; b = a + (PX1 - PX0) / 3
-        z0 = SK + j * (2629 - SK) / 2; z1 = z0 + (2629 - SK) / 2
-        p = dbox(f"parch{i}{j}", a + 1.5, Lb - 22, z0 + 1.5, b - 1.5, Lb - 15, z1 - 1.5, M_PARCH); bevel(p, 0.0015, 1)
+# ── the bed wall: parchment plaster, seamless, over the whole 15 ft 6 in wall, skirting to ceiling ──
+pw_ = dbox("parchment_wall", xLb + 16, Lb - 21, SK, xR - 1, Lb - 15, H - 1, M_PARCH)
 
 # ── left wall: the air conditioner, measured 3 ft 10 × 1 ft, on the painting's centre line ──
 acs = 2299
@@ -372,7 +369,7 @@ def cove(name, x0, s0, x1, s1, power_per_m=28):
     dbox(name + "_strip", min(x0, x1) - (0 if x0 != x1 else 12), min(s0, s1) - (0 if s0 != s1 else 12), H - 4,
          max(x0, x1) + (0 if x0 != x1 else 12), max(s0, s1) + (0 if s0 != s1 else 12), H, M_STRIP)
     ld = bpy.data.lights.new(name, "AREA"); ld.shape = "RECTANGLE"
-    ld.size, ld.size_y = (L_, 0.024) if s0 == s1 else (0.024, L_); ld.energy = power_per_m * L_; warm(ld, 2800)
+    ld.size, ld.size_y = (L_, 0.024) if s0 == s1 else (0.024, L_); ld.energy = power_per_m * L_; warm(ld, 2700)
     lo = bpy.data.objects.new(name, ld); sc.collection.objects.link(lo); lo.location = P((x0 + x1) / 2, (s0 + s1) / 2, H - 8)
 OFF = 152
 cove("cove_left_a", xLs + OFF, STUDY + 200, xLs + OFF, yS - 50)
@@ -384,7 +381,7 @@ for o in [o for o in sc.objects if o.parent and o.parent.name == "ceiling" and o
     loc = o.matrix_world.translation.copy()
     bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.022, depth=0.003, location=loc - Vector((0, 0, 0.003)))
     setmat(bpy.context.active_object, M_DISC)
-    ld = bpy.data.lights.new("spot", "SPOT"); ld.spot_size = math.radians(55); ld.spot_blend = 0.7; ld.shadow_soft_size = 0.015; ld.energy = 9; warm(ld, 2900)
+    ld = bpy.data.lights.new("spot", "SPOT"); ld.spot_size = math.radians(55); ld.spot_blend = 0.7; ld.shadow_soft_size = 0.015; ld.energy = 9; warm(ld, 2700)
     so = bpy.data.objects.new("spot", ld); sc.collection.objects.link(so); so.location = loc - Vector((0, 0, 0.01))
 
 # the dressing room also gets its wardrobes' warm glow where the tunnel bay opens, and the tunnel a light
@@ -449,10 +446,10 @@ except Exception: pass
 sc.view_settings.view_transform = "AgX"
 try: sc.view_settings.look = "AgX - Medium High Contrast"
 except Exception: pass
-sc.view_settings.exposure = float(os.environ.get("EXPOSURE", -1.4))
+sc.view_settings.exposure = float(os.environ.get("EXPOSURE", -1.5))
 try:                                                                  # white-balanced for warm light, as a camera would be
     sc.view_settings.use_white_balance = True
-    sc.view_settings.white_balance_temperature = float(os.environ.get("WB", 3150))
+    sc.view_settings.white_balance_temperature = float(os.environ.get("WB", 3700))
 except Exception as e: print("white balance?", e)
 
 EYE_R = 1600; LENS_R = float(os.environ.get("LENS", 18))
