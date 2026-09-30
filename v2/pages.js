@@ -116,7 +116,7 @@ function overview() {
   const chapters = [
     { title: "The Bedroom", ids: ["bedroom", "study", "walls"], img: "assets/refs/bed-ref-1-low-platform-bed.jpg", line: "The bed and the study: the parchment bed wall, the teak desk, the study wall and the panelled walls." },
     { title: "The Bathroom", ids: ["bathroom"], img: "assets/refs/bathroom-ref-1-painted-ceiling-linework.jpg", line: "A ceiling with fine black hand-painted linework, and the vanity below." },
-    { title: "The Dressing", ids: ["dressing"], img: "assets/refs/ceiling-barrel-vault-coffers.jpg", line: "Teak wardrobes lit warm inside, a vaulted ceiling, a folding mirror — and a hidden door." },
+    { title: "The Dressing", ids: ["dressing"], img: "assets/refs/wardrobe-ref-3-steel-leaded-doors-closeup.jpg", line: "Teak wardrobes lit warm inside, a vaulted ceiling, a folding mirror — and a hidden door." },
   ].map((ch, i) => {
     const c = tally(ch.ids.flatMap(itemsOf)), n = c.brief + c.open + c.final;
     return `<article class="scard" style="--i:${i}"><div class="ph" ${bg(ch.img)}></div><div class="body">
@@ -137,7 +137,7 @@ function overview() {
     { id: "desk", tab: "study", title: "The Desk", img: "assets/refs/desk-ref-1.jpg" },
     { id: "shelf", tab: "study", title: "The Study Wall", img: "assets/refs/wall-ref-4-dark-study-bands-sconces.jpg" },
     { id: "door", tab: "doors", title: "The Doors", img: "assets/refs/door-ref-1.jpg" },
-    { id: "wardrobe", tab: "dressing", title: "The Wardrobes", img: "assets/refs/wardrobe-ref-4-inside-finish-lit-niche.jpg" },
+    { id: "wardrobe", tab: "dressing", title: "The Wardrobes", img: "assets/refs/wardrobe-ref-3-steel-leaded-doors-closeup.jpg" },
     { id: "bed", tab: "bedroom", title: "The Bed", img: "assets/refs/bed-ref-1-low-platform-bed.jpg" },
   ].map((p, i) => {
     const item = P.tabs.find((t) => t.id === p.tab).items.find((x) => x.id === p.id);

@@ -612,7 +612,7 @@ window.PROJECT = {
       items: [
         {
           id: "dressing-shape", name: "Room & Layout", status: "open",
-          glance: {"line": "Wardrobes both sides, a vaulted ceiling down the middle.", "facts": [["9 ft 3 × 12 ft 4", "room"], ["10 ft", "vault crown"], ["9 ft 1 in", "ceiling at the sides"], ["3 × 7 ft 8", "hidden tunnel"]], "mats": ["teak", "cream"], "img": "assets/refs/ceiling-barrel-vault-coffers.jpg"},
+          glance: {"line": "Wardrobes both sides, a vaulted ceiling down the middle.", "facts": [["9 ft 3 × 12 ft 4", "room"], ["10 ft", "vault crown"], ["9 ft 1 in", "ceiling at the sides"], ["3 × 7 ft 8", "hidden tunnel"]], "mats": ["teak", "cream"]},
           drawings: ["dressingshell"],
           parts: [
             { label: "Doorway", value: "The 9 ft 3 in wall shared with the bedroom carries ONE door: D2, the existing door in from the bedroom (AST-DR-000), sitting 2 ft 4 in from the right-hand corner to its frame — measured on both sides of the wall. The bathroom door is not on this wall; it is in the LEFT wall. The mirror is on the far wall, 12 ft 4 in away." },
