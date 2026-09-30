@@ -117,6 +117,20 @@ function buildDesk(VAR) {
     `<circle cx="${x - 45}" cy="${y}" r="3" stroke-width="${th}"/><circle cx="${x + 45}" cy="${y}" r="3" stroke-width="${th}"/>` +
     `<path d="M ${x - 45} ${y + 3} C ${x - 45} ${y + 14} ${x - 36} ${y + 12} ${x - 30} ${y + 20} C ${x - 24} ${y + 27} ${x - 12} ${y + 26} ${x} ${y + 26} C ${x + 12} ${y + 26} ${x + 24} ${y + 27} ${x + 30} ${y + 20} C ${x + 36} ${y + 12} ${x + 45} ${y + 14} ${x + 45} ${y + 3}"/>`;
 
+  // Three drawers in each pedestal (owner, 30.09), graduated — shallowest at the top — between the rail
+  // under the frieze and the plinth, with 18 rails between them. e0/e1 are the usable heights from the top.
+  const RAIL_D = 18, GRAD = [140, 160, 180];
+  function pedRows(e0, e1) {
+    const k = (e1 - e0 - 2 * RAIL_D) / GRAD.reduce((a, b) => a + b, 0);
+    let y = e0; return GRAD.map((g) => { const r = [y, y + g * k]; y += g * k + RAIL_D; return r; });
+  }
+  // One pedestal drawer front, front elevation: cockbead round the edge, swan-neck handle, keyhole.
+  const pedDrawer = (x0, x1, y0, y1, th) => {
+    const mid = (x0 + x1) / 2, hy = (y0 + y1) / 2 - 10;
+    return `<rect x="${f(x0)}" y="${f(y0)}" width="${f(x1 - x0)}" height="${f(y1 - y0)}"/><rect x="${f(x0 + 4)}" y="${f(y0 + 4)}" width="${f(x1 - x0 - 8)}" height="${f(y1 - y0 - 8)}" stroke-width="${th}"/>`
+      + handle(mid, hy, th) + `<path stroke-width="${th}" d="M ${f(mid - 5)} ${f(y0 + 16)} a 4 4 0 1 1 10 0 l 2 10 l -14 0 z"/>`;
+  };
+
   // Carved drop: ribbon bow, then a chain of diminishing husks with beads.
   function drop(cx, y0, len, th) {
     let o = `<ellipse cx="${cx - 9}" cy="${y0 + 8}" rx="9" ry="5.5"/><ellipse cx="${cx + 9}" cy="${y0 + 8}" rx="9" ry="5.5"/><circle cx="${cx}" cy="${y0 + 8}" r="3.5" fill="#fff"/>`;
@@ -219,9 +233,7 @@ function buildDesk(VAR) {
       o += `<rect x="${a}" y="${yR1}" width="${K.ped}" height="${yP - yR1}"/>`;
       o += `<g stroke-width="${th}"><line x1="${a + wl}" y1="${yR1}" x2="${a + wl}" y2="${yP}"/><line x1="${b - wr}" y1="${yR1}" x2="${b - wr}" y2="${yP}"/></g>`;
       const dx0 = a + wl + 10, dx1 = b - wr - 10, dy0 = yR1 + 12, dy1 = yP - 12;
-      o += `<rect x="${dx0}" y="${dy0}" width="${dx1 - dx0}" height="${dy1 - dy0}"/>`;
-      o += `<g stroke-width="${th}"><rect x="${dx0 + 38}" y="${dy0 + 38}" width="${dx1 - dx0 - 76}" height="${dy1 - dy0 - 76}"/><rect x="${dx0 + 46}" y="${dy0 + 46}" width="${dx1 - dx0 - 92}" height="${dy1 - dy0 - 92}"/></g>`;
-      o += ornament((dx0 + dx1) / 2, dy0 + (dy1 - dy0) * 0.36, th);
+      pedRows(dy0, dy1).forEach(([y0, y1]) => (o += pedDrawer(dx0, dx1, y0, y1, th)));   // three drawers
       o += `<rect x="${a - K.plP}" y="${yP}" width="${K.ped + 2 * K.plP}" height="${K.plH}"/><g stroke-width="${th}"><line x1="${a - K.plP}" y1="${yP + 10}" x2="${b + K.plP}" y2="${yP + 10}"/><line x1="${a - K.plP}" y1="${yP + 22}" x2="${b + K.plP}" y2="${yP + 22}"/></g>`;
       o += outerLeft ? cornerMould(0, 1, th) + drop(b - K.stile / 2, K.top + K.conH + 20, yP - 60 - (K.top + K.conH + 20), th)
                      : cornerMould(K.L, -1, th) + drop(a + K.stile / 2, K.top + K.conH + 20, yP - 60 - (K.top + K.conH + 20), th);
@@ -380,30 +392,17 @@ function buildDesk(VAR) {
       [[K.plH, K.plH - 4, ov - 12], [K.plH - 4, K.plH - 9, ov - 9.5], [K.plH - 9, K.plH - 14, ov - 12.5], [K.plH - 14, 12, ov - K.plP], [12, 0, ov - K.plP - 3]]
         .forEach(([z1, z0, off]) => add(pedRing(side, off), z0, z1, { capOcc: false, hatch: z1 - z0 > 6 }));
 
-      // front: raised-and-fielded door with bolection frame, carved ornament and ring pull
-      const dx0 = a + wl + 10, dx1 = b - wr - 10, dy0 = yR1 + 14, dy1 = yP - 14, oc = (dx0 + dx1) / 2, oy = dy0 + (dy1 - dy0) * 0.36;
-      slab(fy, dx0, dy0, dx1, dy1, 0, 4, { hatch: false });
-      frameOn(fy, dx0, dy0, dx1, dy1, 28, 11);
-      frameOn(fy, dx0 + 28, dy0 + 28, dx1 - 28, dy1 - 28, 5, 8);
-      slab(fy, dx0 + 44, dy0 + 44, dx1 - 44, dy1 - 44, 4, 6, { hatch: false });
-      slab(fy, dx0 + 52, dy0 + 52, dx1 - 52, dy1 - 52, 6, 8, { hatch: false });
-      const yo = ov - 8;
-      onY(yo, -1, circPts(oc, oy, 11, 16), { closed: true, w: 1 }); onY(yo, -1, circPts(oc, oy, 5, 10), { closed: true });
-      for (let k = 0; k < 8; k++) { const t = (k / 8) * 2 * Math.PI; onY(yo, -1, [[oc + 5 * Math.cos(t), oy + 5 * Math.sin(t)], [oc + 11 * Math.cos(t), oy + 11 * Math.sin(t)]]); }
-      // ribbon bow above the rosette
-      [-1, 1].forEach((m) => {
-        onY(yo, -1, circPts(oc + m * 9, oy - 19, 8, 14, 0.55), { closed: true, w: 1 });
-        onY(yo, -1, [[oc + m * 3, oy - 15], [oc + m * 7, oy - 4], [oc + m * 12, oy + 2]]);
-        // acanthus C-scroll: a tightening spiral opening toward the rosette
-        onY(yo, -1, Array.from({ length: 30 }, (_, i) => { const t = i / 29, ang = Math.PI * (1 - 2.3 * t), r = 24 * (1 - 0.72 * t); return [oc + m * (40 + r * Math.cos(ang)), oy + 2 - r * 0.85 * Math.sin(ang)]; }), { w: 1 });
-        // leaf tip flowing outward and down from the scroll
-        onY(yo, -1, [[oc + m * 16, oy + 8], [oc + m * 34, oy + 22], [oc + m * 56, oy + 26], [oc + m * 72, oy + 20], [oc + m * 60, oy + 30], [oc + m * 38, oy + 30], [oc + m * 20, oy + 14]], { closed: true });
-        onY(yo, -1, [[oc + m * 24, oy + 16], [oc + m * 44, oy + 25], [oc + m * 62, oy + 25]]);
+      // front: three graduated drawers, cockbeaded, each with a swan-neck handle and a keyhole
+      const dx0 = a + wl + 10, dx1 = b - wr - 10;
+      pedRows(yR1 + 14, yP - 14).forEach(([e0, e1]) => {
+        slab(fy, dx0, e0, dx1, e1, 0, 2.5, { hatch: false });
+        frameOn(fy, dx0, e0, dx1, e1, 3, 5.5);                                   // cockbead
+        const eh = (e0 + e1) / 2 - 8, hx = (dx0 + dx1) / 2, yf = ov - 2.5;
+        [-45, 45].forEach((dx) => { onY(yf, -1, circPts(hx + dx, eh, 9, 14), { closed: true, w: 1 }); onY(yf, -1, circPts(hx + dx, eh, 4, 10), { closed: true }); });
+        const zh = Z(eh), bail = Array.from({ length: 17 }, (_, i) => { const t = i / 16; return [hx - 45 + 90 * t, yf - 16, zh - 4 - 20 * Math.pow(Math.sin(Math.PI * t), 0.75)]; });
+        lines.push({ n: [0, -1, 0], w: 1, pts: [[hx - 45, yf, zh], [hx - 45, yf - 16, zh - 3], ...bail, [hx + 45, yf - 16, zh - 3], [hx + 45, yf, zh]] });
+        onY(yf, -1, [[hx - 3.5, e0 + 14], [hx + 3.5, e0 + 14], [hx + 4.5, e0 + 24], [hx - 4.5, e0 + 24]], { closed: true });
       });
-      const zr = Z(oy + 36), ringPts = (r) => Array.from({ length: 28 }, (_, i) => { const t = (i / 28) * 2 * Math.PI; return [oc + r * Math.cos(t), yo - 7, zr + r * Math.sin(t)]; });
-      lines.push({ n: [0, -1, 0], w: 1, closed: true, pts: ringPts(25) });
-      lines.push({ n: [0, -1, 0], w: 0, closed: true, pts: ringPts(19) });
-      lines.push({ n: [0, -1, 0], w: 1, pts: [[oc, yo, Z(oy + 11)], [oc, yo - 7, zr + 25]] });
       // carved drop on the inner stile: ribbon bow, then diminishing husks
       const ix = left ? b - K.stile / 2 : a + K.stile / 2, dropTop = K.top + K.conH + 26;
       beads.push({ p: [ix - 8, ov - 3, Z(dropTop)], r: 6, ry: 0.6, n: [0, -1, 0] }, { p: [ix + 8, ov - 3, Z(dropTop)], r: 6, ry: 0.6, n: [0, -1, 0] });
@@ -552,15 +551,15 @@ function buildDesk(VAR) {
   const kx = 160;
   s1 += heading(kx, 190, "KEY", "PARTS OF THE DESK", 30);
   ["Top — plain teak, reeded edge", "Reeded console bracket", "Frieze drawer, swan-neck handles", "Reeded rail", SQUARE ? "Square corner, moulding on each face at the corner" : "Hollow corner, moulding at each end of the curve",
-   "Pedestal door, moulded panel", "Carved ornament + ring pull", "Moulded plinth", "Modesty panel in kneehole"]
+   "Pedestal — three drawers each side", "Swan-neck handle + keyhole, every drawer", "Moulded plinth", "Modesty panel in kneehole"]
     .forEach((l, i) => { s1 += bubble(kx + 2, 201 + i * 5.2, i + 1) + text(kx + 6, 201.7 + i * 5.2, l, { size: 1.7 }); });
   s1 += heading(236, 190, "NOTES", "READ BEFORE MAKING", 40);
   (SQUARE
     ? ["Dimensions in feet and inches. Do not scale.", "THE SQUARE-CORNERED DESK. Same size, same carcase,", "   same carving and mouldings as AST-DR-002 — only the",
        "   corners change: every layer turns a plain 90° corner", "   instead of the R150 hollow.",
        "The corner moulding (fillet + bead + fillet), its two", "   collars, carved drop and console stand on each face",
-       "   just in from the corner — front face and end face.", "Reeded edge, frieze drawers, rail, fielded doors,",
-       "   ornament and plinth are unchanged.", "First-angle projection."]
+       "   just in from the corner — front face and end face.", "Reeded edge, frieze drawers, rail, the three pedestal",
+       "   drawers each side and the plinth are unchanged.", "First-angle projection."]
     : SIMPLE
     ? ["Dimensions in feet and inches. Do not scale.", "THE SIMPLIFIED DESK. Same size, same carcase, same", "   mouldings as AST-DR-002 — only the two carved",
        "   passages are reduced, so a carpenter who does not", "   carve can still make it.",
@@ -568,7 +567,7 @@ function buildDesk(VAR) {
        "Pedestal boss: the gadrooned boss and ring pull stay,", "   the acanthus scrolls and ribbon come off.",
        "Everything else — hollowed corners, edge moulding,", "   reeded rail, console brackets, plinth — is unchanged.", "First-angle projection."]
     : ["Dimensions in feet and inches. Do not scale.", "Length 7 ft 6 in and depth 3 ft confirmed.", "   Height 750 set for a 5 ft 9 in user.",
-       "Solid teak throughout; polish sets the room finish.", "Pedestals shown as doors — drawers TBC.", "Hollowed corners; moulding strip at both curve ends.",
+       "Solid teak throughout; polish sets the room finish.", "Three graduated drawers in each pedestal.", "Hollowed corners; moulding strip at both curve ends.",
        "Carving shown schematically — carver to", "   work from reference and Details sheet.",
        "A square-cornered version of this desk is drawn", "   on AST-DR-028 for a carpenter who cannot make the hollows.", "First-angle projection."])
     .forEach((n, i) => { s1 += text(236, 201 + i * 4.3, n, { size: 1.6 }); });
@@ -641,13 +640,22 @@ function buildDesk(VAR) {
   s2 += text(vD4.X(0), vD4.Y(yP - yR1) + 6, "SMALLER DROP ALSO RUNS DOWN", { size: 1.45, fill: THIN }) + text(vD4.X(0), vD4.Y(yP - yR1) + 8.5, "EACH CORNER MOULDING", { size: 1.45, fill: THIN });
 
   // 5 — pedestal ornament 1:3
-  s2 += heading(300, 17, "5 · PEDESTAL ORNAMENT", "ELEVATION · SCALE 1:3", 55);
-  const vD5 = view(350, 50, 3, "Pedestal ornament"), tD5 = vD5.w(0.12);
-  s2 += vD5.g(ornament(0, 0, tD5), 0.3);
-  s2 += chainH([vD5.X(-80), vD5.X(80)], vD5.Y(-40) - 2, ["≈160"], { from: vD5.Y(-30) });
-  s2 += note(vD5.X(0), vD5.Y(35 + 24), vD5.X(60), vD5.Y(80), "BRASS RING PULL Ø48", "HANGS FROM ROSETTE");
-  s2 += note(vD5.X(-62), vD5.Y(16), vD5.X(-90), vD5.Y(45), SIMPLE ? "NO SCROLLS" : "ACANTHUS SCROLLS", SIMPLE ? "BOSS AND RING ONLY" : "CARVED OR BRASS — TBC", "end");
-  s2 += note(vD5.X(-10), vD5.Y(-24), vD5.X(-90), vD5.Y(-25), "RIBBON TIE", "", "end");
+  s2 += heading(300, 17, "5 · PEDESTAL DRAWERS", "RIGHT PEDESTAL FRONT · SCALE 1:10 · THREE EACH SIDE", 70);
+  {
+    const s5 = 10, a = pedR[0], b = pedR[1], wl = K.stile, wr = SO, dx0 = a + wl + 10, dx1 = b - wr - 10, dy0 = yR1 + 12, dy1 = yP - 12;
+    const v5 = view(305 - a / s5, 30 - yR1 / s5, s5, "Pedestal drawers"), t5 = v5.w(0.12);
+    const rows = pedRows(dy0, dy1);
+    let g = `<rect x="${a}" y="${yR1}" width="${K.ped}" height="${yP - yR1}"/><g stroke-width="${t5}"><line x1="${a + wl}" y1="${yR1}" x2="${a + wl}" y2="${yP}"/><line x1="${b - wr}" y1="${yR1}" x2="${b - wr}" y2="${yP}"/></g>`;
+    rows.forEach(([y0, y1]) => (g += pedDrawer(dx0, dx1, y0, y1, t5)));
+    g += `<rect x="${a - K.plP}" y="${yP}" width="${K.ped + 2 * K.plP}" height="${K.plH}"/>`;
+    s2 += v5.g(g, 0.3);
+    s2 += chainV([v5.Y(dy0), ...rows.flatMap(([y0, y1]) => [v5.Y(y1)]).slice(0, 2).flatMap((y, i) => [y, v5.Y(rows[i + 1][0])]), v5.Y(dy1)], v5.X(b) + 6,
+      [Math.round(rows[0][1] - rows[0][0]), RAIL_D, Math.round(rows[1][1] - rows[1][0]), RAIL_D, Math.round(rows[2][1] - rows[2][0])], { from: v5.X(b) + 1, size: 1.2 });
+    s2 += chainH([v5.X(dx0), v5.X(dx1)], v5.Y(yR1) - 3, [`${Math.round(dx1 - dx0)} WIDE`], { from: v5.Y(yR1) - 0.5, size: 1.3 });
+    s2 += text(v5.X(b) + 13, v5.Y(dy0) + 3, "GRADUATED —", { size: 1.45 }) + text(v5.X(b) + 13, v5.Y(dy0) + 6, "SHALLOWEST AT THE TOP", { size: 1.45 });
+    s2 += text(v5.X(b) + 13, v5.Y(dy0) + 11, "COCKBEADED FRONTS,", { size: 1.45 }) + text(v5.X(b) + 13, v5.Y(dy0) + 14, "SWAN-NECK HANDLE (6),", { size: 1.45 }) + text(v5.X(b) + 13, v5.Y(dy0) + 17, "KEYHOLE ON EACH", { size: 1.45 });
+    s2 += text(v5.X(b) + 13, v5.Y(dy0) + 22, "SAME ON THE LEFT", { size: 1.45, fill: THIN }) + text(v5.X(b) + 13, v5.Y(dy0) + 25, "PEDESTAL, MIRRORED", { size: 1.45, fill: THIN });
+  }
 
   // 6 — swan-neck handle 1:1
   s2 += heading(300, 100, "6 · DRAWER HANDLE", "ELEVATION · SCALE 1:1", 55);
