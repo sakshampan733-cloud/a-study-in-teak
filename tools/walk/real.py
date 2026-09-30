@@ -198,22 +198,6 @@ d2s1 = Lb - D2["corner"]; d2s0 = d2s1 - D2["open"]
 OH = LEAF_H + LIN
 STUDY = 280                                                      # the study wall unit's depth
 
-# ── the desk, square-cornered (AST-DR-028: the carpenter builds square) ────────
-dbox("desk_top", dx0, dFront, 710, dx1, dBack, 750, M_DESK)
-dbox("desk_frieze", dx0 + 30, dFront + 30, 635, dx1 - 30, dBack - 30, 710, M_DESK)
-for i, (a, b) in enumerate(((dx0 + 30, dx0 + 590), (dx1 - 590, dx1 - 30))):
-    z = 80 + 18
-    for k, hgt in enumerate((180, 160, 140)):                    # graduated, deepest at the bottom
-        dbox(f"desk_dr{i}{k}", a + 18, dFront + 18, z, b - 18, dFront + 30, z + hgt, M_DESK)
-        hx = (a + b) / 2; hz = z + hgt / 2
-        dbox(f"desk_h{i}{k}", hx - 45, dFront + 4, hz - 4, hx + 45, dFront + 18, hz + 4, M_BRASS)          # swan-neck bail, simplified
-        for sx in (-45, 45): dbox(f"desk_r{i}{k}{sx}", hx + sx - 7, dFront + 8, hz - 7, hx + sx + 7, dFront + 18, hz + 7, M_BRASS)
-        z += hgt + 18
-for k in range(3):                                               # the frieze drawers: push to open, just the joints
-    xs = (dx0 + 30, dx0 + 590, dx1 - 590, dx1 - 30)
-    dbox(f"desk_fj{k}", xs[k] - 1.5 + (3 if k else 0), dFront + 27, 640, xs[k] + 1.5 + (3 if k else 0), dFront + 31, 705, M_DARK)
-for o in DET.objects: bevel(o, 0.002)
-
 # ── skirting: white marble, 4 in, on the bed wall and the left and right walls (not the study wall) ──
 SK = 102
 def skirt(name, x0, s0, x1, s1):
@@ -237,11 +221,6 @@ run0, run1 = STUDY + 40, d2s0 - 102
 pw = (run1 - run0 - 6 * STILE) / 5
 panels = [(run0 + STILE + k * (pw + STILE), run0 + STILE + k * (pw + STILE) + pw) for k in range(5)]
 nar = (d2s1 + 102 + 75, Lb - 15 - 75)
-for k, (a, b) in enumerate(panels + [nar]):
-    frame(f"rw_tall{k}", a, b, 797, 2629); frame(f"rw_short{k}", a, b, 213, 549)
-for (a, b) in ((run0 - 40, run1), (d2s1 + 102, Lb - 15)):
-    r = dbox(f"rw_rail{a}", xR - 28, a, 648, xR, b, 686, M_PAINT); bevel(r, 0.008, 3)
-
 def lamp(name, x, s, z, face, arms=2, span=150):
     """A twin-arm wall lamp: brass back plate, arms, and a fabric shade over a warm bulb on each."""
     ux = face                                                      # direction out of the wall, in x (±1) or s (±2)
@@ -277,7 +256,7 @@ for k in (0, 2, 4):
     a, b = panels[k]; lamp(f"rw_lamp{k}", xR, (a + b) / 2, 1290, -1, 2, 130)
 # the study's twin sconces, one on each pilaster
 for i, x0 in enumerate((book, xP2)):
-    lamp(f"st_sconce{i}", x0 + pil / 2, 280, 1290, 2, 2, 70)
+    lamp(f"st_sconce{i}", x0 + pil / 2, 320, 1290, 2, 2, 70)
 
 # ── doors: a four-panel leaf, applied mouldings both faces, brass knob; casing with a crown on the room side ──
 def dress_leaf(dname, w):
@@ -304,31 +283,7 @@ def dress_leaf(dname, w):
         kn = bpy.context.active_object; kn.parent = d; kn.location = (xoff + sgn * 0.05, (w - 60) / 1000, (zl + lr / 2) / 1000); kn.scale = (0.9, 1, 1)
         setmat(kn, M_BRASS)
     d.data.materials.clear(); d.data.materials.append(M_VEN); bevel(d, 0.003)
-dress_leaf("door_d1", D1["leaf"]); dress_leaf("door_d2", D2["leaf"])
-
-def casing_x(name, xwall, s0, s1, face, jambs=(True, True)):
-    """Casing on a wall that runs north–south (x = wall face), 6 in all round, crown above (AST-DR-011)."""
-    xo = sorted((xwall, xwall + face * 22))
-    parts = []
-    if jambs[0]: parts.append(dbox(name + "_jl", xo[0], s0 - 102, 0, xo[1], s0, OH + 102, M_VEN))
-    if jambs[1]: parts.append(dbox(name + "_jr", xo[0], s1, 0, xo[1], s1 + 102, OH + 102, M_VEN))
-    a, b = s0 - (102 if jambs[0] else 0), s1 + (102 if jambs[1] else 0)
-    parts.append(dbox(name + "_h", xo[0], a, OH, xo[1], b, OH + 102, M_VEN))
-    for (z0, z1, p) in ((OH + 102, OH + 132, 34), (OH + 132, OH + 232, 26), (OH + 232, OH + 262, 40), (OH + 262, 2642, 62)):   # scallop course, mouldings, crown
-        xp = sorted((xwall, xwall + face * p))
-        parts.append(dbox(name + f"_c{z0}", xp[0], a - (p - 22), z0, xp[1], b + (p - 22), z1, M_VEN))
-    for j, on in enumerate(jambs):                                                   # reeds on the jambs
-        if not on: continue
-        sj = s0 - 102 if j == 0 else s1
-        for r in range(5):
-            dbox(f"{name}_reed{j}{r}", xo[0] if face > 0 else xo[0] - 5, sj + 14 + r * 17, 60, (xo[1] + 5) if face > 0 else xo[1], sj + 22 + r * 17, OH + 90, M_VEN)
-    for p in parts: bevel(p, 0.004, 2)
-    for j, on in enumerate(jambs):                                                   # plinth blocks, meeting the skirting square
-        if not on: continue
-        sj = s0 - 102 if j == 0 else s1
-        xp = sorted((xwall, xwall + face * 30)); pb = dbox(f"{name}_pb{j}", xp[0], sj - 4, 0, xp[1], sj + 106, 220, M_VEN); bevel(pb, 0.004, 2)
-casing_x("cas_d1", xLb, d1s0, d1s1 - 10, 1, (True, False))
-casing_x("cas_d2", xR, d2s0, d2s1, -1)
+exec(compile(open(os.path.join(HERE, "joinery.py")).read(), "joinery.py", "exec"))    # the joinery at drawing depth
 
 # ── the bed wall: parchment in large panels, symmetrical on the bed, one shade ──
 PX0, PX1 = cx - 1219, cx + 1219
@@ -511,6 +466,12 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
     "dress": ((4900, 4450), (8400, 4356, 1500)),
     "vault": ((5100, 4356, 1450), (7600, 4356, 3000)),
     "mirror": ((6200, 4500), (8536, 4356, 1300)),
+    "d2close": ((3300, 4650, 1500), (4547, 4650, 1600)),
+    "d1close": ((1500, 5000, 1450), (-177, 5250, 1500)),
+    "pilaster": ((2000, 1100, 1700), (1609, 280, 1900)),
+    "deskclose": ((2600, 700, 1250), (1900, 1500, 600)),
+    "deskfront": ((1500, 420, 1050), (2350, 1600, 480)),
+    "d2head": ((3300, 4650, 1700), (4547, 4650, 2450)),
 }
 def shoot(name):
     cp, tp = VIEWS[name]
