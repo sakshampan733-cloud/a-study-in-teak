@@ -116,7 +116,7 @@ function overview() {
   const chapters = [
     { title: "The Bedroom", ids: ["bedroom", "study", "walls"], img: "assets/refs/bed-ref-1-low-platform-bed.jpg", line: "The bed and the study: the parchment bed wall, the teak desk, the study wall and the panelled walls." },
     { title: "The Bathroom", ids: ["bathroom"], img: "assets/refs/bathroom-ref-1-painted-ceiling-linework.jpg", line: "A ceiling with fine black hand-painted linework, and the vanity below." },
-    { title: "The Dressing", ids: ["dressing"], img: "assets/refs/wardrobe-ref-3-steel-leaded-doors-closeup.jpg", line: "Lit white-glass wardrobes in steel frames, and a folding mirror." },
+    { title: "The Dressing", ids: ["dressing"], img: "assets/refs/ceiling-barrel-vault-coffers.jpg", line: "Teak wardrobes lit warm inside, a vaulted ceiling, a folding mirror — and a hidden door." },
   ].map((ch, i) => {
     const c = tally(ch.ids.flatMap(itemsOf)), n = c.brief + c.open + c.final;
     return `<article class="scard" style="--i:${i}"><div class="ph" ${bg(ch.img)}></div><div class="body">
@@ -137,7 +137,7 @@ function overview() {
     { id: "desk", tab: "study", title: "The Desk", img: "assets/refs/desk-ref-1.jpg" },
     { id: "shelf", tab: "study", title: "The Study Wall", img: "assets/refs/wall-ref-4-dark-study-bands-sconces.jpg" },
     { id: "door", tab: "doors", title: "The Doors", img: "assets/refs/door-ref-1.jpg" },
-    { id: "wardrobe", tab: "dressing", title: "The Wardrobes", img: "assets/refs/wardrobe-ref-3-steel-leaded-doors-closeup.jpg" },
+    { id: "wardrobe", tab: "dressing", title: "The Wardrobes", img: "assets/refs/wardrobe-ref-4-inside-finish-lit-niche.jpg" },
     { id: "bed", tab: "bedroom", title: "The Bed", img: "assets/refs/bed-ref-1-low-platform-bed.jpg" },
   ].map((p, i) => {
     const item = P.tabs.find((t) => t.id === p.tab).items.find((x) => x.id === p.id);
@@ -265,8 +265,10 @@ function problems() {
       <div class="index">${Object.keys(PSTAT).filter((k) => c[k]).map((k) => `<span class="btn" style="pointer-events:none">${esc(PSTAT[k])} · ${pad2(c[k])}</span>`).join("")}</div></section>` +
     `<div class="probs">${PB.items.map((i, k) => `<article class="prob reveal ${i.status}" id="${i.id}">
       <div class="prob-head"><span class="badge">${pad2(k + 1)}</span><h3 class="prob-t">${esc(i.name)}</h3><span class="pstat ${i.status}">${PSTAT[i.status]}</span></div>
-      ${row("What", i.what)}${row("What it damages", i.effect)}${row("What we are doing", i.doing)}${row("What is needed", i.need)}
-      ${sheets(i.drawings)}
+      <p class="gl-line prob-line">${esc(firstSentence(i.what))}</p>
+      <details class="gl-more"><summary><span class="gl-more-t">Details</span><span class="mono">${[i.what, i.effect, i.doing, i.need].filter(Boolean).length} notes${(i.drawings || []).length ? ` · ${i.drawings.length} drawing${i.drawings.length > 1 ? "s" : ""}` : ""}</span><span class="gl-more-i" aria-hidden="true"></span></summary>
+        <div class="gl-more-body">${row("What", i.what)}${row("What it damages", i.effect)}${row("What we are doing", i.doing)}${row("What is needed", i.need)}
+        ${sheets(i.drawings)}</div></details>
     </article>`).join("")}</div>` +
     nextLink("problems") + footer();
 }
@@ -276,13 +278,13 @@ function principles() {
   return pageHero("principles", "Why the room is the way it is", "Principles", PR.intro, `${n} rules`) +
     PR.groups.map((g) => `<div class="group-label"><span class="eyebrow" data-decode>${esc(g.n)} · ${esc(g.name)}</span></div>
       <div class="wrap"><p class="prose gline">${esc(g.line)}</p></div>
-      <div class="rules">${g.rules.map((r) => `<article class="rule reveal" id="rule-${r.id}">
-        <div class="rule-l"><span class="mono">${esc(g.n)}</span><h3 class="rule-t">${esc(r.t)}</h3></div>
+      <div class="rules">${g.rules.map((r) => `<details class="rule gl-rule reveal" id="rule-${r.id}">
+        <summary class="rule-l"><span class="mono">${esc(g.n)}</span><h3 class="rule-t">${esc(r.t)}</h3><span class="gl-more-i" aria-hidden="true"></span></summary>
         <div class="rule-r">
           <p class="rule-b">${esc(r.body)}</p>
           ${r.check ? `<div class="rule-c"><span class="eyebrow">Where the room stands</span><p>${esc(r.check)}</p></div>` : ""}
           ${(r.at || []).length ? `<div class="rule-at"><span class="mono">Applies to</span>${r.at.map(atLink).join("")}</div>` : ""}
-        </div></article>`).join("")}</div>`).join("") +
+        </div></details>`).join("")}</div>`).join("") +
     nextLink("principles") + footer();
 }
 
@@ -296,6 +298,7 @@ function partValue(p) {
 
 // A tab reads at a glance: for each piece a picture, one line, the numbers that matter and the materials as
 // swatches — then its drawings — and everything else folded away under "All details" until it is wanted.
+const firstSentence = (t) => { const m = String(t || "").match(/^.*?[.!?](\s|$)/); return (m ? m[0] : String(t || "")).trim(); };
 function swatch(k) {
   const w = P.swatches?.[k];
   if (!w) return "";
@@ -346,10 +349,12 @@ function tabPage(t) {
 
 function veneer() {
   const M = P.master;
+  const MSW = { veneer: "teak", grain: "oakGrain", polish: "gloss", tone: "teak", wood: "solidTeak", floor: "taupeMarble", trimStone: "whiteMarble", bathStone: "beigeMarble" };
   const card = (k, name) => `<div class="mcard reveal">
+      ${MSW[k] && P.swatches?.[MSW[k]] ? `<div class="mcard-sw">${swatch(MSW[k])}</div>` : ""}
       <div class="mcard-top"><span class="eyebrow">${name}</span>${pill("m." + k, M[k].status)}</div>
       <div class="value">${M[k].value ? esc(M[k].value) : `<span class="tbd" style="font-size:14px">Not chosen</span>`}</div>
-      ${M[k].rule ? `<p class="rule">${esc(M[k].rule)}</p>` : ""}
+      ${M[k].rule ? `<details class="mcard-more"><summary class="mono">Why · the rule<span class="gl-more-i" aria-hidden="true"></span></summary><p class="rule">${esc(M[k].rule)}</p></details>` : ""}
       <div class="opts">${M[k].options.map((o) => `<span class="opt ${o === M[k].value ? "sel" : ""}">${esc(o)}</span>`).join("")}</div></div>`;
   const chips = (list) => `<div class="chips" style="margin-top:24px">${list.map((a) => `<span class="opt">${esc(a)}</span>`).join("")}</div>`;
   return pageHero("veneer", "One material, everywhere", "Materials", "The master materials. Every piece inherits them unless its spec sheet says otherwise.") +

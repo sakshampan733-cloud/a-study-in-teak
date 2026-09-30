@@ -306,6 +306,9 @@ window.PROJECT = {
   // A part with inherit:"veneer" / "polish" pulls from the master unless overridden.
   // material swatches for the glance cards: a photo where we have one, a colour where we do not
   swatches: {
+    oakGrain: { name: "Royal Oak grain", img: "assets/refs/veneer-royal-oak-OHBF-624.jpg", pos: "50% 80%", zoom: 4 },
+    gloss: { name: "Polish, as the desk", img: "assets/refs/veneer-9292-polish-gloss-reference.jpg" },
+    solidTeak: { name: "Solid teak", img: "assets/refs/desk-ref-1-detail.jpg", pos: "35% 45%", zoom: 3 },
     teak: { name: "Teak, dark stain", img: "assets/refs/veneer-dark-diva-crown-OHBF-607-color-target.jpg", pos: "22% 86%", zoom: 5 },
     burl: { name: "9292 cream burl", img: "assets/refs/veneer-9292-cream-burl.jpg" },
     taupeMarble: { name: "Taupe marble floor", img: "assets/refs/floor-ref-2-taupe-brown-marble-slab.jpg" },

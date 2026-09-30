@@ -584,3 +584,23 @@ body.sheets-dark .lb-inner.is-dwg svg { filter: invert(1) hue-rotate(180deg) bri
   .gl-more { width: calc(100% - 32px); }
   .gl-idx { width: 150px; grid-template-rows: 92px auto; }
 }
+/* principles, problems and materials: headline first, the essay folded */
+.gl-rule > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 16px; }
+.gl-rule > summary::-webkit-details-marker { display: none; }
+.gl-rule > summary .rule-t { flex: 1; margin: 0; }
+.gl-rule[open] .gl-more-i::after { transform: translate(-50%, -50%) rotate(0deg); }
+.gl-rule > .rule-r { padding-top: 16px; }
+.prob .prob-line { margin: 12px 0 0; max-width: 60ch; }
+.prob .gl-more { width: 100%; margin-top: 16px; }
+.mcard-sw .sw { gap: 0; font-size: 0; }
+.mcard-sw .sw i { width: 100%; height: 150px; border-radius: 8px; }
+.mcard-sw { margin-bottom: 18px; }
+.mcard-more > summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; font-size: 11px; color: var(--dim); text-transform: uppercase; }
+.mcard-more > summary::-webkit-details-marker { display: none; }
+.mcard-more .gl-more-i { width: 22px; height: 22px; }
+.mcard-more[open] .gl-more-i::after { transform: translate(-50%, -50%) rotate(0deg); }
+.mcard-sw .sw { display: flex; width: 100%; }
+.rule.gl-rule { display: block; }
+.gl-rule > summary.rule-l { width: 100%; padding: 0; }
+.gl-rule > summary .rule-t { max-width: none; }
+.gl-rule > .rule-r { max-width: 760px; margin-left: 30px; }
