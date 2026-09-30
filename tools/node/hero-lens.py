@@ -13,7 +13,7 @@ Depth Anything Video):
 
 Run with any Python that has numpy (Blender's does):
   /Applications/Blender.app/Contents/Resources/5.2/python/bin/python3.13 tools/node/hero-lens.py \
-      <colour.mp4> <depth.mp4> <out.mp4> [focus_near=0.5] [focus_far=0.3] [gain=2.4]
+      <colour.mp4> <depth.mp4> <out.mp4> [focus_near=0.5] [focus_far=0.3] [gain=2.4]   (depth normalised 0–1 over the clip)
   The depth map is bright = near. Focus stays on the middle forms, so the nearest (a glass lip) never
   sharpens into a readable bowl (bar rule 11).
 """
@@ -30,7 +30,7 @@ F_FAR = float(sys.argv[5]) if len(sys.argv) > 5 else 0.3
 GAIN = float(sys.argv[6]) if len(sys.argv) > 6 else 2.4
 SIGMAS = [float(v) for v in os.environ.get("SIGMAS", "12,18,27,39").split(",")]                                                # even in focus, a wide aperture is never razor-sharp
 ZOOM = float(os.environ.get("ZOOM", 1.25))                                     # closer in: fewer, larger forms
-GAMMA = float(os.environ.get("GAMMA", 1.15)); EXPO = float(os.environ.get("EXPO", 1.3)); WARM = float(os.environ.get("WARM", 1.1)); SAT = float(os.environ.get("SAT", 0.42))
+GAMMA = float(os.environ.get("GAMMA", 1.7)); EXPO = float(os.environ.get("EXPO", 1.1)); WARM = float(os.environ.get("WARM", 1.1)); SAT = float(os.environ.get("SAT", 0.42)); LOCAL = float(os.environ.get("LOCAL", 0.13)); COOL = float(os.environ.get("COOL", 1.5))
 
 TORGB = "scale=in_color_matrix=bt709:in_range=tv:flags=accurate_rnd+full_chroma_int+full_chroma_inp"
 FIT = f"scale={int(W * ZOOM) // 2 * 2}:{int(W * ZOOM * 9 / 16) // 2 * 2}:flags=bicubic,crop={W}:{H}"
@@ -78,16 +78,31 @@ def gauss(a, s):
 
 
 N = count(colour)
+# the depth model's range varies by take and drifts when a near form enters: stretch each frame to 0–1 by its
+# own 2nd / 99.5th percentiles, smoothed over ±0.5 s around the loop so the focus never pumps
+_p = np.frombuffer(subprocess.run([FF, "-loglevel", "error", "-i", depth, "-vf", "scale=160:90,format=gray", "-f", "rawvideo", "-"],
+                                  capture_output=True).stdout, np.uint8).reshape(-1, 90 * 160) / 255.0
+_r = np.percentile(_p, [2, 99.5], axis=1).T                                         # (frames, 2)
+_k = np.exp(-0.5 * (np.arange(-36, 37) / 12.0) ** 2); _k /= _k.sum()
+D_LO, D_HI = (np.array([np.convolve(np.tile(_r[:, j], 3), _k, "same")[len(_r):2 * len(_r)] for j in (0, 1)]))
+print(f"depth range {D_LO.min():.2f}–{D_HI.max():.2f}", flush=True)
+# glints: twice a loop the brightest in-focus edge catches for ~½ s and lets go (the takes' own highlights sit
+# on defocused glass, so a fixed threshold never fires)
+G_AT = [float(v) for v in os.environ.get("GLINTS", "0.3,0.72").split(",")]
+def glint_env(t):
+    d = np.array([min(abs(t - a), 1 - abs(t - a)) for a in G_AT])
+    return float(np.exp(-0.5 * (d / 0.03) ** 2).max())
 enc = subprocess.Popen([FF, "-loglevel", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", "24", "-i", "-",
                         "-vf", "scale=out_color_matrix=bt709:out_range=tv:flags=accurate_rnd+full_chroma_int+full_chroma_inp,format=yuv420p",
-                        "-c:v", "libx264", "-preset", "slow", "-crf", "20", "-profile:v", "high", "-pix_fmt", "yuv420p",
+                        "-c:v", "libx264", "-preset", "slow", "-crf", "20", "-maxrate", "820k", "-bufsize", "1640k", "-profile:v", "high", "-pix_fmt", "yuv420p",
                         "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "iec61966-2-1", "-color_range", "tv",
                         "-movflags", "+faststart", out], stdin=subprocess.PIPE)
 rng = np.random.default_rng(7)
 for i, (c, d) in enumerate(zip(frames(colour, "rgb24", 3), frames(depth, "gray", 1))):
     t = i / N
     focus = F_FAR + (F_NEAR - F_FAR) * (0.5 + 0.5 * np.cos(2 * np.pi * t))        # near at the loop point, far half-way
-    dz = gauss(dilate(d[..., 0] / 255.0, 24), 10)                                  # near edges keep the near depth (no sharp rim halo)
+    j = min(i, len(D_LO) - 1)
+    dz = gauss(dilate(np.clip((d[..., 0] / 255.0 - D_LO[j]) / (D_HI[j] - D_LO[j]), 0, 1), 24), 10)  # near edges keep the near depth (no sharp rim halo)
     coc = np.clip(np.abs(dz - focus) * GAIN, 0, 1) * (len(SIGMAS) - 1)           # 0 … 3 → which blur
     img = np.zeros_like(c)
     for k, s in enumerate(SIGMAS):                                                 # linear blend between neighbouring blurs
@@ -95,15 +110,26 @@ for i, (c, d) in enumerate(zip(frames(colour, "rgb24", 3), frames(depth, "gray",
     # glints: the sharp frame's hottest points, only where that surface is near focus (a defocused glint is
     # already spread by the blur), softened and warmed to cream
     lum = c @ np.array([0.2126, 0.7152, 0.0722], np.float32)
-    g = gauss(np.clip((lum - 232) / 23, 0, 1) * np.clip(1 - coc / 1.5, 0, 1), 6.0)[..., None]
-    img = img + np.clip(g * 1.4, 0, 1) * (np.array([255, 244, 224], np.float32) - img) * 0.8
+    e = glint_env(t)
+    if e > 0.02:
+        wl = gauss(lum * np.clip(1 - coc / 3, 0, 1), 5)                            # bright AND near focus, smoothed so it
+        thr = np.percentile(wl[::4, ::4], 99.85)                                   # catches as one soft patch, never dashes
+        g = (np.clip(gauss(np.clip((wl - thr) / 10 + 0.6, 0, 1), 5) * 2.0, 0, 1) * e)[..., None]
+    else:
+        g = np.zeros((H, W, 1), np.float32)
     # grade: mostly dark, near-neutral blue-black, no green (design/bar.md 8)
     x = np.clip(img / 255.0, 0, 1)
     x = x ** GAMMA * EXPO                                                          # the reference's exposure: dark, but the forms carry light
     x[..., 0] *= WARM; x[..., 1] *= 0.95                                           # copper a touch warmer; no green cast
+    w = np.clip((x[..., 2] - x[..., 0]) / (x[..., 2] + 1e-3) * 4, 0, 1)[..., None]  # the slate side lifted to the reference's share
+    x = x * (1 + (COOL - 1) * w)
+    L = gauss(x @ np.array([0.2126, 0.7152, 0.0722], np.float32), 50)              # wide pools of light (a clear column filling a
+    x = x * np.minimum(1, (LOCAL / np.maximum(L, 1e-4)) ** 0.7)[..., None]         # third of the frame) held down; small lights kept
+    x = np.where(x > 0.62, 0.62 + 0.26 * np.tanh((x - 0.62) / 0.26), x)            # soft shoulder: lit glass stays below luma ≈ 224
     mx, mn = x.max(-1, keepdims=True), x.min(-1, keepdims=True)                   # lit saturation held to the reference's
     y = x @ np.array([0.2126, 0.7152, 0.0722], np.float32)                         # ≈ 0.29–0.40: peach and slate, not orange and blue
     x = y[..., None] + (x - y[..., None]) * np.minimum(1, SAT / ((mx - mn) / (mx + 1e-3) + 1e-6))
+    x = x + g * (np.array([255, 244, 224], np.float32) / 255.0 - x)               # the only near-white: small cream glints
     x = x + np.array([9, 13, 16], np.float32) / 255.0 * (1 - x) ** 3              # blacks read ≈ (7, 11, 14) after grain and encode
     x = x * 255 + rng.normal(0, 1.2, x.shape).astype(np.float32)                  # a touch of grain
     enc.stdin.write(np.clip(x, 0, 255).astype(np.uint8).tobytes())

@@ -273,14 +273,34 @@
     if (now === true || !window.requestIdleCallback) return go();
     setTimeout(() => requestIdleCallback(go, { timeout: 1500 }), 700);
   };
+  // …and on a slow line not before the hero video has buffered to its end: ~400 KB of drawings and the section
+  // photographs sharing a 1.6 Mb/s phone line with it froze the loop nine times in 20 s. A visitor who scrolls,
+  // swipes, presses a key or follows a link gets them at once; 30 s is the backstop.
+  const afterVideo = (fn) => {
+    const v = hero?.querySelector(".hero-video");
+    let t = 0, cap = 0, got = -1, moved = Date.now();
+    const finish = () => { clearInterval(t); clearTimeout(cap); fn(); };
+    const full = () => {
+      if (!v || v.error || v.networkState === 3) return true;                 // no video to wait for (poster)
+      const end = v.buffered.length ? v.buffered.end(v.buffered.length - 1) : 0;
+      if (v.duration > 0 && end >= v.duration - 0.25) return true;            // all of it is here
+      if (end !== got) { got = end; moved = Date.now(); }
+      return v.networkState === 1 && Date.now() - moved > 3000;               // the browser has stopped fetching it
+    };
+    t = setInterval(() => { if (full()) finish(); }, 250);
+    cap = setTimeout(finish, 30000);
+  };
   const deep = location.hash && location.hash !== "#overview";
   loadRest(() => {
     initSite();
     if (deep) return loadPages(true);
-    if (root.classList.contains("is-ready")) return loadPages();
-    const mo = new MutationObserver(() => { if (root.classList.contains("is-ready")) { mo.disconnect(); loadPages(); } });
+    const intent = () => loadPages(true);
+    for (const ev of ["wheel", "touchmove", "keydown"]) addEventListener(ev, intent, { once: true, passive: true });
+    addEventListener("hashchange", intent, { once: true });
+    const ready = () => { if (!ready.on) { ready.on = true; afterVideo(() => loadPages()); } };
+    if (root.classList.contains("is-ready")) return ready();
+    const mo = new MutationObserver(() => { if (root.classList.contains("is-ready")) { mo.disconnect(); ready(); } });
     mo.observe(root, { attributes: true, attributeFilter: ["class"] });
-    setTimeout(() => { mo.disconnect(); loadPages(); }, 4000);
-    addEventListener("hashchange", () => loadPages(true), { once: true });
+    setTimeout(() => { mo.disconnect(); ready(); }, 4000);
   });
 })();

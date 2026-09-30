@@ -595,39 +595,48 @@ window.addEventListener("scroll", onScroll, { passive: true });
 
 // ── router with a soft cross-fade ──
 const current = () => { const id = location.hash.slice(1) || "overview"; return ["veneer", "principles", "lighting", "problems", ...P.tabs.map((t) => t.id)].includes(id) ? id : "overview"; };
-function render(delayMotion = 0) {
+// spread: the first render runs as separate tasks (markup · motion · paper · 3D · the pinned band), so no single
+// frame blocks long enough to stall the hero video on a slow phone
+function render(delayMotion = 0, spread = false) {
   const id = current(), t = P.tabs.find((t) => t.id === id), main = $("#page");
-  main.innerHTML = id === "veneer" ? veneer() : id === "principles" ? principles() : id === "problems" ? problems() : id === "lighting" ? lighting() : t ? tabPage(t) : overview();
-  renderChrome(id);
-  document.title = `${titleOf(id)} · ${P.name}`;
-  const hero = document.querySelector(".hero[data-intro]");
-  if (hero) hero.style.display = id === "overview" ? "" : "none";
-  if (id !== "overview") document.documentElement.classList.add("is-ready");   // a deep link: the nav shows at once
-  requestAnimationFrame(() => { window.__lenis?.resize?.(); window.ScrollTrigger?.refresh(); });
-  main.classList.remove("leaving"); main.classList.add("entering");
-  setTimeout(() => main.classList.remove("entering"), 800);
-  delayMotion ? setTimeout(() => animate(main), delayMotion) : animate(main);
-  applyPaper();
-  applyDims();
-  mountModel();
-  // the rooms band holds the screen while the three cards come in one after another, side by side (not on phones)
-  window.__stackST?.kill(); window.__stackST = null;
-  const band = main.querySelector(".stack");
-  if (band && window.gsap && window.ScrollTrigger && !document.body.classList.contains("reduced")) {
-    const tl = gsap.timeline({ defaults: { ease: "power2.out", duration: 1 } });
-    if (innerWidth >= 768) {
-      band.querySelectorAll(".scard").forEach((c, i) => tl.fromTo(c, { autoAlpha: 0, yPercent: 24 }, { autoAlpha: 1, yPercent: 0 }, i * 0.9));
-      tl.to({}, { duration: 0.9 });   // hold the full row a moment before the band scrolls on
-    } else {
-      // phones: the row is wider than the screen, so the scroll carries it sideways — still side by side
-      band.classList.add("is-track");
-      const track = band.querySelector(".stack-cards");
-      tl.to(track, { x: () => -(track.scrollWidth - innerWidth), ease: "none", duration: 3 });
+  const steps = [() => {
+    main.innerHTML = id === "veneer" ? veneer() : id === "principles" ? principles() : id === "problems" ? problems() : id === "lighting" ? lighting() : t ? tabPage(t) : overview();
+    renderChrome(id);
+    document.title = `${titleOf(id)} · ${P.name}`;
+    const hero = document.querySelector(".hero[data-intro]");
+    if (hero) hero.style.display = id === "overview" ? "" : "none";
+    if (id !== "overview") document.documentElement.classList.add("is-ready");   // a deep link: the nav shows at once
+    main.classList.remove("leaving"); main.classList.add("entering");
+    setTimeout(() => main.classList.remove("entering"), 800);
+  }, () => {
+    delayMotion ? setTimeout(() => animate(main), delayMotion) : animate(main);
+  }, () => {
+    applyPaper();
+    applyDims();
+  }, mountModel, () => {
+    // the rooms band holds the screen while the three cards come in one after another, side by side (not on phones)
+    window.__stackST?.kill(); window.__stackST = null;
+    const band = main.querySelector(".stack");
+    if (band && window.gsap && window.ScrollTrigger && !document.body.classList.contains("reduced")) {
+      const tl = gsap.timeline({ defaults: { ease: "power2.out", duration: 1 } });
+      if (innerWidth >= 768) {
+        band.querySelectorAll(".scard").forEach((c, i) => tl.fromTo(c, { autoAlpha: 0, yPercent: 24 }, { autoAlpha: 1, yPercent: 0 }, i * 0.9));
+        tl.to({}, { duration: 0.9 });   // hold the full row a moment before the band scrolls on
+      } else {
+        // phones: the row is wider than the screen, so the scroll carries it sideways — still side by side
+        band.classList.add("is-track");
+        const track = band.querySelector(".stack-cards");
+        tl.to(track, { x: () => -(track.scrollWidth - innerWidth), ease: "none", duration: 3 });
+      }
+      window.__stackST = ScrollTrigger.create({ trigger: band, start: "top top", end: "bottom bottom", scrub: 0.6, animation: tl, invalidateOnRefresh: true });
     }
-    window.__stackST = ScrollTrigger.create({ trigger: band, start: "top top", end: "bottom bottom", scrub: 0.6, animation: tl, invalidateOnRefresh: true });
-  }
-  onScroll();
-  if (pendingItem) { const it = pendingItem; pendingItem = null; setTimeout(() => { const el = document.getElementById(it); if (el) window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - 70, behavior: "smooth" }); }, 500); }
+    requestAnimationFrame(() => { window.__lenis?.resize?.(); window.ScrollTrigger?.refresh(); });
+    onScroll();
+    if (pendingItem) { const it = pendingItem; pendingItem = null; setTimeout(() => { const el = document.getElementById(it); if (el) window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - 70, behavior: "smooth" }); }, 500); }
+  }];
+  if (!spread) return steps.forEach((f) => f());
+  const next = () => { const f = steps.shift(); if (f) { f(); setTimeout(next, 16); } };
+  next();
 }
 window.addEventListener("hashchange", () => {
   const main = $("#page");
@@ -638,5 +647,5 @@ window.addEventListener("hashchange", () => {
 // v2's entrance is the load sequence; the pages render as soon as this runs
 if (matchMedia("(prefers-reduced-motion: reduce)").matches) document.body.classList.add("reduced");
 document.body.classList.add("loaded");
-render();
+render(0, true);
 })();
