@@ -249,7 +249,7 @@ for o in labels_hide: o.hide_render = True; o.hide_viewport = True
 for o in [ceiling, *ceiling.children]: o.hide_render = False
 
 # ── the tour: calm stops at standing eye height, a pause at each, no orbit ─────
-EYE, LENS = 1650, 21
+EYE, LENS = 1650, 16.5                                           # wide, so the rooms read at their real size rather than cramped
 STOPS = [  # name, camera (x, s[, z]), looking at (x, s, z), hold frames, what happens while it holds
     ("door", (-2400, 5258), (-177, 5258, 1150), 48, "d1"),
     ("in", (350, 5150), (3300, 3500, 1000), 30, None),
