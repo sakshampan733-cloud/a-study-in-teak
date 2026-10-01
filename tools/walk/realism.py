@@ -325,9 +325,13 @@ for o in sc.objects:
 for m_ in (M_STRIP,): m_.node_tree.nodes["Principled BSDF"].inputs["Emission Strength"].default_value *= COVE_K
 M_SHADE.node_tree.nodes["Principled BSDF"].inputs["Emission Strength"].default_value = float(os.environ.get("SHADE_EM", 1.6))   # a lit shade glows
 
-# ═══════════════════════════ 4c · THE SWITCHES ════════════════════════════════
+# ═══════════════════════════ 4c · THE PARTITION ══════════════════════════════
+if os.environ.get("PARTITION", "1") != "0":
+    exec(compile(open(os.path.join(HERE, "glassblock.py")).read(), "glassblock.py", "exec"))
+
+# ═══════════════════════════ 4d · THE SWITCHES ════════════════════════════════
 # LIGHTS=all, or a comma list of circuits to leave on: study6 (the six spots 2'6" off the study wall), spots (all 21),
-# cove, sconces, desk (the banker's lamp), shelf (the bookcase strip). Everything else goes dark; the night outside stays.
+# cove, sconces, desk (the banker's lamp), shelf (the bookcase strip), partition (its LED strips). Everything else goes dark; the night outside stays.
 LIGHTS = os.environ.get("LIGHTS", "all")
 if LIGHTS != "all":
     on = set(LIGHTS.split(","))
@@ -338,6 +342,7 @@ if LIGHTS != "all":
         if "_bulb" in n and not n.startswith("lamp_"): return "sconces"
         if n.startswith("lamp_"): return "desk"
         if n.startswith("book_strip"): return "shelf"
+        if n.startswith("gb_strip"): return "partition"
         return "other"
     for o in sc.objects:
         if o.type == "LIGHT":
@@ -348,6 +353,7 @@ if LIGHTS != "all":
     if "cove" not in on: dark(M_STRIP)
     if "sconces" not in on: dark(M_SHADE); dark(M_BULB)
     if "desk" not in on: dark(bpy.data.materials.get("opal_glass"))
+    if "partition" not in on: dark(bpy.data.materials.get("partition_strip"))
     # the spot discs share one glowing material: give the ones that stay on their own copy, dim the rest
     lit = [o.location.copy() for o in sc.objects if o.type == "LIGHT" and o.name.startswith("spot") and not o.hide_render]
     m_on = M_DISC.copy(); m_on.name = "spot_disc_on"; dark(M_DISC)
@@ -355,10 +361,6 @@ if LIGHTS != "all":
         if o.type == "MESH" and o.data.materials and o.data.materials[0] == M_DISC and any((o.location - p_).length < 0.05 for p_ in lit):
             o.data.materials[0] = m_on
     print("lights on:", sorted(on), sum(1 for o in sc.objects if o.type == "LIGHT" and not o.hide_render), flush=True)
-
-# ═══════════════════════════ 4d · THE PARTITION ══════════════════════════════
-if os.environ.get("PARTITION", "1") != "0":
-    exec(compile(open(os.path.join(HERE, "glassblock.py")).read(), "glassblock.py", "exec"))
 
 # ═══════════════════════════ 5 · THE LENS ════════════════════════════════════
 ng = sc.compositing_node_group

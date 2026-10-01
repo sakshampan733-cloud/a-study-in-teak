@@ -1,7 +1,9 @@
-# The partition (owner, 1 Oct): a wall of Mano cast-glass blocks between the desk and the bed, with one slim wood
-# column from the ceiling (carrying the TV's power) down to a wood board that holds the 55" TV, and one wood support
-# from the board to the floor. The board is smaller than the TV, so from the bed the TV floats on the glass with no
-# wood showing round it. Run by realism.py in real.py's namespace.
+# The partition (owner, 1 Oct): a wall of Mano cast-glass blocks between the desk and the bed. Dark Diva wood:
+# a band two courses deep along the top and another along the bottom, following the curve, each with an LED strip
+# washing light along the glass (down from the top, up from the bottom) so the blocks glow; two slim columns, one
+# block wide, splitting the wall into three equal fields and carrying the TV board between them. The board is
+# smaller than the TV, so from the bed the TV floats on the glass with no wood round it. A low unit of eight drawers
+# (four across, two high) in the 9292 burl stands under the TV. Run by realism.py in real.py's namespace.
 #
 # Mano Vetra block (Eco Outdoor, Tom Fereday): 5½ in square (140 mm), 3¾ in deep (95 mm), solid hand-cast glass,
 # 3/8 in (10 mm) joints, so one block and its joint is 150 mm. Cast glass can't be cut: every piece of wood lands on
@@ -15,7 +17,9 @@ MOD, BLK, DEP = 150.0, 140.0, 95.0                     # module, block face, blo
 COLS, ROWS = 17, 18
 L = COLS * MOD                                         # 2550 developed
 BOARD_C, BOARD_R = (5, 12), (5, 9)                     # columns [5, 12) = 7 blocks, rows [5, 9) = 4 blocks
-COL = 8                                                # the middle column: the wood column and the support
+WCOLS = (5, 11)                                        # the two wood columns: three equal glass fields of 5 blocks
+BAND = 2                                               # wood bands: the bottom two courses and the top two
+LIP = 25.0                                             # the bands stand 25 mm proud of the glass each side, to hide the strips
 Z0 = 10.0                                              # the mortar bed under the first course
 PX, PS = bcx if "bcx" in dir() else 2337.0, 2413.0     # the old partition's centre line: on the bed's axis, 3353 off the bed wall
 CURVE = os.environ.get("PCURVE", "1") != "0"
@@ -105,16 +109,16 @@ M_MORTAR = flat("mortar_dark", (0.055, 0.047, 0.040), 0.85, bump=0.12)
 M_TRACK = flat("track_bronze", (0.12, 0.085, 0.06), 0.4, 0.7)
 def m_screen():
     m, nt, b = node_mat("tv_screen"); b.inputs["Base Color"].default_value = (0.004, 0.004, 0.005, 1)   # an anti-glare panel:
-    b.inputs["Roughness"].default_value = 0.22; b.inputs["Specular IOR Level"].default_value = 0.3        # dim, soft reflections,
-    b.inputs["Coat Weight"].default_value = 0.35; b.inputs["Coat Roughness"].default_value = 0.08         # not a mirror
+    b.inputs["Roughness"].default_value = 0.4; b.inputs["Specular IOR Level"].default_value = 0.2         # dim, soft reflections,
+    b.inputs["Coat Weight"].default_value = 0.15; b.inputs["Coat Roughness"].default_value = 0.15         # not a mirror
     return m
 M_SCREEN = m_screen(); M_TVBODY = flat("tv_body", (0.025, 0.025, 0.027), 0.45, 0.3)
 
-# ── the blocks ──
+# ── the blocks: every course between the bands, except the two columns and the board ──
 bm_g = bmesh.new(); k = 0
 for c in range(COLS):
-    for r in range(ROWS):
-        if c == COL or (BOARD_C[0] <= c < BOARD_C[1] and BOARD_R[0] <= r < BOARD_R[1]): continue
+    for r in range(BAND, ROWS - BAND):
+        if c in WCOLS or (BOARD_C[0] <= c < BOARD_C[1] and BOARD_R[0] <= r < BOARD_R[1]): continue
         add_block(bm_g, -L / 2 + c * MOD + MOD / 2, Z0 + r * MOD + BLK / 2, k); k += 1
 bend(bm_g); GLASS_O = obj("gb_blocks", bm_g, [M_GLASSB])
 print("glass blocks:", k, "curve" if CURVE else "straight", flush=True)
@@ -129,33 +133,60 @@ def slab(bm, u0, u1, w0, w1, z0, z1, nu=1):
     for a, b_ in zip(rows_, rows_[1:]):
         for i in range(4): bm.faces.new((a[i], b_[i], b_[(i + 1) % 4], a[(i + 1) % 4]))
     bm.faces.new(rows_[0][::-1]); bm.faces.new(rows_[-1])
+ZBOT = Z0 + BAND * MOD - 10                                       # top of the bottom band (300)
+ZTOP = Z0 + (ROWS - BAND) * MOD                                   # underside of the top band (2410)
 bm_m = bmesh.new(); WI = DEP / 2 - 6
-for r in range(ROWS + 1):                                         # bed joints
-    zj = Z0 + r * MOD - 10 if r else 0.0
+for r in range(BAND, ROWS - BAND + 1):                            # bed joints
+    zj = Z0 + r * MOD - 10
     slab(bm_m, -L / 2, L / 2, -WI, WI, zj, zj + 10, nu=60)
-for c in range(COLS + 1):                                         # head joints, the full height
+for c in range(COLS + 1):                                         # head joints
     uj = -L / 2 + c * MOD - 5
-    slab(bm_m, uj, uj + 10, -WI, WI, 0, Z0 + ROWS * MOD - 10)
+    slab(bm_m, uj, uj + 10, -WI, WI, ZBOT, ZTOP)
 bend(bm_m); obj("gb_mortar", bm_m, [M_MORTAR])
 
-# ── the head track to the ceiling and the two end channels ──
+# ── the two end channels ──
 bm_t = bmesh.new()
-slab(bm_t, -L / 2 - 6, L / 2 + 6, -DEP / 2 - 4, DEP / 2 + 4, Z0 + ROWS * MOD - 10, H, nu=60)
 for sg in (-1, 1):
     ue = sg * L / 2
-    slab(bm_t, min(ue, ue + sg * 14), max(ue, ue + sg * 14), -DEP / 2 - 4, DEP / 2 + 4, 0, H)
+    slab(bm_t, min(ue, ue + sg * 14), max(ue, ue + sg * 14), -DEP / 2 - 4, DEP / 2 + 4, ZBOT, ZTOP)
 bend(bm_t); obj("gb_track", bm_t, [M_TRACK])
 
-# ── the wood: one piece from floor to ceiling down the middle column, the board across it ──
-uc0 = -L / 2 + COL * MOD + (MOD - BLK) / 2; uc1 = uc0 + BLK
+# ── the wood: the two bands (curved with the wall), the two columns, the board between them ──
 ub0 = -L / 2 + BOARD_C[0] * MOD + (MOD - BLK) / 2; ub1 = -L / 2 + BOARD_C[1] * MOD - (MOD - BLK) / 2
 zb0 = Z0 + BOARD_R[0] * MOD; zb1 = Z0 + BOARD_R[1] * MOD - (MOD - BLK)
 bm_w = bmesh.new()
-slab(bm_w, uc0, uc1, -DEP / 2, DEP / 2, 0, zb0)                    # the support, floor to board
-slab(bm_w, ub0, ub1, -DEP / 2, DEP / 2, zb0, zb1)                  # the board
-slab(bm_w, uc0, uc1, -DEP / 2, DEP / 2, zb1, H)                    # the column, board to ceiling
+WB = DEP / 2 + LIP
+slab(bm_w, -L / 2 - 14, L / 2 + 14, -WB, WB, 0, ZBOT, nu=80)                    # the bottom band
+slab(bm_w, -L / 2 - 14, L / 2 + 14, -WB, WB, ZTOP, H, nu=80)                    # the top band, to the ceiling
+for c in WCOLS:
+    uc0 = -L / 2 + c * MOD + (MOD - BLK) / 2
+    slab(bm_w, uc0, uc0 + BLK, -DEP / 2, DEP / 2, ZBOT, ZTOP)                  # a column, band to band
+slab(bm_w, ub0, ub1, -DEP / 2, DEP / 2, zb0, zb1)                              # the board
 bend(bm_w); WOOD_O = obj("gb_wood", bm_w, [M_VEN]); bevel(WOOD_O, 0.0025, 2)
-print(f"board {ub1 - ub0:.0f} x {zb1 - zb0:.0f} mm, centre {(zb0 + zb1) / 2:.0f} mm up", flush=True)
+print(f"board {ub1 - ub0:.0f} x {zb1 - zb0:.0f} mm, centre {(zb0 + zb1) / 2:.0f} mm up; bands 0-{ZBOT:.0f} and {ZTOP:.0f}-{H}", flush=True)
+
+# ── the strips: an LED line under each lip of the top band, shining down the glass, and on each lip of the
+#    bottom band, shining up. One short area light per block along the curve, each side. ──
+M_PSTRIP = glow("partition_strip", (1.0, 0.70, 0.40), 3.0)
+STRIP_W = float(os.environ.get("PSTRIP", 70.0))                  # watts per metre (Blender's measure), each strip
+bm_e = bmesh.new()
+for sg in (-1, 1):
+    wl = sg * (DEP / 2 + 12)
+    slab(bm_e, -L / 2, L / 2, wl - 5, wl + 5, ZTOP - 3, ZTOP, nu=80)              # the lit line, top
+    slab(bm_e, -L / 2, L / 2, wl - 5, wl + 5, ZBOT, ZBOT + 3, nu=80)              # and bottom
+bend(bm_e); obj("gb_strip_line", bm_e, [M_PSTRIP])
+for sg in (-1, 1):
+    for i in range(COLS):
+        um = -L / 2 + i * MOD + MOD / 2; wl = sg * (DEP / 2 + 12)
+        x, s_ = place(um, wl); xa, sa = place(um - 1, wl); xb, sb = place(um + 1, wl)
+        ang = math.atan2(-(sb - sa), xb - xa)                       # the tangent, in Blender's x-y (y = −s)
+        for top in (True, False):
+            ld = bpy.data.lights.new(f"gb_strip{'t' if top else 'b'}{'p' if sg > 0 else 'n'}{i}", "AREA")
+            ld.shape = "RECTANGLE"; ld.size, ld.size_y = MOD / 1000, 0.012; ld.energy = STRIP_W * MOD / 1000
+            ld.spread = math.radians(100); warm(ld, 2700)
+            lo = bpy.data.objects.new(ld.name, ld); GB.objects.link(lo)
+            lo.location = Vector(P(x, s_, ZTOP - 4 if top else ZBOT + 4))
+            lo.rotation_euler = (0 if top else math.pi, 0, ang)
 
 # ── the TV: a 55" panel (1227 × 706 × 26 mm) on a slim mount, 35 mm proud of the board, on the bed side ──
 TVW, TVH, TVD, STAND = 1227.0, 706.0, 26.0, 35.0
@@ -168,6 +199,30 @@ slab(bm_sc, -TVW / 2 + 4, TVW / 2 - 4, wf + TVD, wf + TVD + 0.6, zc - TVH / 2 + 
 bend(bm_sc); obj("gb_screen", bm_sc, [M_SCREEN])
 bm_mt = bmesh.new(); slab(bm_mt, -200, 200, DEP / 2, wf, zc - 150, zc + 150); bend(bm_mt); obj("gb_mount", bm_mt, [M_IRON])
 
-# the old partition's ceiling light note: the spots at s 2139 now graze the glass from the desk side
 cy.transmission_bounces = max(cy.transmission_bounces, 12); cy.max_bounces = max(cy.max_bounces, 12)
 cy.volume_bounces = max(getattr(cy, "volume_bounces", 0), 2)
+
+# ── the drawers under the TV (owner, 1 Oct): low, four across and two high, in the 9292 burl with the Dark Diva
+#    polish and brass pulls, as the TV drawers were before. Standing on the floor in front of the bottom band, bed
+#    side, the width of the straight middle (9 blocks, 1350 mm) so its ends meet block joints. Height 450 and depth
+#    400 are mine (the owner said "not too high"); they leave ~840 mm to the foot of the bed.
+CW, CDP, CHT, PL = 9 * MOD, 400.0, 450.0, 70.0
+w0 = WB + 5; w1 = w0 + CDP
+bm_c = bmesh.new()
+slab(bm_c, -CW / 2, CW / 2, w0, w1 - 22, PL, CHT - 26)                            # the carcase
+slab(bm_c, -CW / 2 - 8, CW / 2 + 8, w0, w1 + 8, CHT - 26, CHT)                     # the top, oversailing 8 mm
+bend(bm_c); CON_B = obj("gb_console", bm_c, [M_BURL]); bevel(CON_B, 0.002, 2)
+bm_p = bmesh.new(); slab(bm_p, -CW / 2 + 40, CW / 2 - 40, w0, w1 - 60, 0, PL); bend(bm_p); obj("gb_console_plinth", bm_p, [M_DARK])
+fz = [PL + 4, PL + 4 + (CHT - 26 - PL - 8) / 2 + 2]; fh = (CHT - 26 - PL - 8) / 2 - 2
+fw = CW / 4
+for i in range(4):
+    for j in range(2):
+        u0 = -CW / 2 + i * fw + 2; u1 = u0 + fw - 4; z0 = fz[j]
+        bm_f = bmesh.new(); slab(bm_f, u0, u1, w1 - 22, w1, z0, z0 + fh)
+        bend(bm_f); fo = obj(f"gb_drawer{i}{j}", bm_f, [M_BURL]); bevel(fo, 0.0015, 2)
+        um, zm = (u0 + u1) / 2, z0 + fh / 2
+        bm_h = bmesh.new()
+        slab(bm_h, um - 70, um + 70, w1 + 14, w1 + 24, zm - 5, zm + 5)              # a slim brass bar,
+        for sx in (-55, 55): slab(bm_h, um + sx - 5, um + sx + 5, w1, w1 + 14, zm - 4, zm + 4)   # on two posts
+        bend(bm_h); ho = obj(f"gb_pull{i}{j}", bm_h, [M_BRASS]); bevel(ho, 0.0015, 2)
+print(f"drawers: 4 x 2, {CW:.0f} wide, {CHT:.0f} high, {CDP:.0f} deep", flush=True)

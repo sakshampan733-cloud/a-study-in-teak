@@ -778,6 +778,7 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
     "r_study": ((2337, 3700, 1500), (2337, 0, 1300), {"lens": 22, "fstop": 8.0}),
     # the glass-block partition (1 Oct): from the bed, from the desk, and from straight above to show the curve
     "r_pbed": ((3950, 4850, 1300), (2337, 2413, 1150), {"lens": 24, "fstop": 5.6}),
+    "r_ptv": ((2337, 4600, 1150), (2337, 2413, 1250), {"lens": 24, "fstop": 4.0}),
     "r_pdesk": ((1000, 650, 1450), (2337, 2413, 1250), {"lens": 24, "fstop": 5.6}),
     "p_plan": ((2337, 2900, 7000), (2337, 2900, 0), {"ortho": 5.2, "hide": ("ceiling",)}),
     "vanity": ((6250, 1150, 1400), (6600, 2718, 950)),
