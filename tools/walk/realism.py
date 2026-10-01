@@ -356,6 +356,10 @@ if LIGHTS != "all":
             o.data.materials[0] = m_on
     print("lights on:", sorted(on), sum(1 for o in sc.objects if o.type == "LIGHT" and not o.hide_render), flush=True)
 
+# ═══════════════════════════ 4d · THE PARTITION ══════════════════════════════
+if os.environ.get("PARTITION", "1") != "0":
+    exec(compile(open(os.path.join(HERE, "glassblock.py")).read(), "glassblock.py", "exec"))
+
 # ═══════════════════════════ 5 · THE LENS ════════════════════════════════════
 ng = sc.compositing_node_group
 if ng:

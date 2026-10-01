@@ -776,6 +776,10 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
     "r_bed": ((3700, 3250, 1350), (2200, 5500, 750), {"lens": 30, "fstop": 4.0}),
     "r_desk": ((3000, 2750, 1250), (2000, 1250, 820), {"lens": 40, "fstop": 2.8}),
     "r_study": ((2337, 3700, 1500), (2337, 0, 1300), {"lens": 22, "fstop": 8.0}),
+    # the glass-block partition (1 Oct): from the bed, from the desk, and from straight above to show the curve
+    "r_pbed": ((3950, 4850, 1300), (2337, 2413, 1150), {"lens": 24, "fstop": 5.6}),
+    "r_pdesk": ((1000, 650, 1450), (2337, 2413, 1250), {"lens": 24, "fstop": 5.6}),
+    "p_plan": ((2337, 2900, 7000), (2337, 2900, 0), {"ortho": 5.2, "hide": ("ceiling",)}),
     "vanity": ((6250, 1150, 1400), (6600, 2718, 950)),
     "door": ((2600, 3500), (-177, 5200, 1250)),
     "dress": ((4900, 4450), (8400, 4356, 1500)),
@@ -797,12 +801,19 @@ def shoot(name):
     if "fstop" in op:
         c_.data.dof.use_dof = True; c_.data.dof.aperture_fstop = op["fstop"]
         c_.data.dof.focus_distance = (Vector(P(*tp)) - c_.location).length
-    if name.startswith(("h_", "r_")):      # hero stills: camera held level and raised/lowered by lens shift, so walls stay upright
+    if "ortho" in op:                     # a plan, looking straight down with the ceiling lifted off
+        c_.data.type = "ORTHO"; c_.data.ortho_scale = op["ortho"]; c_.data.clip_end = 20
+        for n_ in op.get("hide", ()):
+            if sc.objects.get(n_): sc.objects[n_].hide_render = True
+        c_.rotation_euler = (0, 0, 0)
+    elif name.startswith(("h_", "r_")):      # hero stills: camera held level and raised/lowered by lens shift, so walls stay upright
         aim(c_, P(tp[0], tp[1], cz)); d_ = math.hypot(tp[0] - cp[0], tp[1] - cp[1])
         c_.data.shift_y = c_.data.lens * (tp[2] - cz) / d_ / c_.data.sensor_width
     else: aim(c_, P(*tp))
     sc.camera = c_; sc.render.filepath = os.path.join(OUTR, name + ".png"); sc.render.image_settings.file_format = "PNG"
     bpy.ops.render.render(write_still=True)
+    for n_ in op.get("hide", ()):
+        if sc.objects.get(n_): sc.objects[n_].hide_render = False
 
 TOUR = [  # name, camera (x, s[, z]), looking at (x, s, z), hold frames, what happens while it holds
     ("door", (-2500, 5200), (-177, 5230, 1200), 56, "d1"),
