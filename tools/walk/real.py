@@ -22,8 +22,8 @@ TEX = os.path.join(HERE, "tex")
 rng = random.Random(7)
 
 # ── what is not part of this tour ─────────────────────────────────────────────
-KILL = ("chair_",
-        "glass_bwin", "lbl_", "painting", "desk_top", "desk_frieze", "sconce", "dome", "cor_", "L_cor")
+KILL = ("chair_", "bed_back", "table0", "table1", "partition_", "drawers", "dr_gap", "dr_pull", "tv",
+        "glass_bwin", "lbl_", "painting", "desk_top", "desk_frieze", "sconce", "dome", "L_cor")
 for o in list(sc.objects):
     if o.name.startswith(KILL) or o.type == "LIGHT": bpy.data.objects.remove(o, do_unlink=True)
 for d in ("door_d1", "door_d2", "door_d3"): sc.objects[d].rotation_euler.z = 0
@@ -50,12 +50,20 @@ def noise_bump(nt, b, scale=80, strength=0.05, dist=0.001):
     bp = nt.nodes.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = strength; bp.inputs["Distance"].default_value = dist
     nt.links.new(n.outputs["Fac"], bp.inputs["Height"]); nt.links.new(bp.outputs["Normal"], b.inputs["Normal"])
 
+def rough_var(nt, b, amount=0.12, scale=5.0, detail=8.0):
+    """Roughness that wanders a little from place to place, as a polished or painted surface really does."""
+    n = nt.nodes.new("ShaderNodeTexNoise"); n.inputs["Scale"].default_value = scale; n.inputs["Detail"].default_value = detail
+    mr = nt.nodes.new("ShaderNodeMapRange"); base = b.inputs["Roughness"].default_value
+    mr.inputs["To Min"].default_value = max(0.0, base - amount); mr.inputs["To Max"].default_value = min(1.0, base + amount)
+    nt.links.new(n.outputs["Fac"], mr.inputs["Value"]); nt.links.new(mr.outputs["Result"], b.inputs["Roughness"])
+
 def veneer(name="teak_veneer", gloss=0.32, coat=0.35, val=0.78, sat=0.72, tex="veneer.jpg", scale=0.9):
     m, nt, b = node_mat(name)
     t = img(nt, tex, scale, blend=0.15)
     nt.links.new(tone(nt, t.outputs["Color"], 0.5, sat, val), b.inputs["Base Color"])
     b.inputs["Roughness"].default_value = gloss; b.inputs["Coat Weight"].default_value = coat
     b.inputs["Coat Roughness"].default_value = 0.12
+    rough_var(nt, b, 0.07, 9.0)
     return m
 M_VEN = veneer("dark_diva_crown", 0.32, 0.4, 1.12, 1.0, "dark_diva_crown.jpg", (0.9, 0.9, 1.1))   # Dark Diva Crown, from the owner's sample (OHBF-607), book-matched
 M_DESK = veneer("teak_desk", gloss=0.18, coat=1.0, val=0.82, sat=0.78)
@@ -65,6 +73,7 @@ def marble(name, fname, scale, rough, val=1.0, sat=1.0):
     t = img(nt, fname, scale, blend=0.1)
     nt.links.new(tone(nt, t.outputs["Color"], 0.5, sat, val), b.inputs["Base Color"])
     b.inputs["Roughness"].default_value = rough; b.inputs["Coat Weight"].default_value = 0.6; b.inputs["Coat Roughness"].default_value = 0.03
+    rough_var(nt, b, 0.05, 3.0)
     return m
 M_FLOOR = marble("taupe_marble", "taupe.jpg", 1.6, 0.12, 0.5, 1.05)          # the laid floor is a deep taupe-brown
 M_WHITE = marble("white_marble", "white.jpg", 0.7, 0.1)
@@ -75,6 +84,7 @@ def flat(name, col, rough=0.8, metal=0.0, bump=0.0, coat=0.0):
     b.inputs["Base Color"].default_value = (*col, 1); b.inputs["Roughness"].default_value = rough
     b.inputs["Metallic"].default_value = metal; b.inputs["Coat Weight"].default_value = coat
     if bump: noise_bump(nt, b, 120, bump, 0.0006)
+    if rough > 0.5 and not metal: rough_var(nt, b, 0.06, 2.5, 6.0)
     return m
 M_PAINT = flat("cream_paint", (0.72, 0.64, 0.52), 0.86, bump=0.04)
 M_CEIL = flat("ceiling_paint", (0.86, 0.83, 0.77), 0.9, bump=0.02)
@@ -117,7 +127,8 @@ def shade():
     m, nt, b = node_mat("lamp_shade")
     out = nt.nodes["Material Output"]; tr = nt.nodes.new("ShaderNodeBsdfTranslucent"); tr.inputs["Color"].default_value = (1.0, 0.86, 0.66, 1)
     mix = nt.nodes.new("ShaderNodeMixShader"); mix.inputs["Fac"].default_value = 0.6
-    b.inputs["Base Color"].default_value = (0.86, 0.80, 0.68, 1); b.inputs["Roughness"].default_value = 0.95
+    b.inputs["Base Color"].default_value = (0.80, 0.72, 0.58, 1); b.inputs["Roughness"].default_value = 0.95
+    b.inputs["Emission Color"].default_value = (1.0, 0.70, 0.36, 1); b.inputs["Emission Strength"].default_value = 0.55
     nt.links.new(b.outputs["BSDF"], mix.inputs[1]); nt.links.new(tr.outputs["BSDF"], mix.inputs[2]); nt.links.new(mix.outputs["Shader"], out.inputs["Surface"])
     return m
 M_SHADE = shade()
@@ -135,6 +146,7 @@ def glow(name, col, strength):
     b.inputs["Emission Strength"].default_value = strength
     return m
 M_STRIP = glow("cove_strip", (1.0, 0.55, 0.22), 2.2)
+M_BULB = glow("bulb", (1.0, 0.72, 0.40), 30.0)
 M_DISC = glow("spot_disc", (1.0, 0.80, 0.55), 12.0)
 def night():
     m, nt, b = node_mat("night_sky")
@@ -181,7 +193,10 @@ for o in list(sc.objects):
     elif n == "glass_win":
         mg, ntg, bg_ = node_mat("glass"); bg_.inputs["Transmission Weight"].default_value = 1.0; bg_.inputs["Roughness"].default_value = 0.0; bg_.inputs["IOR"].default_value = 1.45; setmat(o, mg)
     elif n in ("bed_base",): setmat(o, M_DARK)
-    elif n in ("bed_frame", "bed_back", "table0", "table1", "partition_bed", "partition_desk", "drawers"): setmat(o, M_BURL)
+    elif n == "cor_floor": setmat(o, M_FLOOR)
+    elif n.startswith("cor_wall"): setmat(o, M_PAINT)
+    elif n == "cor_ceil": setmat(o, M_CEIL)
+    elif n == "bed_frame": setmat(o, M_BURL)
     elif n.startswith("dr_pull"): setmat(o, M_BRASS)
     elif n.startswith("dr_gap") or n == "drawers_plinth": setmat(o, M_DARK)
     elif n == "tv":
@@ -262,6 +277,23 @@ run0, run1 = STUDY + 40, d2s0 - 102
 pw = (run1 - run0 - 6 * STILE) / 5
 panels = [(run0 + STILE + k * (pw + STILE), run0 + STILE + k * (pw + STILE) + pw) for k in range(5)]
 nar = (d2s1 + 102 + 75, Lb - 15 - 75)
+def pleated_shade(name, centre, h=0.15, r0=0.092, r1=0.060, npl=48):
+    """An empire shade, pleated: a cone whose wall waves, bound with a thin trim at top and bottom."""
+    bm = bmesh.new(); rows = 10; ring = []
+    for j in range(rows + 1):
+        t = j / rows; r = r0 + (r1 - r0) * t; z = -h / 2 + h * t
+        ring.append([bm.verts.new((math.cos(2 * math.pi * i / 96) * (r + 0.0028 * math.sin(2 * math.pi * i / 96 * npl)),
+                                    math.sin(2 * math.pi * i / 96) * (r + 0.0028 * math.sin(2 * math.pi * i / 96 * npl)), z)) for i in range(96)])
+    for a_, b_ in zip(ring, ring[1:]):
+        for i in range(96): bm.faces.new((a_[i], a_[(i + 1) % 96], b_[(i + 1) % 96], b_[i]))
+    me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
+    for p_ in me.polygons: p_.use_smooth = True
+    o = bpy.data.objects.new(name, me); sc.collection.objects.link(o); o.location = centre; setmat(o, M_SHADE)
+    so = o.modifiers.new("t", "SOLIDIFY"); so.thickness = 0.0016
+    for z_ in (-h / 2, h / 2):
+        bpy.ops.mesh.primitive_torus_add(major_radius=r0 if z_ < 0 else r1, minor_radius=0.0018, location=centre + Vector((0, 0, z_)))
+        setmat(bpy.context.active_object, M_SHADE)
+    return o
 def lamp(name, x, s, z, face, arms=2, span=150):
     """A twin-arm wall lamp: brass back plate, arms, and a fabric shade over a warm bulb on each."""
     ux = face                                                      # direction out of the wall, in x (±1) or s (±2)
@@ -280,9 +312,9 @@ def lamp(name, x, s, z, face, arms=2, span=150):
         c = Vector(P3(150, off, 150))
         bpy.ops.mesh.primitive_cylinder_add(vertices=12, radius=0.012, depth=0.09, location=c - Vector((0, 0, 0.05)))
         cup = bpy.context.active_object; setmat(cup, M_BRASS)
-        bpy.ops.mesh.primitive_cone_add(vertices=48, radius1=0.085, radius2=0.052, depth=0.13, end_fill_type="NOTHING", location=c + Vector((0, 0, 0.03)))
-        sh = bpy.context.active_object; sh.name = f"{name}_shade{k}"; setmat(sh, M_SHADE)
-        sol = sh.modifiers.new("t", "SOLIDIFY"); sol.thickness = 0.002
+        sh = pleated_shade(f"{name}_shade{k}", c + Vector((0, 0, 0.035)))
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=12, radius=0.016, location=c + Vector((0, 0, 0.012)))
+        bulb = bpy.context.active_object; setmat(bulb, M_BULB)
         ld = bpy.data.lights.new(f"{name}_bulb{k}", "POINT"); ld.shadow_soft_size = 0.02; ld.energy = 14
         warm(ld, 2600)
         lo = bpy.data.objects.new(f"{name}_bulb{k}", ld); sc.collection.objects.link(lo); lo.location = c + Vector((0, 0, 0.02))
@@ -329,22 +361,13 @@ exec(compile(open(os.path.join(HERE, "joinery.py")).read(), "joinery.py", "exec"
 # ── the bed wall: parchment plaster, seamless, over the whole 15 ft 6 in wall, skirting to ceiling ──
 pw_ = dbox("parchment_wall", xLb + 16, Lb - 21, SK, xR - 1, Lb - 15, H - 1, M_PARCH)
 
-# ── the bed back (the owner's curved one) in the burl: a brass inlay line and a brass cap along its curve,
-# a hidden warm strip on top washing up the parchment wall; the bedside tables get a brass edge ──
-band("bb_inlay", bp, BT + 4, 1000, 1012, CLAY); setmat(sc.objects["bb_inlay"], M_BRASS)
-band("bb_cap", bp, BT + 10, 1372, 1384, CLAY); setmat(sc.objects["bb_cap"], M_BRASS)
-ld = bpy.data.lights.new("bb_glow", "AREA"); ld.shape = "RECTANGLE"; ld.size, ld.size_y = 2.2, 0.03; ld.energy = 55; warm(ld, 2600)
-lo = bpy.data.objects.new("bb_glow", ld); sc.collection.objects.link(lo); lo.location = P(cx, Lb - 45, 1392); lo.rotation_euler = (math.radians(180 - 12), 0, 0)
-lo.visible_camera = False
-for i_, sg in enumerate((-1, 1)):
-    ccx, ccs = cx + sg * bs, Lb - bR
-    tr_ = bR - BT / 2 - 25                                           # the tables' radius (furnish.py)
-    q = [(ccx + sg * (tr_ + 6) * math.sin(math.pi / 2 * k / 24), ccs + (tr_ + 6) * math.cos(math.pi / 2 * k / 24)) for k in range(25)]
-    band(f"tb_edge{i_}", q, 8, 588, 602, CLAY); setmat(sc.objects[f"tb_edge{i_}"], M_BRASS)
-# the partition: a brass inlay on both faces at the same height as the bed back's
-band("pt_inlay_b", pside(1), pT + 4, 1000, 1012, CLAY); setmat(sc.objects["pt_inlay_b"], M_BRASS)
-band("pt_inlay_d", pside(-1), pT + 4, 1000, 1012, CLAY); setmat(sc.objects["pt_inlay_d"], M_BRASS)
-tvf = dbox("tv_frame", cx - 622, yP + pT / 2 - 2, 842, cx + 622, yP + pT / 2 + 40, 1553, M_DARK)
+# (the bed back and the partition are out: the owner is deciding what goes there)
+# the corridor outside the front door: lit, with the same marble and paint, so the tour can start there
+ld = bpy.data.lights.new("corl_main", "AREA"); ld.shape = "RECTANGLE"; ld.size, ld.size_y = 1.6, 0.9; ld.energy = 140; warm(ld, 2800)
+lo = bpy.data.objects.new("corl_main", ld); sc.collection.objects.link(lo); lo.location = P(xLb - T - 1400, 5250, H - 30)
+ld = bpy.data.lights.new("corl_fill", "AREA"); ld.shape = "RECTANGLE"; ld.size, ld.size_y = 1.0, 0.6; ld.energy = 40; warm(ld, 2800)
+lo = bpy.data.objects.new("corl_fill", ld); sc.collection.objects.link(lo); lo.location = P(xLb - T - 2400, 5250, H - 30)
+for o_ in [o for o in sc.objects if o.name in ("L_study", "L_bedz")]: pass
 
 # ── the bathroom, as far as it is known: its stone, and the vanity (scheme C, AST-DR-021) on the door wall,
 # between the door and the pier, facing into the room ─────────────────────────
@@ -407,22 +430,76 @@ acs = 2299
 ac = dbox("ac", xLs, acs - 584, 2240, xLs + 220, acs + 584, 2545, M_AC); bevel(ac, 0.02, 4)
 for k in range(10): dbox(f"ac_l{k}", xLs + 205, acs - 540 + k * 4, 2250, xLs + 222, acs + 540, 2256 + k * 4, M_AC)
 
-# ── the bookcase: books, some leaning, a stack or two ──────────────────────────
+# ── the bookcase: a real shelf — books of every height and thickness, some leaning or lying flat, a few objects ──
+def jacket():
+    m, nt, b = node_mat("book_jacket")
+    oi = nt.nodes.new("ShaderNodeObjectInfo"); ramp = nt.nodes.new("ShaderNodeValToRGB")
+    cols = [(0.28, 0.05, 0.04), (0.05, 0.12, 0.08), (0.05, 0.07, 0.15), (0.42, 0.28, 0.14), (0.60, 0.53, 0.40), (0.04, 0.035, 0.03),
+            (0.34, 0.16, 0.07), (0.70, 0.64, 0.50), (0.18, 0.04, 0.10), (0.10, 0.20, 0.22)]
+    ramp.color_ramp.interpolation = "CONSTANT"
+    for i, c in enumerate(cols):
+        if i >= len(ramp.color_ramp.elements): ramp.color_ramp.elements.new(i / len(cols))
+        ramp.color_ramp.elements[i].position = i / len(cols); ramp.color_ramp.elements[i].color = (*c, 1)
+    nt.links.new(oi.outputs["Random"], ramp.inputs["Fac"])
+    tc = nt.nodes.new("ShaderNodeTexCoord"); sep = nt.nodes.new("ShaderNodeSeparateXYZ"); nt.links.new(tc.outputs["Generated"], sep.inputs["Vector"])
+    band = nt.nodes.new("ShaderNodeValToRGB"); band.color_ramp.interpolation = "CONSTANT"        # gold bands near the head and tail
+    band.color_ramp.elements[0].color = (0, 0, 0, 1)
+    for pos, col in ((0.08, 1), (0.11, 0), (0.15, 1), (0.17, 0), (0.83, 1), (0.86, 0)):
+        e = band.color_ramp.elements.new(pos); e.color = (col, col, col, 1)
+    nt.links.new(sep.outputs["Z"], band.inputs["Fac"])
+    gate = nt.nodes.new("ShaderNodeMath"); gate.operation = "MULTIPLY"; nt.links.new(band.outputs["Color"], gate.inputs[0])
+    g2 = nt.nodes.new("ShaderNodeMath"); g2.operation = "GREATER_THAN"; g2.inputs[1].default_value = 0.5; nt.links.new(oi.outputs["Random"], g2.inputs[0])   # half the books carry bands
+    nt.links.new(g2.outputs["Value"], gate.inputs[1])
+    gold = nt.nodes.new("ShaderNodeMixRGB"); gold.inputs["Color2"].default_value = (0.55, 0.40, 0.14, 1)
+    nt.links.new(ramp.outputs["Color"], gold.inputs["Color1"]); nt.links.new(gate.outputs["Value"], gold.inputs["Fac"])
+    geo = nt.nodes.new("ShaderNodeNewGeometry"); sp2 = nt.nodes.new("ShaderNodeSeparateXYZ"); nt.links.new(geo.outputs["Normal"], sp2.inputs["Vector"])
+    top = nt.nodes.new("ShaderNodeMath"); top.operation = "GREATER_THAN"; top.inputs[1].default_value = 0.7; nt.links.new(sp2.outputs["Z"], top.inputs[0])
+    page = nt.nodes.new("ShaderNodeMixRGB"); page.inputs["Color2"].default_value = (0.78, 0.72, 0.58, 1)
+    nt.links.new(gold.outputs["Color"], page.inputs["Color1"]); nt.links.new(top.outputs["Value"], page.inputs["Fac"])
+    nt.links.new(page.outputs["Color"], b.inputs["Base Color"])
+    b.inputs["Roughness"].default_value = 0.55; rough_var(nt, b, 0.2, 40.0, 3.0)
+    return m
+M_JACKET = jacket()
+M_OBJ_CERAMIC = flat("shelf_ceramic", (0.82, 0.80, 0.74), 0.15, coat=0.5)
+def pivot_rot(o, pivot_mm, rx=0.0, ry=0.0, rz=0.0):
+    pv = Vector(P(*pivot_mm)); o.data.transform(__import__("mathutils").Matrix.Translation(-pv)); o.location = pv; o.rotation_euler = (rx, ry, rz)
+bookx = {}
 for z in (686, 890 + 25, 1160 + 25, 1430 + 25, 1700 + 25):
-    top = min([zz for zz in (890, 1160, 1430, 1700, 2039) if zz > z + 10])
-    x = 70 + rng.uniform(0, 40)
-    while x < book - 80:
-        if rng.random() < 0.08:                                     # a gap, or a small stack lying flat
-            if rng.random() < 0.5:
-                for q in range(rng.randint(2, 5)):
-                    hh = rng.uniform(22, 38); d_ = rng.uniform(150, 210); w_ = rng.uniform(150, 230)
-                    zz = z + q * 40; o = dbox(f"bk{x:.0f}{zz:.0f}", x, 20, zz, x + w_, 20 + d_, zz + hh, rng.choice(BOOKS)); bevel(o, 0.003, 2)
-                x += 240
-            else: x += rng.uniform(40, 120)
-            continue
-        w_ = rng.uniform(18, 48); h_ = min(rng.uniform(170, 265), top - z - 20); d_ = rng.uniform(140, 220)
-        o = dbox(f"bk{x:.0f}{z:.0f}", x, 20, z, x + w_, 20 + d_, z + h_, rng.choice(BOOKS)); bevel(o, 0.004, 2)
-        x += w_ + rng.uniform(0, 3)
+    top = min([zz for zz in (890, 1160, 1430, 1700, 2039) if zz > z + 10]); room_h = top - z - 15
+    x = 70 + rng.uniform(0, 30); nb = 0
+    while x < book - 90:
+        r_ = rng.random()
+        if r_ < 0.06:                                               # a small stack lying flat
+            n_ = rng.randint(2, 5); w_ = rng.uniform(170, 240); d_ = rng.uniform(150, 215); zz = z
+            for q in range(n_):
+                hh = rng.uniform(20, 42); xo = rng.uniform(-6, 6)
+                o = dbox(f"bks{x:.0f}{zz:.0f}", x + xo, 22 + rng.uniform(-4, 4), zz, x + xo + w_ - q * 4, 22 + d_, zz + hh, M_JACKET)
+                bevel(o, 0.002, 2); pivot_rot(o, (x + w_ / 2, 22 + d_ / 2, zz), 0, 0, rng.uniform(-0.05, 0.05)); zz += hh
+            if rng.random() < 0.6 and zz + 90 < top:                 # an object on top of the stack
+                bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=0.03, depth=0.07, location=P(x + w_ / 2, 22 + d_ / 2, zz + 38))
+                setmat(bpy.context.active_object, M_BRASS)
+            x += w_ + 10; continue
+        if r_ < 0.10 and room_h > 230:                              # an object: a vase, a frame, a brass bowl
+            kind = rng.choice(["vase", "frame", "bowl"]); ox = x + 60
+            if kind == "vase":
+                bpy.ops.mesh.primitive_uv_sphere_add(segments=32, ring_count=16, radius=0.055, location=P(ox, 110, z + 75))
+                v_ = bpy.context.active_object; v_.scale = (1, 1, 1.3); setmat(v_, M_OBJ_CERAMIC)
+                bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.022, depth=0.08, location=P(ox, 110, z + 175)); setmat(bpy.context.active_object, M_OBJ_CERAMIC)
+            elif kind == "frame":
+                o = dbox(f"fr{x:.0f}{z}", ox - 70, 150, z, ox + 70, 160, z + 180, M_BRASS); bevel(o, 0.003, 2)
+                pivot_rot(o, (ox, 155, z), -0.18, 0, 0)
+            else:
+                bpy.ops.mesh.primitive_cone_add(vertices=40, radius1=0.05, radius2=0.085, depth=0.06, location=P(ox, 120, z + 32)); setmat(bpy.context.active_object, M_BRASS)
+            x += 150; continue
+        if r_ < 0.14: x += rng.uniform(40, 130); continue          # a gap
+        w_ = rng.choice([rng.uniform(16, 26), rng.uniform(24, 40), rng.uniform(34, 56)])
+        h_ = min(rng.choice([rng.uniform(170, 215), rng.uniform(205, 250), rng.uniform(240, 275)]), room_h)
+        d_ = rng.uniform(150, 225); y0 = 22 + rng.uniform(0, 28)
+        o = dbox(f"bk{x:.0f}{z:.0f}", x, y0, z, x + w_, y0 + d_, z + h_, M_JACKET); bevel(o, 0.003, 2)
+        if rng.random() < 0.07 and nb:                                # a leaning book: rests against its neighbour
+            pivot_rot(o, (x + w_ / 2, y0 + d_ / 2, z), 0, rng.choice([-1, 1]) * rng.uniform(0.08, 0.2), 0); x += w_ + 22
+        else: x += w_ + rng.uniform(0, 2.5)
+        nb += 1
 # the bookcase strip light, under the head rail
 ld = bpy.data.lights.new("book_strip", "AREA"); ld.shape = "RECTANGLE"; ld.size, ld.size_y = (book - 120) / 1000, 0.03; ld.energy = 35; warm(ld, 2700)
 lo = bpy.data.objects.new("book_strip", ld); sc.collection.objects.link(lo); lo.location = P(book / 2, 120, 2025)
@@ -539,11 +616,37 @@ def curtain():
     so = o.modifiers.new("t", "SOLIDIFY"); so.thickness = 0.0012
     sd = o.modifiers.new("s", "SUBSURF"); sd.levels = 1; sd.render_levels = 1
     for p_ in me.polygons: p_.use_smooth = True
+    # cloth: pin the heading, let gravity and the fabric's own stiffness settle the folds (80 frames), keep the result
+    pin = o.vertex_groups.new(name="pin")
+    top_row = [v.index for v in me.vertices if v.co.z > (H - 70) / 1000]
+    pin.add(top_row, 1.0, "REPLACE")
+    cl = o.modifiers.new("cloth", "CLOTH"); cs = cl.settings
+    cs.quality = 12; cs.mass = 0.3; cs.tension_stiffness = 40; cs.compression_stiffness = 40; cs.shear_stiffness = 25
+    cs.bending_stiffness = 0.9; cs.air_damping = 2.5; cs.vertex_group_mass = "pin"
+    cl.collision_settings.use_self_collision = False
+    cl.point_cache.frame_start = 1; cl.point_cache.frame_end = 90
+    o.modifiers.move(len(o.modifiers) - 1, 0)
+    for fr in range(1, 91): sc.frame_set(fr)
+    dg = bpy.context.evaluated_depsgraph_get(); me2 = bpy.data.meshes.new_from_object(o.evaluated_get(dg))
+    o.modifiers.clear(); o.data = me2
+    for p_ in me2.polygons: p_.use_smooth = True
+    ss2 = o.modifiers.new("t", "SOLIDIFY"); ss2.thickness = 0.0012
+    sc.frame_set(1)
     tr = dbox("curtain_track2", xa - 40, 365, H - 40, xR - 12, 405, H - 20, M_BRONZE); bevel(tr, 0.004, 2)
     for o_ in [o for o in sc.objects if o.name.startswith("curtain_track") and o.name != "curtain_track2"]: bpy.data.objects.remove(o_, do_unlink=True)
     tb = sc.objects.get("tieback")
     if tb: tb.location = (0, 0, 0)
 curtain()
+
+# ── the corridor outside the front door, wider and longer than the stub furnish.py left ──
+for o_ in [o for o in sc.objects if o.name.startswith("cor_")]: bpy.data.objects.remove(o_, do_unlink=True)
+cxw = xLb - T
+dbox("cor_floor", cxw - 3600, 3300, -150, cxw, 7200, 0, M_FLOOR)
+dbox("cor_wallN", cxw - 3600, 3180, 0, cxw, 3300, H, M_PAINT); dbox("cor_wallS", cxw - 3600, 7200, 0, cxw, 7320, H, M_PAINT)
+dbox("cor_wallW", cxw - 3720, 3180, 0, cxw - 3600, 7320, H, M_PAINT); dbox("cor_ceil", cxw - 3720, 3180, H, cxw, 7320, H + 150, M_CEIL)
+dbox("cor_wallE_s", cxw, 5996, 0, cxw + 110, 7320, H, M_PAINT); dbox("cor_wallE_n", cxw, 3180, 0, xLs - T, 4600, H, M_PAINT)
+for sg_ in (3300 + 12, 7200 - 12):
+    skirt(f"cor_sk{sg_}", cxw - 3600, sg_ - 12 if sg_ < 5000 else sg_ - 0, cxw, sg_ + 12 if sg_ < 5000 else sg_ + 12)
 
 # ── world and render ───────────────────────────────────────────────────────────
 w = sc.world; bg = w.node_tree.nodes["Background"]; bg.inputs["Color"].default_value = (0.01, 0.012, 0.02, 1); bg.inputs["Strength"].default_value = 0.3
@@ -564,6 +667,23 @@ cy.max_bounces = 8; cy.diffuse_bounces = 4; cy.glossy_bounces = 4; cy.transmissi
 cy.sample_clamp_indirect = 6.0; cy.caustics_reflective = False; cy.caustics_refractive = False
 try: cy.use_light_tree = True
 except Exception: pass
+def compositing():
+    """A soft glow on the highlights (Blender 5: the compositor is a node group assigned to the scene)."""
+    try:
+        ng = bpy.data.node_groups.new("comp", "CompositorNodeTree")
+        ng.interface.new_socket("Image", in_out="OUTPUT", socket_type="NodeSocketColor")
+        rl = ng.nodes.new("CompositorNodeRLayers"); gl = ng.nodes.new("CompositorNodeGlare"); go = ng.nodes.new("NodeGroupOutput")
+        for k, v in (("Type", "Fog Glow"), ("Quality", "High")):
+            try: gl.inputs[k].default_value = v
+            except Exception as e: print("glare in", k, e, flush=True)
+        for k, v in (("Threshold", 0.9), ("Strength", 0.22), ("Size", 0.45)):
+            gl.inputs[k].default_value = v
+        print("glare inputs", [i.name for i in gl.inputs], flush=True)
+        ng.links.new(rl.outputs["Image"], gl.inputs["Image"]); ng.links.new(gl.outputs["Image"], go.inputs[0])
+        sc.compositing_node_group = ng
+        print("compositor glare on", flush=True)
+    except Exception as e: print("compositor?", e, flush=True)
+compositing()
 sc.view_settings.view_transform = "AgX"
 try: sc.view_settings.look = "AgX - Medium High Contrast"
 except Exception: pass
@@ -579,8 +699,9 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
     "study": ((3300, 2900), (1500, 0, 1250)),
     "desk": ((3900, 700, 1350), (2000, 2300, 700)),
     "right": ((700, 1800), (4547, 3300, 1300)),
-    "bed": ((3300, 3350), (2100, 5766, 900)),
-    "tvside": ((1100, 4250), (2337, 2450, 1100)),
+    "bed": ((2300, 3000), (2337, 5766, 900)),
+    "left": ((3750, 4900), (-50, 2700, 1450)),
+    "outside": ((-2500, 5200), (-177, 5230, 1200)),
     "vanity": ((6250, 1150, 1400), (6600, 2718, 950)),
     "door": ((2600, 3500), (-177, 5200, 1250)),
     "dress": ((4900, 4450), (8400, 4356, 1500)),
@@ -601,17 +722,19 @@ def shoot(name):
     bpy.ops.render.render(write_still=True)
 
 TOUR = [  # name, camera (x, s[, z]), looking at (x, s, z), hold frames, what happens while it holds
-    ("in", (300, 5200), (2337, 2600, 1150), 20, None),
-    ("tv", (1100, 4250), (2337, 2450, 1100), 26, None),
-    ("bed", (3300, 3350), (2100, 5766, 900), 30, None),
+    ("door", (-2500, 5200), (-177, 5230, 1200), 56, "d1"),
+    ("in", (150, 5150), (2600, 3000, 1150), 22, None),
+    ("bed", (2300, 3000), (2337, 5766, 900), 30, None),
+    ("left", (3750, 4900), (-50, 2700, 1450), 30, None),
+    ("left2", (3600, 3600), (-80, 4700, 1350), 24, None),
     ("right", (1500, 3550), (4547, 3200, 1400), 22, None),
     (None, (4150, 3150), (4150, 1000, 1300), 0, None),
     ("study", (4100, 1900), (1600, 0, 1300), 26, None),
     ("window", (3600, 1500), (3950, 0, 1450), 20, None),
     ("book", (1500, 1150), (600, 0, 1300), 20, None),
     ("desk", (3300, 780, 1300), (2337, 2000, 720), 26, None),
-    (None, (650, 1300), (650, 3000, 1300), 0, None),
-    (None, (700, 3350), (2500, 4300, 1300), 0, None),
+    (None, (1100, 1500), (1100, 3500, 1300), 0, None),
+    (None, (1000, 3350), (2800, 4300, 1300), 0, None),
     ("d2", (3450, 4650), (5400, 4650, 1400), 34, "d2"),
     ("dress", (5100, 4450), (8400, 4356, 1500), 26, None),
     ("vault", (5900, 4356, 1500), (7700, 4356, 3000), 26, None),
@@ -627,6 +750,7 @@ FPM = float(os.environ.get("FPM", 15))                                # frames p
 def animate_real():
     walk = cam("walk_r", LENS_R)
     tgt = bpy.data.objects.new("look_r", None); sc.collection.objects.link(tgt)
+    walk.data.dof.use_dof = True; walk.data.dof.focus_object = tgt; walk.data.dof.aperture_fstop = float(os.environ.get("FSTOP", 4.0))
     con = walk.constraints.new("TRACK_TO"); con.target = tgt; con.track_axis = "TRACK_NEGATIVE_Z"; con.up_axis = "UP_Y"
     f, prev, marks, acts = 1, None, {}, {}
     for name, cp, tp, hold, act in TOUR:
@@ -646,6 +770,9 @@ def animate_real():
     d = sc.objects["door_d2"]; a, b = acts["d2"]; rot = d["open"]
     d.rotation_euler.z = 0; d.keyframe_insert("rotation_euler", index=2, frame=1); d.keyframe_insert("rotation_euler", index=2, frame=a + 4)
     d.rotation_euler.z = rot; d.keyframe_insert("rotation_euler", index=2, frame=b - 2)
+    d = sc.objects["door_d1"]; a, b = acts["d1"]; rot = d["open"]
+    d.rotation_euler.z = 0; d.keyframe_insert("rotation_euler", index=2, frame=1); d.keyframe_insert("rotation_euler", index=2, frame=a + 8)
+    d.rotation_euler.z = rot; d.keyframe_insert("rotation_euler", index=2, frame=b - 4)
     d = sc.objects["door_d3"]; a, b = acts["d3"]; rot = d["open"]
     d.rotation_euler.z = 0; d.keyframe_insert("rotation_euler", index=2, frame=1); d.keyframe_insert("rotation_euler", index=2, frame=a + 4)
     d.rotation_euler.z = rot; d.keyframe_insert("rotation_euler", index=2, frame=b - 2)
