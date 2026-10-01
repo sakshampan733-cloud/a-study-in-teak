@@ -23,8 +23,13 @@ D2T, D2B = D1B - GAP, CLR                           # 614, 305
 FX0, FX1 = OVH, W - GAP                             # fronts: flush with the left side's face, 3 clear of the right wall
 YF = D - OVH                                        # front face of the drawer fronts (from the back wall): 513
 YC = YF - FR                                        # front of the carcase: 494
-SECZ0, SECZ1 = CLR + CB + GAP, CLR + CB + GAP + 70  # secret drawer, behind the big drawer's face: 326–396
-D2Z0, D2Z1 = 400.0, 600.0                           # big drawer box
+# The secret drawer is the owner's own (AST-DR-019, "the drawer within the big drawer"): it rides at the TOP of the big
+# drawer's opening on its own runners, its front 22 behind the big drawer's face; the big drawer's sides stop lower so
+# it rides clear above them. Open the big drawer and the inner one pulls out behind the big front, never through it.
+SECZ0, SECZ1 = D2T - 124, D2T - 29                  # the inner drawer's front: 490–585
+SECB0, SECB1 = SECZ0 + 10, SECZ1 - 10               # its box: 500–575
+SECY1 = YC - 22; SECY0 = SECY1 - 18                 # its front, 22 behind the big drawer's face (in depth from the wall)
+D2Z0, D2Z1 = CLR + CB + 12, SECZ0 - 30              # big drawer box: 335–460, its sides stopping clear below the inner one
 D1Z0, D1Z1 = 632.0, 742.0                           # top drawer box
 BOX0, BOX1 = 44.0, YC                               # drawer boxes run 450 (44–494)
 def inch(mm): return mm / 25.4
@@ -103,11 +108,11 @@ for p, q in zip(b_profile(), b_profile()[1:]): fe.line((R - p[0], ZS + p[1]), (R
 # the carcase and the drawer fronts
 fe.rect(FX0, D1B, FX1, D1T); fe.rect(FX0, D2B, FX1, D2T)
 fe.line((FX0, D2B), (FX0, ZS), "OUT")
-fe.rect(FX0 + 40, SECZ0, FX1 - 40, SECZ1, "HID"); fe.text(((FX0 + FX1) / 2, SECZ0 + 18), "SECRET DRAWER — hidden behind the big drawer's face", 2.0, "TXT", "middle")
+fe.rect(FX0 + 40, SECZ0, FX1 - 40, SECZ1, "HID"); fe.text(((FX0 + FX1) / 2, SECZ0 + 40), "SECRET DRAWER — inside the big drawer, at the top", 2.0, "TXT", "middle")
 fe.rect(FX0 + 30, D2Z0, FX1 - 30, D2Z1, "HID"); fe.rect(FX0 + 30, D1Z0, FX1 - 30, D1Z1, "HID")
 fe.line((W / 2, CLR - 60), (W / 2, TOP + 60), "CEN")
 fe.text(((FX0 + FX1) / 2, (D1B + D1T) / 2 - 4), "DRAWER 1", 2.6, "TXT", "middle")
-fe.text(((FX0 + FX1) / 2, (D2B + D2T) / 2 + 25), "DRAWER 2 (big)", 2.6, "TXT", "middle")
+fe.text(((FX0 + FX1) / 2, (D2Z0 + D2Z1) / 2), "DRAWER 2 (big)", 2.6, "TXT", "middle")
 fe.text((W / 2, CLR / 2), "305 (12\") CLEAR — FLOATING, WALL-HUNG", 2.4, "TXT", "middle")
 # dimensions
 fe.dim((0, TOP), (W, TOP), 14 * 5, "914 (3' 0\") OVERALL")
@@ -125,7 +130,7 @@ se.line((0, ZS + EDGE / 2), (D - R, ZS + EDGE / 2), "THIN"); se.line((0, ZS + ED
 for p, q in zip(b_profile(), b_profile()[1:]): se.line((D - R + p[0], ZS + p[1]), (D - R + q[0], ZS + q[1]))
 se.rect(0, CLR, YC, ZS)                                                               # the left side panel, veneered
 se.rect(YC, D1B, YF, D1T); se.rect(YC, D2B, YF, D2T)                                  # the fronts' edges
-se.rect(BOX0, D1Z0, BOX1, D1Z1, "HID"); se.rect(BOX0, D2Z0, BOX1, D2Z1, "HID"); se.rect(60, SECZ0, YC - 1, SECZ1, "HID")
+se.rect(BOX0, D1Z0, BOX1, D1Z1, "HID"); se.rect(BOX0, D2Z0, BOX1, D2Z1, "HID"); se.rect(110, SECB0, SECY1, SECB1, "HID")
 se.text((YC / 2, (CLR + ZS) / 2), "LEFT SIDE PANEL — VENEERED", 2.6, "TXT", "middle")
 se.dim((0, TOP), (D, TOP), 14 * 5, "533 (21\") — DEPTH TO CONFIRM")
 se.dim((0, CLR), (YC, CLR), -10 * 5, lab(YC) + " CARCASE")
@@ -163,20 +168,21 @@ sa.rect(YC, D1B, YF, D1T); sa.rect(YC, D2B, YF, D2T)
 for (z0, z1) in ((D1Z0, D1Z1), (D2Z0, D2Z1)):
     sa.rect(BOX0, z0, BOX1, z1, "OUT"); sa.rect(BOX0 + 15, z0 + 12, BOX1 - 15, z1, "THIN")
     sa.rect(BOX0 + 20, z0 - 12, BOX1 - 20, z0, "HID")                                  # undermount runners
-sa.rect(60, SECZ0, YC - 1, SECZ1, "OUT"); sa.rect(60 + 12, SECZ0 + 10, YC - 19, SECZ1, "THIN")
-sa.rect(YC - 19, SECZ0, YC - 1, SECZ1, "OUT")
+sa.rect(110, SECB0, SECY0, SECB1, "OUT"); sa.rect(110 + 12, SECB0 + 8, SECY0, SECB1, "THIN")        # the inner drawer's box
+sa.rect(SECY0, SECZ0, SECY1, SECZ1, "OUT")                                                         # its front, 22 behind D2's face
+sa.rect(130, SECB0 - 12, SECY0 - 20, SECB0, "HID")                                                 # its own runners
 TX = D + 170                                                                       # leader notes start here, right of the dims
 for i, (pt, t) in enumerate((((300, TOP - 8), "MARBLE TOP: 20 slab + 20 laminated edge, \"B\" profile (detail 1)"),
                              ((BK + 10, ZS - CB - 30), "steel hanging rail + 2 concealed brackets"),
                              ((D - 6, (D1B + D1T) / 2), "DRAWER 1 FRONT, veneered"),
                              ((300, (D1Z0 + D1Z1) / 2), "drawer box, 15 ply, 450 soft-close runners"),
+                             ((260, (SECB0 + SECB1) / 2), "SECRET DRAWER: rides at the top on its own runners"),
+                             (((SECY0 + SECY1) / 2, SECZ0 + 5), "its front, 22 behind D2's face (as on the owner's vanity)"),
                              ((300, (D2Z0 + D2Z1) / 2), "BIG DRAWER box (D2)"),
-                             ((D - 6, D2Z0 - 30), "D2 FRONT covers the secret drawer"),
-                             ((260, (SECZ0 + SECZ1) / 2), "SECRET DRAWER: push-to-open, behind D2's face"),
                              ((200, CLR + 9), "bottom panel: veneered underside (seen from below)"))):
     sa.leader(pt, (TX, 940 - i * 95), t)
 sa.dim((0, CLR - 120), (D, CLR - 120), 0.01, "533 (21\") TBC")
-for (z0, z1, t, o) in ((0, CLR, "305 (12\")", 14), (CLR, ZS, lab(ZS - CLR), 14), (ZS, TOP, "40", 14), (SECZ0, SECZ1, "70", 6)):
+for (z0, z1, t, o) in ((0, CLR, "305 (12\")", 14), (CLR, ZS, lab(ZS - CLR), 14), (ZS, TOP, "40", 14), (SECZ0, SECZ1, lab(SECZ1 - SECZ0), 6)):
     sa.dim((D + 10, z0), (D + 10, z1), -o * 5, t)
 
 dt = view("DT1", "DETAIL 1 — STONE EDGE \"B\"", 1, 2, (318, 30), (3200, 600))
@@ -310,8 +316,9 @@ def notes():
         ("DRAWERS AND HARDWARE", True),
         ("Drawer 1: 178 (7\") front — anywhere from 152–229 (6–9\") works; drawer 2 takes the rest. 3 mm reveals.", False),
         ("Drawers 1 and 2: full-extension soft-close undermount runners, 450 mm (Blum Movento or equal).", False),
-        ("Secret drawer: 70 mm box under the big drawer's box, behind the lower part of its face, on 400 mm push-to-open runners", False),
-        ("  (Blum Tip-On or equal). Invisible when closed; open the big drawer and press its front.  Pulls: not specified.", False),
+        ("Secret drawer: as on the owner's vanity — a drawer within the big drawer. A 75 mm box rides at the top of the big", False),
+        ("  drawer's opening on its own 400 mm runners, its front 22 mm behind the big drawer's face; the big drawer's sides stop", False),
+        ("  lower so it rides clear. Invisible when shut: open the big drawer, then pull the inner one out behind it.  Pulls: not specified.", False),
         ("FIXING", True),
         ("Wall-hung on a steel hanging rail and two concealed steel cantilever brackets inside the side panels, into the back wall;", False),
         ("  cleated to the right wall. Size for the stone (about 30 kg) plus contents — the fabricator / engineer to confirm.", False),
