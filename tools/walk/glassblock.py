@@ -68,7 +68,7 @@ def add_block(bm_all, uc, zc, k):
 def m_glass():
     m, nt, b = node_mat("mano_glass")
     b.inputs["Base Color"].default_value = (0.93, 0.95, 0.92, 1); b.inputs["Transmission Weight"].default_value = 1.0
-    b.inputs["Roughness"].default_value = 0.035; b.inputs["IOR"].default_value = 1.5
+    b.inputs["Roughness"].default_value = 0.05; b.inputs["IOR"].default_value = 1.5
     # the cast surface: a slow wave plus a fine ripple, different on every block
     at = nt.nodes.new("ShaderNodeAttribute"); at.attribute_type = "GEOMETRY"; at.attribute_name = "blk"
     tc = nt.nodes.new("ShaderNodeTexCoord"); add = nt.nodes.new("ShaderNodeVectorMath"); add.operation = "ADD"
@@ -78,7 +78,7 @@ def m_glass():
     nt.links.new(add.outputs["Vector"], n1.inputs["Vector"]); nt.links.new(add.outputs["Vector"], n2.inputs["Vector"])
     mx = nt.nodes.new("ShaderNodeMath"); mx.operation = "MULTIPLY_ADD"; mx.inputs[1].default_value = 0.25
     nt.links.new(n2.outputs["Fac"], mx.inputs[0]); nt.links.new(n1.outputs["Fac"], mx.inputs[2])
-    bp = nt.nodes.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = 0.22; bp.inputs["Distance"].default_value = 0.0015
+    bp = nt.nodes.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = 0.32; bp.inputs["Distance"].default_value = 0.0018
     nt.links.new(mx.outputs["Value"], bp.inputs["Height"])
     # each face is dished ~2.5 mm inside a ~15 mm rim, height = −(1 − r²)^1.5 on a rounded-square r
     uv = nt.nodes.new("ShaderNodeUVMap"); sp = nt.nodes.new("ShaderNodeSeparateXYZ"); nt.links.new(uv.outputs["UV"], sp.inputs["Vector"])
@@ -93,19 +93,20 @@ def m_glass():
     r = op("DIVIDE", op("MULTIPLY", op("POWER", op("ADD", op("POWER", ru, v=6.0), op("POWER", rv_, v=6.0)), v=1 / 6), v=2.0), v=0.80)
     one = nt.nodes.new("ShaderNodeValue"); one.outputs[0].default_value = 1.0
     dish = op("POWER", op("MAXIMUM", op("SUBTRACT", one.outputs[0], op("MULTIPLY", r, r)), v=0.0), v=1.5)
-    bp2 = nt.nodes.new("ShaderNodeBump"); bp2.invert = True; bp2.inputs["Strength"].default_value = 0.6; bp2.inputs["Distance"].default_value = 0.0025
+    bp2 = nt.nodes.new("ShaderNodeBump"); bp2.invert = True; bp2.inputs["Strength"].default_value = 0.35; bp2.inputs["Distance"].default_value = 0.0025
     nt.links.new(dish, bp2.inputs["Height"]); nt.links.new(bp2.outputs["Normal"], bp.inputs["Normal"])
     nt.links.new(bp.outputs["Normal"], b.inputs["Normal"])
     # thick recycled glass: a faint green-grey that deepens with thickness
-    va = nt.nodes.new("ShaderNodeVolumeAbsorption"); va.inputs["Color"].default_value = (0.82, 0.88, 0.80, 1); va.inputs["Density"].default_value = 3.0
+    va = nt.nodes.new("ShaderNodeVolumeAbsorption"); va.inputs["Color"].default_value = (0.82, 0.88, 0.80, 1); va.inputs["Density"].default_value = 2.0
     nt.links.new(va.outputs["Volume"], nt.nodes["Material Output"].inputs["Volume"])
     return m
 M_GLASSB = m_glass()
 M_MORTAR = flat("mortar_dark", (0.055, 0.047, 0.040), 0.85, bump=0.12)
 M_TRACK = flat("track_bronze", (0.12, 0.085, 0.06), 0.4, 0.7)
 def m_screen():
-    m, nt, b = node_mat("tv_screen"); b.inputs["Base Color"].default_value = (0.006, 0.006, 0.007, 1)
-    b.inputs["Roughness"].default_value = 0.08; b.inputs["Coat Weight"].default_value = 1.0; b.inputs["Coat Roughness"].default_value = 0.02
+    m, nt, b = node_mat("tv_screen"); b.inputs["Base Color"].default_value = (0.004, 0.004, 0.005, 1)   # an anti-glare panel:
+    b.inputs["Roughness"].default_value = 0.22; b.inputs["Specular IOR Level"].default_value = 0.3        # dim, soft reflections,
+    b.inputs["Coat Weight"].default_value = 0.35; b.inputs["Coat Roughness"].default_value = 0.08         # not a mirror
     return m
 M_SCREEN = m_screen(); M_TVBODY = flat("tv_body", (0.025, 0.025, 0.027), 0.45, 0.3)
 
