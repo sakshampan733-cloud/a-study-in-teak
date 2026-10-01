@@ -22,6 +22,23 @@ def bb(o):
 STY = bpy.data.collections.new("styling"); sc.collection.children.link(STY)
 SOFT = bpy.data.collections.new("bedding"); sc.collection.children.link(SOFT)
 
+# ═══════════════════════════ 0 · THE DESK UP TO THE PARTITION (owner, 1 Oct) ═══════════════════════════════
+# The desk backs onto the glass partition with no more than 2 in (50 mm) between them, room for a monitor arm's clamp.
+# The partition's desk-side face is at s = 2413 − 47.5 (glassblock.py); every piece of the desk moves toward it.
+DESK_GAP = 50.0
+def _in_desk(o):
+    if o.type != "MESH": return False
+    if o.name.startswith("dk_"): return True
+    if o.data.materials and o.data.materials[0] and o.data.materials[0].name.startswith("teak_desk"):
+        x0_, s0_, z0_, x1_, s1_, z1_ = bb(o); return 1100 < x0_ and x1_ < 3600 and 1150 < s0_ and s1_ < 2300 and z1_ < 800
+    return False
+_dk = [o for o in sc.objects if _in_desk(o)]
+if _dk:
+    _ds = (2413.0 - 95.0 / 2 - DESK_GAP) - max(bb(o)[4] for o in _dk)
+    for o in _dk: o.location.y -= _ds / 1000
+    bpy.context.view_layer.update()                                       # so everything placed on the desk below sees it moved
+    print(f"desk moved {_ds:.0f} mm toward the partition ({len(_dk)} pieces)", flush=True)
+
 # ═══════════════════════════ 1 · THE BED, MADE ═══════════════════════════════
 for n_ in ("duvet", "duvet_fold", "throw", "pillow_b0", "pillow_b1", "pillow_f0", "pillow_f1"):
     o_ = sc.objects.get(n_)
@@ -303,6 +320,93 @@ if STYLE and sc.objects.get("dk_top"):
         va.location = loc_ if hit else Vector(P(gx0 + 170, 200, gz0))         # stood on whatever surface is under the window's left end
         print("vase on", hit, tuple(round(c, 3) for c in loc_), flush=True)
         sd = va.modifiers.new("s", "SUBSURF"); sd.levels = 1; sd.render_levels = 2
+
+# ═══════════════════════════ 2b · THE MONITOR (owner, 1 Oct: "a nice Samsung OLED monitor") ════════════
+# A 32 in 16:9 flat OLED (the Odyssey OLED G8 class: about 714 × 414 mm, a few mm thin at the edge), on a single arm
+# clamped to the desk's back edge in the 2 in gap, facing the chair. Centred on the desk, its middle 1.12 m up.
+if sc.objects.get("dk_top"):
+    tx0, ts0, tz0, tx1, ts1, TZ = bb(sc.objects["dk_top"]); mcx = (tx0 + tx1) / 2
+    M_PANEL = flat("monitor_body", (0.018, 0.018, 0.02), 0.35, 0.6); M_SCR = None
+    ms_, nt_, bs_ = node_mat("monitor_screen"); bs_.inputs["Base Color"].default_value = (0.004, 0.004, 0.005, 1)
+    bs_.inputs["Roughness"].default_value = 0.3; bs_.inputs["Specular IOR Level"].default_value = 0.25
+    MW, MH, MZ, MS = 714.0, 414.0, TZ + 370, ts1 - 230                      # width, height, centre height, screen plane (s)
+    def mbox(name, x0, s0, z0, x1, s1, z1, m, bv=0.0015):
+        bpy.ops.mesh.primitive_cube_add(size=1, location=P((x0 + x1) / 2, (s0 + s1) / 2, (z0 + z1) / 2))
+        o = bpy.context.active_object; o.scale = ((x1 - x0) / 1000, (s1 - s0) / 1000, (z1 - z0) / 1000)
+        return solid(name, STY, m, bv, 2)
+    mbox("monitor_panel", mcx - MW / 2, MS, MZ - MH / 2, mcx + MW / 2, MS + 7, MZ + MH / 2, M_PANEL, 0.002)
+    mbox("monitor_glass", mcx - MW / 2 + 3, MS - 0.6, MZ - MH / 2 + 3, mcx + MW / 2 - 3, MS, MZ + MH / 2 - 3, ms_, 0)
+    mbox("monitor_back", mcx - 160, MS + 7, MZ - 110, mcx + 160, MS + 32, MZ + 90, M_PANEL, 0.006)
+    pole_s = ts1 + DESK_GAP / 2                                              # the clamp sits in the gap behind the desk
+    bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=0.016, depth=0.46, location=P(mcx, pole_s, TZ + 230)); solid("monitor_pole", STY, M_IRON, 0)
+    mbox("monitor_clamp", mcx - 30, pole_s - 22, TZ - 70, mcx + 30, pole_s + 22, TZ + 18, M_IRON, 0.003)
+    mbox("monitor_arm", mcx - 18, MS + 32, MZ - 20, mcx + 18, pole_s, MZ + 4, M_IRON, 0.004)
+    print("monitor on the desk", flush=True)
+
+# ═══════════════════════════ 2c · THE PAINTING (owner, 1 Oct: "a really big painting, landscape") ═════════════
+# 8 ft × 5 ft (2400 × 1500) on the left wall, centred under the air-conditioner, its top 100 mm below it. The owner
+# hasn't chosen the picture: a stand-in, a tonal dusk landscape in oils, in a slim antique gilt frame.
+def oil_landscape():
+    m, nt, b = node_mat("painting_landscape"); b.inputs["Roughness"].default_value = 0.45; b.inputs["Coat Weight"].default_value = 0.35
+    tc = nt.nodes.new("ShaderNodeTexCoord"); sp = nt.nodes.new("ShaderNodeSeparateXYZ"); nt.links.new(tc.outputs["Generated"], sp.inputs["Vector"])
+    # the horizon wanders: a low line of hills against a warm, fading sky; darker earth below
+    hz = nt.nodes.new("ShaderNodeTexNoise"); hz.inputs["Scale"].default_value = 3.0; hz.inputs["Detail"].default_value = 4
+    nt.links.new(tc.outputs["Generated"], hz.inputs["Vector"])
+    hl = nt.nodes.new("ShaderNodeMath"); hl.operation = "MULTIPLY_ADD"; hl.inputs[1].default_value = 0.16; hl.inputs[2].default_value = 0.30
+    nt.links.new(hz.outputs["Fac"], hl.inputs[0])
+    d_ = nt.nodes.new("ShaderNodeMath"); d_.operation = "SUBTRACT"; nt.links.new(sp.outputs["Z"], d_.inputs[0]); nt.links.new(hl.outputs["Value"], d_.inputs[1])
+    ramp = nt.nodes.new("ShaderNodeValToRGB"); cr = ramp.color_ramp
+    stops = [(0.0, (0.035, 0.032, 0.022)), (0.26, (0.075, 0.065, 0.040)), (0.30, (0.14, 0.11, 0.065)), (0.33, (0.40, 0.28, 0.13)),
+             (0.42, (0.62, 0.45, 0.22)), (0.62, (0.36, 0.33, 0.27)), (1.0, (0.12, 0.13, 0.14))]
+    cr.elements[0].position, cr.elements[0].color = stops[0][0], (*stops[0][1], 1)
+    cr.elements[1].position, cr.elements[1].color = stops[-1][0], (*stops[-1][1], 1)
+    for pos, col in stops[1:-1]:
+        e = cr.elements.new(pos); e.color = (*col, 1)
+    mr = nt.nodes.new("ShaderNodeMapRange"); mr.inputs["From Min"].default_value = -0.35; mr.inputs["From Max"].default_value = 0.70
+    nt.links.new(d_.outputs["Value"], mr.inputs["Value"]); nt.links.new(mr.outputs["Result"], ramp.inputs["Fac"])
+    # the paint: dabs and strokes, horizontal in the sky, broken in the ground
+    br = nt.nodes.new("ShaderNodeTexWave"); br.bands_direction = "Z"; br.inputs["Scale"].default_value = 9; br.inputs["Distortion"].default_value = 14
+    br.inputs["Detail"].default_value = 6; br.inputs["Detail Roughness"].default_value = 0.7
+    nt.links.new(tc.outputs["Generated"], br.inputs["Vector"])
+    # clouds: soft, stretched sideways, brighter toward the horizon glow; the brushwork only as texture
+    cl = nt.nodes.new("ShaderNodeTexNoise"); cl.inputs["Scale"].default_value = 2.2; cl.inputs["Detail"].default_value = 7; cl.inputs["Roughness"].default_value = 0.62
+    cm = nt.nodes.new("ShaderNodeMapping"); cm.inputs["Scale"].default_value = (1.0, 0.55, 2.4)
+    nt.links.new(tc.outputs["Generated"], cm.inputs["Vector"]); nt.links.new(cm.outputs["Vector"], cl.inputs["Vector"])
+    cv = nt.nodes.new("ShaderNodeMapRange"); cv.inputs["From Min"].default_value = 0.35; cv.inputs["From Max"].default_value = 0.7
+    cv.inputs["To Min"].default_value = 0.72; cv.inputs["To Max"].default_value = 1.3; nt.links.new(cl.outputs["Fac"], cv.inputs["Value"])
+    sky = nt.nodes.new("ShaderNodeMath"); sky.operation = "GREATER_THAN"; sky.inputs[1].default_value = 0.0; nt.links.new(d_.outputs["Value"], sky.inputs[0])
+    k_ = nt.nodes.new("ShaderNodeMix"); k_.data_type = "FLOAT"; k_.inputs["A"].default_value = 1.0
+    nt.links.new(sky.outputs["Value"], k_.inputs["Factor"]); nt.links.new(cv.outputs["Result"], k_.inputs["B"])
+    lit = nt.nodes.new("ShaderNodeMixRGB"); lit.blend_type = "MULTIPLY"; lit.inputs["Fac"].default_value = 1.0
+    nt.links.new(ramp.outputs["Color"], lit.inputs["Color1"]); nt.links.new(k_.outputs["Result"], lit.inputs["Color2"])
+    dab = nt.nodes.new("ShaderNodeTexNoise"); dab.inputs["Scale"].default_value = 38; dab.inputs["Detail"].default_value = 3
+    nt.links.new(tc.outputs["Generated"], dab.inputs["Vector"])
+    mix = nt.nodes.new("ShaderNodeMixRGB"); mix.blend_type = "OVERLAY"; mix.inputs["Fac"].default_value = 0.12
+    nt.links.new(lit.outputs["Color"], mix.inputs["Color1"]); nt.links.new(dab.outputs["Color"], mix.inputs["Color2"])
+    nt.links.new(mix.outputs["Color"], b.inputs["Base Color"])
+    imp = nt.nodes.new("ShaderNodeTexNoise"); imp.inputs["Scale"].default_value = 140; imp.inputs["Detail"].default_value = 8
+    nt.links.new(tc.outputs["Generated"], imp.inputs["Vector"])
+    bp = nt.nodes.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = 0.25; bp.inputs["Distance"].default_value = 0.0012
+    hb = nt.nodes.new("ShaderNodeMath"); hb.operation = "MULTIPLY_ADD"; hb.inputs[1].default_value = 0.3
+    nt.links.new(br.outputs["Fac"], hb.inputs[0]); nt.links.new(imp.outputs["Fac"], hb.inputs[2])
+    nt.links.new(hb.outputs["Value"], bp.inputs["Height"]); nt.links.new(bp.outputs["Normal"], b.inputs["Normal"])
+    return m
+ac_ = sc.objects.get("ac")
+if ac_:
+    ax0, as0, az0, ax1, as1, az1 = bb(ac_)
+    PW_, PH_ = 2400.0, 1500.0; pc_s = (as0 + as1) / 2; ptop = az0 - 100; pz0 = ptop - PH_
+    wall_x = BED["xLs"]                                                          # the left wall's face here
+    M_GILT = flat("antique_gilt", (0.55, 0.40, 0.17), 0.38, 1.0); rough_var(M_GILT.node_tree, M_GILT.node_tree.nodes["Principled BSDF"], 0.12, 25.0)
+    def pbox(name, x0, s0, z0, x1, s1, z1, m, bv=0.002):
+        bpy.ops.mesh.primitive_cube_add(size=1, location=P((x0 + x1) / 2, (s0 + s1) / 2, (z0 + z1) / 2))
+        o = bpy.context.active_object; o.scale = ((x1 - x0) / 1000, (s1 - s0) / 1000, (z1 - z0) / 1000)
+        return solid(name, STY, m, bv, 3)
+    FW, FD = 80.0, 55.0                                                          # frame: 80 wide, 55 deep off the wall
+    pbox("painting_canvas", wall_x + 12, pc_s - PW_ / 2, pz0, wall_x + 40, pc_s + PW_ / 2, ptop, oil_landscape(), 0.001)
+    for nm, (s0_, s1_, z0_, z1_) in {"t": (pc_s - PW_ / 2 - FW, pc_s + PW_ / 2 + FW, ptop, ptop + FW), "b": (pc_s - PW_ / 2 - FW, pc_s + PW_ / 2 + FW, pz0 - FW, pz0),
+                                     "l": (pc_s - PW_ / 2 - FW, pc_s - PW_ / 2, pz0, ptop), "r": (pc_s + PW_ / 2, pc_s + PW_ / 2 + FW, pz0, ptop)}.items():
+        pbox(f"painting_frame_{nm}", wall_x + 5, s0_, z0_, wall_x + FD, s1_, z1_, M_GILT, 0.012)
+    print(f"painting {PW_:.0f} x {PH_:.0f} on the left wall, centre s {pc_s:.0f}, {pz0:.0f}-{ptop:.0f} up", flush=True)
 
 # ═══════════════════════════ 3 · MATERIALS WITH DEPTH ════════════════════════
 def depth(m, bump=0.06, bevel_r=0.0015, coat_flat=True):
