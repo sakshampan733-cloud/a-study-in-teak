@@ -22,11 +22,12 @@ for i, n in enumerate(names):
 # dissolves: one cross effect wherever two shots overlap
 strips = sorted([s for s in ed.strips if s.type == "IMAGE"], key=lambda s: s.frame_start)
 for k, (s1, s2) in enumerate(zip(strips, strips[1:])):
-    ed.strips.new_effect(f"dissolve{k}", "CROSS", 3, int(s2.frame_start), input1=s1, input2=s2, frame_end=int(s1.frame_final_end))
+    ln = int(s1.frame_final_end - s2.frame_start)
+    if ln > 0: ed.strips.new_effect(f"dissolve{k}", "CROSS", 3 + k % 2, int(s2.frame_start), length=ln, input1=s1, input2=s2)
 end = strips[-1].frame_final_end - 1
 sc.frame_start, sc.frame_end = 1, end
 # fade up from and down to black, by keying the master brightness of the whole edit through a colour strip on top
-blk = ed.strips.new_effect("black", "COLOR", 5, 1, frame_end=end + 1); blk.color = (0, 0, 0); blk.blend_type = "ALPHA_OVER"
+blk = ed.strips.new_effect("black", "COLOR", 6, 1, length=end); blk.color = (0, 0, 0); blk.blend_type = "ALPHA_OVER"
 for fr, v in ((1, 1.0), (18, 0.0), (end - 24, 0.0), (end, 1.0)):
     blk.blend_alpha = v; blk.keyframe_insert("blend_alpha", frame=fr)
 im = sc.render.image_settings; im.media_type = "VIDEO"; im.file_format = "FFMPEG"
