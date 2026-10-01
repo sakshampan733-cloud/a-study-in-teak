@@ -709,6 +709,7 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
     "h_desk": ((1500, 380, 1250), (2400, 1700, 650)),
     "h_dress": ((4950, 4400, 1500), (8536, 4356, 1450)),
     "h_vanity": ((6150, 1050, 1450), (6600, 2718, 1000)),
+    "h_wardrobe": ((4950, 3720, 1450), (6600, 5080, 1300)),     # the south wardrobes, from the aisle by the dressing door
     "vanity": ((6250, 1150, 1400), (6600, 2718, 950)),
     "door": ((2600, 3500), (-177, 5200, 1250)),
     "dress": ((4900, 4450), (8400, 4356, 1500)),
@@ -724,7 +725,12 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
 }
 def shoot(name):
     cp, tp = VIEWS[name]
-    c_ = cam("r_" + name, LENS_R); c_.location = P(cp[0], cp[1], cp[2] if len(cp) > 2 else EYE_R); aim(c_, P(*tp))
+    cz = cp[2] if len(cp) > 2 else EYE_R
+    c_ = cam("r_" + name, LENS_R); c_.location = P(cp[0], cp[1], cz)
+    if name.startswith("h_"):      # hero stills: camera held level and raised/lowered by lens shift, so walls stay upright
+        aim(c_, P(tp[0], tp[1], cz)); d_ = math.hypot(tp[0] - cp[0], tp[1] - cp[1])
+        c_.data.shift_y = c_.data.lens * (tp[2] - cz) / d_ / c_.data.sensor_width
+    else: aim(c_, P(*tp))
     sc.camera = c_; sc.render.filepath = os.path.join(OUTR, name + ".png"); sc.render.image_settings.file_format = "PNG"
     bpy.ops.render.render(write_still=True)
 
