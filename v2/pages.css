@@ -207,6 +207,7 @@ body.scrolled .phero-meta { opacity: 0; }
 
 .sheets { max-width: 1100px; margin: 72px auto 0; padding: 0 24px; display: flex; flex-direction: column; gap: 40px; }
 .sheet-card { background: var(--charcoal); border-radius: 10px; padding: 32px; }
+.cad-links.set-links { width: min(1052px, calc(100% - 48px)); margin: 72px auto -40px; padding: 18px 56px; box-sizing: border-box; background: var(--charcoal); border-radius: 10px; }
 .sheet-top { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
 .sheet-top .mono { font-size: 11px; color: var(--dim); }
 .dwg { margin: 0; cursor: zoom-in; border-radius: 6px; overflow: hidden; }

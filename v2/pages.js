@@ -245,11 +245,14 @@ function pointers(id) {
 function sheets(list) {
   const ds = [].concat(list || []).filter((d) => window.DRAWINGS?.[d]);
   if (!ds.length) return "";
-  return `<div class="sheets">${ds.map((d) => {
+  const fam = (k) => ({ "vanity-drawer": "vanity-c" })[k] || k.replace(/-(details|3d)$/, ""), fams = {};   // same sets as tools/node/drawings-pdf.js
+  ds.forEach((k) => { (fams[fam(k)] = fams[fam(k)] || []).push(k); });
+  const sets = Object.entries(fams).filter(([, v]) => v.length > 1).map(([f, v]) => `<span class="mono">${esc(window.DRAWINGS[v[0]].title.split(" · ")[0].replace(/ — General arrangement$/, ""))} · all ${v.length} sheets</span><a class="btn steel" href="../cad/${f}-set.pdf" download>A3 PDF</a><a class="btn steel" href="../cad/${f}-set-a4.pdf" download>A4 PDF</a>`).join("");
+  return `${sets ? `<div class="cad-links set-links"><span class="mono">Print · flip-through</span>${sets}</div>` : ""}<div class="sheets">${ds.map((d) => {
     const D = window.DRAWINGS[d], [name, code] = D.title.split(" · ");
     return `<div class="sheet-card reveal"><div class="sheet-top"><h3 class="h-sm">${esc(name)}</h3><div class="sheet-tools"><span class="mono">${esc(code || "")}</span>${dimToggle()}${paperToggle()}</div></div>
       <figure class="dwg" data-open="dwg:${d}">${D.svg}</figure>
-      <div class="cad-links"><span class="mono">Editable CAD</span>${D.model === false ? "" : `<a class="btn" href="../cad/${d}-model.dxf" download>DXF · true size</a>`}<a class="btn" href="../cad/${d}-sheet.dxf" download>DXF · A3 sheet</a><a class="btn" href="../cad/${d}.svg" download>SVG</a><button class="btn steel" data-open="dwg:${d}">Full size</button></div></div>`;
+      <div class="cad-links"><span class="mono">Editable CAD</span>${D.model === false ? "" : `<a class="btn" href="../cad/${d}-model.dxf" download>DXF · true size</a>`}<a class="btn" href="../cad/${d}-sheet.dxf" download>DXF · A3 sheet</a><a class="btn" href="../cad/${d}.svg" download>SVG</a><span class="mono">Print</span><a class="btn" href="../cad/${d}.pdf" download>A3 PDF</a><a class="btn" href="../cad/${d}-a4.pdf" download>A4 PDF</a><button class="btn steel" data-open="dwg:${d}">Full size</button></div></div>`;
   }).join("")}</div>`;
 }
 
