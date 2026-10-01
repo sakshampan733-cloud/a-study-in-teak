@@ -21,8 +21,23 @@ window.MODEL3D = (function () {
   // The floor carries the setting-out, so the room can be read at a glance instead of guessed at.
   // Drawn in room coordinates: x across, y along from the study wall — which is exactly how the
   // floor plane is laid out, so no transform is needed.
+  // What stands in the room, as decided on 1 Oct — the same numbers as the plan (drawings/suite2d.js): the glass-block
+  // partition on the old centre line, turning towards the bed only; the desk (square corners) 2 in off it; the bed
+  // with its rug; no curved bed back (its design is still open).
+  function layout(L) {
+    const cx = 2337, yP = L - 3353, pT = 95, RUN = 2400, straight = 600, pR = 1300;
+    const pAt = (u, w) => {
+      if (Math.abs(u) <= straight) return [cx + u, yP + w];
+      const sg = Math.sign(u), th = (Math.abs(u) - straight) / pR;
+      return [cx + sg * (straight + pR * Math.sin(th)) - sg * w * Math.sin(th), yP + pR * (1 - Math.cos(th)) + w * Math.cos(th)];
+    };
+    const drF = pT / 2 + 5 + 400, bed = { w: 1829, l: 1981 }, bedFoot = L - 60 - bed.l;
+    const desk = { L: 2286, D: 914, H: 750 }; desk.back = yP - pT / 2 - 50; desk.front = desk.back - desk.D;
+    return { cx, yP, pT, RUN, pAt, drF, bed, bedFoot, desk };
+  }
+
   function floorDims(S, Wd, L) {
-    const B = BEDPLAN, G = window.PGEOM;
+    const Y = layout(L);
     const FR = ["", "\u215b", "\u00bc", "\u215c", "\u00bd", "\u215d", "\u00be", "\u215e"];
     const ft = (mm) => { const e = Math.round(mm / 25.4 * 8), F = Math.floor(e / 96), i = Math.floor((e - F * 96) / 8), r = e % 8;
       return (F ? F + "'" : "") + i + FR[r] + '"'; };
@@ -35,35 +50,29 @@ window.MODEL3D = (function () {
     // a run across the room (horizontal on this plane)
     const runH = (y, x0, x1, label) => `<path d="M ${x0} ${y} L ${x1} ${y}"/>` + tick(x0, y, 0) + tick(x1, y, 0)
       + `<text x="${(x0 + x1) / 2}" y="${y - 70}" font-size="${T}" fill="${RED}" stroke="none" text-anchor="middle" font-family="Helvetica" font-weight="700">${label}</text>`;
-    if (!B || !G) return o + "</g>";
-    const yPart = S.yPart, face = yPart + G.PROJ + G.thick / 2;
-    const bedFoot = L - B.back.t - B.bed.l, bedHead = L - B.back.t;
-    const cup = 280, dD = 823, dBack = yPart - G.thick / 2 - dD;
+    const yPart = Y.yP, face = Y.yP + Y.drF;
+    const bedFoot = Y.bedFoot, bedHead = L - 60;
+    const cup = 280, dD = Y.desk.D, dBack = Y.desk.back;
     // along the room, down the left-hand side
     o += runV(330, 0, yPart, ft(yPart) + "  STUDY SIDE");
     o += runV(330, yPart, L, ft(L - yPart) + "  BED SIDE");
-    // what the study side is actually holding
+    // what the study side is holding
     o += runV(1130, 0, cup, ft(cup));
-    o += runV(1130, cup, dBack, ft(dBack - cup) + "  CHAIR");
-    o += runV(1130, dBack, dBack + dD, ft(dD) + "  DESK");
-    // and what the bed side is holding
+    o += runV(1130, cup, dBack - dD, ft(dBack - dD - cup) + "  CHAIR");
+    o += runV(1130, dBack - dD, dBack, ft(dD) + "  DESK");
+    // and the bed side, from the drawers' front
     o += runV(Wd - 520, face, bedFoot, ft(bedFoot - face) + "  WALKWAY");
-    o += runV(Wd - 520, bedFoot, bedHead, ft(B.bed.l) + "  BED");
-    // the room across, at each end
+    o += runV(Wd - 520, bedFoot, bedHead, ft(Y.bed.l) + "  BED");
     o += runH(260, 0, Wd, ft(Wd) + " WIDE");
-    // across the bed: what stands either side of it. The right wall is the straight one, so that
-    // figure holds the whole length of the bed; the left wall splays and steps, so the model's
-    // square room reads it at its narrowest — the sheet AST-DR-013 carries the full range.
-    const xPR = Wd - B.gapR, xBR = xPR - (B.width - B.bed.w) / 2, xBL = xBR - B.bed.w;
+    const xBL = Y.cx - Y.bed.w / 2, xBR = Y.cx + Y.bed.w / 2;
     o += runH(bedFoot + 420, 0, xBL, ft(xBL) + "+");
-    o += runH(bedFoot + 420, xBL, xBR, ft(B.bed.w) + " BED");
+    o += runH(bedFoot + 420, xBL, xBR, ft(Y.bed.w) + " BED");
     o += runH(bedFoot + 420, xBR, Wd, ft(Wd - xBR));
     return o + "</g>";
   }
 
   function planes() {
     const S = SHELL, R = RWALL, H = S.H, Wd = S.wStudy, L = R.run + R.door.w + R.ret;
-    const B = BEDPLAN, G = window.PGEOM;
     const P = [];
     // the walls that are decided carry their own elevations, exactly as drawn
     P.push({ id: "study", w: Wd, h: H, tf: `translate3d(0px,0px,0px)`, art: view("studywall", "Wall elevation") });
@@ -95,33 +104,16 @@ window.MODEL3D = (function () {
       P.push({ id: "s4" + x0 + z0, w: d, h, cls: "solid", tf: `translate3d(${x0 + w}px,${H - h}px,${z0}px) rotateY(-90deg)` });
     };
 
-    if (B && G) {
-      const xPR = Wd - B.gapR, xPL = xPR - B.width, xc = (xPL + xPR) / 2;
-      const TH = Math.acos(1 - G.PROJ / G.R), half = B.width / 2 - G.R * Math.sin(TH);
-      // the partition: plain glass, no leading — its pattern is not settled
-      const part = [];
-      // six facets to a curl: enough to read as a curve, few enough not to look like a fence
-      for (let i = 6; i >= 0; i--) { const t = -Math.PI / 2 - TH * (i / 6); part.push([xc - half + G.R * Math.cos(t), S.yPart + G.R + G.R * Math.sin(t)]); }
-      for (let i = 0; i <= 6; i++) { const t = -Math.PI / 2 + TH * (i / 6); part.push([xc + half + G.R * Math.cos(t), S.yPart + G.R + G.R * Math.sin(t)]); }
-      run(part, H, 0, "glassbay");
-      // the bed back: straight behind the bed, a curl at each end turning into the room
-      const c = B.back.t / 2, r = B.back.rc, back = [[xPL + c, L - B.back.d]];
-      for (let i = 0; i <= 4; i++) { const a = Math.PI - (Math.PI / 2) * (i / 4); back.push([xPL + c + r + r * Math.cos(a), L - c - r + r * Math.sin(a)]); }
-      for (let i = 0; i <= 4; i++) { const a = Math.PI / 2 - (Math.PI / 2) * (i / 4); back.push([xPR - c - r + r * Math.cos(a), L - c - r + r * Math.sin(a)]); }
-      back.push([xPR - c, L - B.back.d]);
-      run(back, B.back.h, 0, "solid");
-      // the desk, behind the partition on the study side, facing it
-      const dL = 2134, dD = 823, dH = 750;                  // 7 ft x 2 ft 8 in
-      // The desk stands AGAINST the partition — freestanding, not fixed to it, just touching.
-      // It meets the straight middle of the screen; past that the screen curves away towards the
-      // bed, so the desk's two ends stand clear of it.
-      const dGap = G.thick / 2;
-      slab(xc - dL / 2, S.yPart - dGap - dD, dL, dD, dH);
-      // the bed, and a bedside ledge inside each curl
-      const xBR = xPR - (B.width - B.bed.w) / 2, xBL = xBR - B.bed.w;
-      slab(xBL, L - B.back.t - B.bed.l, B.bed.w, B.bed.l, B.bed.base + B.bed.matt);
-      [[xPL + B.back.t + 5, xBL - B.ledge.gap], [xBR + B.ledge.gap, xPR - B.back.t - 5]]
-        .forEach(([a, b]) => slab(a, L - B.back.d + 20, b - a, B.back.d - B.back.t - B.back.rc - 50, B.ledge.h));
+    {
+      const Y = layout(L), { cx, pAt, RUN, pT } = Y;
+      const path = (w, n = 16) => Array.from({ length: n + 1 }, (_, i) => pAt(-RUN / 2 + RUN * i / n, w));
+      run(path(0), H, 0, "glassbay");                                         // the glass blocks, floor to ceiling
+      slab(cx - 145, Y.yP - pT / 2, 290, pT, H);                              // the wood column, a foot wide
+      P.push({ id: "tv", w: 1227, h: 706, cls: "tvpanel", tf: `translate3d(${cx - 613}px,${H - 1408}px,${Y.yP + pT / 2 + 61}px)` });   // the TV, floating
+      run(path(Y.drF), 450, 0, "solid");                                      // the drawers' front, the whole length
+      slab(cx - 600, Y.yP + pT / 2 + 5, 1200, Y.drF - pT / 2 - 5, 450);       // and their top across the straight middle
+      slab(cx - Y.desk.L / 2, Y.desk.front, Y.desk.L, Y.desk.D, Y.desk.H);   // the desk, square corners, 2 in off the glass
+      slab(cx - Y.bed.w / 2, Y.bedFoot, Y.bed.w, Y.bed.l, 580);              // the bed (its back is not decided)
     }
     return { P, Wd, H, L };
   }

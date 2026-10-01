@@ -421,6 +421,7 @@ body.sheets-dark .lb-inner.is-dwg svg { filter: invert(1) hue-rotate(180deg) bri
 .m3d-w.glassbay { background: rgba(255, 255, 255, .42); outline: none; backface-visibility: visible; border: 1px solid rgba(27,27,27,.22); }
 /* furniture stands in the room, so it is seen from both sides */
 .m3d-w.solid { background: #f4f1ea; backface-visibility: visible; border: 1px solid rgba(27,27,27,.72); }
+.m3d-w.tvpanel { background: #151515; backface-visibility: visible; }
 .m3d-w.glassbay .ink { stroke: #1b1b1b; }
 
 
@@ -481,6 +482,8 @@ body.sheets-dark .lb-inner.is-dwg svg { filter: invert(1) hue-rotate(180deg) bri
 .p2d .thin { stroke: var(--thin); stroke-width: 9; }
 .p2d .hid { fill: none; stroke: var(--thin); stroke-width: 9; stroke-dasharray: 60 40; }
 .p2d .tv { fill: var(--tvc); }
+.p2d .glassb { fill: var(--bg); stroke: var(--ink); stroke-width: 16; }
+.p2d .solidf { fill: var(--ink); }
 .p2d .mir { fill: var(--ink); }
 .p2d text { font-family: var(--mono); letter-spacing: -2px; paint-order: stroke; stroke: var(--bg); stroke-width: 26px; stroke-linejoin: round; }
 .p2d .rn { fill: var(--lbl); font-weight: 400; letter-spacing: 6px; }

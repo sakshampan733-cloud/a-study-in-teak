@@ -29,37 +29,28 @@
   const doorEnd = xLb + D1.leaf;
   const bx0 = doorEnd + 178, bx1 = xR - 787, Wb = bx1 - bx0, cx = (bx0 + bx1) / 2;
   const bedW = 1829, bedL = 1981, BT = 50, bedFoot = L - BT - 10 - bedL;
-  // partition: 8 ft, 11 ft off the bed wall. A straight middle, and at each end two matching curves —
-  // one turning towards the bed, one towards the desk (the same curve turned through 180°).
-  const pT = 70, PW = 2438 - pT, yP = L - 3353, pTurn = 0.96;   // PW on the centreline, so it is 8 ft over the outside
-  const REACH = 381;                                          // each curve comes out 15 in from the common line — both sides (owner, 27.09)
-  const pR = REACH / (1 - Math.cos(pTurn));                   // same 55° turn as before, so the curve radius grows to suit
-  const st = PW / 2 - pR * Math.sin(pTurn);                 // half the straight middle
-  const reach = pR * (1 - Math.cos(pTurn));                  // how far each curve comes out
-  const ri = pR - pT / 2;                                    // the curve's inside face
-  const tInner = Math.acos((pR - reach) / ri);               // where that face meets the line across the tips
-  const cav = { yF: yP + reach, half: st + ri * Math.sin(tInner) };   // TV-side cavity: front line, half-width
-  const drawers = 4;
-  const tv = { w: 1228, d: 50 };
-  const bs = bedW / 2 + 50, bTh = (70 * Math.PI) / 180, bR = (Wb / 2 - bs) / Math.sin(bTh), tr = bR - BT / 2 - 25;
+  // partition (owner, 1 Oct): Mano cast-glass blocks, 95 deep, 16 blocks of 150 = 2400 along its run, on the old
+  // centre line 11 ft off the bed wall. A straight middle of 8 blocks; each end turns TOWARDS THE BED only, on a 1.3 m
+  // radius over 4 blocks (26°, 136 out) — about as tight as the blocks go. One foot-wide wood column up the middle;
+  // the TV floats on the bed side; eight drawers (4 across × 2 high, 450 high, 400 deep) run the whole length.
+  const pT = 95, yP = L - 3353, MOD = 150, RUN = 16 * MOD, pR = 1300, straight = 8 * MOD / 2;
+  const pTurn = (RUN / 2 - straight) / pR, reach = pR * (1 - Math.cos(pTurn));
+  const pAt = (u, w) => {                                    // run position u (from the middle) and offset w (+ towards the bed) to plan x, y
+    if (Math.abs(u) <= straight) return [cx + u, yP + w];
+    const sg = Math.sign(u), th = (Math.abs(u) - straight) / pR;
+    return [cx + sg * (straight + pR * Math.sin(th)) - sg * w * Math.sin(th), yP + pR * (1 - Math.cos(th)) + w * Math.cos(th)];
+  };
+  const along = (w, u0 = -RUN / 2, u1 = RUN / 2, n = 48) => Array.from({ length: n + 1 }, (_, i) => pAt(u0 + (u1 - u0) * i / n, w));
+  const col = 290, drw = { gap: 5, d: 400, n: 4 }, drFront = pT / 2 + drw.gap + drw.d;
+  const tv = { w: 1227, d: 26, stand: 35 };
   const study = { d: 280, book: 1489, pil: 240, xP2: xR - (70 + 1219) - 240 };
   const WD = { d: 686 };
   const mirror = { c: 674, w: 253, t: 25, off: 20 };
+  const rug = { w: 3050, l: 2440, y0: bedFoot + 15 - 600 };   // 10 × 8 ft wool rug under the bed (owner: "your choice")
 
-  // the desk faces the partition from the study side and sits in the desk-side curve until it touches it
-  const desk = { L: 2286, D: 914, h: 150 };
-  desk.gap = (() => {                                        // desk back, measured study-wards from the partition line
-    const need = (ax, ad) => {                               // the curve's inside face at |x| = ax, less how far in the desk point sits
-      if (ax <= st) return pT / 2 - ad;
-      const u = ax - st; if (u >= ri * Math.sin(pTurn)) return 0;
-      return pR - Math.sqrt(ri * ri - u * u) - ad;
-    };
-    let g = 0; const hx = desk.L / 2, h = desk.h;
-    for (let i = 0; i <= 60; i++) g = Math.max(g, need((hx - h) * i / 60, 0));          // along the back edge
-    for (let i = 0; i <= 30; i++) { const p = (Math.PI / 2) * i / 30; g = Math.max(g, need(hx - h * Math.cos(p), h * Math.sin(p))); }   // the hollowed corner
-    return g;
-  })();
-  desk.back = yP - desk.gap; desk.front = desk.back - desk.D;
+  // the desk: the square-cornered version (AST-DR-028), its back 2 in from the glass — room for a monitor arm's clamp
+  const desk = { L: 2286, D: 914, gap: 50 };
+  desk.back = yP - pT / 2 - desk.gap; desk.front = desk.back - desk.D;
 
   const R = (x0, y0, x1, y1, c = "", a = "") => `<rect class="${c}" x="${f(Math.min(x0, x1))}" y="${f(Math.min(y0, y1))}" width="${f(Math.abs(x1 - x0))}" height="${f(Math.abs(y1 - y0))}" ${a}/>`;
   const poly = (pts) => "M " + pts.map((p) => `${f(p[0])} ${f(p[1])}`).join(" L ") + " Z";
@@ -114,65 +105,50 @@
   // ── the pieces ──
   const P = {
     bed() {
-      let o = "";
-      const bp = [];
-      for (let i = 24; i >= 0; i--) { const a = bTh * (i / 24); bp.push([cx - bs - bR * Math.sin(a), L - (bR - bR * Math.cos(a)) - BT / 2]); }
-      for (let i = 0; i <= 24; i++) { const a = bTh * (i / 24); bp.push([cx + bs + bR * Math.sin(a), L - (bR - bR * Math.cos(a)) - BT / 2]); }
-      [-1, 1].forEach((sg) => {
-        const ccx = cx + sg * bs, ccy = L - bR, ex = ccx + sg * tr;
-        o += `<path class="fu" d="M ${f(ccx)} ${f(ccy)} L ${f(ccx)} ${f(ccy + tr)} A ${f(tr)} ${f(tr)} 0 0 ${sg < 0 ? 1 : 0} ${f(ex)} ${f(ccy)} Z"/>`;
-      });
-      o += `<path class="solid" stroke-width="${BT}" d="M ${bp.map((p) => `${f(p[0])} ${f(p[1])}`).join(" L ")}"/>`;
+      let o = R(cx - rug.w / 2, rug.y0, cx + rug.w / 2, rug.y0 + rug.l, "hid");
+      o += Tx(cx - rug.w / 2 + 420, rug.y0 + 170, "RUG 10'×8'", "tx2", { size: 70 });
+      o += R(xLb, L - BT, xR, L, "hid");                     // the bed back: straight, wall to wall — its design not decided
       o += R(cx - bedW / 2, bedFoot, cx + bedW / 2, L - BT - 10, "fu");
       o += R(cx - bedW / 2 + 60, L - BT - 380, cx + bedW / 2 - 60, L - BT - 70, "fu2");
       o += `<line class="thin" x1="${f(cx - bedW / 2)}" y1="${f(bedFoot + 520)}" x2="${f(cx + bedW / 2)}" y2="${f(bedFoot + 520)}"/>`;
       o += Tx(cx, bedFoot + 1000, "BED", "lb", { size: 120 });
-      o += Tx(cx - bs - tr / 2, L - 170, "TABLE", "tx2", { size: 70 }) + Tx(cx + bs + tr / 2, L - 170, "TABLE", "tx2", { size: 70 });
+      o += Tx(cx + bedW / 2 + 520, L - 130, "BED BACK — STRAIGHT, WALL TO WALL · DESIGN TBC", "tx2", { size: 60 });
       o += `<g class="fdim">` + dimH(cx - bedW / 2, cx + bedW / 2, bedFoot + 330, null, "6'-0\" BED", { size: 90 }) +
         dimV(bedFoot, L - BT - 10, cx + bedW / 2 - 170, null, "6'-6\"", { size: 90 }) +
-        dimH(bx0, bx1, L + T + 260, L, `${ftin(Wb)} BED-BACK`, { size: 95 }) + `</g>`;
+        dimH(xLb, xR, L + T + 260, L, `${ftin(xR - xLb)} BED BACK`, { size: 95 }) + `</g>`;
       return o;
     },
     partition() {
-      let o = "";
-      // the drawer unit filling the TV-side cavity: its back follows the curve, its front runs straight across the tips
-      const back = [];
-      for (let i = 0; i <= 24; i++) { const t = tInner * (1 - i / 24); back.push([cx - st - ri * Math.sin(t), yP + pR - ri * Math.cos(t)]); }
-      for (let i = 0; i <= 24; i++) { const t = tInner * (i / 24); back.push([cx + st + ri * Math.sin(t), yP + pR - ri * Math.cos(t)]); }
-      o += `<path class="fu" d="M ${back.map((p) => `${f(p[0])} ${f(p[1])}`).join(" L ")} Z"/>`;
-      const dw = (2 * cav.half) / drawers;
-      for (let i = 1; i < drawers; i++) {
-        const x = cx - cav.half + i * dw, u = Math.abs(x - cx) - st;
-        const yb = u <= 0 ? yP + pT / 2 : yP + pR - Math.sqrt(ri * ri - u * u);
-        o += `<line class="thin" x1="${f(x)}" y1="${f(yb)}" x2="${f(x)}" y2="${f(cav.yF)}"/>`;
-      }
-      for (let i = 0; i < drawers; i++) o += `<line class="thin" x1="${f(cx - cav.half + (i + 0.5) * dw - 70)}" y1="${f(cav.yF - 45)}" x2="${f(cx - cav.half + (i + 0.5) * dw + 70)}" y2="${f(cav.yF - 45)}"/>`;
-      // the screen: straight middle, two curves at each end — one to the bed, one to the desk
-      const side = (sg) => {
-        const pts = [];
-        for (let i = 20; i >= 0; i--) { const t = pTurn * i / 20; pts.push([cx - st - pR * Math.sin(t), yP + sg * (pR - pR * Math.cos(t))]); }
-        for (let i = 0; i <= 20; i++) { const t = pTurn * i / 20; pts.push([cx + st + pR * Math.sin(t), yP + sg * (pR - pR * Math.cos(t))]); }
-        return `<path class="solid part" stroke-width="${pT}" d="M ${pts.map((p) => `${f(p[0])} ${f(p[1])}`).join(" L ")}"/>`;
-      };
-      o += side(1) + side(-1);
-      o += R(cx - tv.w / 2, yP + pT / 2, cx + tv.w / 2, yP + pT / 2 + tv.d, "tv");
-      o += Tx(cx, cav.yF - 110, `DRAWERS ×4 · ${ftin(cav.yF - yP - pT / 2)} DEEP · TV ABOVE`, "tx2", { size: 70 });
+      const ring = (wa, wb, u0, u1) => { const a = along(wa, u0, u1), b = along(wb, u0, u1).reverse(); return a.concat(b); };
+      let o = `<path class="fu" d="${poly(ring(pT / 2 + drw.gap, drFront))}"/>`;            // the drawers, the whole length
+      for (let i = 1; i < drw.n; i++) { const u = -RUN / 2 + i * RUN / drw.n, [ax, ay] = pAt(u, pT / 2 + drw.gap), [bx, by] = pAt(u, drFront);
+        o += `<line class="thin" x1="${f(ax)}" y1="${f(ay)}" x2="${f(bx)}" y2="${f(by)}"/>`; }
+      for (let i = 0; i < drw.n; i++) { const u = -RUN / 2 + (i + 0.5) * RUN / drw.n, [ax, ay] = pAt(u - 70, drFront - 45), [bx, by] = pAt(u + 70, drFront - 45);
+        o += `<line class="thin" x1="${f(ax)}" y1="${f(ay)}" x2="${f(bx)}" y2="${f(by)}"/>`; }
+      o += `<path class="glassb" d="${poly(ring(-pT / 2, pT / 2))}"/>`;                // the glass blocks
+      for (let i = 1; i < 16; i++) { const [ax, ay] = pAt(-RUN / 2 + i * MOD, -pT / 2), [bx, by] = pAt(-RUN / 2 + i * MOD, pT / 2);
+        o += `<line class="thin" x1="${f(ax)}" y1="${f(ay)}" x2="${f(bx)}" y2="${f(by)}"/>`; }
+      o += R(cx - col / 2, yP - pT / 2, cx + col / 2, yP + pT / 2, "solidf");                // the wood column, a foot wide
+      o += R(cx - tv.w / 2, yP + pT / 2 + tv.stand, cx + tv.w / 2, yP + pT / 2 + tv.stand + tv.d, "tv");
+      o += Tx(cx, yP + drFront - 110, `DRAWERS 4 × 2 · ${ftin(drw.d)} DEEP · TV FLOATS ABOVE`, "tx2", { size: 66 });
+      const [lx] = pAt(-RUN / 2, 0), [rx] = pAt(RUN / 2, 0);
       o += `<g class="fdim">` +
-        dimH(cx - PW / 2 - pT / 2, cx + PW / 2 + pT / 2, cav.yF + 430, yP, `${ftin(PW + pT)} PARTITION`, { size: 90 }) +
-        dimH(cx - cav.half, cx + cav.half, cav.yF + 200, cav.yF, `${ftin(2 * cav.half)} DRAWERS`, { size: 85 }) +
-        dimV(yP, cav.yF, cx + cav.half + 200, cx + cav.half - 60, `${ftin(reach)} OUT`, { size: 80 }) +
-        dimV(yP - reach, yP, cx - cav.half - 200, cx - cav.half + 60, `${ftin(reach)} OUT`, { size: 80 }) +
-        `<line class="thin" x1="${f(cx - PW / 2 - 300)}" y1="${f(yP)}" x2="${f(cx - PW / 2 + 60)}" y2="${f(yP)}"/>` + `</g>`;
+        dimH(lx - pT / 2, rx + pT / 2, yP - 330, yP - pT / 2, `${ftin(rx - lx + pT)} GLASS-BLOCK PARTITION`, { size: 90 }) +
+        dimV(yP, yP + reach, rx + 230, rx, `${ftin(reach)} OUT`, { size: 80 }) + `</g>`;
       return o;
     },
     desk() {
-      const x0 = cx - desk.L / 2, x1 = cx + desk.L / 2, y0 = desk.front, y1 = desk.back, h = desk.h;
-      let o = `<path class="fu" d="M ${f(x0 + h)} ${f(y0)} L ${f(x1 - h)} ${f(y0)} A ${h} ${h} 0 0 0 ${f(x1)} ${f(y0 + h)} L ${f(x1)} ${f(y1 - h)} A ${h} ${h} 0 0 0 ${f(x1 - h)} ${f(y1)} L ${f(x0 + h)} ${f(y1)} A ${h} ${h} 0 0 0 ${f(x0)} ${f(y1 - h)} L ${f(x0)} ${f(y0 + h)} A ${h} ${h} 0 0 0 ${f(x0 + h)} ${f(y0)} Z"/>`;
+      const x0 = cx - desk.L / 2, x1 = cx + desk.L / 2, y0 = desk.front, y1 = desk.back;
+      let o = R(x0, y0, x1, y1, "fu");                                                     // square corners (AST-DR-028)
       o += R(x0 + 560, y0 + 40, x1 - 560, y1 - 280, "hid");
+      o += R(cx - 357, y1 - 260, cx + 357, y1 - 230, "thin");                              // the monitor, on its arm
       o += `<rect class="fu2" x="${f(cx - 280)}" y="${f(y0 - 430)}" width="560" height="560" rx="90"/>`;
       o += Tx(cx, (y0 + y1) / 2 + 150, "DESK", "lb", { size: 110 }) + Tx(cx, y0 - 170, "CHAIR", "tx2", { size: 70 });
-      o += `<g class="fdim">` + dimH(x0, x1, y0 + 150, null, "7'-6\" × 3'-0\"", { size: 85 }) + `</g>`;
+      o += `<g class="fdim">` + dimH(x0, x1, y0 + 150, null, "7'-6\" × 3'-0\" · SQUARE", { size: 85 }) + `</g>`;
       return o;
+    },
+    art() {                                                                                 // the big painting, left wall, under the AC (stand-in)
+      return R(xLs + 5, 1099, xLs + 60, 3499, "solidf") + Tx(xLs + 190, 2299, "PAINTING 8'×5'", "tx2", { size: 66, rot: true });
     },
     study() {
       let o = R(0, 0, xR, study.d, "fu");
@@ -209,17 +185,16 @@
   function clearances() {
     const cl = (needs, s) => `<g class="clg ${needs.map((n) => "need-" + n).join(" ")}">${s}</g>`;
     const o = { cls: "cl", size: 88 }, os = { cls: "cl", size: 76 };
-    const tvFront = yP + pT / 2 + tv.d, tipL = cx - PW / 2 - pT / 2, tipR = cx + PW / 2 + pT / 2;
+    const tvFront = yP + pT / 2 + tv.stand + tv.d, drF = yP + drFront, [tipL] = pAt(-RUN / 2, -pT / 2), [tipR] = pAt(RUN / 2, -pT / 2);
     let s = "";
-    s += cl(["bed", "partition"], dimV(cav.yF, bedFoot, cx - 420, null, `${ftin(bedFoot - cav.yF)} BED TO DRAWERS`, o));
+    s += cl(["bed", "partition"], dimV(drF, bedFoot, cx - 420, null, `${ftin(bedFoot - drF)} BED TO DRAWERS`, o));
     s += cl(["bed", "partition"], dimV(tvFront, bedFoot, cx + 420, null, `${ftin(bedFoot - tvFront)} BED TO TV`, o));
-    s += cl(["partition"], dimH(leftAt(yP), tipL, yP, null, ftin(tipL - leftAt(yP)), o) + dimH(tipR, xR, yP, null, ftin(xR - tipR), o));
+    s += cl(["partition"], dimH(leftAt(yP), tipL - pT / 2, yP, null, ftin(tipL - pT / 2 - leftAt(yP)), o) + dimH(tipR + pT / 2, xR, yP, null, ftin(xR - tipR - pT / 2), o));
     s += cl(["partition"], dimV(yP, L, xR - 330, null, "11'-0\" TO THE BED WALL", o));
     s += cl(["desk", "study"], dimV(study.d, desk.front, cx + 700, null, `${ftin(desk.front - study.d)} CHAIR SPACE`, o));
-    s += cl(["desk", "partition"], dimV(desk.back, yP - pT / 2, cx - 700, null, ftin(yP - pT / 2 - desk.back), os));
+    s += cl(["desk", "partition"], dimV(desk.back, yP - pT / 2, cx - 700, null, "2\" GAP", os));
     s += cl(["bed"], dimH(xLb, cx - bedW / 2, bedFoot + 1250, null, ftin(cx - bedW / 2 - xLb), o) + dimH(cx + bedW / 2, xR, bedFoot + 1250, null, ftin(xR - cx - bedW / 2), o));
-    s += cl(["bed"], dimH(doorEnd, bx0, L - 120, null, ftin(bx0 - doorEnd), os) + dimH(bx1, xR, L - 120, null, ftin(xR - bx1), os));
-    s += cl(["bed", "partition"], `<line class="cld" x1="${f(cx)}" y1="${f(desk.front - 200)}" x2="${f(cx)}" y2="${f(L + 60)}"/>` + Tx(cx - 45, (cav.yF + bedFoot) / 2, "CENTRELINE", "clt", { size: 62, rot: true }));
+    s += cl(["bed", "partition"], `<line class="cld" x1="${f(cx)}" y1="${f(desk.front - 200)}" x2="${f(cx)}" y2="${f(L + 60)}"/>` + Tx(cx - 45, (drF + bedFoot) / 2, "CENTRELINE", "clt", { size: 62, rot: true }));
     s += cl(["wardrobes"], dimV(DR.y0 + WD.d, DR.y1 - WD.d, DR.x0 + 2650, null, `${ftin(DR.y1 - DR.y0 - 2 * WD.d)} AISLE`, o));
     return s;
   }
@@ -258,7 +233,7 @@
     return o;
   }
 
-  const PIECES = [["bed", "Bed"], ["partition", "Partition, TV & drawers"], ["desk", "Desk & chair"], ["study", "Study wall"], ["wardrobes", "Wardrobes"], ["mirror", "Mirror"]];
+  const PIECES = [["bed", "Bed & rug"], ["partition", "Partition, TV & drawers"], ["desk", "Desk & chair"], ["art", "Painting"], ["study", "Study wall"], ["wardrobes", "Wardrobes"], ["mirror", "Mirror"]];
   const SHOW = [["room", "Room sizes"], ["fsize", "Furniture sizes"], ["clr", "Clearances"], ["lights", "Lights"]];
   const THEMES = [["light", "Light"], ["dark", "Dark"], ["blue", "Blueprint"]];
   const VB = [xLb - T - 800, -T - 800, E + 700 - (xLb - T - 800), TUN.y1 + T + 520 - (-T - 800)];
@@ -278,7 +253,7 @@
   const save = (s) => { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch {} };
 
   function mount(el) {
-    const st = Object.assign({ theme: "light", room: true, fsize: false, clr: true, lights: false, bed: true, partition: true, desk: true, study: true, wardrobes: true, mirror: true }, load() || {});
+    const st = Object.assign({ theme: "light", room: true, fsize: false, clr: true, lights: false, bed: true, partition: true, desk: true, art: true, study: true, wardrobes: true, mirror: true }, load() || {});
     const btn = (k, label, cls = "") => `<button type="button" data-k="${k}" class="${cls}">${label}</button>`;
     el.innerHTML = `<div class="p2d-bar">
         <div class="p2d-grp"><span class="p2d-lbl">Show</span>${SHOW.map(([k, l]) => btn(k, l)).join("")}</div>
