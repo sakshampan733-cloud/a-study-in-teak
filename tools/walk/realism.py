@@ -228,6 +228,8 @@ if STYLE and sc.objects.get("dk_top"):
     for j, xx in enumerate((-L_ / 2, L_ / 2)):
         rings.append([bm.verts.new((xx, R_ * math.cos(math.pi * i / seg), R_ * math.sin(math.pi * i / seg))) for i in range(seg + 1)])
     for i in range(seg): bm.faces.new((rings[0][i], rings[0][i + 1], rings[1][i + 1], rings[1][i]))
+    bm.faces.new(rings[0][::-1]); bm.faces.new(rings[1])                    # the glass is closed at both ends
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     bm.to_mesh(me); bm.free()
     sh = bpy.data.objects.new("lamp_shade", me); STY.objects.link(sh); sh.location = Vector(P(lx, ls, TZ + 288)); sh.rotation_euler = (0, 0, 0)
     sh.data.materials.append(mg); sh.data.materials.append(M_OPAL)
@@ -262,20 +264,24 @@ def depth(m, bump=0.06, bevel_r=0.0015, coat_flat=True):
     nt = m.node_tree; b = nt.nodes.get("Principled BSDF")
     if not b: return
     tex = next((n for n in nt.nodes if n.type == "TEX_IMAGE"), None)
-    bv = nt.nodes.new("ShaderNodeBevel"); bv.samples = 6; bv.inputs["Radius"].default_value = bevel_r
+    if os.environ.get("BEVEL_SHADER") != "1": bevel_r = 0.0          # the joinery's edges are already rounded in the mesh; the
+    bv = nt.nodes.new("ShaderNodeBevel"); bv.samples = 6; bv.inputs["Radius"].default_value = bevel_r   # shader bevel doubled render time
     if tex and bump:
         bw_ = nt.nodes.new("ShaderNodeRGBToBW"); nt.links.new(tex.outputs["Color"], bw_.inputs["Color"])
         bp = nt.nodes.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = bump; bp.inputs["Distance"].default_value = 0.0004
-        nt.links.new(bw_.outputs["Val"], bp.inputs["Height"]); nt.links.new(bv.outputs["Normal"], bp.inputs["Normal"])
+        nt.links.new(bw_.outputs["Val"], bp.inputs["Height"])
+        if bevel_r: nt.links.new(bv.outputs["Normal"], bp.inputs["Normal"])
         nt.links.new(bp.outputs["Normal"], b.inputs["Normal"])
-    elif not b.inputs["Normal"].is_linked:
+    elif bevel_r and not b.inputs["Normal"].is_linked:
         nt.links.new(bv.outputs["Normal"], b.inputs["Normal"])
-    if coat_flat and "Coat Normal" in b.inputs: nt.links.new(bv.outputs["Normal"], b.inputs["Coat Normal"])   # the polish fills the pores
+    if bevel_r and coat_flat and "Coat Normal" in b.inputs: nt.links.new(bv.outputs["Normal"], b.inputs["Coat Normal"])   # the polish fills the pores
+    if not bevel_r: nt.nodes.remove(bv)
 for m_, bmp, br in ((M_VEN, 0.05, 0.0015), (M_DESK, 0.04, 0.0012), (M_BURL, 0.03, 0.002), (M_WHITE, 0.0, 0.001), (M_FLOOR, 0.0, 0.0)):
     depth(m_, bmp, br)
 for m_ in (M_BRASS, M_BRONZE):                                          # handled brass: not a perfect mirror
     nt = m_.node_tree; b = nt.nodes["Principled BSDF"]; b.inputs["Roughness"].default_value = 0.28; rough_var(nt, b, 0.1, 60.0)
-    bv = nt.nodes.new("ShaderNodeBevel"); bv.inputs["Radius"].default_value = 0.0008; nt.links.new(bv.outputs["Normal"], b.inputs["Normal"])
+    if os.environ.get("BEVEL_SHADER") == "1":
+        bv = nt.nodes.new("ShaderNodeBevel"); bv.inputs["Radius"].default_value = 0.0008; nt.links.new(bv.outputs["Normal"], b.inputs["Normal"])
 
 # ═══════════════════════════ 4 · A REAL NIGHT OUTSIDE ════════════════════════
 for o in [o for o in sc.objects if o.type == "MESH" and o.data.materials and o.data.materials[0] and o.data.materials[0].name.startswith("night_sky")]:
@@ -293,14 +299,18 @@ if os.path.exists(HDRI):
     hz.inputs["To Min"].default_value = float(os.environ.get("HDRI_GROUND", 0.08)); hz.inputs["To Max"].default_value = 1.0
     wt.links.new(sep_.outputs["Z"], hz.inputs["Value"])
     mul_ = wt.nodes.new("ShaderNodeMixRGB"); mul_.blend_type = "MULTIPLY"; mul_.inputs["Fac"].default_value = 1.0
-    wt.links.new(env.outputs["Color"], mul_.inputs["Color1"]); wt.links.new(hz.outputs["Result"], mul_.inputs["Color2"])
+    cap = wt.nodes.new("ShaderNodeRGBCurve")                     # cap the car park's floodlights, which flare through the glass
+    wt.links.new(env.outputs["Color"], cap.inputs["Color"]); env_c = cap.outputs["Color"]
+    wt.links.new(env_c, mul_.inputs["Color1"]); wt.links.new(hz.outputs["Result"], mul_.inputs["Color2"])
     wt.links.new(mul_.outputs["Color"], bgn.inputs["Color"]); bgn.inputs["Strength"].default_value = float(os.environ.get("HDRI_STR", 1.5))
     print("hdri on", flush=True)
 
 # ═══════════════════════════ 4b · LIGHT WITH SHAPE ═══════════════════════════
 # A room lit evenly from the ceiling reads as a render. Dim the cove, let the lamps make the pools.
-COVE_K, LAMP_K, SPOT_K = float(os.environ.get("COVE_K", 0.45)), float(os.environ.get("LAMP_K", 1.8)), float(os.environ.get("SPOT_K", 2.0))
-# the ceiling spots: a real downlight's beam is tighter and crisper than the first guess, so each one throws a pool on
+COVE_K, LAMP_K, SPOT_K = float(os.environ.get("COVE_K", 0.45)), float(os.environ.get("LAMP_K", 1.8)), float(os.environ.get("SPOT_K", 100.0))
+# the ceiling spots: stage 3 had them ~100× too weak (9 W against lamps a hand's width from the wall), so they lit
+# nothing. At ~900 W each (Blender's point-light measure, matching a 10 W LED downlight's beam) they pool on the floor.
+# A real downlight's beam is also tighter and crisper than the first guess, so each one throws a pool on
 # the floor and, close to a wall, the V-shaped scallop. The fixtures' beam angle is NOT known yet: 40° is a common one.
 SPOT_BEAM, SPOT_BLEND = float(os.environ.get("SPOT_BEAM", 40)), float(os.environ.get("SPOT_BLEND", 0.25))
 for o in sc.objects:

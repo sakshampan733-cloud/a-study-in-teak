@@ -19,13 +19,13 @@ SHOTS = [
     ("s05_sconces", 144, ((2700, 2300, 1500), (4547, 2900, 1350)), ((2700, 4000, 1500), (4547, 4500, 1350)), 28, 5.6, {}),
     ("s06_bed", 150, ((3750, 3300, 1350), (2200, 5500, 760)), ((2900, 2950, 1300), (2337, 5550, 760)), 30, 4.0, {}),
     ("s07_d2", 168, ((3350, 4650, 1500), (5400, 4650, 1400)), ((4150, 4650, 1500), (6400, 4600, 1450)), 24, 5.6,
-        {"swing": ("door_d2", 18, 96), "ev": 0.25}),
+        {"swing": ("door_d2", 18, 96), "ev": 0.6}),
     ("s08_dress", 168, ((5050, 4356, 1450), (8400, 4356, 1450)), ((6300, 4356, 1450), (8400, 4356, 1650)), 22, 5.6,
-        {"open": ("door_d2",), "ev": 0.5}),
+        {"open": ("door_d2",), "ev": 1.3}),
     ("s09_vault", 132, ((5700, 4356, 1400), (7700, 4356, 1900)), ((6000, 4356, 1400), (7700, 4356, 3050)), 20, 5.6,
-        {"open": ("door_d2",), "ev": 0.5, "tilt": True}),
+        {"open": ("door_d2",), "ev": 1.3, "tilt": True}),
     ("s10_vanity", 132, ((6100, 1000, 1350), (6403, 2718, 1000)), ((6250, 1350, 1330), (6403, 2718, 990)), 26, 4.0,
-        {"open": ("door_d2", "door_d3"), "ev": 0.3}),
+        {"open": ("door_d2", "door_d3"), "ev": 0.7}),
 ]
 FLOAT = float(os.environ.get("FLOAT", 1.0))
 PREVIEW = os.environ.get("PREVIEW") == "1"                     # how much the camera floats in the hand (1 = a gimbal)
@@ -79,7 +79,7 @@ def film_shot(sh):
 if MODER == "film":
     bake_modifiers()
     sc.render.use_persistent_data = True
-    sc.render.use_motion_blur = True; sc.render.motion_blur_shutter = 0.5
+    sc.render.use_motion_blur = os.environ.get("MBLUR") == "1"; sc.render.motion_blur_shutter = 0.5   # slow moves: blur is invisible, and costly
     sc.render.fps = 24
     sc.render.resolution_x, sc.render.resolution_y = int(os.environ.get("RX", 1920)), int(os.environ.get("RY", 1080))
     ims = sc.render.image_settings; ims.file_format = "PNG"; ims.color_mode = "RGB"; ims.color_depth = "8"

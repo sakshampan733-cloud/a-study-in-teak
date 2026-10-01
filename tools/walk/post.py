@@ -2,7 +2,7 @@
 # a little coarser than a pixel, fresh every frame). A render is too clean to read as a photograph without them.
 #
 #   python3 tools/walk/post.py in.png out.jpg [--grain 0.10] [--vig 0.16]
-#   python3 tools/walk/post.py --dir in_dir out_dir           (every .png in a folder, for a shot's frames)
+#   python3 tools/walk/post.py --dir in_dir out_dir [--size 1920x1080]   (every .png in a folder, for a shot's frames)
 import os, sys
 from PIL import Image, ImageChops, ImageFilter
 
@@ -10,8 +10,14 @@ def arg(name, default):
     return float(sys.argv[sys.argv.index(name) + 1]) if name in sys.argv else default
 GRAIN, VIG = arg("--grain", 0.10), arg("--vig", 0.16)
 
+SIZE = sys.argv[sys.argv.index("--size") + 1] if "--size" in sys.argv else None     # e.g. 1920x1080: scale up first
+
 def post(src, dst):
-    im = Image.open(src).convert("RGB"); w, h = im.size
+    im = Image.open(src).convert("RGB")
+    if SIZE:
+        tw, th = (int(v) for v in SIZE.split("x"))
+        if im.size != (tw, th): im = im.resize((tw, th), Image.LANCZOS)
+    w, h = im.size
     # vignette: darken toward the corners, following the frame's shape
     rad = Image.radial_gradient("L").resize((w, h), Image.BILINEAR)
     vig = rad.point(lambda v: 255 - int(255 * VIG * (v / 255.0) ** 2.4))
@@ -30,7 +36,7 @@ def post(src, dst):
     out.save(dst, quality=95) if dst.lower().endswith((".jpg", ".jpeg")) else out.save(dst)
 
 if __name__ == "__main__":
-    a = [x for x in sys.argv[1:] if not x.startswith("--") and not (sys.argv[sys.argv.index(x) - 1] in ("--grain", "--vig"))]
+    a = [x for x in sys.argv[1:] if not x.startswith("--") and not (sys.argv[sys.argv.index(x) - 1] in ("--grain", "--vig", "--size"))]
     if "--dir" in sys.argv:
         src, dst = a[0], a[1]; os.makedirs(dst, exist_ok=True)
         for f in sorted(os.listdir(src)):
