@@ -550,10 +550,10 @@ for z in (686, 890 + 25, 1160 + 25, 1430 + 25, 1700 + 25):
             setn = rng.choice([1, 1, 2, 3, 4, 6, 8]); set_tone = rng.random()
             set_h = min(rng.choice([rng.uniform(178, 205), rng.uniform(205, 240), rng.uniform(235, 280)]), room_h)
             set_w = rng.choice([rng.uniform(18, 28), rng.uniform(26, 40), rng.uniform(36, 55)]); set_d = rng.uniform(150, 230)
-        tone = min(0.999, max(0.0, set_tone + (rng.uniform(-0.03, 0.03) if setn > 1 else 0)))
+        btone = min(0.999, max(0.0, set_tone + (rng.uniform(-0.03, 0.03) if setn > 1 else 0)))
         w_ = set_w * rng.uniform(0.92, 1.08); h_ = min(set_h * rng.uniform(0.985, 1.0), room_h); d_ = set_d * rng.uniform(0.97, 1.0)
         front = STUDY - 12 - rng.uniform(0, 14); y0 = max(22, front - d_)                 # spines near the shelf's front edge
-        o = book_obj(f"bk{x:.0f}{z:.0f}", x, y0, z, w_, d_, h_, tone); setn -= 1
+        o = book_obj(f"bk{x:.0f}{z:.0f}", x, y0, z, w_, d_, h_, btone); setn -= 1
         if rng.random() < 0.07 and nb:                                # a leaning book: rests against its neighbour
             pivot_rot(o, (x + w_ / 2, y0 + d_ / 2, z), 0, rng.choice([-1, 1]) * rng.uniform(0.08, 0.2), 0); x += w_ + 22; setn = 0
         else: x += w_ + rng.uniform(0.3, 2.0)

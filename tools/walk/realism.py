@@ -163,6 +163,53 @@ for n_ in ("mattress", "bed_frame", "bed_base", "floor"):
     o_ = sc.objects.get(n_)
     if o_ and "col" in o_.modifiers: o_.modifiers.remove(o_.modifiers["col"])
 
+# ═══════════════════════════ 1b · THE RUG (owner, 1 Oct: "put a carpet under my bed, your choice") ═════════
+# A hand-knotted wool rug, about 10 × 8 ft (3050 × 2440): warm oatmeal with a tobacco border and a pin line, the
+# colour drifting a little along its length the way hand-dyed wool does. Under the lower two-thirds of the bed,
+# 600 mm proud of its foot and of each side.
+def rug_mat():
+    m, nt, b = node_mat("wool_rug")
+    b.inputs["Roughness"].default_value = 1.0; b.inputs["Sheen Weight"].default_value = 0.7; b.inputs["Sheen Roughness"].default_value = 0.5
+    tc = nt.nodes.new("ShaderNodeTexCoord"); sp = nt.nodes.new("ShaderNodeSeparateXYZ"); nt.links.new(tc.outputs["Object"], sp.inputs["Vector"])
+    def op(o, a_, b_=None, v=None):
+        n = nt.nodes.new("ShaderNodeMath"); n.operation = o; nt.links.new(a_, n.inputs[0])
+        if b_ is not None: nt.links.new(b_, n.inputs[1])
+        if v is not None: n.inputs[1].default_value = v
+        return n.outputs[0]
+    dx = op("SUBTRACT", nt.nodes.new("ShaderNodeValue").outputs[0], op("ABSOLUTE", sp.outputs["X"]))
+    dy = op("SUBTRACT", nt.nodes.new("ShaderNodeValue").outputs[0], op("ABSOLUTE", sp.outputs["Y"]))
+    vx, vy = [n for n in nt.nodes if n.bl_idname == "ShaderNodeValue"]
+    vx.outputs[0].default_value = RUG_W / 2000; vy.outputs[0].default_value = RUG_L / 2000
+    d = op("MINIMUM", dx, dy)                                            # metres in from the nearest edge
+    band = op("MULTIPLY", op("GREATER_THAN", d, v=0.10), op("LESS_THAN", d, v=0.21))
+    pin = op("MULTIPLY", op("GREATER_THAN", d, v=0.27), op("LESS_THAN", d, v=0.283))
+    edge = op("LESS_THAN", d, v=0.018)                                   # the overcast edge, a shade darker
+    ab = nt.nodes.new("ShaderNodeTexNoise"); ab.inputs["Scale"].default_value = 2.2; ab.inputs["Detail"].default_value = 3
+    mp = nt.nodes.new("ShaderNodeMapping"); mp.inputs["Scale"].default_value = (6.0, 0.6, 1.0)   # streaks along the warp
+    nt.links.new(tc.outputs["Object"], mp.inputs["Vector"]); nt.links.new(mp.outputs["Vector"], ab.inputs["Vector"])
+    field = nt.nodes.new("ShaderNodeValToRGB"); field.color_ramp.elements[0].color = (0.44, 0.37, 0.28, 1); field.color_ramp.elements[1].color = (0.56, 0.48, 0.37, 1)
+    nt.links.new(ab.outputs["Fac"], field.inputs["Fac"])
+    c1 = nt.nodes.new("ShaderNodeMixRGB"); c1.inputs["Color2"].default_value = (0.17, 0.11, 0.07, 1)
+    nt.links.new(field.outputs["Color"], c1.inputs["Color1"]); nt.links.new(op("MAXIMUM", band, pin), c1.inputs["Fac"])
+    c2 = nt.nodes.new("ShaderNodeMixRGB"); c2.inputs["Color2"].default_value = (0.30, 0.24, 0.17, 1)
+    nt.links.new(c1.outputs["Color"], c2.inputs["Color1"]); nt.links.new(edge, c2.inputs["Fac"])
+    nt.links.new(c2.outputs["Color"], b.inputs["Base Color"])
+    pile = nt.nodes.new("ShaderNodeTexNoise"); pile.inputs["Scale"].default_value = 900; pile.inputs["Detail"].default_value = 6
+    knot = nt.nodes.new("ShaderNodeTexVoronoi"); knot.inputs["Scale"].default_value = 260
+    mx_ = nt.nodes.new("ShaderNodeMath"); mx_.operation = "MULTIPLY_ADD"; mx_.inputs[1].default_value = 0.4
+    nt.links.new(knot.outputs["Distance"], mx_.inputs[0]); nt.links.new(pile.outputs["Fac"], mx_.inputs[2])
+    bp = nt.nodes.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = 0.5; bp.inputs["Distance"].default_value = 0.002
+    nt.links.new(mx_.outputs["Value"], bp.inputs["Height"]); nt.links.new(bp.outputs["Normal"], b.inputs["Normal"])
+    return m
+RUG_W, RUG_L, RUG_T = 3050.0, 2440.0, 12.0
+rs0 = ms0 - 600
+bpy.ops.mesh.primitive_cube_add(size=1, location=P(bcx, rs0 + RUG_L / 2, RUG_T / 2))
+rug_ = bpy.context.active_object; rug_.name = "rug"
+rug_.data.transform(Matrix.Diagonal((RUG_W / 1000, RUG_L / 1000, RUG_T / 1000, 1.0)))
+for c in list(rug_.users_collection): c.objects.unlink(rug_)
+sc.collection.objects.link(rug_); setmat(rug_, rug_mat()); bevel(rug_, 0.005, 3)
+print(f"rug {RUG_W:.0f} x {RUG_L:.0f} from s {rs0:.0f}", flush=True)
+
 # ═══════════════════════════ 2 · ON THE DESK ═════════════════════════════════
 def solid(name, coll, m, w_=0.0015, seg=2):
     o = bpy.context.active_object; o.name = name
@@ -331,7 +378,7 @@ if os.environ.get("PARTITION", "1") != "0":
 
 # ═══════════════════════════ 4d · THE SWITCHES ════════════════════════════════
 # LIGHTS=all, or a comma list of circuits to leave on: study6 (the six spots 2'6" off the study wall), spots (all 21),
-# cove, sconces, desk (the banker's lamp), shelf (the bookcase strip), partition (its LED strips). Everything else goes dark; the night outside stays.
+# cove, sconces, desk (the banker's lamp), shelf (the bookcase strip). Everything else goes dark; the night outside stays.
 LIGHTS = os.environ.get("LIGHTS", "all")
 if LIGHTS != "all":
     on = set(LIGHTS.split(","))
@@ -342,7 +389,6 @@ if LIGHTS != "all":
         if "_bulb" in n and not n.startswith("lamp_"): return "sconces"
         if n.startswith("lamp_"): return "desk"
         if n.startswith("book_strip"): return "shelf"
-        if n.startswith("gb_strip"): return "partition"
         return "other"
     for o in sc.objects:
         if o.type == "LIGHT":
@@ -353,7 +399,6 @@ if LIGHTS != "all":
     if "cove" not in on: dark(M_STRIP)
     if "sconces" not in on: dark(M_SHADE); dark(M_BULB)
     if "desk" not in on: dark(bpy.data.materials.get("opal_glass"))
-    if "partition" not in on: dark(bpy.data.materials.get("partition_strip"))
     # the spot discs share one glowing material: give the ones that stay on their own copy, dim the rest
     lit = [o.location.copy() for o in sc.objects if o.type == "LIGHT" and o.name.startswith("spot") and not o.hide_render]
     m_on = M_DISC.copy(); m_on.name = "spot_disc_on"; dark(M_DISC)
