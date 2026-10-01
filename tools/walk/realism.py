@@ -169,7 +169,7 @@ for n_ in ("mattress", "bed_frame", "bed_base", "floor"):
 # 600 mm proud of its foot and of each side.
 def rug_mat():
     m, nt, b = node_mat("wool_rug")
-    b.inputs["Roughness"].default_value = 1.0; b.inputs["Sheen Weight"].default_value = 0.7; b.inputs["Sheen Roughness"].default_value = 0.5
+    b.inputs["Roughness"].default_value = 1.0; b.inputs["Sheen Weight"].default_value = 0.25; b.inputs["Sheen Roughness"].default_value = 0.6
     tc = nt.nodes.new("ShaderNodeTexCoord"); sp = nt.nodes.new("ShaderNodeSeparateXYZ"); nt.links.new(tc.outputs["Object"], sp.inputs["Vector"])
     def op(o, a_, b_=None, v=None):
         n = nt.nodes.new("ShaderNodeMath"); n.operation = o; nt.links.new(a_, n.inputs[0])
@@ -187,18 +187,18 @@ def rug_mat():
     ab = nt.nodes.new("ShaderNodeTexNoise"); ab.inputs["Scale"].default_value = 2.2; ab.inputs["Detail"].default_value = 3
     mp = nt.nodes.new("ShaderNodeMapping"); mp.inputs["Scale"].default_value = (6.0, 0.6, 1.0)   # streaks along the warp
     nt.links.new(tc.outputs["Object"], mp.inputs["Vector"]); nt.links.new(mp.outputs["Vector"], ab.inputs["Vector"])
-    field = nt.nodes.new("ShaderNodeValToRGB"); field.color_ramp.elements[0].color = (0.44, 0.37, 0.28, 1); field.color_ramp.elements[1].color = (0.56, 0.48, 0.37, 1)
+    field = nt.nodes.new("ShaderNodeValToRGB"); field.color_ramp.elements[0].color = (0.24, 0.19, 0.135, 1); field.color_ramp.elements[1].color = (0.32, 0.26, 0.185, 1)
     nt.links.new(ab.outputs["Fac"], field.inputs["Fac"])
-    c1 = nt.nodes.new("ShaderNodeMixRGB"); c1.inputs["Color2"].default_value = (0.17, 0.11, 0.07, 1)
+    c1 = nt.nodes.new("ShaderNodeMixRGB"); c1.inputs["Color2"].default_value = (0.07, 0.042, 0.026, 1)
     nt.links.new(field.outputs["Color"], c1.inputs["Color1"]); nt.links.new(op("MAXIMUM", band, pin), c1.inputs["Fac"])
-    c2 = nt.nodes.new("ShaderNodeMixRGB"); c2.inputs["Color2"].default_value = (0.30, 0.24, 0.17, 1)
+    c2 = nt.nodes.new("ShaderNodeMixRGB"); c2.inputs["Color2"].default_value = (0.14, 0.10, 0.07, 1)
     nt.links.new(c1.outputs["Color"], c2.inputs["Color1"]); nt.links.new(edge, c2.inputs["Fac"])
     nt.links.new(c2.outputs["Color"], b.inputs["Base Color"])
     pile = nt.nodes.new("ShaderNodeTexNoise"); pile.inputs["Scale"].default_value = 900; pile.inputs["Detail"].default_value = 6
     knot = nt.nodes.new("ShaderNodeTexVoronoi"); knot.inputs["Scale"].default_value = 260
     mx_ = nt.nodes.new("ShaderNodeMath"); mx_.operation = "MULTIPLY_ADD"; mx_.inputs[1].default_value = 0.4
     nt.links.new(knot.outputs["Distance"], mx_.inputs[0]); nt.links.new(pile.outputs["Fac"], mx_.inputs[2])
-    bp = nt.nodes.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = 0.5; bp.inputs["Distance"].default_value = 0.002
+    bp = nt.nodes.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = 0.85; bp.inputs["Distance"].default_value = 0.003
     nt.links.new(mx_.outputs["Value"], bp.inputs["Height"]); nt.links.new(bp.outputs["Normal"], b.inputs["Normal"])
     return m
 RUG_W, RUG_L, RUG_T = 3050.0, 2440.0, 12.0
