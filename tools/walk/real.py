@@ -257,7 +257,7 @@ BW = 127
 def border(name, x0, s0, x1, s1):
     o = dbox(name, x0, s0, 0.3, x1, s1, 1.4, M_WHITE)
     for p_ in o.data.polygons: p_.use_smooth = False
-border("bd_study", xLs, 255, xR, 255 + BW)                              # in front of the study joinery
+# no border along the study joinery: only the left, bed and right walls have the white strip (the owner, 1 Oct)
 border("bd_left_a", xLs, 255 + BW, xLs + BW, yS)
 border("bd_left_b", xLb, yS, xLb + BW, Lb - BW)
 border("bd_left_step", xLb, yS - BW, xLs, yS)
@@ -432,41 +432,95 @@ for k in range(10): dbox(f"ac_l{k}", xLs + 205, acs - 540 + k * 4, 2250, xLs + 2
 
 # ── the bookcase: a real shelf — books of every height and thickness, some leaning or lying flat, a few objects ──
 def jacket():
+    """One material for every book. Each book carries a 'tone' (0–1) that picks its colour from a muted library
+    palette — leather, cloth, paper jackets — and sets of volumes share a tone. The spine (the face toward the room)
+    gets what spines have: a title running down it, a small mark at the foot, gilt rules on the leather ones."""
     m, nt, b = node_mat("book_jacket")
-    oi = nt.nodes.new("ShaderNodeObjectInfo"); ramp = nt.nodes.new("ShaderNodeValToRGB")
-    cols = [(0.28, 0.05, 0.04), (0.05, 0.12, 0.08), (0.05, 0.07, 0.15), (0.42, 0.28, 0.14), (0.60, 0.53, 0.40), (0.04, 0.035, 0.03),
-            (0.34, 0.16, 0.07), (0.70, 0.64, 0.50), (0.18, 0.04, 0.10), (0.10, 0.20, 0.22)]
-    ramp.color_ramp.interpolation = "CONSTANT"
+    at = nt.nodes.new("ShaderNodeAttribute"); at.attribute_type = "OBJECT"; at.attribute_name = "tone"
+    ramp = nt.nodes.new("ShaderNodeValToRGB"); ramp.color_ramp.interpolation = "CONSTANT"
+    cols = [(0.20, 0.035, 0.03), (0.035, 0.085, 0.05), (0.03, 0.045, 0.10), (0.30, 0.17, 0.08), (0.03, 0.025, 0.02),   # leather
+            (0.16, 0.19, 0.22), (0.19, 0.18, 0.10), (0.22, 0.07, 0.06), (0.27, 0.26, 0.24),                               # cloth
+            (0.66, 0.61, 0.50), (0.74, 0.72, 0.66), (0.50, 0.43, 0.32), (0.48, 0.22, 0.07), (0.11, 0.22, 0.22)]         # paper jackets
     for i, c in enumerate(cols):
         if i >= len(ramp.color_ramp.elements): ramp.color_ramp.elements.new(i / len(cols))
         ramp.color_ramp.elements[i].position = i / len(cols); ramp.color_ramp.elements[i].color = (*c, 1)
-    nt.links.new(oi.outputs["Random"], ramp.inputs["Fac"])
-    tc = nt.nodes.new("ShaderNodeTexCoord"); sep = nt.nodes.new("ShaderNodeSeparateXYZ"); nt.links.new(tc.outputs["Generated"], sep.inputs["Vector"])
-    band = nt.nodes.new("ShaderNodeValToRGB"); band.color_ramp.interpolation = "CONSTANT"        # gold bands near the head and tail
-    band.color_ramp.elements[0].color = (0, 0, 0, 1)
-    for pos, col in ((0.08, 1), (0.11, 0), (0.15, 1), (0.17, 0), (0.83, 1), (0.86, 0)):
-        e = band.color_ramp.elements.new(pos); e.color = (col, col, col, 1)
-    nt.links.new(sep.outputs["Z"], band.inputs["Fac"])
-    gate = nt.nodes.new("ShaderNodeMath"); gate.operation = "MULTIPLY"; nt.links.new(band.outputs["Color"], gate.inputs[0])
-    g2 = nt.nodes.new("ShaderNodeMath"); g2.operation = "GREATER_THAN"; g2.inputs[1].default_value = 0.5; nt.links.new(oi.outputs["Random"], g2.inputs[0])   # half the books carry bands
-    nt.links.new(g2.outputs["Value"], gate.inputs[1])
-    gold = nt.nodes.new("ShaderNodeMixRGB"); gold.inputs["Color2"].default_value = (0.55, 0.40, 0.14, 1)
-    nt.links.new(ramp.outputs["Color"], gold.inputs["Color1"]); nt.links.new(gate.outputs["Value"], gold.inputs["Fac"])
+    nt.links.new(at.outputs["Fac"], ramp.inputs["Fac"])
+    # a little fading and dirt: the colour wanders over the cover
+    nz = nt.nodes.new("ShaderNodeTexNoise"); nz.inputs["Scale"].default_value = 18
+    fade = nt.nodes.new("ShaderNodeMixRGB"); fade.blend_type = "MULTIPLY"; fade.inputs["Fac"].default_value = 0.25
+    nt.links.new(ramp.outputs["Color"], fade.inputs["Color1"]); nt.links.new(nz.outputs["Color"], fade.inputs["Color2"])
+    gen = nt.nodes.new("ShaderNodeTexCoord"); sep = nt.nodes.new("ShaderNodeSeparateXYZ"); nt.links.new(gen.outputs["Generated"], sep.inputs["Vector"])
+    def mm(lo, hi, src):                                   # 1 where lo < src < hi
+        a_ = nt.nodes.new("ShaderNodeMath"); a_.operation = "GREATER_THAN"; a_.inputs[1].default_value = lo; nt.links.new(src, a_.inputs[0])
+        b_ = nt.nodes.new("ShaderNodeMath"); b_.operation = "LESS_THAN"; b_.inputs[1].default_value = hi; nt.links.new(src, b_.inputs[0])
+        c_ = nt.nodes.new("ShaderNodeMath"); c_.operation = "MULTIPLY"; nt.links.new(a_.outputs[0], c_.inputs[0]); nt.links.new(b_.outputs[0], c_.inputs[1])
+        return c_.outputs[0]
+    def mul(x, y):
+        c_ = nt.nodes.new("ShaderNodeMath"); c_.operation = "MULTIPLY"; nt.links.new(x, c_.inputs[0]); nt.links.new(y, c_.inputs[1]); return c_.outputs[0]
+    def add(x, y):
+        c_ = nt.nodes.new("ShaderNodeMath"); c_.operation = "MAXIMUM"; nt.links.new(x, c_.inputs[0]); nt.links.new(y, c_.inputs[1]); return c_.outputs[0]
+    # the title: a column down the middle of the spine, broken into letters by a fine wave
+    wv = nt.nodes.new("ShaderNodeTexWave"); wv.wave_type = "BANDS"; wv.bands_direction = "Z"; wv.inputs["Scale"].default_value = 70
+    wv.inputs["Distortion"].default_value = 9; wv.inputs["Detail"].default_value = 4
+    gl = nt.nodes.new("ShaderNodeMath"); gl.operation = "GREATER_THAN"; gl.inputs[1].default_value = 0.62; nt.links.new(wv.outputs["Fac"], gl.inputs[0])
+    title = mul(mul(mm(0.30, 0.70, sep.outputs["X"]), mm(0.34, 0.80, sep.outputs["Z"])), gl.outputs[0])
+    mark = mul(mm(0.32, 0.68, sep.outputs["X"]), mm(0.05, 0.085, sep.outputs["Z"]))
+    rules = add(add(mm(0.10, 0.112, sep.outputs["Z"]), mm(0.13, 0.138, sep.outputs["Z"])), add(mm(0.87, 0.882, sep.outputs["Z"]), mm(0.90, 0.908, sep.outputs["Z"])))
+    leather = nt.nodes.new("ShaderNodeMath"); leather.operation = "LESS_THAN"; leather.inputs[1].default_value = 5 / 14; nt.links.new(at.outputs["Fac"], leather.inputs[0])
+    ink_m = add(add(title, mark), mul(rules, leather.outputs[0]))
+    # only on the spine: the face looking into the room (Blender −Y)
     geo = nt.nodes.new("ShaderNodeNewGeometry"); sp2 = nt.nodes.new("ShaderNodeSeparateXYZ"); nt.links.new(geo.outputs["Normal"], sp2.inputs["Vector"])
-    top = nt.nodes.new("ShaderNodeMath"); top.operation = "GREATER_THAN"; top.inputs[1].default_value = 0.7; nt.links.new(sp2.outputs["Z"], top.inputs[0])
-    page = nt.nodes.new("ShaderNodeMixRGB"); page.inputs["Color2"].default_value = (0.78, 0.72, 0.58, 1)
-    nt.links.new(gold.outputs["Color"], page.inputs["Color1"]); nt.links.new(top.outputs["Value"], page.inputs["Fac"])
-    nt.links.new(page.outputs["Color"], b.inputs["Base Color"])
-    b.inputs["Roughness"].default_value = 0.55; rough_var(nt, b, 0.2, 40.0, 3.0)
+    spine = nt.nodes.new("ShaderNodeMath"); spine.operation = "LESS_THAN"; spine.inputs[1].default_value = -0.7; nt.links.new(sp2.outputs["Y"], spine.inputs[0])
+    ink_m = mul(ink_m, spine.outputs[0])
+    # gilt on dark books, black on light ones
+    bw = nt.nodes.new("ShaderNodeRGBToBW"); nt.links.new(ramp.outputs["Color"], bw.inputs["Color"])
+    light = nt.nodes.new("ShaderNodeMath"); light.operation = "GREATER_THAN"; light.inputs[1].default_value = 0.3; nt.links.new(bw.outputs["Val"], light.inputs[0])
+    ink = nt.nodes.new("ShaderNodeMixRGB"); ink.inputs["Color1"].default_value = (0.62, 0.45, 0.16, 1); ink.inputs["Color2"].default_value = (0.04, 0.035, 0.03, 1)
+    nt.links.new(light.outputs[0], ink.inputs["Fac"])
+    col = nt.nodes.new("ShaderNodeMixRGB"); nt.links.new(fade.outputs["Color"], col.inputs["Color1"]); nt.links.new(ink.outputs["Color"], col.inputs["Color2"])
+    nt.links.new(ink_m, col.inputs["Fac"]); nt.links.new(col.outputs["Color"], b.inputs["Base Color"])
+    # finish: leather polished, cloth matt, jackets a soft sheen; gilt is metal
+    rmap = nt.nodes.new("ShaderNodeMapRange"); rmap.inputs["From Min"].default_value = 0; rmap.inputs["From Max"].default_value = 1
+    rmap.inputs["To Min"].default_value = 0.38; rmap.inputs["To Max"].default_value = 0.72; nt.links.new(at.outputs["Fac"], rmap.inputs["Value"])
+    met = mul(mul(ink_m, leather.outputs[0]), ink_m)
+    nt.links.new(rmap.outputs["Result"], b.inputs["Roughness"]); nt.links.new(met, b.inputs["Metallic"])
+    cl = nt.nodes.new("ShaderNodeTexNoise"); cl.inputs["Scale"].default_value = 700
+    bp = nt.nodes.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = 0.08; bp.inputs["Distance"].default_value = 0.0002
+    nt.links.new(cl.outputs["Fac"], bp.inputs["Height"]); nt.links.new(bp.outputs["Normal"], b.inputs["Normal"])
+    return m
+def pageblock():
+    m, nt, b = node_mat("book_pages")
+    b.inputs["Base Color"].default_value = (0.76, 0.70, 0.56, 1); b.inputs["Roughness"].default_value = 0.85
+    wv = nt.nodes.new("ShaderNodeTexWave"); wv.wave_type = "BANDS"; wv.bands_direction = "X"; wv.inputs["Scale"].default_value = 600
+    bp = nt.nodes.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = 0.15; bp.inputs["Distance"].default_value = 0.0002
+    nt.links.new(wv.outputs["Fac"], bp.inputs["Height"]); nt.links.new(bp.outputs["Normal"], b.inputs["Normal"])
     return m
 M_JACKET = jacket()
+M_PAGEBLOCK = pageblock()
 M_OBJ_CERAMIC = flat("shelf_ceramic", (0.82, 0.80, 0.74), 0.15, coat=0.5)
 def pivot_rot(o, pivot_mm, rx=0.0, ry=0.0, rz=0.0):
     pv = Vector(P(*pivot_mm)); o.data.transform(__import__("mathutils").Matrix.Translation(-pv)); o.location = pv; o.rotation_euler = (rx, ry, rz)
+def book_obj(name, x0, s0, z0, w, d, h, tone):
+    """A hardback as it is made: two boards and a spine wrapped round a page block set 3 mm inside them."""
+    bm = bmesh.new(); bt = min(2.6, w * 0.12)
+    def part(a0, b0, c0, a1, b1, c1, mi):
+        r = bmesh.ops.create_cube(bm, size=1.0)
+        for v in r["verts"]:
+            v.co.x = (x0 + (a0 if v.co.x < 0 else a1)) / 1000; v.co.y = -(s0 + (b0 if v.co.y < 0 else b1)) / 1000; v.co.z = (z0 + (c0 if v.co.z < 0 else c1)) / 1000
+        for f in {f for v in r["verts"] for f in v.link_faces}: f.material_index = mi
+    part(0, 0, 0, bt, d, h, 0); part(w - bt, 0, 0, w, d, h, 0)                         # the boards
+    part(bt, d - 3.0, 0, w - bt, d, h, 0)                                              # the spine, at the front
+    part(bt - 0.2, 3, 3, w - bt + 0.2, d - 3.0, h - 3, 1)                              # the pages, set in
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
+    o = bpy.data.objects.new(name, me); DET.objects.link(o)                  # in room coordinates, like dbox, so pivot_rot works
+    me.materials.append(M_JACKET); me.materials.append(M_PAGEBLOCK); o["tone"] = tone
+    bv = o.modifiers.new("bevel", "BEVEL"); bv.width = 0.0009; bv.segments = 2; bv.limit_method = "ANGLE"
+    return o
 bookx = {}
 for z in (686, 890 + 25, 1160 + 25, 1430 + 25, 1700 + 25):
     top = min([zz for zz in (890, 1160, 1430, 1700, 2039) if zz > z + 10]); room_h = top - z - 15
-    x = 70 + rng.uniform(0, 30); nb = 0
+    x = 70 + rng.uniform(0, 30); nb = 0; setn = 0; set_tone = set_h = set_w = set_d = 0
     while x < book - 90:
         r_ = rng.random()
         if r_ < 0.06:                                               # a small stack lying flat
@@ -474,7 +528,7 @@ for z in (686, 890 + 25, 1160 + 25, 1430 + 25, 1700 + 25):
             for q in range(n_):
                 hh = rng.uniform(20, 42); xo = rng.uniform(-6, 6)
                 o = dbox(f"bks{x:.0f}{zz:.0f}", x + xo, 22 + rng.uniform(-4, 4), zz, x + xo + w_ - q * 4, 22 + d_, zz + hh, M_JACKET)
-                bevel(o, 0.002, 2); pivot_rot(o, (x + w_ / 2, 22 + d_ / 2, zz), 0, 0, rng.uniform(-0.05, 0.05)); zz += hh
+                o["tone"] = rng.random(); bevel(o, 0.002, 2); pivot_rot(o, (x + w_ / 2, 22 + d_ / 2, zz), 0, 0, rng.uniform(-0.05, 0.05)); zz += hh
             if rng.random() < 0.6 and zz + 90 < top:                 # an object on top of the stack
                 bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=0.03, depth=0.07, location=P(x + w_ / 2, 22 + d_ / 2, zz + 38))
                 setmat(bpy.context.active_object, M_BRASS)
@@ -492,13 +546,17 @@ for z in (686, 890 + 25, 1160 + 25, 1430 + 25, 1700 + 25):
                 bpy.ops.mesh.primitive_cone_add(vertices=40, radius1=0.05, radius2=0.085, depth=0.06, location=P(ox, 120, z + 32)); setmat(bpy.context.active_object, M_BRASS)
             x += 150; continue
         if r_ < 0.14: x += rng.uniform(40, 130); continue          # a gap
-        w_ = rng.choice([rng.uniform(16, 26), rng.uniform(24, 40), rng.uniform(34, 56)])
-        h_ = min(rng.choice([rng.uniform(170, 215), rng.uniform(205, 250), rng.uniform(240, 275)]), room_h)
-        d_ = rng.uniform(150, 225); y0 = 22 + rng.uniform(0, 28)
-        o = dbox(f"bk{x:.0f}{z:.0f}", x, y0, z, x + w_, y0 + d_, z + h_, M_JACKET); bevel(o, 0.003, 2)
+        if setn <= 0:                                                 # start a new run: a set of volumes, or a few odd books
+            setn = rng.choice([1, 1, 2, 3, 4, 6, 8]); set_tone = rng.random()
+            set_h = min(rng.choice([rng.uniform(178, 205), rng.uniform(205, 240), rng.uniform(235, 280)]), room_h)
+            set_w = rng.choice([rng.uniform(18, 28), rng.uniform(26, 40), rng.uniform(36, 55)]); set_d = rng.uniform(150, 230)
+        tone = min(0.999, max(0.0, set_tone + (rng.uniform(-0.03, 0.03) if setn > 1 else 0)))
+        w_ = set_w * rng.uniform(0.92, 1.08); h_ = min(set_h * rng.uniform(0.985, 1.0), room_h); d_ = set_d * rng.uniform(0.97, 1.0)
+        front = STUDY - 12 - rng.uniform(0, 14); y0 = max(22, front - d_)                 # spines near the shelf's front edge
+        o = book_obj(f"bk{x:.0f}{z:.0f}", x, y0, z, w_, d_, h_, tone); setn -= 1
         if rng.random() < 0.07 and nb:                                # a leaning book: rests against its neighbour
-            pivot_rot(o, (x + w_ / 2, y0 + d_ / 2, z), 0, rng.choice([-1, 1]) * rng.uniform(0.08, 0.2), 0); x += w_ + 22
-        else: x += w_ + rng.uniform(0, 2.5)
+            pivot_rot(o, (x + w_ / 2, y0 + d_ / 2, z), 0, rng.choice([-1, 1]) * rng.uniform(0.08, 0.2), 0); x += w_ + 22; setn = 0
+        else: x += w_ + rng.uniform(0.3, 2.0)
         nb += 1
 # the bookcase strip light, under the head rail
 ld = bpy.data.lights.new("book_strip", "AREA"); ld.shape = "RECTANGLE"; ld.size, ld.size_y = (book - 120) / 1000, 0.03; ld.energy = 35; warm(ld, 2700)
@@ -694,6 +752,9 @@ try:                                                                  # white-ba
     sc.view_settings.white_balance_temperature = float(os.environ.get("WB", 3700))
 except Exception as e: print("white balance?", e)
 
+if os.environ.get("REAL4", "1") != "0":                              # stage 4: the realism pass (bedding, styling, depth, night, lens)
+    exec(compile(open(os.path.join(HERE, "realism.py")).read(), "realism.py", "exec"))
+
 EYE_R = 1600; LENS_R = float(os.environ.get("LENS", 18))
 VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
     "room": ((1200, 5000), (2600, 600, 1250)),
@@ -710,6 +771,11 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
     "h_dress": ((4950, 4400, 1500), (8536, 4356, 1450)),
     "h_vanity": ((6150, 1050, 1450), (6600, 2718, 1000)),
     "h_wardrobe": ((4950, 3720, 1450), (6600, 5080, 1300)),     # the south wardrobes, from the aisle by the dressing door
+    # stage-4 test views: (camera, target, {lens, fstop}) — a real lens, not the 18 mm walk lens
+    "r_room": ((350, 5300, 1450), (2700, 2600, 1100), {"lens": 22, "fstop": 5.6}),
+    "r_bed": ((3700, 3250, 1350), (2200, 5500, 750), {"lens": 30, "fstop": 4.0}),
+    "r_desk": ((3000, 2750, 1250), (2000, 1250, 820), {"lens": 40, "fstop": 2.8}),
+    "r_study": ((2337, 3700, 1500), (2337, 0, 1300), {"lens": 22, "fstop": 8.0}),
     "vanity": ((6250, 1150, 1400), (6600, 2718, 950)),
     "door": ((2600, 3500), (-177, 5200, 1250)),
     "dress": ((4900, 4450), (8400, 4356, 1500)),
@@ -724,10 +790,14 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
     "window": ((3000, 1900, 1550), (3950, 0, 1450)),
 }
 def shoot(name):
-    cp, tp = VIEWS[name]
+    cp, tp = VIEWS[name][:2]
+    op = VIEWS[name][2] if len(VIEWS[name]) > 2 else {}
     cz = cp[2] if len(cp) > 2 else EYE_R
-    c_ = cam("r_" + name, LENS_R); c_.location = P(cp[0], cp[1], cz)
-    if name.startswith("h_"):      # hero stills: camera held level and raised/lowered by lens shift, so walls stay upright
+    c_ = cam("r_" + name, op.get("lens", LENS_R)); c_.location = P(cp[0], cp[1], cz)
+    if "fstop" in op:
+        c_.data.dof.use_dof = True; c_.data.dof.aperture_fstop = op["fstop"]
+        c_.data.dof.focus_distance = (Vector(P(*tp)) - c_.location).length
+    if name.startswith(("h_", "r_")):      # hero stills: camera held level and raised/lowered by lens shift, so walls stay upright
         aim(c_, P(tp[0], tp[1], cz)); d_ = math.hypot(tp[0] - cp[0], tp[1] - cp[1])
         c_.data.shift_y = c_.data.lens * (tp[2] - cz) / d_ / c_.data.sensor_width
     else: aim(c_, P(*tp))
@@ -843,5 +913,7 @@ if MODER in ("still", "stills"):
     for d in ("door_d2",): sc.objects[d].rotation_euler.z = sc.objects[d]["open"]
     pick = [ONLY] if ONLY else ([v for v in os.environ["STILLS"].split(",")] if os.environ.get("STILLS") else list(VIEWS))
     for n in pick: shoot(n)
+if MODER == "film":                                                      # stage 5: the film of slow composed shots
+    exec(compile(open(os.path.join(HERE, "film.py")).read(), "film.py", "exec"))
 bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUTR, "real.blend"))
 print("DONE", MODER)
