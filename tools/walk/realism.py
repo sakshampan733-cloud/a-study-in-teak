@@ -344,7 +344,7 @@ if sc.objects.get("dk_top"):
     print("monitor on the desk", flush=True)
 
 # ═══════════════════════════ 2c · THE PAINTING (owner, 1 Oct: "a really big painting, landscape") ═════════════
-# 8 ft × 5 ft (2400 × 1500) on the left wall, centred under the air-conditioner, its top 100 mm below it. The owner
+# 8 ft × 5 ft (2400 × 1500) on the left wall, centred under the air-conditioner, its top ~250 mm below it. The owner
 # hasn't chosen the picture: a stand-in, a tonal dusk landscape in oils, in a slim antique gilt frame.
 def oil_landscape():
     m, nt, b = node_mat("painting_landscape"); b.inputs["Roughness"].default_value = 0.45; b.inputs["Coat Weight"].default_value = 0.35
@@ -394,7 +394,7 @@ def oil_landscape():
 ac_ = sc.objects.get("ac")
 if ac_:
     ax0, as0, az0, ax1, as1, az1 = bb(ac_)
-    PW_, PH_ = 2400.0, 1500.0; pc_s = (as0 + as1) / 2; ptop = az0 - 100; pz0 = ptop - PH_
+    PW_, PH_ = 2400.0, 1500.0; pc_s = (as0 + as1) / 2; ptop = az0 - 100 - 152; pz0 = ptop - PH_    # 6 in lower (owner): clear of the AC
     wall_x = BED["xLs"]                                                          # the left wall's face here
     M_GILT = flat("antique_gilt", (0.55, 0.40, 0.17), 0.38, 1.0); rough_var(M_GILT.node_tree, M_GILT.node_tree.nodes["Principled BSDF"], 0.12, 25.0)
     def pbox(name, x0, s0, z0, x1, s1, z1, m, bv=0.002):
