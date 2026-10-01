@@ -636,7 +636,8 @@ def curtain():
     for o_ in [o for o in sc.objects if o.name.startswith("curtain_track") and o.name != "curtain_track2"]: bpy.data.objects.remove(o_, do_unlink=True)
     tb = sc.objects.get("tieback")
     if tb: tb.location = (0, 0, 0)
-curtain()
+# 1 Oct: the owner wants the curtain out for now (it hid the window and panelling); keep curtain() for when it returns
+for o_ in [o for o in sc.objects if o.name.startswith("curtain") or o.name == "tieback"]: bpy.data.objects.remove(o_, do_unlink=True)
 
 # ── the corridor outside the front door, wider and longer than the stub furnish.py left ──
 for o_ in [o for o in sc.objects if o.name.startswith("cor_")]: bpy.data.objects.remove(o_, do_unlink=True)
@@ -702,6 +703,12 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
     "bed": ((2300, 3000), (2337, 5766, 900)),
     "left": ((3750, 4900), (-50, 2700, 1450)),
     "outside": ((-2500, 5200), (-177, 5230, 1200)),
+    "h_study": ((2400, 3300, 1450), (2200, 0, 1250)),
+    "h_bedwall": ((2300, 2400, 1400), (2337, 5766, 1000)),
+    "h_right": ((900, 2900, 1450), (4547, 2600, 1300)),
+    "h_desk": ((1500, 380, 1250), (2400, 1700, 650)),
+    "h_dress": ((4950, 4400, 1500), (8536, 4356, 1450)),
+    "h_vanity": ((6150, 1050, 1450), (6600, 2718, 1000)),
     "vanity": ((6250, 1150, 1400), (6600, 2718, 950)),
     "door": ((2600, 3500), (-177, 5200, 1250)),
     "dress": ((4900, 4450), (8400, 4356, 1500)),
@@ -828,6 +835,7 @@ if MODER == "stops":                                                    # a quic
 if MODER in ("still", "stills"):
     sc.render.resolution_x, sc.render.resolution_y = int(os.environ.get("RX", 1280)), int(os.environ.get("RY", 720))
     for d in ("door_d2",): sc.objects[d].rotation_euler.z = sc.objects[d]["open"]
-    for n in ([ONLY] if ONLY else VIEWS): shoot(n)
+    pick = [ONLY] if ONLY else ([v for v in os.environ["STILLS"].split(",")] if os.environ.get("STILLS") else list(VIEWS))
+    for n in pick: shoot(n)
 bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUTR, "real.blend"))
 print("DONE", MODER)
