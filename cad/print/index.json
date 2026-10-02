@@ -24,8 +24,8 @@
   "starts": [
    0
   ],
-  "pages": 7,
-  "pagesA4": 7
+  "pages": 5,
+  "pagesA4": 5
  },
  "door": {
   "title": "DOOR D1 — 7 FT 7 IN × 3 FT",
@@ -38,8 +38,8 @@
   "starts": [
    0
   ],
-  "pages": 8,
-  "pagesA4": 8
+  "pages": 7,
+  "pagesA4": 7
  },
  "door-narrow": {
   "title": "DOOR D2 · D3 — 7 FT 7 IN × 2 FT 6 IN",
@@ -52,8 +52,8 @@
   "starts": [
    0
   ],
-  "pages": 8,
-  "pagesA4": 8
+  "pages": 7,
+  "pagesA4": 7
  },
  "architrave": {
   "title": "DOOR CASINGS",
@@ -66,8 +66,8 @@
   "starts": [
    0
   ],
-  "pages": 9,
-  "pagesA4": 9
+  "pages": 8,
+  "pagesA4": 8
  },
  "casingb": {
   "title": "DOOR CASINGS — OPTION B",
@@ -193,8 +193,8 @@
   "starts": [
    0
   ],
-  "pages": 3,
-  "pagesA4": 3
+  "pages": 2,
+  "pagesA4": 2
  },
  "vanity": {
   "title": "VANITY — NORMAL",

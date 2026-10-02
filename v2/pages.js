@@ -565,7 +565,7 @@ function lbFit() {
   LB.y = Math.max(0, (body.clientHeight - inner.offsetHeight) / 2);
   lbApply();
 }
-function lbClose() { const lb = $("#lightbox"); lb.hidden = true; lb.innerHTML = ""; document.documentElement.classList.remove("lb-open", "pv-open"); }
+function lbClose() { const lb = $("#lightbox"); lb.hidden = true; lb.innerHTML = ""; document.documentElement.classList.remove("lb-open", "pv-open"); window.__lenis?.start(); }
 
 // ── large print: a drawing's enlarged pages one under another, read like a PDF; − and + widen the pages ──
 function openPrint(f, at) {
@@ -573,9 +573,10 @@ function openPrint(f, at) {
   const src = (i) => `../cad/print/${f}-${String(i + 1).padStart(2, "0")}.webp`;
   lb.innerHTML = `<div class="lb-bar"><span class="mono" style="font-size:11px;color:var(--dim)">${esc(name)} · large print · ${S.pages} pages</span>
     <div class="grp"><a class="btn" href="../cad/print/${f}.pdf" download>A3 PDF</a><a class="btn" href="../cad/print/${f}-a4.pdf" download>A4 PDF</a><button class="btn" data-pz="-">−</button><button class="btn" data-pz="+">+</button><button class="btn" data-z="x">Close</button></div></div>
-    <div class="pv-body"><div class="pv-pages">${Array.from({ length: S.pages }, (_, i) => `<figure class="pv-page" id="pv-${i}"><img src="${src(i)}" alt="Page ${i + 1} of ${S.pages}" width="1985" height="1404" loading="${Math.abs(i - at) < 2 ? "eager" : "lazy"}" decoding="async"></figure>`).join("")}</div></div>`;
+    <div class="pv-body" data-lenis-prevent><div class="pv-pages">${Array.from({ length: S.pages }, (_, i) => `<figure class="pv-page" id="pv-${i}"><img src="${src(i)}" alt="Page ${i + 1} of ${S.pages}" width="1985" height="1404" loading="${Math.abs(i - at) < 2 ? "eager" : "lazy"}" decoding="async"></figure>`).join("")}</div></div>`;
   lb.hidden = false;
   document.documentElement.classList.add("pv-open");
+  window.__lenis?.stop();                                    // the page's smooth scroll would otherwise swallow the wheel and touch
   if (at) requestAnimationFrame(() => lb.querySelector("#pv-" + at)?.scrollIntoView());
 }
 document.addEventListener("click", (e) => {

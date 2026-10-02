@@ -121,14 +121,17 @@ const PREPARE = String.raw`
     let u = null; [...el.children].forEach((k) => { if (!/^(clippath|defs|pattern|style)$/i.test(k.tagName)) u = join(u, painted(k)); });
     return u;
   };
-  const collect = (el) => {
+  // each piece keeps its own markup (wrapped in the plain groups it sat in, for their stroke and fill), so a view's
+  // page can be drawn from its own pieces alone — no neighbour bleeding in at the edges
+  const collect = (el, wrap = []) => {
     const tag = el.tagName.toLowerCase();
     if (tag === "style" || tag === "defs" || el.hasAttribute("data-tb")) return;
-    if (tag === "g" && !el.getAttribute("transform") && !el.classList.contains("dk-dim") && el.children.length > 1) return [...el.children].forEach(collect);
+    if (tag === "g" && !el.getAttribute("transform") && !el.classList.contains("dk-dim") && el.children.length > 1)
+      return [...el.children].forEach((k) => collect(k, wrap.concat("<g " + [...el.attributes].map((a) => a.name + '="' + a.value.replace(/"/g, "&quot;") + '"').join(" ") + ">")));
     const r = painted(el); if (!r || (r[2] - r[0] <= 0 && r[3] - r[1] <= 0)) return;
-    els.push([(r[0] - sr.left) / unit, (r[1] - sr.top) / unit, (r[2] - sr.left) / unit, (r[3] - sr.top) / unit]);
+    els.push([(r[0] - sr.left) / unit, (r[1] - sr.top) / unit, (r[2] - sr.left) / unit, (r[3] - sr.top) / unit, wrap.join("") + el.outerHTML + "</g>".repeat(wrap.length), tag]);
   };
-  [...svg.children].forEach(collect);
+  [...svg.children].forEach((k) => collect(k));
   return { title, dwg, changed, left, occ, heads, tbBox, els };
 })()`;
 
@@ -161,12 +164,12 @@ function findViews(occ, tbBox, heads, els) {
   const span = (h, g) => Math.min(h.x + h.w, g.x + g.w) - Math.max(h.x, g.x);           // how far two headings' rules overlap
   H.forEach((h) => { h.bottom = Math.min(288, ...H.filter((g) => g !== h && g.y > h.y + 3 && (span(h, g) > 8 || (g.x >= h.x - 25 && g.x < h.x + h.w - 8))).map((g) => g.top)); });
   H.forEach((h) => { h.right = Math.min(411, ...H.filter((g) => g.x > h.x + 5 && g.top < h.bottom && g.bottom > h.top + 1).map((g) => g.x - 1.5)); });
-  const views = H.map((h) => ({ name: h.t, cell: { x0: h.x - 2, y0: h.top, x1: h.right, y1: h.bottom }, x0: h.x, y0: h.y - 3, x1: h.x + h.w, y1: h.y + 5.5, n: 1 }));
+  const views = H.map((h) => ({ name: h.t, cell: { x0: h.x - 2, y0: h.top, x1: h.right, y1: h.bottom }, x0: h.x, y0: h.y - 3, x1: h.x + h.w, y1: h.y + 5.5, n: 1, els: [] }));
   // each piece goes to the cell that holds its centre (the one whose heading is nearest above, where cells overlap)
   const strays = [];
-  els.forEach(([x0, y0, x1, y1]) => {
+  els.forEach(([x0, y0, x1, y1], i) => {
     if (x1 < 9 || y1 < 9 || x0 > 411 || y0 > 288 || (x0 >= tbBox[0] - 0.5 && y0 >= tbBox[1] - 0.5)) return;
-    const c = { x0: Math.max(9, x0), y0: Math.max(9, y0), x1: Math.min(411, x1), y1: Math.min(288, y1), n: 1 }, cx = (c.x0 + c.x1) / 2, cy = (c.y0 + c.y1) / 2;
+    const c = { x0: Math.max(9, x0), y0: Math.max(9, y0), x1: Math.min(411, x1), y1: Math.min(288, y1), n: 1, i }, cx = (c.x0 + c.x1) / 2, cy = (c.y0 + c.y1) / 2;
     if (c.x1 - c.x0 > 380 && c.y1 - c.y0 > 250) return;                             // a backdrop, not a drawn piece
     const home = views.filter((v) => cx >= v.cell.x0 && cx < v.cell.x1 && cy >= v.cell.y0 && cy < v.cell.y1).sort((a, b) => b.cell.y0 - a.cell.y0)[0]
       || views.filter((v) => gapOf(c, v) < 14).sort((a, b) => gapOf(c, a) - gapOf(c, b))[0];
@@ -174,10 +177,51 @@ function findViews(occ, tbBox, heads, els) {
     // a piece may run a little past its cell (a dimension, a long elevation); a piece that runs far past it is a cut line
     // or an unclipped hatch — keep only the part near the cell
     const M = 60, k = home.cell;
+    home.els.push(i);
     if (home.cell) grow(home, { x0: Math.max(c.x0, k.x0 - M), y0: Math.max(c.y0, k.y0 - M), x1: Math.min(c.x1, k.x1 + M), y1: Math.min(c.y1, k.y1 + M), n: 1 });
   });
+  // a label and its leader go to the view the leader POINTS AT (its far end), even when the label sits over in the
+  // next view's cell; a second line stacked under a label follows it. Headings never move.
+  const owner = new Map(); views.forEach((v) => v.els.forEach((i) => owner.set(i, v)));
+  const B = (i) => ({ x0: els[i][0], y0: els[i][1], x1: els[i][2], y1: els[i][3] });
+  const cellAt = (x, y) => views.filter((v) => x >= v.cell.x0 && x < v.cell.x1 && y >= v.cell.y0 && y < v.cell.y1).sort((a, b) => b.cell.y0 - a.cell.y0)[0];
+  const isHead = (i) => /font-size="3(\.\d+)?"/.test(els[i][4]);
+  const leaders = [...owner.keys()].filter((i) => /^(path|line|polyline|g)$/.test(els[i][5]) && !/transform=/.test(els[i][4].slice(0, 200)) && (els[i][2] - els[i][0]) > 4);
+  const texts = [...owner.keys()].filter((i) => els[i][5] === "text" && !isHead(i)).sort((a, b) => els[a][1] - els[b][1]);
+  const movedLines = new Map();
+  const move = (i, to) => { const from = owner.get(i); if (!to || from === to) return; from.els.splice(from.els.indexOf(i), 1); to.els.push(i); owner.set(i, to); grow(to, { ...B(i), n: 0 });
+    if (els[i][5] !== "text" && els[i][5] !== "circle") movedLines.set(i, to); };
+  const moved = new Map(), claimed = new Map();                                  // leader → the label it belongs to
+  texts.forEach((t) => {
+    const T = B(t), mid = (T.y0 + T.y1) / 2;
+    const above = [...moved.keys()].find((m) => Math.abs(B(m).x0 - T.x0) < 0.6 && T.y0 - B(m).y1 < 3 && T.y0 > B(m).y0);
+    if (above) { move(t, moved.get(above)); moved.set(t, moved.get(above)); return; }
+    for (const l of leaders) {
+      if (claimed.has(l)) continue;
+      const b = B(l), right = Math.abs(b.x1 - T.x0) < 2.5, left = Math.abs(b.x0 - T.x1) < 2.5;
+      const nearTop = Math.abs(b.y0 - mid) < 2.2, nearBot = Math.abs(b.y1 - mid) < 2.2;
+      if (!(right || left) || !(nearTop || nearBot)) continue;
+      const fx = right ? b.x0 : b.x1, fy = nearTop ? b.y1 : b.y0;                      // the end away from the label
+      const under = [...owner.keys()].filter((i) => i !== l && els[i][5] !== "text" && els[i][5] !== "circle" && (els[i][2] - els[i][0]) * (els[i][3] - els[i][1]) > 4 && !leaders.includes(i) && fx >= els[i][0] - 1 && fx <= els[i][2] + 1 && fy >= els[i][1] - 1 && fy <= els[i][3] + 1)
+        .sort((p, q) => (els[p][2] - els[p][0]) * (els[p][3] - els[p][1]) - (els[q][2] - els[q][0]) * (els[q][3] - els[q][1]))[0];
+      const to = under !== undefined ? owner.get(under) : cellAt(fx, fy);               // the drawing it points at
+      if (!to) break;
+      claimed.set(l, t); move(t, to); move(l, to); moved.set(t, to);
+      break;
+    }
+  });
+  // every leader that touches a moved label follows it (a label can carry a leader drawn as two pieces)
+  moved.forEach((to, t) => { const T = B(t), mid = (T.y0 + T.y1) / 2;
+    [...owner.keys()].filter((i) => /^(path|line|polyline)$/.test(els[i][5]) || (els[i][5] === "g" && !/transform=/.test(els[i][4].slice(0, 200))))
+      .forEach((l) => { const b = B(l);
+        if ((!claimed.has(l) || claimed.get(l) === t) && (Math.abs(b.x1 - T.x0) < 2.5 || Math.abs(b.x0 - T.x1) < 2.5) && (Math.abs(b.y0 - mid) < 2.5 || Math.abs(b.y1 - mid) < 2.5)) move(l, to); }); });
+  // and the dot at a moved leader's end goes with it
+  movedLines.forEach((to, l) => { const b = B(l);
+    [...owner.keys()].filter((i) => els[i][5] === "circle" && (els[i][2] - els[i][0]) < 2).forEach((c) => {
+      const cx = (els[c][0] + els[c][2]) / 2, cy = (els[c][1] + els[c][3]) / 2;
+      if ([[b.x0, b.y0], [b.x0, b.y1], [b.x1, b.y0], [b.x1, b.y1]].some(([x, y]) => Math.hypot(cx - x, cy - y) < 1.2)) move(c, to); }); });
   const extra = [];
-  strays.forEach((c) => { const e = extra.find((v) => gapOf(c, v) < 12); if (e) grow(e, c); else extra.push({ name: "", ...c }); });
+  strays.forEach((c) => { const e = extra.find((v) => gapOf(c, v) < 12); if (e) { grow(e, c); e.els.push(c.i); } else extra.push({ name: "", ...c, els: [c.i] }); });
   if (process.env.DEBUG_VIEWS) views.concat(extra).forEach((v) => console.log("   ", (v.name || "-").padEnd(36), [v.x0, v.y0, v.x1, v.y1].map((n) => Math.round(n)).join(","), v.n, v.cell ? [v.cell.x0, v.cell.y0, v.cell.x1, v.cell.y1].map(Math.round).join(",") : ""));
   return views.filter((v) => v.n > 1).concat(extra)
     .sort((a, b) => (Math.abs(a.y0 - b.y0) < 20 ? a.x0 - b.x0 : a.y0 - b.y0));
@@ -197,6 +241,8 @@ function planPages(sheet, P) {
     const name = r.name || "Detail";
     // each view whole on one page, as large as the page allows — never cut into pieces (owner, 2 Oct: the cut-up
     // enlargements looked wrong)
+    // a view that would print no bigger than it already does on the whole-sheet page gets no page of its own
+    if (fit < 1.35 * Math.min(BW / 420, BH / 297)) return;
     pages.push({ view: r, box: [r.x0 - PAD, r.y0 - PAD, w, h], s: Math.min(fit, P.MAXS), name, part: "" });
   });
   return pages;
@@ -219,6 +265,7 @@ const prefixIds = (s, p) => s.replace(/\bid="([^"]+)"/g, `id="${p}-$1"`).replace
 function familyHTML(famTitle, sheets, P) {
   const BW = P.W - 2 * P.M, BH = P.H - P.HEAD - P.FOOT - 3, t = (v) => (v * P.T).toFixed(2) + "mm", mm = (v) => v.toFixed(2) + "mm";
   const plans = sheets.map((sh) => planPages(sh, P));
+  if (process.env.PLAN_REPORT && P.suffix === "") sheets.forEach((sh, i) => plans[i].forEach((p) => console.log("PLAN", sh.key, JSON.stringify(p.name), p.box.map(Math.round).join(","), p.s.toFixed(2))));
   const total = plans.reduce((a, p) => a + p.length + 1, 0);
   let defs = "", body = "", n = 0;
   const starts = [];
@@ -230,11 +277,14 @@ function familyHTML(famTitle, sheets, P) {
     const id = "S" + si, pages = plans[si];
     starts.push(n);
     defs += `<g id="${id}">${prefixIds(sh.inner, id)}</g>`;
+    // each view's own pieces, on their own: its page shows nothing else (the sheet's patterns and clips stay in the whole)
+    sh.views.forEach((v, k) => { if (v.els) defs += `<g id="${id}v${k}">${prefixIds(v.els.map((i) => sh.els[i][4]).join(""), id).replace(/\bid="[^"]+"/g, "")}</g>`; });
     const s0 = Math.min(BW / 420, BH / 297);
     body += page(sh, `The whole sheet — then each view on its own page, ${n + 2} to ${n + 1 + pages.length}`, "",
       `<svg viewBox="0 0 420 297" style="width:${mm(420 * s0)};height:${mm(297 * s0)}"><rect x="8" y="8" width="404" height="281" fill="#fff" stroke="#000" stroke-width="0.6"/><use href="#${id}"/></svg>`);
     pages.forEach((p) => { const [x, y, w, h] = p.box;
-      body += page(sh, p.name, p.part, `<svg viewBox="${x} ${y} ${w} ${h}" style="width:${mm(w * p.s)};height:${mm(h * p.s)}"><use href="#${id}"/></svg>`); });
+      const k = sh.views.indexOf(p.view), ref = p.view.els ? `${id}v${k}` : id;
+      body += page(sh, p.name, p.part, `<svg viewBox="${x} ${y} ${w} ${h}" style="width:${mm(w * p.s)};height:${mm(h * p.s)}"><use href="#${ref}"/></svg>`); });
   });
   return { total, starts, html: `<!doctype html><html><head><meta charset="utf-8"><title>${esc(famTitle)}</title><style>
     @page { size: ${P.W}mm ${P.H}mm; margin: 0 } html, body { margin: 0; padding: 0; background: #fff; font-family: Helvetica, Arial, sans-serif; color: #000; }
@@ -272,7 +322,7 @@ function familyHTML(famTitle, sheets, P) {
       const prep = await pg.evaluate(PREPARE);
       const inner = await pg.evaluate(() => document.querySelector("svg").innerHTML);
       const views = findViews(prep.occ, prep.tbBox, prep.heads, prep.els);
-      sheets.push({ key: k, title: prep.title, dwg: prep.dwg, inner, occ: prep.occ, heads: prep.heads, views });
+      sheets.push({ key: k, title: prep.title, dwg: prep.dwg, inner, occ: prep.occ, heads: prep.heads, views, els: prep.els });
       report.push(`\n${k}: ${views.length} views, ${prep.changed.length} notes converted`);
       prep.changed.forEach((c) => report.push("   ✓ " + c));
       prep.left.forEach((c) => report.push("   ? " + c));
