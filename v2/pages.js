@@ -162,6 +162,7 @@ function overview() {
     ["The dressing-room door", 37.5], ["The dressing room", 43], ["The vault", 48.5], ["The vanity", 53.5]];
   const walk = `<section class="section" style="padding-bottom:24px">${head("The walk-through", "Walk the rooms.", "Rendered in Blender from the drawings, in the real finishes and light: in through the door, the partition, the study and desk, the bed, the dressing room and the vanity. The bed back, the way the curved drawers open and the wardrobe interiors are not designed yet, so they are shown as placeholders.")}</section>
     <section class="film reveal" id="film"><div class="wrap"><div class="film-frame"><video controls playsinline preload="none" poster="media/room-film-poster.jpg"></video></div>
+      <div class="film-music"><div id="film-spotify"></div></div>
       <div class="film-chapters">${FILM.map(([n, t], k) => `<button class="btn" data-film="${t}"><span class="mono">${pad2(k + 1)}</span>${esc(n)}</button>`).join("")}</div></div></section>`;
   const plan2d = `<section class="section">${head("The plan", "Switch things on and off.", "The whole suite from above. Show the measurements and the lights, and put each piece of furniture in or take it out, one at a time.")}
     <div class="wrap reveal"><div class="p2d" id="p2d"></div></div></section>`;
@@ -200,6 +201,20 @@ function pageHero(id, eyebrow, title, prose, flankR) {
 function mountFilm(el) {
   const v = el.querySelector("video"), small = matchMedia("(max-width: 760px)").matches || navigator.connection?.saveData;
   v.src = small ? "media/room-film-720.mp4" : "media/room-film.mp4";
+  mountSoundtrack(v);
+}
+// The soundtrack (owner, 2 Oct): Devil In A New Dress, Kanye West ft. Rick Ross. The song can't be hosted here, so it
+// plays through Spotify's own player, which the film drives: play starts it, pause and the end stop it. Spotify plays
+// the whole song to a listener logged in to Spotify in this browser, and a 30-second preview to anyone else.
+const SOUNDTRACK = "spotify:track:1UGD3lW3tDmgZfAVDh6w7r";
+function mountSoundtrack(v) {
+  const box = $("#film-spotify"); if (!box || box.dataset.on) return; box.dataset.on = "1";
+  window.onSpotifyIframeApiReady = (API) => API.createController(box, { uri: SOUNDTRACK, width: "100%", height: 80 }, (c) => {
+    v.addEventListener("play", () => { if (v.currentTime < 0.5) c.restart(); else c.resume(); });
+    v.addEventListener("pause", () => c.pause());
+    v.addEventListener("ended", () => c.pause());
+  });
+  const sc = document.createElement("script"); sc.src = "https://open.spotify.com/embed/iframe-api/v1"; sc.async = true; document.head.appendChild(sc);
 }
 document.addEventListener("click", (e) => {
   const b = e.target.closest("[data-film]"); if (!b) return;
