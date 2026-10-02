@@ -1,8 +1,9 @@
 // Large-print drawing sets, for printing and for the carpenter (owner, 2 Oct): every drawing the site shows, made
-// legible. Each A3 sheet prints first whole, on a page of its own, then every view on it (elevation, plan, section,
-// detail, notes) whole on a page of its own, as large as the page allows up to three times the A3 size. Feet and
-// inches only (the mm layer is dropped and any mm left in the notes converted). Strong colour for a weak printer:
-// drawing black, dimension lines red, measurements green and bold, notes dark blue, every line heavier.
+// legible, in the style of the owner's sister's A4 vanity set (2 Oct). Each A3 sheet prints first whole, then every
+// view on it (elevation, plan, section, detail, notes) on a page of its own at a true standard scale with a scale bar,
+// its lettering brought up to a readable printed size, under a title block (project · sheet · scale · date · rev ·
+// drawing n of N) and a red print note. Feet and inches only (the mm layer is dropped and any mm left in the notes
+// converted). Drawing black, every line heavier; dimension lines and figures one dark red; notes dark grey.
 //
 // Out, in cad/print/:  <family>.pdf, <family>-a4.pdf   one PDF per drawing or option — all its sheets, every page
 //                      <family>-NN.webp                the A3 pages as images, for the scrolling viewer on the site
@@ -38,7 +39,7 @@ const PREPARE = String.raw`
 (async () => {
   const FR = ["", "⅛", "¼", "⅜", "½", "⅝", "¾", "⅞"];
   const ftin = (mm) => { const t = Math.round(mm / 25.4 * 8) / 8; let ft = Math.floor(t / 12), r = t - ft * 12, w = Math.floor(r), e = Math.round((r - w) * 8);
-    if (e === 8) { e = 0; w++; } if (w === 12) { w = 0; ft++; } const i = w + FR[e] + '"'; return ft ? ft + "'-" + i : i; };
+    if (e === 8) { e = 0; w++; } if (w === 12) { w = 0; ft++; } const i = (w || !e ? w : "") + FR[e] + '"'; return ft ? ft + "'-" + i : i; };
   const IMP = "(?:\\d+[½¼¾⅛⅜⅝⅞]?|[½¼¾⅛⅜⅝⅞])\\s?(?:in|IN)\\b|\\d+\\s?(?:ft|FT)(?:\\s?\\d+(?:[½¼¾⅛⅜⅝⅞])?\\s?(?:in|IN)\\b)?";
   const KEEP = [/\b9292\b/g, /\bREVISION \d+/g, /\bREF\. \d+/g];                // a veneer code, revision and reference numbers — not sizes
   const FIX = { "6 AND 10 IN": "0¼\" AND 0⅜\" IN" };                          // single figures that are mm, said in words
@@ -47,7 +48,7 @@ const PREPARE = String.raw`
     KEEP.forEach((re) => (o = o.replace(re, (m) => { kept.push(m); return "\u0000" + (kept.length - 1) + "\u0001"; })));
     if (FIX[o.trim()]) return FIX[o.trim()];
     const SC = "(?:APPROX\\s+)?(?:SCALE\\s+)?1:\\d+(?:\\.\\d+)?";                // a scale means nothing once the page is enlarged
-    o = o.replace(new RegExp("\\s*·\\s*" + SC, "g"), "").replace(new RegExp("\\b" + SC + "\\s*·\\s*", "g"), "").replace(new RegExp("\\b" + SC, "g"), "NOT TO SCALE");
+    o = o.replace(new RegExp("\\s*·\\s*" + SC, "g"), "").replace(new RegExp("\\b" + SC + "\\s*·\\s*", "g"), "").replace(new RegExp("\\b" + SC, "g"), "");
     o = o.replace(new RegExp("(" + IMP + ")\\s*\\(\\s*\\d{2,5}\\s*\\)", "g"), "$1");                    // 2 ft 3 in (686)
     o = o.replace(new RegExp("(\\d{2,5}(?:\\.\\d+)?)(\\s+[A-Za-z]+)?\\s*\\(\\s*(?:" + IMP + ")[^)]*\\)", "g"), (m, n, w) => ftin(+n) + (w || ""));  // 1219 (4 FT)
     o = o.replace(new RegExp("(\\d{2,5})\\s*·\\s*(?:" + IMP + ")", "g"), (m, n) => ftin(+n));          // 948 · 3 FT 1 IN
@@ -68,6 +69,17 @@ const PREPARE = String.raw`
   const tb = svg.querySelector("[data-tb]"), tbt = tb ? [...tb.querySelectorAll("text")].map((t) => t.textContent.trim()) : [];
   const di = tbt.indexOf("DWG"), dwg = di >= 0 ? tbt[di + 1] : "";
   const title = tbt[2] || "";                                                  // the sheet's own title, under the project name
+  const pick = (k) => { const i = tbt.indexOf(k); return i >= 0 ? tbt[i + 1] || "" : ""; };
+  const date = pick("DATE"), rev = (pick("REV").split(" ")[0] || ""), tsub = tbt[3] || "";
+  // each heading's subtitle, before the notes are converted: it carries the view's drawing scale ("1:10"); mark it,
+  // so each page can put its own printed scale there
+  const subOrig = new Map(), texts0 = [...svg.querySelectorAll("text")];
+  texts0.forEach((t) => {
+    if (t.closest("[data-tb]")) return; const fs = +t.getAttribute("font-size"); if (fs < 3 || fs > 3.6) return;
+    const x = +t.getAttribute("x"), y = +t.getAttribute("y");
+    const u = texts0.find((u) => Math.abs(+u.getAttribute("x") - x) < 0.01 && Math.abs(+u.getAttribute("y") - y - 4.8) < 0.05);
+    if (u) { u.setAttribute("data-sub", "1"); subOrig.set(t, u.textContent); }
+  });
   const changed = [], left = [];
   svg.querySelectorAll("text").forEach((t) => {
     if (t.closest("[data-tb]")) return;
@@ -100,7 +112,7 @@ const PREPARE = String.raw`
   const rules = [...svg.querySelectorAll("line")].map((l) => [+l.getAttribute("x1"), +l.getAttribute("y1"), +l.getAttribute("x2"), +l.getAttribute("y2")]);
   const heads = [...svg.querySelectorAll("text")].filter((t) => !t.closest("[data-tb]") && +t.getAttribute("font-size") >= 3 && +t.getAttribute("font-size") <= 3.6)
     .map((t) => { const x = +t.getAttribute("x"), y = +t.getAttribute("y"), r = rules.find((l) => Math.abs(l[0] - x) < 0.01 && Math.abs(l[1] - y - 1.5) < 0.01);
-      return { t: t.textContent.trim(), x, y, w: r ? r[2] - r[0] : 0 }; }).filter((h) => h.w > 0);
+      return { t: t.textContent.trim(), x, y, w: r ? r[2] - r[0] : 0, sub: subOrig.get(t) || "" }; }).filter((h) => h.w > 0);
   const tbBox = tb ? (() => { const r = tb.querySelector("rect"); return r ? [+r.getAttribute("x"), +r.getAttribute("y")] : [300, 239]; })() : [420, 297];
   // the drawn pieces, each with its box on the sheet: top-level elements, opening plain groups that just gather things
   const sr = svg.getBoundingClientRect(), els = [];
@@ -132,7 +144,7 @@ const PREPARE = String.raw`
     els.push([(r[0] - sr.left) / unit, (r[1] - sr.top) / unit, (r[2] - sr.left) / unit, (r[3] - sr.top) / unit, wrap.join("") + el.outerHTML + "</g>".repeat(wrap.length), tag]);
   };
   [...svg.children].forEach((k) => collect(k));
-  return { title, dwg, changed, left, occ, heads, tbBox, els };
+  return { title, dwg, date, rev, tsub, changed, left, occ, heads, tbBox, els };
 })()`;
 
 // ── views: each heading claims a cell (down to the next heading in its column, across to the next one to its right);
@@ -164,7 +176,7 @@ function findViews(occ, tbBox, heads, els) {
   const span = (h, g) => Math.min(h.x + h.w, g.x + g.w) - Math.max(h.x, g.x);           // how far two headings' rules overlap
   H.forEach((h) => { h.bottom = Math.min(288, ...H.filter((g) => g !== h && g.y > h.y + 3 && (span(h, g) > 8 || (g.x >= h.x - 25 && g.x < h.x + h.w - 8))).map((g) => g.top)); });
   H.forEach((h) => { h.right = Math.min(411, ...H.filter((g) => g.x > h.x + 5 && g.top < h.bottom && g.bottom > h.top + 1).map((g) => g.x - 1.5)); });
-  const views = H.map((h) => ({ name: h.t, cell: { x0: h.x - 2, y0: h.top, x1: h.right, y1: h.bottom }, x0: h.x, y0: h.y - 3, x1: h.x + h.w, y1: h.y + 5.5, n: 1, els: [] }));
+  const views = H.map((h) => ({ name: h.t, nts: /APPROX|AXONOMETRIC|ISOMETRIC|NOT TO SCALE/i.test(h.sub), den: (/APPROX|AXONOMETRIC|ISOMETRIC|NOT TO SCALE/i.test(h.sub) ? 0 : +((h.sub.match(/\b1:(\d+(?:\.\d+)?)/) || [])[1] || 0)), cell: { x0: h.x - 2, y0: h.top, x1: h.right, y1: h.bottom }, x0: h.x, y0: h.y - 3, x1: h.x + h.w, y1: h.y + 5.5, n: 1, els: [] }));
   // each piece goes to the cell that holds its centre (the one whose heading is nearest above, where cells overlap)
   const strays = [];
   els.forEach(([x0, y0, x1, y1], i) => {
@@ -226,81 +238,126 @@ function findViews(occ, tbBox, heads, els) {
   return views.filter((v) => v.n > 1).concat(extra)
     .sort((a, b) => (Math.abs(a.y0 - b.y0) < 20 ? a.x0 - b.x0 : a.y0 - b.y0));
 }
-// ── paper ────────────────────────────────────────────────────────────────────────────────────────────────────────
+// ── paper, after the owner's sister's A4 set (2 Oct): a frame, each view at a true standard scale with a scale bar,
+// a title block (project · sheet · scale · date · rev · drawing n of N) and a red print note under the frame ─────────
 const PAPERS = {
-  // MAXS caps the enlargement (in printed mm per A3 mm), so a small detail is not blown up out of all proportion
-  a3: { suffix: "", W: 420, H: 297, M: 8, HEAD: 16, FOOT: 11, T: 1, MAXS: 3 },
-  a4: { suffix: "-a4", W: 297, H: 210, M: 6, HEAD: 12, FOOT: 8.5, T: 0.75, MAXS: 3 },
+  a3: { suffix: "", name: "A3", W: 420, H: 297, F: 8, TB: 19, PADX: 9, SB: 11, T: 1.25, MAXS: 3 },
+  a4: { suffix: "-a4", name: "A4", W: 297, H: 210, F: 6, TB: 15, PADX: 7, SB: 9, T: 1, MAXS: 3 },
 };
 const PAD = 2.5;
+const area = (P) => ({ x: P.F + P.PADX, y: P.F + P.PADX, w: P.W - 2 * P.F - 2 * P.PADX, h: P.H - 2 * P.F - P.TB - 2 * P.PADX - P.SB });
+// the standard scales a view may print at (1:N), and the ones a carpenter's foot rule reads directly
+const STD = [1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 16, 20, 24, 25, 30, 32, 40, 48, 50, 60, 75, 96, 100];
+const IMPERIAL = { 2: `6" = 1'-0"`, 3: `4" = 1'-0"`, 4: `3" = 1'-0"`, 6: `2" = 1'-0"`, 8: `1½" = 1'-0"`, 12: `1" = 1'-0"`, 16: `¾" = 1'-0"`, 24: `½" = 1'-0"`, 32: `⅜" = 1'-0"`, 48: `¼" = 1'-0"`, 96: `⅛" = 1'-0"` };
 function planPages(sheet, P) {
-  const BW = P.W - 2 * P.M, BH = P.H - P.HEAD - P.FOOT - 3;
-  const pages = [];
+  const A = area(P), pages = [];
   sheet.views.forEach((r) => {
-    const w = r.x1 - r.x0 + 2 * PAD, h = r.y1 - r.y0 + 2 * PAD, fit = Math.min(BW / w, BH / h);
-    const name = r.name || "Detail";
-    // each view whole on one page, as large as the page allows — never cut into pieces (owner, 2 Oct: the cut-up
-    // enlargements looked wrong)
-    // a view that would print no bigger than it already does on the whole-sheet page gets no page of its own
-    if (fit < 1.35 * Math.min(BW / 420, BH / 297)) return;
-    pages.push({ view: r, box: [r.x0 - PAD, r.y0 - PAD, w, h], s: Math.min(fit, P.MAXS), name, part: "" });
+    const w = r.x1 - r.x0 + 2 * PAD, h = r.y1 - r.y0 + 2 * PAD, fit = Math.min(A.w / w, A.h / h);
+    // a view that would print no bigger than it does on the whole-sheet page gets no page of its own
+    if (fit < 1.35 * Math.min(A.w / 420, A.h / 297)) return;
+    // the largest standard scale the page holds; a view drawn to no scale (3D, notes, tables) just fills the page
+    let s = Math.min(fit, P.MAXS), N = 0;
+    if (r.den) { const want = r.den / s; N = STD.find((n) => n >= want - 1e-6) || 0; if (N) s = r.den / N; }
+    pages.push({ view: r, box: [r.x0 - PAD, r.y0 - PAD, w, h], s, N, name: r.name || "Detail" });
   });
   return pages;
 }
+const FR = ["", "⅛", "¼", "⅜", "½", "⅝", "¾", "⅞"];
+const ftin = (inch) => { const t = Math.round(inch * 8) / 8, ft = Math.floor(t / 12), r = t - ft * 12, w = Math.floor(r), e = Math.round((r - w) * 8);
+  const ins = (w || !e ? String(w) : "") + FR[e] + '"'; return ft ? `${ft}'-${ins}` : ins; };
+// a scale bar in feet and inches, six bays, about 50–110 mm long on the paper
+const scaleBar = (N, P) => {
+  const per = 25.4 / N, seg = [0.25, 0.5, 1, 2, 3, 6, 12, 24, 36, 60, 120].find((g) => 6 * g * per >= 45 * P.T) || 120;
+  const L = 6 * seg * per, fs = 2.3 * P.T, top = fs + 1, bh = 1.8 * P.T;
+  let g = "";
+  for (let i = 0; i < 6; i++) g += `<rect x="${(i * seg * per).toFixed(2)}" y="${top}" width="${(seg * per).toFixed(2)}" height="${bh.toFixed(2)}" fill="${i % 2 ? "#fff" : "#111"}" stroke="#111" stroke-width="0.25"/>`;
+  for (let i = 0; i <= 6; i++) g += `<text x="${(i * seg * per).toFixed(2)}" y="${fs.toFixed(2)}" font-size="${fs.toFixed(2)}" text-anchor="${i ? "middle" : "start"}" font-weight="600">${ftin(i * seg)}</text>`;
+  return `<svg viewBox="-1 0 ${(L + 8).toFixed(2)} ${(top + bh + 0.5).toFixed(2)}" style="width:${(L + 9).toFixed(2)}mm;height:${(top + bh + 0.5).toFixed(2)}mm">${g}</svg>`;
+};
+// title-block wording: "VANITY — SCHEME C" → "Vanity — Scheme C"; a view heading in sentence case
+const titleCase = (t) => t.toLowerCase().replace(/(^|[\s(—·-])([a-z])/g, (m, a, c) => a + c.toUpperCase())
+  .replace(/\b(\d+) (Ft|In)\b/g, (m, n, u) => `${n} ${u.toLowerCase()}`).replace(/ (And|Of|The|In|To|A|On|At) /g, (m) => m.toLowerCase());
+const sentence = (t) => { const l = t.toLowerCase(); return (l[0] || "").toUpperCase() + l.slice(1); };
+const fixCaps = (t) => t.replace(/\b([a-z])–([a-z])\b/g, (m) => m.toUpperCase()).replace(/\bd(\d)\b/g, "D$1").replace(/\b(\d+)b\b/g, "$1B");
 
 const STYLE = `
   text { font-weight: 600; }
   text[font-weight="700"], text[font-weight="bold"] { font-weight: 800; }
   [stroke="#1b1b1b"], [stroke="#2a2a2a"], [stroke="#111"], [stroke="#222"], [stroke="#333"] { stroke: #000 !important; }
   [fill="#1b1b1b"], [fill="#2a2a2a"], [fill="#111"], [fill="#222"], [fill="#333"] { fill: #000 !important; }
-  text[fill="#666"], text[fill="#6f6f6f"], text[fill="#777"], text[fill="#888"], text[fill="#8c8c8c"], text[fill="#999"], text[fill="#555"] { fill: #12308a !important; }
+  text[fill="#666"], text[fill="#6f6f6f"], text[fill="#777"], text[fill="#888"], text[fill="#8c8c8c"], text[fill="#999"], text[fill="#555"] { fill: #3d3d3d !important; font-weight: 500; }
   [stroke="#666"], [stroke="#6f6f6f"], [stroke="#777"], [stroke="#888"], [stroke="#8c8c8c"], [stroke="#999"], [stroke="#9a9a9a"], [stroke="#aaa"], [stroke="#bbb"] { stroke: #333 !important; }
-  [stroke="#8a3a22"], .dk-dim line, .dk-dim path, .dk-dim polyline { stroke: #e00000 !important; }
-  text[fill="#8a3a22"], text.dk-in { fill: #007a33 !important; font-weight: 800 !important; }`;
+  [stroke="#8a3a22"], .dk-dim line, .dk-dim path, .dk-dim polyline { stroke: #a51d17 !important; }
+  text[fill="#8a3a22"], text.dk-in { fill: #a51d17 !important; font-weight: 600 !important; }`;
 
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
 const prefixIds = (s, p) => s.replace(/\bid="([^"]+)"/g, `id="${p}-$1"`).replace(/url\(#([^)]+)\)/g, `url(#${p}-$1)`).replace(/href="#([^"]+)"/g, `href="#${p}-$1"`);
 
-// one document per family and paper: every sheet defined once, every page a window onto it
+// one document per family and paper: every sheet defined once for its whole-sheet page; every view's page drawn from
+// that view's own pieces, at its printed scale, with the lettering brought up to a readable printed size
 function familyHTML(famTitle, sheets, P) {
-  const BW = P.W - 2 * P.M, BH = P.H - P.HEAD - P.FOOT - 3, t = (v) => (v * P.T).toFixed(2) + "mm", mm = (v) => v.toFixed(2) + "mm";
+  const A = area(P), mm = (v) => v.toFixed(2) + "mm", t = (v) => (v * P.T).toFixed(2) + "mm";
   const plans = sheets.map((sh) => planPages(sh, P));
-  if (process.env.PLAN_REPORT && P.suffix === "") sheets.forEach((sh, i) => plans[i].forEach((p) => console.log("PLAN", sh.key, JSON.stringify(p.name), p.box.map(Math.round).join(","), p.s.toFixed(2))));
+  if (process.env.PLAN_REPORT && P.suffix === "") sheets.forEach((sh, i) => plans[i].forEach((p) => console.log("PLAN", sh.key, JSON.stringify(p.name), p.box.map(Math.round).join(","), p.s.toFixed(2), p.N ? "1:" + p.N : "NTS")));
   const total = plans.reduce((a, p) => a + p.length + 1, 0);
   let defs = "", body = "", n = 0;
   const starts = [];
-  const legend = `<span class="lg"><i style="background:#000"></i>drawing</span><span class="lg"><i style="background:#e00000"></i>dimension line</span><span class="lg"><b style="color:#007a33">5'-2½"</b> measurement</span><span class="lg"><b style="color:#12308a">Aa</b> note</span>`;
-  const page = (sh, title, part, inner) => { n++;
-    return `<section class="pg"><header><div class="t">${esc(sh.dwg)}  ${esc(sh.title)}</div><div class="v">${esc(title)}${part ? `<span>${esc(part)}</span>` : ""}</div><div class="n">${n}/${total}</div></header>
-      <div class="box">${inner}</div><footer>${legend}<span class="sc">All sizes in feet and inches. Go by the written sizes — never measure the paper.</span></footer></section>`; };
+  const note = `ALL DIMENSIONS IN FEET &amp; INCHES. &nbsp;PRINT ON ${P.name} AT 100% / “ACTUAL SIZE” — NOT “FIT TO PAGE” — AND CHECK THE SCALE BAR. &nbsp;DO NOT SCALE; WORK TO FIGURED DIMENSIONS. &nbsp;VERIFY ON SITE.`;
+  const page = (sh, sheetName, sheetSub, scale, inner, bar) => { n++;
+    return `<section class="pg"><div class="frame"></div><div class="area">${inner}</div>${bar ? `<div class="bar">${bar}</div>` : ""}
+      <div class="tb"><div><i>PROJECT</i><b class="v">A Study in Teak — ${esc(titleCase(sh.title))}</b></div>
+        <div><i>SHEET</i><b class="v strong">${esc(sheetName)}</b><span>${esc(sheetSub)}</span></div>
+        <div><i>SCALE</i><b class="v">${esc(scale)}</b></div><div><i>DATE</i><b class="v">${esc(sh.date)}</b></div>
+        <div><i>REV</i><b class="v">${esc(sh.rev)}</b></div><div><i>DRAWING</i><b class="v strong">${esc(sh.dwg)} · ${n} of ${total}</b></div></div>
+      <div class="note">${note}</div></section>`; };
   sheets.forEach((sh, si) => {
     const id = "S" + si, pages = plans[si];
     starts.push(n);
     defs += `<g id="${id}">${prefixIds(sh.inner, id)}</g>`;
-    // each view's own pieces, on their own: its page shows nothing else (the sheet's patterns and clips stay in the whole)
-    sh.views.forEach((v, k) => { if (v.els) defs += `<g id="${id}v${k}">${prefixIds(v.els.map((i) => sh.els[i][4]).join(""), id).replace(/\bid="[^"]+"/g, "")}</g>`; });
-    const s0 = Math.min(BW / 420, BH / 297);
-    body += page(sh, `The whole sheet — then each view on its own page, ${n + 2} to ${n + 1 + pages.length}`, "",
-      `<svg viewBox="0 0 420 297" style="width:${mm(420 * s0)};height:${mm(297 * s0)}"><rect x="8" y="8" width="404" height="281" fill="#fff" stroke="#000" stroke-width="0.6"/><use href="#${id}"/></svg>`);
-    pages.forEach((p) => { const [x, y, w, h] = p.box;
-      const k = sh.views.indexOf(p.view), ref = p.view.els ? `${id}v${k}` : id;
-      body += page(sh, p.name, p.part, `<svg viewBox="${x} ${y} ${w} ${h}" style="width:${mm(w * p.s)};height:${mm(h * p.s)}"><use href="#${ref}"/></svg>`); });
+    const s0 = Math.min(A.w / 420, A.h / 297);
+    body += page(sh, "General arrangement — the whole sheet", `${pages.length ? `each view follows at its own scale, pages ${n + 2} to ${n + 1 + pages.length}` : sh.tsub}`, "NTS",
+      `<svg viewBox="0 0 420 297" style="width:${mm(420 * s0)};height:${mm(297 * s0)}"><use href="#${id}"/></svg>`, "");
+    pages.forEach((p, pi) => {
+      const [x, y, w, h] = p.box, ref = `${id}p${pi}`;
+      // the subtitle states the printed scale; a 3D view says it has none; a table or notes says nothing
+      const scaleText = p.N ? `SCALE 1:${p.N}${IMPERIAL[p.N] ? ` (${IMPERIAL[p.N]})` : p.N === 1 ? " (FULL SIZE)" : ""} @ ${P.name}` : p.view.nts ? "NOT TO SCALE" : "";
+      const src = p.view.els ? p.view.els.map((i) => sh.els[i][4]).join("") : sh.inner;
+      // lettering up to a size a carpenter reads easily on the paper — figures about 3.2 mm, notes about 2.4 mm —
+      // within limits, so nothing grows into the drawing; the subtitle takes this page's real scale
+      const html = prefixIds(src, id).replace(/\bid="[^"]+"/g, "").replace(/<text\b([^>]*)>([^<]*)<\/text>/g, (m, at, tx) => {
+        if (/data-sub="1"/.test(at) && scaleText) tx = scaleText + (tx.trim() ? " · " + tx : "");
+        const fm = at.match(/font-size="([\d.]+)"/);
+        if (fm && +fm[1] >= 3) { const fs = +fm[1], cap = 5.2 * P.T / (p.s * fs); if (cap < 1) at = at.replace(/font-size="[\d.]+"/, `font-size="${(fs * cap).toFixed(3)}"`); }   // headings about 5 mm, as hers
+        if (fm && +fm[1] < 3) {
+          const fs = +fm[1], dim = /class="dk-in"/.test(at), want = (dim ? 3.2 : 2.4) * P.T;
+          const f = Math.min(dim ? 1.45 : 1.4, Math.max(1, want / (p.s * fs)));
+          at = at.replace(/font-size="[\d.]+"/, `font-size="${(fs * f).toFixed(3)}"`);
+        }
+        return `<text${at}>${tx}</text>`; });
+      defs += `<g id="${ref}">${html}</g>`;
+      body += page(sh, fixCaps(sentence(p.name)), sh.tsub, p.N ? `1:${p.N} @ ${P.name}` : "NTS",
+        `<svg viewBox="${x} ${y} ${w} ${h}" style="width:${mm(w * p.s)};height:${mm(h * p.s)}"><use href="#${ref}"/></svg>`, p.N ? scaleBar(p.N, P) : "");
+    });
   });
+  const F = P.F, inner = P.W - 2 * F;
   return { total, starts, html: `<!doctype html><html><head><meta charset="utf-8"><title>${esc(famTitle)}</title><style>
     @page { size: ${P.W}mm ${P.H}mm; margin: 0 } html, body { margin: 0; padding: 0; background: #fff; font-family: Helvetica, Arial, sans-serif; color: #000; }
-    .pg { width: ${P.W}mm; height: ${P.H}mm; page-break-after: always; break-after: page; overflow: hidden; box-sizing: border-box; padding: 0 ${P.M}mm; background: #fff; }
+    .pg { position: relative; width: ${P.W}mm; height: ${P.H}mm; page-break-after: always; break-after: page; overflow: hidden; background: #fff; }
     .pg:last-child { page-break-after: auto; break-after: auto; }
-    header { height: ${P.HEAD}mm; box-sizing: border-box; display: flex; align-items: center; gap: ${t(6)}; border-bottom: ${t(0.9)} solid #000; }
-    header .t { font-size: ${t(5)}; font-weight: 800; white-space: nowrap; }
-    header .v { font-size: ${t(4.6)}; font-weight: 700; color: #12308a; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    header .v span { color: #e00000; margin-left: ${t(4)}; }
-    header .n { font-size: ${t(5.4)}; font-weight: 800; }
-    .box { height: ${BH + 3}mm; display: flex; align-items: center; justify-content: center; }
-    .box svg { display: block; overflow: hidden; }
-    footer { height: ${P.FOOT}mm; box-sizing: border-box; display: flex; align-items: center; gap: ${t(6)}; border-top: ${t(0.6)} solid #000; font-size: ${t(3.6)}; font-weight: 700; white-space: nowrap; }
-    footer .lg i { display: inline-block; width: ${t(8)}; height: ${t(2.4)}; margin-right: ${t(1.6)}; vertical-align: middle; }
-    footer .lg b { margin-right: ${t(1.2)}; }
-    footer .sc { margin-left: auto; }
+    .frame { position: absolute; left: ${F}mm; top: ${F}mm; width: ${inner}mm; height: ${P.H - 2 * F}mm; box-sizing: border-box; border: ${t(0.45)} solid #222; }
+    .area { position: absolute; left: ${mm(A.x)}; top: ${mm(A.y)}; width: ${mm(A.w)}; height: ${mm(A.h)}; }
+    .area svg { display: block; overflow: hidden; }
+    .bar { position: absolute; left: ${mm(A.x)}; top: ${mm(A.y + A.h + 1.5)}; font-family: Helvetica, Arial, sans-serif; }
+    .bar svg { display: block; }
+    .tb { position: absolute; left: ${F}mm; top: ${P.H - F - P.TB}mm; width: ${inner}mm; height: ${P.TB}mm; box-sizing: border-box; border-top: ${t(0.35)} solid #222;
+      display: grid; grid-template-columns: 25% 32% 12% 10% 6% 15%; }
+    .tb > div { border-left: ${t(0.3)} solid #222; padding: ${t(1.6)} ${t(2)} 0; overflow: hidden; }
+    .tb > div:first-child { border-left: 0; }
+    .tb i { display: block; font-style: normal; font-size: ${t(2)}; color: #666; letter-spacing: .04em; }
+    .tb .v { display: block; font-weight: 500; font-size: ${t(3.3)}; margin-top: ${t(1.6)}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tb .v.strong { font-weight: 800; }
+    .tb span { display: block; font-size: ${t(2.1)}; color: #555; margin-top: ${t(0.5)}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .note { position: absolute; left: ${F + 1}mm; top: ${P.H - F + 1.2}mm; font-size: ${t(1.95)}; color: #a51d17; letter-spacing: .02em; white-space: nowrap; }
     ${STYLE}
   </style></head><body><svg width="0" height="0" style="position:absolute"><defs>${defs}</defs></svg>${body}</body></html>` };
 }
@@ -322,7 +379,7 @@ function familyHTML(famTitle, sheets, P) {
       const prep = await pg.evaluate(PREPARE);
       const inner = await pg.evaluate(() => document.querySelector("svg").innerHTML);
       const views = findViews(prep.occ, prep.tbBox, prep.heads, prep.els);
-      sheets.push({ key: k, title: prep.title, dwg: prep.dwg, inner, occ: prep.occ, heads: prep.heads, views, els: prep.els });
+      sheets.push({ key: k, title: prep.title, dwg: prep.dwg, date: prep.date, rev: prep.rev, tsub: prep.tsub, inner, occ: prep.occ, heads: prep.heads, views, els: prep.els });
       report.push(`\n${k}: ${views.length} views, ${prep.changed.length} notes converted`);
       prep.changed.forEach((c) => report.push("   ✓ " + c));
       prep.left.forEach((c) => report.push("   ? " + c));

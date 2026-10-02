@@ -34,7 +34,7 @@ window.DK = (function () {
     let whole = Math.floor(rest), eighths = Math.round((rest - whole) * 8);
     if (eighths === 8) { eighths = 0; whole += 1; }
     if (whole === 12) { whole = 0; ft += 1; }
-    const inch = `${whole}${FR[eighths]}"`;
+    const inch = `${whole || !eighths ? whole : ""}${FR[eighths]}"`;          // ¾", not 0¾"
     return ft ? `${ft}'-${inch}` : inch;
   }
   // A chain label may be a bare number ("4547") or a number with words ("4547 WALL (14 FT 11 IN)").

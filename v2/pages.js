@@ -163,6 +163,7 @@ function overview() {
   const walk = `<section class="section" style="padding-bottom:24px">${head("The walk-through", "Walk the rooms.", "Rendered in Blender from the drawings, in the real finishes and light: in through the door, the partition, the study and desk, the bed, the dressing room and the vanity. The bed back, the way the curved drawers open and the wardrobe interiors are not designed yet, so they are shown as placeholders.")}</section>
     <section class="film reveal" id="film"><div class="wrap"><div class="film-frame"><video controls playsinline muted preload="none" poster="media/room-film-poster.jpg"></video></div>
       <div class="film-music"><div id="film-spotify"></div></div>
+      <p class="film-hint mono" hidden>Spotify is playing its 30-second preview, which starts partway into the song and stops after 30 seconds. Log in at open.spotify.com in this browser, reload, and the whole song plays from the start with the film.</p>
       <div class="film-chapters">${FILM.map(([n, t], k) => `<button class="btn" data-film="${t}"><span class="mono">${pad2(k + 1)}</span>${esc(n)}</button>`).join("")}</div></div></section>`;
   const plan2d = `<section class="section">${head("The plan", "Switch things on and off.", "The whole suite from above. Show the measurements and the lights, and put each piece of furniture in or take it out, one at a time.")}
     <div class="wrap reveal"><div class="p2d" id="p2d"></div></div></section>`;
@@ -216,6 +217,8 @@ function mountSoundtrack(v) {
     v.addEventListener("seeked", () => { if (!v.paused) c.seek(v.currentTime); });
     v.addEventListener("pause", () => c.pause());
     v.addEventListener("ended", () => c.pause());
+    // a listener who isn't logged in to Spotify gets a 30-second preview cut from the middle of the song: say so
+    c.addListener("playback_update", (e) => { const d = e?.data?.duration; if (d && d < 31000) { const h = $("#film .film-hint"); if (h) h.hidden = false; } });
   });
   const sc = document.createElement("script"); sc.src = "https://open.spotify.com/embed/iframe-api/v1"; sc.async = true; document.head.appendChild(sc);
 }
