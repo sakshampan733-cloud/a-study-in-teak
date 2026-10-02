@@ -156,8 +156,13 @@ function overview() {
     <div class="wrap"><div class="plan-grid reveal"><div class="panel" style="padding:12px">${plans}</div>
     <div class="panel"><div class="facts">${P.room.facts.map((f) => `<div class="k">${esc(f.k)}</div><div class="v">${esc(f.v)}</div>`).join("")}</div></div></div></div></section>`;
 
-  const walk = `<section class="section" style="padding-bottom:24px">${head("The walk-through", "Scroll, and walk the rooms.", "Rendered in Blender from the drawings — every wall to the inch, every moulding to its profile, in its real finish and light — the bedroom, the study, the dressing room and the bathroom vanity.")}</section>
-    <section class="walk" id="walk"></section>`;
+  // The film: the rendered walk-through (tools/walk/make_film.sh), shot by shot. Start times are seconds into the film —
+  // each shot is 12 frames shorter than it was rendered, where it dissolves into the next.
+  const FILM = [["From the door", 0], ["The reveal", 5.75], ["The partition", 11.25], ["The study", 16.25], ["The desk", 21.25], ["The sconces", 26.25], ["The bed", 31.75],
+    ["The dressing-room door", 37.5], ["The dressing room", 43], ["The vault", 48.5], ["The vanity", 53.5]];
+  const walk = `<section class="section" style="padding-bottom:24px">${head("The walk-through", "Walk the rooms.", "Rendered in Blender from the drawings, in the real finishes and light: in through the door, the partition, the study and desk, the bed, the dressing room and the vanity. The bed back, the way the curved drawers open and the wardrobe interiors are not designed yet, so they are shown as placeholders.")}</section>
+    <section class="film reveal" id="film"><div class="wrap"><div class="film-frame"><video controls playsinline preload="none" poster="media/room-film-poster.jpg"></video></div>
+      <div class="film-chapters">${FILM.map(([n, t], k) => `<button class="btn" data-film="${t}"><span class="mono">${pad2(k + 1)}</span>${esc(n)}</button>`).join("")}</div></div></section>`;
   const plan2d = `<section class="section">${head("The plan", "Switch things on and off.", "The whole suite from above. Show the measurements and the lights, and put each piece of furniture in or take it out, one at a time.")}
     <div class="wrap reveal"><div class="p2d" id="p2d"></div></div></section>`;
 
@@ -191,12 +196,25 @@ function pageHero(id, eyebrow, title, prose, flankR) {
 // The three-dimensional room lives on the overview; it is rebuilt whenever that page renders.
 // Each viewer is built only as it comes within a screen of view: all four sit below the hero, and building them at
 // once was an 80 ms frame (on a slow phone) in the middle of the hero loop.
+// the film: a phone, or a connection set to save data, gets the 720p file (5 MB) rather than the 1080p one (37 MB)
+function mountFilm(el) {
+  const v = el.querySelector("video"), small = matchMedia("(max-width: 760px)").matches || navigator.connection?.saveData;
+  v.src = small ? "media/room-film-720.mp4" : "media/room-film.mp4";
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-film]"); if (!b) return;
+  const v = $("#film video"); if (!v) return;
+  if (!v.src) mountFilm($("#film"));
+  const go = () => { v.currentTime = +b.dataset.film; v.play().catch(() => {}); };
+  if (v.readyState) go(); else { v.addEventListener("loadedmetadata", go, { once: true }); v.load(); }
+  v.scrollIntoView({ behavior: "smooth", block: "center" });
+});
 let mounts;
 function mountModel() {
   mounts?.disconnect();
   const jobs = [
     ["m3d", () => window.MODEL3D?.mount, (el) => window.MODEL3D.mount(el), "Model unavailable"],
-    ["walk", () => window.WALK?.mount, (el) => window.WALK.mount(el), null],
+    ["film", () => true, mountFilm, null],
     ["p2d", () => window.SUITE2D?.mount, (el) => window.SUITE2D.mount(el), "Plan unavailable"],
     ["p3d", () => window.PARTITION3D?.mount, (el) => window.PARTITION3D.mount(el, { tv: true }), "Model unavailable"],
   ];
