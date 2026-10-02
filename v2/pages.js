@@ -161,7 +161,7 @@ function overview() {
   const FILM = [["From the door", 0], ["The reveal", 5.75], ["The partition", 11.25], ["The study", 16.25], ["The desk", 21.25], ["The sconces", 26.25], ["The bed", 31.75],
     ["The dressing-room door", 37.5], ["The dressing room", 43], ["The vault", 48.5], ["The vanity", 53.5]];
   const walk = `<section class="section" style="padding-bottom:24px">${head("The walk-through", "Walk the rooms.", "Rendered in Blender from the drawings, in the real finishes and light: in through the door, the partition, the study and desk, the bed, the dressing room and the vanity. The bed back, the way the curved drawers open and the wardrobe interiors are not designed yet, so they are shown as placeholders.")}</section>
-    <section class="film reveal" id="film"><div class="wrap"><div class="film-frame"><video controls playsinline preload="none" poster="media/room-film-poster.jpg"></video></div>
+    <section class="film reveal" id="film"><div class="wrap"><div class="film-frame"><video controls playsinline muted preload="none" poster="media/room-film-poster.jpg"></video></div>
       <div class="film-music"><div id="film-spotify"></div></div>
       <div class="film-chapters">${FILM.map(([n, t], k) => `<button class="btn" data-film="${t}"><span class="mono">${pad2(k + 1)}</span>${esc(n)}</button>`).join("")}</div></div></section>`;
   const plan2d = `<section class="section">${head("The plan", "Switch things on and off.", "The whole suite from above. Show the measurements and the lights, and put each piece of furniture in or take it out, one at a time.")}
@@ -200,17 +200,20 @@ function pageHero(id, eyebrow, title, prose, flankR) {
 // the film: a phone, or a connection set to save data, gets the 720p file (5 MB) rather than the 1080p one (37 MB)
 function mountFilm(el) {
   const v = el.querySelector("video"), small = matchMedia("(max-width: 760px)").matches || navigator.connection?.saveData;
+  if (v.getAttribute("src")) return;                       // already set up: setting src again would reload and stop it
   v.src = small ? "media/room-film-720.mp4" : "media/room-film.mp4";
   mountSoundtrack(v);
 }
 // The soundtrack (owner, 2 Oct): Devil In A New Dress, Kanye West ft. Rick Ross. The song can't be hosted here, so it
-// plays through Spotify's own player, which the film drives: play starts it, pause and the end stop it. Spotify plays
+// plays through Spotify's own player, which the film drives, in step with it: play starts it, pause and the end stop it. Spotify plays
 // the whole song to a listener logged in to Spotify in this browser, and a 30-second preview to anyone else.
 const SOUNDTRACK = "spotify:track:1UGD3lW3tDmgZfAVDh6w7r";
 function mountSoundtrack(v) {
   const box = $("#film-spotify"); if (!box || box.dataset.on) return; box.dataset.on = "1";
   window.onSpotifyIframeApiReady = (API) => API.createController(box, { uri: SOUNDTRACK, width: "100%", height: 80 }, (c) => {
-    v.addEventListener("play", () => { if (v.currentTime < 0.5) c.restart(); else c.resume(); });
+    // the song runs in step with the film: film 0:00 is song 0:00, and a jump in the film jumps the song
+    v.addEventListener("play", () => { if (v.currentTime < 0.5) c.restart(); else { c.seek(v.currentTime); c.resume(); } });
+    v.addEventListener("seeked", () => { if (!v.paused) c.seek(v.currentTime); });
     v.addEventListener("pause", () => c.pause());
     v.addEventListener("ended", () => c.pause());
   });
@@ -220,8 +223,11 @@ document.addEventListener("click", (e) => {
   const b = e.target.closest("[data-film]"); if (!b) return;
   const v = $("#film video"); if (!v) return;
   if (!v.src) mountFilm($("#film"));
-  const go = () => { v.currentTime = +b.dataset.film; v.play().catch(() => {}); };
-  if (v.readyState) go(); else { v.addEventListener("loadedmetadata", go, { once: true }); v.load(); }
+  // jump first, then play, inside the click itself; before the film has loaded, setting the time sets where it
+  // starts (seeking after a pending play could stall it at the start)
+  v.preload = "auto";
+  v.currentTime = +b.dataset.film;
+  v.play().catch(() => {});
   v.scrollIntoView({ behavior: "smooth", block: "center" });
 });
 let mounts;
