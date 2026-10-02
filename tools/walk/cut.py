@@ -31,7 +31,7 @@ blk = ed.strips.new_effect("black", "COLOR", 6, 1, length=end); blk.color = (0, 
 for fr, v in ((1, 1.0), (18, 0.0), (end - 24, 0.0), (end, 1.0)):
     blk.blend_alpha = v; blk.keyframe_insert("blend_alpha", frame=fr)
 im = sc.render.image_settings; im.media_type = "VIDEO"; im.file_format = "FFMPEG"
-ff = sc.render.ffmpeg; ff.format = "MPEG4"; ff.codec = "H264"; ff.constant_rate_factor = "PERC_LOSSLESS"; ff.ffmpeg_preset = "GOOD"
+ff = sc.render.ffmpeg; ff.format = "MPEG4"; ff.codec = "H264"; ff.constant_rate_factor = os.environ.get("CRF", "PERC_LOSSLESS"); ff.ffmpeg_preset = "GOOD"
 ff.gopsize = 24; ff.audio_codec = "NONE"
 sc.view_settings.view_transform = "Standard"
 sc.render.filepath = out
