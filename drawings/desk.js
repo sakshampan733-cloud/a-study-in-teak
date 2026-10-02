@@ -37,8 +37,13 @@ const DESK_SQUARE = { rev: "1 — square corners, every detail kept", date: "30.
 // drops, no carved collars — because it costs more than it is worth, needs a carver and a far finer drawing, and
 // would never come out like the reference anyway. What stays is the joinery a good carpenter runs with a moulder:
 // the reeded top edge, the cove, the frieze and reeded rail all round, the square panel mouldings, the cockbeaded
-// drawers, a plain bead moulding at each corner and the moulded plinth. Mature, standard, sophisticated.
-const DESK_PLAIN = { rev: "1 — square corners, no carving: mouldings only", date: "02.10.2026" };
+// drawers and the moulded plinth. Mature, standard, sophisticated. Rev 2 (owner, same day): the corner mouldings go
+// too — just the square panel mouldings — and the stiles they needed slim to a plain 1½ in, so the drawers widen.
+// A monitor-arm clamp bay at the back centre: the clamp bites 2–3 in in from the back edge, so the underside of the
+// top is kept clear 4 in in (the frieze back rail and the modesty panel set in to 4 in, the cove stopped, the centre
+// frieze drawer shortened) and its body sits in the 2 in gap behind the desk, before the glass.
+const DESK_PLAIN = { rev: "2 — no corner mouldings, wider drawers, monitor clamp bay", date: "02.10.2026", stile: 38,
+  clamp: { w: 254, back: 102, drop: 89, gap: 51 } };   // bay 10 in wide · clear 4 in in from the back edge · 3½ in under the top · 2 in to the glass
 
 function buildDesk(VAR) {
   const { INK, THIN, DIM, f, text, view, chainH, chainV, bubble, note, heading, cutMark, frame, titleBlock, sheet } = window.DK;
@@ -67,7 +72,9 @@ function buildDesk(VAR) {
   // clear each other at the arris instead of colliding
   const MS = SQUARE ? K.ov + 21 : VC + K.mould.w / 2 - 2;
   // Outer stile on the pedestal front: carcase edge to the far side of the moulding, plus 10.
-  const SO = MS + K.mould.w / 2 - K.ov + 10;
+  const SO = PLAIN ? K.stile : MS + K.mould.w / 2 - K.ov + 10;   // plain: no moulding to clear, a plain 1½ in stile
+  // the modesty panel, 18 thick, at the back of the kneehole — set in to the clamp bay's line on the plain desk
+  const modB = PLAIN ? K.D - K.clamp.back : K.D - K.ov - 22, modF = modB - 18;
   // Outline of a box with hollow corners where flags (TL, TR, BR, BL) are set. Plan: y0 = front.
   function outline(x0, y0, x1, y1, spec, flags = [1, 1, 1, 1], off = 0) {
     const corners = [[x0, y0, 1, 1, false], [x1, y0, -1, 1, true], [x1, y1, -1, -1, false], [x0, y1, 1, -1, true]];
@@ -199,7 +206,12 @@ function buildDesk(VAR) {
   // Outer corner in elevation: the hollow's shading, plus the terminating moulding at each end of the curve —
   // square-on on the face we look at, edge-on (in profile) on the return face at the silhouette.
   // edge = the top's corner line on this view (0 or full width), dir = +1 at the left, -1 at the right.
+  // a monitor-arm C-clamp on the back edge of the top (W = the back edge): plate on the top, body down the back in the
+  // gap to the glass, arm under the top, screw up to a pad 1½ in in from the edge — inside the 4 in clear bay
+  const clampShape = (W) => `<rect x="${W - 76}" y="-14" width="106" height="14"/><rect x="${W + 12}" y="-14" width="18" height="${K.top + 74}"/>`
+    + `<rect x="${W - 60}" y="${K.top + 48}" width="90" height="12"/><line x1="${W - 40}" y1="${K.top + 12}" x2="${W - 40}" y2="${K.top + 48}"/><rect x="${W - 54}" y="${K.top}" width="28" height="12"/>`;
   const cornerMould = (edge, dir, th) => {
+    if (PLAIN) return "";                                     // plain: the corners are just the square panel mouldings
     const M = K.mould, hw = M.w / 2, xf = edge + dir * MS, xs = edge + dir * K.ov, xo = xs - dir * M.proj;
     const yTop = K.top + K.conH, yC1 = yTop + 4, yC2 = yP - 104, yB = yP - 60;
     let o = hollowShade(edge, dir, K.ov, yF0 + 12, yF1, th) + hollowShade(edge, dir, K.ov, yR1, yP, th) + hollowShade(edge, dir, K.ov - K.plP, yP, K.H, th);
@@ -274,12 +286,13 @@ function buildDesk(VAR) {
     o += `<g stroke-width="${th}" stroke-dasharray="${dash}" opacity=".7">`;
     const y0 = K.ov, y1 = K.D - K.ov;
     o += `<path d="${outlinePath(0, 0, pedL[1] + K.ov, K.D, SPEC, [1, 0, 0, 1], K.ov)}"/><path d="${outlinePath(pedR[0] - K.ov, 0, K.L, K.D, SPEC, [0, 1, 1, 0], K.ov)}"/>`;
-    [[0, 0, 1, 1], [K.L, 0, -1, 1], [K.L, K.D, -1, -1], [0, K.D, 1, -1]].forEach(([ox, oy, sx, sy]) => {
+    if (!PLAIN) [[0, 0, 1, 1], [K.L, 0, -1, 1], [K.L, K.D, -1, -1], [0, K.D, 1, -1]].forEach(([ox, oy, sx, sy]) => {
       const M = K.mould, a = ox + sx * K.ov, b = oy + sy * K.ov;
       o += `<rect x="${f(Math.min(ox + sx * (MS - M.w / 2), ox + sx * (MS + M.w / 2)))}" y="${f(Math.min(b, b - sy * M.proj))}" width="${M.w}" height="${M.proj}"/>`;
       o += `<rect x="${f(Math.min(a, a - sx * M.proj))}" y="${f(Math.min(oy + sy * (MS - M.w / 2), oy + sy * (MS + M.w / 2)))}" width="${M.proj}" height="${M.w}"/>`;
     });
-    o += `<line x1="${pedL[1]}" y1="${K.D - K.ov - 40}" x2="${pedR[0]}" y2="${K.D - K.ov - 40}"/></g>`;
+    o += `<line x1="${pedL[1]}" y1="${modF + 9}" x2="${pedR[0]}" y2="${modF + 9}"/></g>`;
+    if (PLAIN) { const C = K.clamp; o += `<rect x="${K.L / 2 - C.w / 2}" y="${K.D - C.back}" width="${C.w}" height="${C.back}" fill="rgba(165,29,23,.08)" stroke="${DIM}" stroke-width="${th * 1.6}" stroke-dasharray="${dash}"/>`; }
     return o;
   }
 
@@ -299,6 +312,10 @@ function buildDesk(VAR) {
       o += `<rect x="${a - K.plP}" y="${yP}" width="${K.ped + 2 * K.plP}" height="${K.plH}"/><line stroke-width="${th}" x1="${a - K.plP}" y1="${yP + 10}" x2="${b + K.plP}" y2="${yP + 10}"/>`;
     });
     o += cornerMould(0, 1, th) + cornerMould(K.L, -1, th);
+    if (PLAIN) {                                              // the clamp bay: frieze and cove stopped, rail set in 4 in
+      const C = K.clamp, x0 = K.L / 2 - C.w / 2;
+      o += `<rect x="${x0}" y="${K.top}" width="${C.w}" height="${yR1 - K.top}" fill="#ece7dc"/><rect x="${x0 + 14}" y="${yF0 + 10}" width="${C.w - 28}" height="${yR1 - yF0 - 20}" stroke-width="${th}"/>`;
+    }
     return o;
   }
 
@@ -313,13 +330,21 @@ function buildDesk(VAR) {
     o += `<g stroke-width="${th}"><rect x="${s0}" y="${yR1}" width="${s1 - s0}" height="${yP - yR1}"/><rect x="${s0 - K.plP}" y="${yP}" width="${s1 - s0 + 2 * K.plP}" height="${K.plH}"/></g>`;
     // drawer: front, bottom, back ; runners
     o += `<rect ${hatch} x="${s0}" y="${yF0 + 3}" width="22" height="${K.frz - 6}"/>`;
-    o += `<rect ${hatch} x="${s0 + 22}" y="${yF1 - 15}" width="${s1 - s0 - 22 - 80}" height="9"/>`;
-    o += `<rect ${hatch} x="${s1 - 80 - 15}" y="${yF0 + 25}" width="15" height="${K.frz - 31}"/>`;
-    o += `<rect stroke-width="${th}" x="${s0 + 22}" y="${yF1 - 6}" width="${s1 - s0 - 60}" height="6"/>`;
+    const short = PLAIN ? 40 : 0;                                        // plain: the centre drawer stops short of the clamp bay
+    o += `<rect ${hatch} x="${s0 + 22}" y="${yF1 - 15}" width="${s1 - s0 - 22 - 80 - short}" height="9"/>`;
+    o += `<rect ${hatch} x="${s1 - 80 - 15 - short}" y="${yF0 + 25}" width="15" height="${K.frz - 31}"/>`;
+    o += `<rect stroke-width="${th}" x="${s0 + 22}" y="${yF1 - 6}" width="${s1 - s0 - 60 - short}" height="6"/>`;
     // front rail, back rail, modesty panel
     o += `<rect ${hatch} x="${s0}" y="${yF1}" width="22" height="${K.rail}"/>`;
-    o += `<rect ${hatch} x="${s1 - 22}" y="${yF0}" width="22" height="${K.frz + K.rail}"/>`;
-    o += `<rect ${hatch} x="${s1 - 40}" y="${yR1}" width="18" height="${K.H - K.modestyUp - yR1}"/>`;
+    const railB = PLAIN ? W - K.clamp.back : s1;                         // plain: set in to 4 in at the clamp bay
+    o += `<rect ${hatch} x="${railB - 22}" y="${yF0}" width="22" height="${K.frz + K.rail}"/>`;
+    o += `<rect ${hatch} x="${modF}" y="${yR1}" width="18" height="${K.H - K.modestyUp - yR1}"/>`;
+    if (PLAIN) {
+      // the monitor-arm clamp (dashed): top plate on the desk, body down the back in the 2 in gap, jaw 3 in under the top
+      const C = K.clamp, d = `stroke-dasharray="${th * 6} ${th * 4}"`;
+      o += `<g fill="none" stroke="${DIM}" stroke-width="${th * 2}" ${d}>${clampShape(W)}<line x1="${W + 21}" y1="-14" x2="${W + 21}" y2="-150"/></g>`;
+      o += `<line x1="${W + C.gap}" y1="-160" x2="${W + C.gap}" y2="${K.H}" stroke-width="${th * 2.5}" stroke-dasharray="${th * 10} ${th * 5}"/>`;   // the glass partition
+    }
     o += `<line x1="-60" y1="${K.H}" x2="${W + 60}" y2="${K.H}" stroke-width="${th * 4}"/>`;
     return o;
   }
@@ -357,11 +382,14 @@ function buildDesk(VAR) {
     topBands.push([K.H - 33.5, K.H - 37, 2.5], [K.H - 37, K.H - K.top, 5]);
     topBands.forEach(([z1, z0, off], i) => add(full(off), z0, z1, { capOcc: i === 0, hatch: z1 - z0 >= 4.9 }));
     // ── cove under the top
-    [[K.H - K.top, K.H - K.top - 4, 12], [K.H - K.top - 4, K.H - K.top - 8, 18], [K.H - K.top - 8, K.H - K.top - 12, 24]].forEach(([z1, z0, off]) => add(full(off), z0, z1, { capOcc: false, hatch: false }));
+    // plain desk: frieze and cove stop at the monitor clamp bay (back centre), the rail behind it set in 4 in
+    const bay = (off) => { if (!PLAIN) return full(off); const C = K.clamp, a = L / 2 - C.w / 2, b = L / 2 + C.w / 2, yN = DD - C.back, yo = DD - off;
+      return { ring: [[off, off], [L - off, off], [L - off, yo], [b, yo], [b, yN], [a, yN], [a, yo], [off, yo]], curved: Array(8).fill(false) }; };
+    [[K.H - K.top, K.H - K.top - 4, 12], [K.H - K.top - 4, K.H - K.top - 8, 18], [K.H - K.top - 8, K.H - K.top - 12, 24]].forEach(([z1, z0, off]) => add(bay(off), z0, z1, { capOcc: false, hatch: false }));
 
     // ── frieze band with drawers
     const zFt = K.H - K.top - 12, zFb = Z(yF1);
-    add(full(ov), zFb, zFt, { capOcc: false });
+    add(bay(ov), zFb, zFt, { capOcc: false });
     const fy = { axis: "y", at: ov, dir: -1 };
     const drawers = [[ov + SO, pedL[1] - K.stile], [pedL[1], pedR[0]], [pedR[0] + K.stile, L - ov - SO]];
     drawers.forEach(([a, b]) => {
@@ -370,7 +398,8 @@ function buildDesk(VAR) {
       frameOn(fy, a + 3, e0, b - 3, e1, 3, 5.5);                              // cockbead
     });
     // frieze back and ends: sunk panels as mouldings
-    [[ov + SO, pedL[1]], [pedL[1], pedR[0]], [pedR[0], L - ov - SO]].forEach(([a, b]) => frameOn({ axis: "y", at: yb, dir: 1 }, a + 16, yF0 + 18, b - 16, yF1 - 6, 3, 4));
+    (PLAIN ? [[ov + SO, pedL[1]], [pedL[1], L / 2 - K.clamp.w / 2], [L / 2 + K.clamp.w / 2, pedR[0]], [pedR[0], L - ov - SO]] : [[ov + SO, pedL[1]], [pedL[1], pedR[0]], [pedR[0], L - ov - SO]])
+      .forEach(([a, b]) => frameOn({ axis: "y", at: yb, dir: 1 }, a + 16, yF0 + 18, b - 16, yF1 - 6, 3, 4));
     frameOn({ axis: "x", at: ov, dir: -1 }, ov + SO + 10, yF0 + 18, yb - SO - 10, yF1 - 6, 3, 4);
     frameOn({ axis: "x", at: L - ov, dir: 1 }, ov + SO + 10, yF0 + 18, yb - SO - 10, yF1 - 6, 3, 4);
 
@@ -378,10 +407,10 @@ function buildDesk(VAR) {
     for (let r = 0; r < 3; r++) { const b = zFb - r * 5; add(full(ov - 1.5), b - 1, b, { capOcc: false, hatch: false }); add(full(ov - 3.5), b - 4, b - 1, { capOcc: false, hatch: false }); add(full(ov - 1.5), b - 5, b - 4, { capOcc: false, hatch: false }); }
 
     // ── modesty panel, framed on both faces
-    add(box(pedL[1], yb - 40, pedR[0], yb - 22), K.modestyUp, Z(yR1));
+    add(box(pedL[1], modF, pedR[0], modB), K.modestyUp, Z(yR1));
     [[pedL[1] + 50, pedL[1] + knee / 2 - 12], [pedL[1] + knee / 2 + 12, pedR[0] - 50]].forEach(([a, b]) => {
-      frameOn({ axis: "y", at: yb - 40, dir: -1 }, a, yR1 + 40, b, K.H - K.modestyUp - 40, 18, 5);
-      frameOn({ axis: "y", at: yb - 22, dir: 1 }, a, yR1 + 40, b, K.H - K.modestyUp - 40, 18, 5);
+      frameOn({ axis: "y", at: modF, dir: -1 }, a, yR1 + 40, b, K.H - K.modestyUp - 40, 18, 5);
+      frameOn({ axis: "y", at: modB, dir: 1 }, a, yR1 + 40, b, K.H - K.modestyUp - 40, 18, 5);
     });
 
     [0, 1].forEach((side) => {
@@ -437,6 +466,7 @@ function buildDesk(VAR) {
         { c: [ox + sx * MS, oy + sy * ov], t: [1, 0], n: [0, -sy] },   // on the front / back face
         { c: [ox + sx * ov, oy + sy * MS], t: [0, 1], n: [-sx, 0] },   // on the end face
       ].forEach(({ c, t, n }) => {
+        if (PLAIN) return;                                   // the plain desk has no corner mouldings at all
         const F = (u, w) => [c[0] + t[0] * u + n[0] * w, c[1] + t[1] * u + n[1] * w];
         const n3 = [n[0], n[1], 0];
         const profile = (hw, bead, fil, steps = 8) => {
@@ -527,22 +557,30 @@ function buildDesk(VAR) {
   s1 += heading(282, 17, "SECTION A–A", `THROUGH KNEEHOLE · 1:${scS} · FRONT ←`, 50);
   s1 += vS.g(section(tS), 0.3);
   s1 += note(vS.X(K.ov + 11), vS.Y(yF0 + 60), vS.X(K.D) + 6, vS.Y(yF0 + 120), "DRAWER FRONT 22", "DOVETAILED, 9 BOTTOM");
-  s1 += note(vS.X(K.D - K.ov - 31), vS.Y(450), vS.X(K.D) + 6, vS.Y(470), "MODESTY PANEL 18", `STOPS ${K.modestyUp} ABOVE FLOOR`);
+  s1 += note(vS.X(modF + 9), vS.Y(450), vS.X(K.D) + 6, vS.Y(470), "MODESTY PANEL 18", `STOPS ${K.modestyUp} ABOVE FLOOR`);
+  if (PLAIN) {
+    const C = K.clamp;
+    s1 += note(vS.X(K.D - 60), vS.Y(K.top + 70), vS.X(K.D) + 6, vS.Y(250), "MONITOR CLAMP BAY", "CLEAR 4 IN IN, 3½ IN UNDER THE TOP");
+    s1 += note(vS.X(K.D + C.gap), vS.Y(-120), vS.X(K.D) + 6, vS.Y(-150), "GLASS PARTITION", "2 IN BEHIND THE DESK");
+    s1 += chainH([vS.X(K.D - C.back), vS.X(K.D), vS.X(K.D + C.gap)], vS.Y(-170), [C.back, C.gap], { from: vS.Y(-10), size: 1.3 });
+  }
   s1 += note(vS.X(K.D - 4), vS.Y(20), vS.X(K.D) + 6, vS.Y(60), "REEDED EDGE", "SEE DETAIL 1");
   s1 += chainV([vS.Y(yF0), vS.Y(yF1)], vS.X(0) - 4, [K.frz], { from: vS.X(K.ov), size: 1.5 });
 
   // Plan (below the front — first-angle projection)
   const vP = view(28, 110, sc, "Plan"), tP = vP.w(0.12);
-  s1 += heading(18, 101, "PLAN", `SCALE 1:${sc} · FRONT AT BOTTOM`, 40);
+  s1 += heading(18, 101, "PLAN", `SCALE 1:${sc} · FRONT AT TOP`, 40);
   s1 += vP.g(plan(tP, `${vP.w(1)} ${vP.w(0.7)}`), 0.3);
   s1 += chainV([vP.Y(0), vP.Y(K.D)], vP.X(K.L) + 13, [K.D], { from: vP.X(K.L) + 1 });
   s1 += note(vP.X(K.L * 0.3), vP.Y(K.D * 0.4), vP.X(K.L * 0.3) + 2, vP.Y(K.D * 0.4) - 2, "PLAIN TEAK TOP", "NO INSET — GRAIN LENGTHWAYS");
   s1 += note(vP.X(pedR[0] + 60), vP.Y(K.D - 60), vP.X(pedR[0] + 60) + 2, vP.Y(K.D - 60) + 1, "PEDESTALS BELOW", "(HIDDEN, DASHED)");
+  if (PLAIN) s1 += note(vP.X(K.L / 2 + K.clamp.w / 2), vP.Y(K.D - K.clamp.back / 2), vP.X(K.L / 2 + K.clamp.w / 2 + 160), vP.Y(K.D + 70), "MONITOR CLAMP BAY — 10 IN WIDE", "UNDERSIDE CLEAR 4 IN IN FROM THE BACK EDGE");
 
   // Back
   const vB = view(176, 110, sc, "Back elevation"), tB = vB.w(0.12);
   s1 += heading(176, 101, "BACK ELEVATION", `SCALE 1:${sc} · IF FREE-STANDING`, 50);
   s1 += vB.g(back(tB) + `<line x1="-60" y1="${K.H}" x2="${K.L + 60}" y2="${K.H}" stroke-width="${vB.w(0.6)}"/>`, 0.3);
+  if (PLAIN) s1 += note(vB.X(K.L / 2), vB.Y(yF0 + 30), vB.X(K.L / 2 + 300), vB.Y(-60), "CLAMP BAY — RAIL SET IN 4 IN", "COVE STOPPED · 10 IN WIDE");
 
   // Axonometric
   s1 += heading(18, 190, "AXONOMETRIC", "NOT TO SCALE · FROM FRONT RIGHT", 45);
@@ -551,15 +589,15 @@ function buildDesk(VAR) {
   // Key + notes
   const kx = 160;
   s1 += heading(kx, 190, "KEY", "PARTS OF THE DESK", 30);
-  ["Top — plain teak, reeded edge", PLAIN ? "Plain stile at the kneehole — no bracket" : "Reeded console bracket", "Frieze drawer, push-to-open", "Reeded rail", SQUARE ? "Square corner, moulding on each face at the corner" : "Hollow corner, moulding at each end of the curve",
+  ["Top — plain teak, reeded edge", PLAIN ? "Plain stile at the kneehole — no bracket" : "Reeded console bracket", "Frieze drawer, push-to-open", "Reeded rail", PLAIN ? "Square corner — plain, no moulding" : SQUARE ? "Square corner, moulding on each face at the corner" : "Hollow corner, moulding at each end of the curve",
    "Pedestal — three drawers each side", "Swan-neck handle + keyhole, every drawer", "Moulded plinth", "Modesty panel in kneehole"]
     .forEach((l, i) => { s1 += bubble(kx + 2, 201 + i * 5.2, i + 1) + text(kx + 6, 201.7 + i * 5.2, l, { size: 1.7 }); });
   s1 += heading(236, 190, "NOTES", "READ BEFORE MAKING", 40);
   (PLAIN
-    ? ["Dimensions in feet and inches. Do not scale.", "THE PLAIN DESK — SELECTED. Square corners, and no", "   carving anywhere: no console brackets, no carved",
-       "   drops, no carved collars. Mouldings only.", "Kept: reeded top edge, cove, frieze drawers and",
-       "   reeded rail all round, the square panel mouldings,", "   cockbeaded drawers, a plain bead moulding at each",
-       "   corner and the moulded plinth.", "Same size and carcase as AST-DR-002 and -028.", "First-angle projection."]
+    ? ["Dimensions in feet and inches. Do not scale.", "THE PLAIN DESK — SELECTED. Square corners, no carving,", "   no corner mouldings: just the square panel mouldings,",
+       "   reeded top edge, frieze, reeded rail and plinth.", "Stiles a plain 1½ in, so the pedestal drawers are wider.",
+       "MONITOR CLAMP BAY at the back centre, 10 in wide: the", "   underside of the top clear 4 in in from the back edge",
+       "   and 3½ in down; the clamp's body in the 2 in gap to", "   the glass. Top 1⅝ in solid teak.", "First-angle projection."]
     : SQUARE
     ? ["Dimensions in feet and inches. Do not scale.", "THE SQUARE-CORNERED DESK. Same size, same carcase,", "   same carving and mouldings as AST-DR-002 — only the",
        "   corners change: every layer turns a plain 90° corner", "   instead of the R150 hollow.",
@@ -619,14 +657,28 @@ function buildDesk(VAR) {
   s2 += note(o2.x + 60, o2.y + 26, o2.x + 62, o2.y + 18, "DRAWER BOTTOM", "");
 
   if (PLAIN) {
-    // no console (3) and no carved drop (4) on this desk: say what it leaves out, where those details were
-    s2 += heading(150, 17, "NO CARVING ON THIS DESK", "DETAILS 3 AND 4 OF THE OTHER DESKS ARE LEFT OUT", 140);
-    ["Left out, on purpose (owner, 2 Oct 2026):", "   · console brackets — under the top, at the kneehole and the corners",
-     "   · carved husk drops — on the kneehole stiles and down the corner beads", "   · carved collars on the corner mouldings",
-     "", "Kept — every one a run moulding, no carver needed:", "   · reeded top edge and cove (1)   · reeded rail all round (2)", "   · cockbeaded pedestal drawers (5)   · swan-neck handles (6)",
-     "   · moulded plinth (7)   · plain bead moulding at each corner (8, 8B)", "   · square panel mouldings on the ends and back",
-     "", "The kneehole stiles stay as plain flat stiles."]
-      .forEach((n, i) => { s2 += text(150, 30 + i * 4.6, n, { size: 1.75, fill: i === 0 || i === 5 ? INK : THIN }); });
+    // 3 — the monitor clamp bay, section at the back centre, 1:4 (no console or carved drop on this desk)
+    const C = K.clamp, W = K.D;
+    s2 += heading(150, 17, "3 · MONITOR CLAMP BAY", "SECTION AT THE BACK CENTRE · SCALE 1:4 · NO CARVING ON THIS DESK", 140);
+    const v3 = view(160 - (W - 170) / 4, 40, 4, "Monitor clamp bay"), t3 = v3.w(0.12), hatchS = `fill="url(#hatchDesk2)"`, ds = `stroke-dasharray="${v3.w(1.2)} ${v3.w(0.8)}"`;
+    let g3 = `<path ${hatchS} d="M ${W - 170} 0 L ${W - 4} 0 L ${W - 4} 4${(() => { let d = ""; for (let i = 0; i < 4; i++) d += ` A 4 4 0 0 1 ${W - 4} ${4 + (i + 1) * 8}`; return d; })()} L ${W - 4} ${K.top} L ${W - 170} ${K.top} Z"/>`;
+    g3 += `<rect ${hatchS} x="${W - C.back - 22}" y="${yF0}" width="22" height="${K.frz + K.rail}"/>`;                      // back rail, set in
+    g3 += `<rect ${hatchS} x="${W - C.back - 18}" y="${yR1}" width="18" height="70"/>`;                                     // modesty panel, set in
+    g3 += `<rect ${hatchS} x="${W - 170}" y="${yF0 + 25}" width="15" height="${K.frz - 31}"/>`;                            // centre drawer back, stops short
+    g3 += `<g fill="none" stroke="${DIM}" stroke-width="${t3 * 2}" ${ds}>${clampShape(W)}<line x1="${W + 21}" y1="-14" x2="${W + 21}" y2="-60"/></g>`;
+    g3 += `<line x1="${W + C.gap}" y1="-70" x2="${W + C.gap}" y2="${yR1 + 80}" stroke-width="${t3 * 3}" stroke-dasharray="${v3.w(2)} ${v3.w(1)}"/>`;
+    s2 += v3.g(g3, 0.3);
+    s2 += chainH([v3.X(W - C.back), v3.X(W), v3.X(W + C.gap)], v3.Y(-30), [`${C.back} CLEAR`, C.gap], { from: v3.Y(-16), size: 1.3 });
+    s2 += chainV([v3.Y(K.top), v3.Y(K.top + C.drop)], v3.X(W) + 16, [C.drop], { from: v3.X(W) + 1, size: 1.3 });
+    s2 += chainV([v3.Y(0), v3.Y(K.top)], v3.X(W - 170) - 4, [K.top], { from: v3.X(W - 170) - 1, size: 1.3 });
+    s2 += note(v3.X(W - 40), v3.Y(K.top + 66), v3.X(W - 170) - 2, v3.Y(K.top + 120), "CLAMP (DASHED)", "BITES 2–3 IN IN; BODY IN THE GAP", "end");
+    s2 += note(v3.X(W - C.back - 11), v3.Y(yF0 + 40), v3.X(W - 170) - 2, v3.Y(yF0 + 30), "BACK RAIL, SET IN 4 IN", "AT THE BAY ONLY · 10 IN WIDE", "end");
+    s2 += note(v3.X(W + C.gap), v3.Y(yR1 + 60), v3.X(W + C.gap) + 4, v3.Y(yR1 + 90), "GLASS PARTITION", "");
+    [["MONITOR CLAMP BAY — back centre, 10 in wide:", INK], ["   underside of the top clear 4 in in from the", THIN], ["   back edge and 3½ in down — the cove stops,", THIN],
+     ["   the back rail and modesty panel set in to 4 in,", THIN], ["   the centre frieze drawer is 1½ in shorter.", THIN], ["Clamp body sits in the 2 in gap to the glass.", THIN],
+     ["Top 1⅝ in solid teak: inside the grip of common", THIN], ["   monitor-arm clamps (about ½–3½ in).", THIN], ["", THIN],
+     ["NO CARVING, NO CORNER MOULDINGS (owner, 2 Oct):", INK], ["   consoles, drops, collars and corner beads all", THIN], ["   left out; just the square panel mouldings.", THIN]]
+      .forEach(([n, c], i) => { s2 += text(222, 34 + i * 4.4, n, { size: 1.6, fill: c }); });
   } else {
     // 3 — console bracket 1:2.5
     s2 += heading(150, 17, "3 · CONSOLE BRACKET", "FRONT + SIDE · 1:2.5 · 50 WIDE AT KNEEHOLE, 34 ON CORNERS", 70);
@@ -694,7 +746,8 @@ function buildDesk(VAR) {
   s2 += note(o7.x + 7.5, o7.y - 10, o7.x + 20, o7.y - 16, "PEDESTAL CARCASE ABOVE", "");
 
   // 8 — hollow corner: one centre, parallel curves, softened ends, column in the hollow. Plan 1:4
-  s2 += SQUARE ? heading(18, 205, "8 · CORNER — SQUARE + MOULDINGS", "PLAN · SCALE 1:4 · ALL FOUR CORNERS · EVERY LAYER TURNS 90°", 90)
+  s2 += PLAIN ? heading(18, 205, "8 · CORNER — SQUARE, PLAIN", "PLAN · SCALE 1:4 · ALL FOUR CORNERS · EVERY LAYER TURNS 90°", 90)
+       : SQUARE ? heading(18, 205, "8 · CORNER — SQUARE + MOULDINGS", "PLAN · SCALE 1:4 · ALL FOUR CORNERS · EVERY LAYER TURNS 90°", 90)
                : heading(18, 205, "8 · CORNER — HOLLOW + END MOULDINGS", "PLAN · SCALE 1:4 · ALL FOUR CORNERS · CURVES SHARE ONE CENTRE", 90);
   const vD8 = view(62, 218, 4, "Corner plan"), tD8 = vD8.w(0.12), ext = 250, big = 4000, dsh = `${vD8.w(1)} ${vD8.w(0.6)}`;
   const gT = cornerPrims(SPEC), gC = cornerPrims(SPEC, K.ov), gP = cornerPrims(SPEC, K.ov - K.plP);
@@ -705,9 +758,9 @@ function buildDesk(VAR) {
   d8 += `<path stroke-width="${tD8}" stroke-dasharray="${vD8.w(0.5)} ${vD8.w(0.8)}" d="${outlinePath(0, 0, big, big, SPEC, [1, 1, 1, 1], K.ov - K.plP)}"/>`;
   {
     const M = K.mould, prof = (c, t, n) => { const F = (u, w) => [c[0] + t[0] * u + n[0] * w, c[1] + t[1] * u + n[1] * w]; const pts = [F(-M.w / 2, 0), F(-M.w / 2, M.fillet), F(-M.bead, M.fillet)]; for (let k = 1; k < 10; k++) { const a = Math.PI * (1 - k / 10); pts.push(F(M.bead * Math.cos(a), M.fillet + M.bead * Math.sin(a))); } pts.push(F(M.bead, M.fillet), F(M.w / 2, M.fillet), F(M.w / 2, 0)); return pts; };
-    [prof([MS, K.ov], [1, 0], [0, -1]), prof([K.ov, MS], [0, 1], [-1, 0])].forEach((pts) => { d8 += `<path fill="url(#hatchDesk2)" d="M ${pts.map((p) => `${f(p[0])} ${f(p[1])}`).join(" L ")} Z"/>`; });
+    if (!PLAIN) [prof([MS, K.ov], [1, 0], [0, -1]), prof([K.ov, MS], [0, 1], [-1, 0])].forEach((pts) => { d8 += `<path fill="url(#hatchDesk2)" d="M ${pts.map((p) => `${f(p[0])} ${f(p[1])}`).join(" L ")} Z"/>`; });
     // console above (dashed, 38 × 24) and plinth block below (dotted, 34 × 16) at each strip
-    d8 += `<g stroke-width="${tD8}">${PLAIN ? "" : `<rect x="${f(MS - 19)}" y="${K.ov - 24}" width="38" height="24" stroke-dasharray="${dsh}"/><rect x="${K.ov - 24}" y="${f(MS - 19)}" width="24" height="38" stroke-dasharray="${dsh}"/>`}
+    if (!PLAIN) d8 += `<g stroke-width="${tD8}">${PLAIN ? "" : `<rect x="${f(MS - 19)}" y="${K.ov - 24}" width="38" height="24" stroke-dasharray="${dsh}"/><rect x="${K.ov - 24}" y="${f(MS - 19)}" width="24" height="38" stroke-dasharray="${dsh}"/>`}
       <rect x="${f(MS - 17)}" y="${K.ov - 16}" width="34" height="16" stroke-dasharray="${vD8.w(0.4)} ${vD8.w(0.6)}"/><rect x="${K.ov - 16}" y="${f(MS - 17)}" width="16" height="34" stroke-dasharray="${vD8.w(0.4)} ${vD8.w(0.6)}"/></g>`;
   }
   if (!SQUARE) d8 += `<g stroke-width="${tD8}" stroke-dasharray="${vD8.w(0.3)} ${vD8.w(0.5)}"><line x1="0" y1="0" x2="${f((SPEC.R + K.ov) * 0.707)}" y2="${f((SPEC.R + K.ov) * 0.707)}"/><line x1="${f(gT.u)}" y1="${SPEC.f}" x2="${f(gT.pts[2][0])}" y2="${f(gT.pts[2][1])}"/><line x1="${SPEC.f}" y1="${f(gT.u)}" x2="${f(gT.pts[1][0])}" y2="${f(gT.pts[1][1])}"/></g>`;
@@ -717,8 +770,11 @@ function buildDesk(VAR) {
   if (SQUARE) {
     s2 += note(vD8.X(0), vD8.Y(0), vD8.X(-8) - 3, vD8.Y(-12), "SQUARE CORNER", "TOP, FRIEZE, PEDESTAL, PLINTH — ALL 90°", "end");
     s2 += note(vD8.X(3), vD8.Y(14), vD8.X(-8) - 3, vD8.Y(14), "REEDED EDGE", "MITRED ROUND THE CORNER", "end");
-    s2 += note(vD8.X(MS), vD8.Y(K.ov - K.mould.fillet - K.mould.bead), vD8.X(ext) + 4, vD8.Y(20), "MOULDING AT THE CORNER", `FILLET + BEAD + FILLET · ${K.mould.w} WIDE · ${K.mould.proj} PROUD`);
-    s2 += note(vD8.X(K.ov - K.mould.fillet - K.mould.bead), vD8.Y(MS), vD8.X(-8) - 3, vD8.Y(MS + 10), "SAME ON THE END FACE", PLAIN ? "PLINTH BLOCK BELOW (DOTTED)" : "CONSOLE ABOVE (DASHED), BLOCK BELOW", "end");
+    if (PLAIN) s2 += note(vD8.X(K.ov), vD8.Y(K.ov + 20), vD8.X(-8) - 3, vD8.Y(MS + 10), "PLAIN CORNER", "NO MOULDING — 1½ IN STILES", "end");
+    else {
+      s2 += note(vD8.X(MS), vD8.Y(K.ov - K.mould.fillet - K.mould.bead), vD8.X(ext) + 4, vD8.Y(20), "MOULDING AT THE CORNER", `FILLET + BEAD + FILLET · ${K.mould.w} WIDE · ${K.mould.proj} PROUD`);
+      s2 += note(vD8.X(K.ov - K.mould.fillet - K.mould.bead), vD8.Y(MS), vD8.X(-8) - 3, vD8.Y(MS + 10), "SAME ON THE END FACE", "CONSOLE ABOVE (DASHED), BLOCK BELOW", "end");
+    }
     s2 += note(vD8.X(K.ov + 60), vD8.Y(K.ov), vD8.X(ext) + 4, vD8.Y(60), "FRIEZE + PEDESTAL FACE", `DASHED — ${K.ov} IN FROM THE TOP`);
     s2 += note(vD8.X(K.ov - K.plP + 90), vD8.Y(K.ov - K.plP), vD8.X(ext) + 4, vD8.Y(100), "PLINTH", `PROJECTS ${K.plP}, MITRED`);
   } else {
@@ -731,7 +787,8 @@ function buildDesk(VAR) {
     s2 += note(vD8.X((SPEC.R + K.ov) * 0.72), vD8.Y((SPEC.R + K.ov) * 0.72), vD8.X(-8) - 3, vD8.Y(118), "CLEAN HOLLOW", "NOTHING IN THE MIDDLE", "end");
     s2 += note(vD8.X((SPEC.R + K.ov - K.plP) * 0.34), vD8.Y((SPEC.R + K.ov - K.plP) * 0.94), vD8.X(ext) + 4, vD8.Y(116), `PLINTH R${SPEC.R + K.ov - K.plP}`, "PROJECTS 15");
   }
-  s2 += chainH([vD8.X(0), vD8.X(K.ov), vD8.X(MS)], vD8.Y(ext) + 4, [K.ov, Math.round(MS - K.ov)], { from: vD8.Y(ext) + 1, size: 1.4 });
+  s2 += PLAIN ? chainH([vD8.X(0), vD8.X(K.ov), vD8.X(K.ov + SO)], vD8.Y(ext) + 4, [K.ov, `${SO} STILE`], { from: vD8.Y(ext) + 1, size: 1.4 })
+    : chainH([vD8.X(0), vD8.X(K.ov), vD8.X(MS)], vD8.Y(ext) + 4, [K.ov, Math.round(MS - K.ov)], { from: vD8.Y(ext) + 1, size: 1.4 });
 
   // 8B — corner elevation, square-on: the hollow between its two end mouldings. 1:10 crop of the front.
   s2 += heading(212, 180, "8B · CORNER ELEVATION", `FRONT LEFT CORNER · SCALE 1:10${SQUARE ? " · SQUARE" : ""}`, 60);
@@ -740,20 +797,22 @@ function buildDesk(VAR) {
     s2 += v8.g(`<clipPath id="clip8b"><rect x="-10" y="-5" width="${w8 + 10}" height="${K.H + 10}"/></clipPath><g clip-path="url(#clip8b)">${front(t8)}</g><line x1="-10" y1="${K.H}" x2="${w8}" y2="${K.H}" stroke-width="${v8.w(0.5)}"/>`, 0.3);
     const yC1 = K.top + K.conH + 10;
     if (!SQUARE) s2 += note(v8.X(VC * 0.55), v8.Y(yR1 + 260), v8.X(w8) + 4, v8.Y(yR1 + 230), "CLEAN HOLLOW", "CURVES AWAY FROM YOU");
-    s2 += note(v8.X(MS + 8), v8.Y(yR1 + 380), v8.X(w8) + 4, v8.Y(yR1 + 360), "MOULDING, SQUARE-ON", SQUARE ? "JUST IN FROM THE CORNER" : "CURVE STARTS HERE");
-    s2 += note(v8.X(K.ov - K.mould.proj / 2), v8.Y(yR1 + 330), v8.X(-10) - 2, v8.Y(yR1 + 330), "MOULDING,", "EDGE-ON", "end");
+    if (PLAIN) s2 += note(v8.X(K.ov + SO / 2), v8.Y(yR1 + 300), v8.X(w8) + 4, v8.Y(yR1 + 280), "PLAIN STILE, 1½ IN", "NO CORNER MOULDING");
+    else {
+      s2 += note(v8.X(MS + 8), v8.Y(yR1 + 380), v8.X(w8) + 4, v8.Y(yR1 + 360), "MOULDING, SQUARE-ON", SQUARE ? "JUST IN FROM THE CORNER" : "CURVE STARTS HERE");
+      s2 += note(v8.X(K.ov - K.mould.proj / 2), v8.Y(yR1 + 330), v8.X(-10) - 2, v8.Y(yR1 + 330), "MOULDING,", "EDGE-ON", "end");
+    }
     if (!PLAIN) s2 += note(v8.X(MS), v8.Y(K.top + 80), v8.X(w8) + 4, v8.Y(K.top + 60), "CONSOLE", "34 WIDE");
     if (!PLAIN) s2 += note(v8.X(MS + 14), v8.Y(yC1), v8.X(w8) + 4, v8.Y(yC1 - 30), "CARVED COLLAR", "TEAK");
-    else s2 += note(v8.X(MS + 8), v8.Y(yR1 + 120), v8.X(w8) + 4, v8.Y(yR1 + 100), "PLAIN BEAD", "RAIL TO PLINTH BLOCK — NO CARVING");
-    s2 += note(v8.X(MS + 16), v8.Y(yP - 30), v8.X(w8) + 4, v8.Y(yP - 30), "PLINTH BLOCK", "");
+    if (!PLAIN) s2 += note(v8.X(MS + 16), v8.Y(yP - 30), v8.X(w8) + 4, v8.Y(yP - 30), "PLINTH BLOCK", "");
   }
   s2 += heading(300, 160, "NOTES", "DETAILS", 40);
   ["Profiles are drawn from film stills and are indicative;", "   the joiner to prepare a full-size mock-up of 1, 2 and 7.",
    ...(PLAIN ? ["No carving: every profile is a run moulding — a spindle", "   moulder or router, no carver."] : ["Carving (4, 5): carver to work from the reference photos;", "   sample one drop before carving the set."]),
    "Hardware (6): standard 90 mm swan-neck, solid brass.", "Gold/brass on handles and ring pulls only; rest plain teak.",
-   ...(SQUARE ? ["Corners: square, every layer mitred; moulding on each", "   face just in from the corner (8, 8B)."] : ["Corners: clean R150 hollow, moulding at both ends (8, 8B).", "Cut a card template of the hollow to confirm."])]
+   ...(PLAIN ? ["Corners: square, every layer mitred; plain — no corner", "   moulding (8, 8B). Clamp bay: detail 3."] : SQUARE ? ["Corners: square, every layer mitred; moulding on each", "   face just in from the corner (8, 8B)."] : ["Corners: clean R150 hollow, moulding at both ends (8, 8B).", "Cut a card template of the hollow to confirm."])]
     .forEach((n, i) => { s2 += text(300, 171 + i * 4.3, n, { size: 1.6 }); });
-  s2 += titleBlock({ title: `DESK${VAR.suffix.toUpperCase()} — DETAILS`, sub: PLAIN ? "Edge · Rail · Drawers · Handle · Plinth · Corner — no carving" : "Edge · Rail · Console · Drop · Ornament · Handle · Plinth · Corner", date: K.date, rev: K.rev, dwg: VAR.dwg2 });
+  s2 += titleBlock({ title: `DESK${VAR.suffix.toUpperCase()} — DETAILS`, sub: PLAIN ? "Edge · Rail · Clamp bay · Drawers · Handle · Plinth · Corner" : "Edge · Rail · Console · Drop · Ornament · Handle · Plinth · Corner", date: K.date, rev: K.rev, dwg: VAR.dwg2 });
 
   // ═════════════ SHEET 3 — 3D VIEWS ═════════════
   window.DK.begin(VAR.key + "-3d");
@@ -764,7 +823,7 @@ function buildDesk(VAR) {
   s3 += heading(250, 17, "FROM THE BACK LEFT", "AXONOMETRIC · APPROX 1:29 · IF FREE-STANDING", 70);
   s3 += axo3d(270, 32, 29, true).svg;
   // corner close-up: the same model at 1:4, windowed on the front-left corner
-  s3 += heading(250, 128, "CORNER CLOSE-UP", PLAIN ? "FRONT RIGHT · APPROX 1:4 · SQUARE CORNER, PLAIN MOULDINGS, NO CARVING" : SQUARE ? "FRONT RIGHT · APPROX 1:4 · SQUARE CORNER, MOULDINGS, CONSOLES" : "FRONT RIGHT · APPROX 1:4 · HOLLOW, ROUNDS, END MOULDINGS, CONSOLES", 70);
+  s3 += heading(250, 128, "CORNER CLOSE-UP", PLAIN ? "FRONT RIGHT · APPROX 1:4 · PLAIN SQUARE CORNER — NO MOULDING, NO CARVING" : SQUARE ? "FRONT RIGHT · APPROX 1:4 · SQUARE CORNER, MOULDINGS, CONSOLES" : "FRONT RIGHT · APPROX 1:4 · HOLLOW, ROUNDS, END MOULDINGS, CONSOLES", 70);
   {
     const sc = 4, full = render3d(sc, false);
     const cs = Math.cos(Math.PI / 6);
@@ -780,8 +839,11 @@ function buildDesk(VAR) {
     const lbl = (pt, x2, y2, t1, t2, anchor = "start") => { const q = P3(...pt); return note(q[0], q[1], x2, y2, t1, t2, anchor); };
     if (SQUARE) {
       s3 += lbl([K.L, 0, K.H - 20], win.x + win.w - 4, win.y + 8, "SQUARE CORNER", "REEDS MITRED ROUND IT", "end");
-      s3 += lbl([K.L - K.ov + M.proj, MS, 420], win.x + win.w - 4, win.y + 72, "MOULDING AT THE CORNER", PLAIN ? "SIDE FACE — PLAIN BEAD" : "SIDE FACE — COLLARS + CARVED DROP", "end");
-      s3 += lbl([K.L - MS, K.ov - M.proj, 440], win.x + 4, win.y + 72, "MOULDING AT THE CORNER", "FRONT FACE");
+      if (PLAIN) s3 += lbl([K.L - K.ov, K.ov + SO / 2, 420], win.x + win.w - 4, win.y + 72, "PLAIN 1½ IN STILE", "NO CORNER MOULDING", "end");
+      else {
+        s3 += lbl([K.L - K.ov + M.proj, MS, 420], win.x + win.w - 4, win.y + 72, "MOULDING AT THE CORNER", "SIDE FACE — COLLARS + CARVED DROP", "end");
+        s3 += lbl([K.L - MS, K.ov - M.proj, 440], win.x + 4, win.y + 72, "MOULDING AT THE CORNER", "FRONT FACE");
+      }
     } else {
     s3 += lbl([K.L - g.pts[2][0], g.pts[2][1], K.H - 30], win.x + win.w - 4, win.y + 8, `TOP HOLLOW R${SPEC.R}`, "REEDS RUN ROUND THE CURVE", "end");
     s3 += lbl([K.L - g.u, 0, K.H - 20], win.x + 4, win.y + 8, `ROUNDED END R${SPEC.f}`, "NO SHARP ARRIS");
