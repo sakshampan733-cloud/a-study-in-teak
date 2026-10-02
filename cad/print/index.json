@@ -1,0 +1,244 @@
+{
+ "roomshell": {
+  "title": "THE ROOM AS BUILT",
+  "dwgs": [
+   "AST-DR-000"
+  ],
+  "keys": [
+   "roomshell"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 9,
+  "pagesA4": 14
+ },
+ "doorveneer": {
+  "title": "DOORS — MADE IN VENEER",
+  "dwgs": [
+   "AST-DR-015"
+  ],
+  "keys": [
+   "doorveneer"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 17,
+  "pagesA4": 21
+ },
+ "door": {
+  "title": "DOOR D1 — 7 FT 7 IN × 3 FT",
+  "dwgs": [
+   "AST-DR-001"
+  ],
+  "keys": [
+   "door"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 20,
+  "pagesA4": 26
+ },
+ "door-narrow": {
+  "title": "DOOR D2 · D3 — 7 FT 7 IN × 2 FT 6 IN",
+  "dwgs": [
+   "AST-DR-009"
+  ],
+  "keys": [
+   "door-narrow"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 16,
+  "pagesA4": 24
+ },
+ "architrave": {
+  "title": "DOOR CASINGS",
+  "dwgs": [
+   "AST-DR-011"
+  ],
+  "keys": [
+   "architrave"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 21,
+  "pagesA4": 28
+ },
+ "casingb": {
+  "title": "DOOR CASINGS — OPTION B",
+  "dwgs": [
+   "AST-DR-012"
+  ],
+  "keys": [
+   "casingb"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 17,
+  "pagesA4": 20
+ },
+ "desk-square": {
+  "title": "DESK (SQUARE CORNERS) — GENERAL ARRANGEMENT",
+  "dwgs": [
+   "AST-DR-028",
+   "AST-DR-029",
+   "AST-DR-030"
+  ],
+  "keys": [
+   "desk-square",
+   "desk-square-details",
+   "desk-square-3d"
+  ],
+  "starts": [
+   0,
+   9,
+   24
+  ],
+  "pages": 39,
+  "pagesA4": 62
+ },
+ "desk": {
+  "title": "DESK — GENERAL ARRANGEMENT",
+  "dwgs": [
+   "AST-DR-002",
+   "AST-DR-003",
+   "AST-DR-004"
+  ],
+  "keys": [
+   "desk",
+   "desk-details",
+   "desk-3d"
+  ],
+  "starts": [
+   0,
+   9,
+   24
+  ],
+  "pages": 39,
+  "pagesA4": 62
+ },
+ "studywall": {
+  "title": "STUDY WALL — GENERAL ARRANGEMENT",
+  "dwgs": [
+   "AST-DR-005",
+   "AST-DR-006"
+  ],
+  "keys": [
+   "studywall",
+   "studywall-details"
+  ],
+  "starts": [
+   0,
+   15
+  ],
+  "pages": 30,
+  "pagesA4": 36
+ },
+ "leftwall": {
+  "title": "LEFT WALL",
+  "dwgs": [
+   "AST-DR-014"
+  ],
+  "keys": [
+   "leftwall"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 12,
+  "pagesA4": 15
+ },
+ "rightwall": {
+  "title": "RIGHT WALL — PANEL MOULDING",
+  "dwgs": [
+   "AST-DR-007"
+  ],
+  "keys": [
+   "rightwall"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 20,
+  "pagesA4": 24
+ },
+ "dressingshell": {
+  "title": "DRESSING ROOM",
+  "dwgs": [
+   "AST-DR-023"
+  ],
+  "keys": [
+   "dressingshell"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 14,
+  "pagesA4": 15
+ },
+ "mirror": {
+  "title": "DRESSING MIRROR",
+  "dwgs": [
+   "AST-DR-027"
+  ],
+  "keys": [
+   "mirror"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 14,
+  "pagesA4": 18
+ },
+ "vanity": {
+  "title": "VANITY — NORMAL",
+  "dwgs": [
+   "AST-DR-019"
+  ],
+  "keys": [
+   "vanity"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 22,
+  "pagesA4": 25
+ },
+ "vanity-b": {
+  "title": "VANITY — SCHEME B",
+  "dwgs": [
+   "AST-DR-020"
+  ],
+  "keys": [
+   "vanity-b"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 22,
+  "pagesA4": 25
+ },
+ "vanity-c": {
+  "title": "VANITY — SCHEME C",
+  "dwgs": [
+   "AST-DR-021",
+   "AST-DR-022"
+  ],
+  "keys": [
+   "vanity-c",
+   "vanity-drawer"
+  ],
+  "starts": [
+   0,
+   22
+  ],
+  "pages": 36,
+  "pagesA4": 47
+ }
+}

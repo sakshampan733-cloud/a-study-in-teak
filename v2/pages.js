@@ -245,14 +245,16 @@ function pointers(id) {
 function sheets(list) {
   const ds = [].concat(list || []).filter((d) => window.DRAWINGS?.[d]);
   if (!ds.length) return "";
-  const fam = (k) => ({ "vanity-drawer": "vanity-c" })[k] || k.replace(/-(details|3d)$/, ""), fams = {};   // same sets as tools/node/drawings-pdf.js
+  // the large-print sets (tools/node/print-drawings.js): a drawing's sheets together — desk + details + 3D, vanity C + its drawer
+  const fam = (k) => ({ "vanity-drawer": "vanity-c" })[k] || k.replace(/-(details|3d)$/, ""), fams = {}, PS = window.PRINTSETS || {};
   ds.forEach((k) => { (fams[fam(k)] = fams[fam(k)] || []).push(k); });
-  const sets = Object.entries(fams).filter(([, v]) => v.length > 1).map(([f, v]) => `<span class="mono">${esc(window.DRAWINGS[v[0]].title.split(" · ")[0].replace(/ — General arrangement$/, ""))} · all ${v.length} sheets</span><a class="btn steel" href="../cad/${f}-set.pdf" download>A3 PDF</a><a class="btn steel" href="../cad/${f}-set-a4.pdf" download>A4 PDF</a>`).join("");
-  return `${sets ? `<div class="cad-links set-links"><span class="mono">Print · flip-through</span>${sets}</div>` : ""}<div class="sheets">${ds.map((d) => {
-    const D = window.DRAWINGS[d], [name, code] = D.title.split(" · ");
+  const pdfs = (f) => `<a class="btn" href="../cad/print/${f}.pdf" download>A3 PDF</a><a class="btn" href="../cad/print/${f}-a4.pdf" download>A4 PDF</a>`;
+  const sets = Object.entries(fams).filter(([f]) => PS[f]).map(([f, v]) => `<div class="ps-row"><b>${esc(window.DRAWINGS[v[0]].title.split(" · ")[0].replace(/ — General arrangement$/, ""))}</b><span class="mono">${v.length > 1 ? `${v.length} sheets · ` : ""}${PS[f].pages} pages</span><span class="ps-btns"><button class="btn steel" data-print="${f}">Read</button>${pdfs(f)}</span></div>`).join("");
+  return `${sets ? `<div class="cad-links set-links ps"><div class="ps-head"><span class="mono">Large print · for the carpenter</span><span class="ps-key"><i class="k-red"></i>dimension lines <i class="k-green"></i>sizes, feet &amp; inches</span></div>${sets}</div>` : ""}<div class="sheets">${ds.map((d) => {
+    const D = window.DRAWINGS[d], [name, code] = D.title.split(" · "), f = fam(d), at = PS[f] ? PS[f].starts[PS[f].keys.indexOf(d)] || 0 : 0;
     return `<div class="sheet-card reveal"><div class="sheet-top"><h3 class="h-sm">${esc(name)}</h3><div class="sheet-tools"><span class="mono">${esc(code || "")}</span>${dimToggle()}${paperToggle()}</div></div>
       <figure class="dwg" data-open="dwg:${d}">${D.svg}</figure>
-      <div class="cad-links"><span class="mono">Editable CAD</span>${D.model === false ? "" : `<a class="btn" href="../cad/${d}-model.dxf" download>DXF · true size</a>`}<a class="btn" href="../cad/${d}-sheet.dxf" download>DXF · A3 sheet</a><a class="btn" href="../cad/${d}.svg" download>SVG</a><span class="mono">Print</span><a class="btn" href="../cad/${d}.pdf" download>A3 PDF</a><a class="btn" href="../cad/${d}-a4.pdf" download>A4 PDF</a><button class="btn steel" data-open="dwg:${d}">Full size</button></div></div>`;
+      <div class="cad-links"><span class="mono">Editable CAD</span>${D.model === false ? "" : `<a class="btn" href="../cad/${d}-model.dxf" download>DXF · true size</a>`}<a class="btn" href="../cad/${d}-sheet.dxf" download>DXF · A3 sheet</a><a class="btn" href="../cad/${d}.svg" download>SVG</a>${PS[f] ? `<span class="mono">Large print</span><button class="btn" data-print="${f}" data-at="${at}">Read</button>${pdfs(f)}` : ""}<button class="btn steel" data-open="dwg:${d}">Full size</button></div></div>`;
   }).join("")}</div>`;
 }
 
@@ -545,7 +547,30 @@ function lbFit() {
   LB.y = Math.max(0, (body.clientHeight - inner.offsetHeight) / 2);
   lbApply();
 }
-function lbClose() { const lb = $("#lightbox"); lb.hidden = true; lb.innerHTML = ""; document.documentElement.classList.remove("lb-open"); }
+function lbClose() { const lb = $("#lightbox"); lb.hidden = true; lb.innerHTML = ""; document.documentElement.classList.remove("lb-open", "pv-open"); }
+
+// ── large print: a drawing's enlarged pages one under another, read like a PDF; − and + widen the pages ──
+function openPrint(f, at) {
+  const S = window.PRINTSETS[f], lb = $("#lightbox"), name = window.DRAWINGS[S.keys[0]].title.split(" · ")[0].replace(/ — General arrangement$/, "");
+  const src = (i) => `../cad/print/${f}-${String(i + 1).padStart(2, "0")}.webp`;
+  lb.innerHTML = `<div class="lb-bar"><span class="mono" style="font-size:11px;color:var(--dim)">${esc(name)} · large print · ${S.pages} pages</span>
+    <div class="grp"><a class="btn" href="../cad/print/${f}.pdf" download>A3 PDF</a><a class="btn" href="../cad/print/${f}-a4.pdf" download>A4 PDF</a><button class="btn" data-pz="-">−</button><button class="btn" data-pz="+">+</button><button class="btn" data-z="x">Close</button></div></div>
+    <div class="pv-body"><div class="pv-pages">${Array.from({ length: S.pages }, (_, i) => `<figure class="pv-page" id="pv-${i}"><img src="${src(i)}" alt="Page ${i + 1} of ${S.pages}" width="1985" height="1404" loading="${Math.abs(i - at) < 2 ? "eager" : "lazy"}" decoding="async"></figure>`).join("")}</div></div>`;
+  lb.hidden = false;
+  document.documentElement.classList.add("pv-open");
+  if (at) requestAnimationFrame(() => lb.querySelector("#pv-" + at)?.scrollIntoView());
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-print]");
+  if (b && window.PRINTSETS?.[b.dataset.print]) return openPrint(b.dataset.print, +b.dataset.at || 0);
+  const z = e.target.closest("[data-pz]"), pages = $("#lightbox .pv-pages");
+  if (z && pages) {
+    const steps = [1, 1.5, 2.2, 3.2], cur = steps.indexOf(+pages.dataset.z || 1), body = $("#lightbox .pv-body"), y = body.scrollTop / body.scrollHeight;
+    const next = steps[Math.max(0, Math.min(steps.length - 1, cur + (z.dataset.pz === "+" ? 1 : -1)))];
+    pages.dataset.z = next; pages.style.setProperty("--pz", next);
+    body.scrollTop = y * body.scrollHeight; body.scrollLeft = (body.scrollWidth - body.clientWidth) / 2;
+  }
+});
 
 document.addEventListener("click", (e) => {
   const lb = $("#lightbox");

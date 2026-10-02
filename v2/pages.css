@@ -208,6 +208,16 @@ body.scrolled .phero-meta { opacity: 0; }
 .sheets { max-width: 1100px; margin: 72px auto 0; padding: 0 24px; display: flex; flex-direction: column; gap: 40px; }
 .sheet-card { background: var(--charcoal); border-radius: 10px; padding: 32px; }
 .cad-links.set-links { width: min(1052px, calc(100% - 48px)); margin: 72px auto -40px; padding: 18px 56px; box-sizing: border-box; background: var(--charcoal); border-radius: 10px; }
+.cad-links.ps { display: block; padding: 22px 56px 14px; }
+.ps-head { display: flex; justify-content: space-between; align-items: center; gap: 12px 24px; flex-wrap: wrap; margin-bottom: 10px; }
+.ps-key { font-size: 11px; color: var(--dim); display: flex; align-items: center; gap: 6px; }
+.ps-key i { display: inline-block; width: 18px; height: 3px; border-radius: 2px; margin-left: 10px; }
+.ps-key .k-red { background: #e00000; } .ps-key .k-green { background: #00a046; }
+.ps-row { display: flex; align-items: center; gap: 8px 16px; flex-wrap: wrap; padding: 10px 0; border-top: 1px solid rgba(255,255,255,.08); }
+.ps-row b { font-weight: 500; font-size: 15px; min-width: 0; }
+.cad-links .ps-row .mono { margin-right: auto; }
+.ps-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+@media (max-width: 640px) { .cad-links.ps { padding: 18px 20px 10px; } .cad-links .ps-row .mono { margin-right: 0; flex-basis: 100%; } }
 .sheet-top { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
 .sheet-top .mono { font-size: 11px; color: var(--dim); }
 .dwg { margin: 0; cursor: zoom-in; border-radius: 6px; overflow: hidden; }
@@ -286,6 +296,12 @@ td { padding: 16px 12px 16px 0; border-bottom: 1px solid var(--hair); vertical-a
 .lb-inner { position: absolute; left: 0; top: 0; width: 100%; transform-origin: 0 0; }
 .lb-hint { text-align: center; font-size: 10px; letter-spacing: .08em; color: var(--dim); padding: 0 16px 14px; }
 html.lb-open, html.lb-open body { overflow: hidden; overscroll-behavior: none; }
+/* large print: pages under one another, scrolled like a PDF */
+html.pv-open, html.pv-open body { overflow: hidden; }
+.pv-body { flex: 1; overflow: auto; margin: 0 16px 16px; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.pv-pages { --pz: 1; width: calc(min(1400px, 100%) * var(--pz)); margin: 0 auto; display: flex; flex-direction: column; gap: 14px; padding-bottom: 24px; }
+.pv-page { margin: 0; background: #fff; border-radius: 4px; overflow: hidden; aspect-ratio: 1985 / 1404; box-shadow: 0 2px 18px rgba(0,0,0,.35); }
+.pv-page img { display: block; width: 100%; height: auto; }
 @media (max-width: 640px) { .lb-bar { padding: 12px 16px; flex-wrap: wrap; } .lb-bar .grp { flex-wrap: wrap; } }
 .lb-inner svg { width: 100%; height: auto; display: block; background: #fff; border-radius: 6px; }
 body.sheets-dark .lb-inner.is-dwg svg { filter: invert(1) hue-rotate(180deg) brightness(.93); }
