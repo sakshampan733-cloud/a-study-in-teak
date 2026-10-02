@@ -1,10 +1,8 @@
 // Large-print drawing sets, for printing and for the carpenter (owner, 2 Oct): every drawing the site shows, made
-// legible. The print step finds each view on an A3 sheet (elevation, plan, section, detail, notes) and gives it a
-// page of its own at three to six times the size, splitting a view too big for that where it has least drawing,
-// after a key page that shows the whole sheet and which page holds each part. Feet and inches only (the mm layer is
-// dropped and any mm left in the notes converted). Strong colour for a weak printer: drawing black, dimension lines
-// red, measurements green and bold, notes dark blue, every line heavier. A4 is laid out on its own, with more pages,
-// so the lettering prints near the same size on either paper.
+// legible. Each A3 sheet prints first whole, on a page of its own, then every view on it (elevation, plan, section,
+// detail, notes) whole on a page of its own, as large as the page allows up to three times the A3 size. Feet and
+// inches only (the mm layer is dropped and any mm left in the notes converted). Strong colour for a weak printer:
+// drawing black, dimension lines red, measurements green and bold, notes dark blue, every line heavier.
 //
 // Out, in cad/print/:  <family>.pdf, <family>-a4.pdf   one PDF per drawing or option — all its sheets, every page
 //                      <family>-NN.webp                the A3 pages as images, for the scrolling viewer on the site
@@ -184,40 +182,22 @@ function findViews(occ, tbBox, heads, els) {
   return views.filter((v) => v.n > 1).concat(extra)
     .sort((a, b) => (Math.abs(a.y0 - b.y0) < 20 ? a.x0 - b.x0 : a.y0 - b.y0));
 }
-function cutsFor(occ, r, nx, ny) {
-  const col = (x) => { let n = 0; for (let y = r.y0; y < r.y1; y++) n += occ[y * GW + x]; return n; };
-  const row = (y) => { let n = 0; for (let x = r.x0; x < r.x1; x++) n += occ[y * GW + x]; return n; };
-  const pick = (a0, a1, n, ink) => { const out = [a0];
-    for (let i = 1; i < n; i++) { const ideal = a0 + (a1 - a0) * i / n, win = (a1 - a0) / n * 0.2; let best = Math.round(ideal), bv = 1e9;
-      for (let v = Math.round(ideal - win); v <= Math.round(ideal + win); v++) { const c = ink(v) + Math.abs(v - ideal) * 0.08; if (c < bv) { bv = c; best = v; } } out.push(best); }
-    out.push(a1); return out; };
-  return { xs: pick(r.x0, r.x1, nx, col), ys: pick(r.y0, r.y1, ny, row) };
-}
-
 // ── paper ────────────────────────────────────────────────────────────────────────────────────────────────────────
 const PAPERS = {
-  a3: { suffix: "", W: 420, H: 297, M: 8, HEAD: 16, FOOT: 11, T: 1, MINS: 3.2, MAXS: 6 },
-  a4: { suffix: "-a4", W: 297, H: 210, M: 6, HEAD: 12, FOOT: 8.5, T: 0.75, MINS: 2.6, MAXS: 5 },
+  // MAXS caps the enlargement (in printed mm per A3 mm), so a small detail is not blown up out of all proportion
+  a3: { suffix: "", W: 420, H: 297, M: 8, HEAD: 16, FOOT: 11, T: 1, MAXS: 3 },
+  a4: { suffix: "-a4", W: 297, H: 210, M: 6, HEAD: 12, FOOT: 8.5, T: 0.75, MAXS: 3 },
 };
-const PAD = 2.5, OVER = 5;
+const PAD = 2.5;
 function planPages(sheet, P) {
   const BW = P.W - 2 * P.M, BH = P.H - P.HEAD - P.FOOT - 3;
   const pages = [];
   sheet.views.forEach((r) => {
     const w = r.x1 - r.x0 + 2 * PAD, h = r.y1 - r.y0 + 2 * PAD, fit = Math.min(BW / w, BH / h);
     const name = r.name || "Detail";
-    // the whole view on one page always; a view that comes out small that way is then also cut into enlarged parts
-    pages.push({ view: r, box: [r.x0 - PAD, r.y0 - PAD, w, h], s: Math.min(fit, P.MAXS), name, part: fit >= P.MINS ? "" : "whole view" });
-    if (fit >= 0.8 * P.MINS) return;
-    const nx = Math.ceil(w * P.MINS / BW), ny = Math.ceil(h * P.MINS / BH);
-    const { xs, ys } = cutsFor(sheet.occ, r, nx, ny);
-    const rowName = (j) => (ny === 1 ? "" : ny === 2 ? ["top", "bottom"][j] : ny === 3 ? ["top", "middle", "bottom"][j] : `row ${j + 1}`);
-    const colName = (i) => (nx === 1 ? "" : nx === 2 ? ["left", "right"][i] : nx === 3 ? ["left", "centre", "right"][i] : `column ${i + 1}`);
-    for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
-      const x0 = xs[i] - (i ? OVER : PAD), x1 = xs[i + 1] + (i < nx - 1 ? OVER : PAD), y0 = ys[j] - (j ? OVER : PAD), y1 = ys[j + 1] + (j < ny - 1 ? OVER : PAD);
-      pages.push({ view: r, box: [x0, y0, x1 - x0, y1 - y0], s: Math.min(BW / (x1 - x0), BH / (y1 - y0), P.MAXS), name,
-        part: `enlarged, part ${j * nx + i + 1} of ${nx * ny} — ${[rowName(j), colName(i)].filter(Boolean).join(" ")}` });
-    }
+    // each view whole on one page, as large as the page allows — never cut into pieces (owner, 2 Oct: the cut-up
+    // enlargements looked wrong)
+    pages.push({ view: r, box: [r.x0 - PAD, r.y0 - PAD, w, h], s: Math.min(fit, P.MAXS), name, part: "" });
   });
   return pages;
 }
@@ -245,20 +225,14 @@ function familyHTML(famTitle, sheets, P) {
   const legend = `<span class="lg"><i style="background:#000"></i>drawing</span><span class="lg"><i style="background:#e00000"></i>dimension line</span><span class="lg"><b style="color:#007a33">5'-2½"</b> measurement</span><span class="lg"><b style="color:#12308a">Aa</b> note</span>`;
   const page = (sh, title, part, inner) => { n++;
     return `<section class="pg"><header><div class="t">${esc(sh.dwg)}  ${esc(sh.title)}</div><div class="v">${esc(title)}${part ? `<span>${esc(part)}</span>` : ""}</div><div class="n">${n}/${total}</div></header>
-      <div class="box">${inner}</div><footer>${legend}<span class="sc">All sizes in feet and inches. Enlarged — go by the written sizes, never measure the paper.</span></footer></section>`; };
+      <div class="box">${inner}</div><footer>${legend}<span class="sc">All sizes in feet and inches. Go by the written sizes — never measure the paper.</span></footer></section>`; };
   sheets.forEach((sh, si) => {
     const id = "S" + si, pages = plans[si];
     starts.push(n);
     defs += `<g id="${id}">${prefixIds(sh.inner, id)}</g>`;
     const s0 = Math.min(BW / 420, BH / 297);
-    let marks = "", at = n + 2;
-    const groups = [];
-    pages.forEach((p) => { const g = groups[groups.length - 1]; if (g && g.view === p.view) g.last = at; else groups.push({ view: p.view, box: p.box, first: at, last: at }); at++; });
-    groups.forEach((g) => { const [x, y, w, h] = g.box, label = g.first === g.last ? `${g.first}` : `${g.first}–${g.last}`, bw = 4.2 * label.length + 5;
-      marks += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="rgba(0,122,51,.07)" stroke="#007a33" stroke-width="0.9" stroke-dasharray="3 1.6"/>
-        <rect x="${x + w - bw}" y="${y - 3.5}" width="${bw}" height="8" rx="4" fill="#007a33"/><text x="${x + w - bw / 2}" y="${y + 2.4}" font-size="6.2" text-anchor="middle" fill="#fff" style="font-weight:800" font-family="Helvetica, Arial, sans-serif">${label}</text>`; });
-    body += page(sh, "Key — the whole sheet. Each green box is one view; its number is the page (or pages) it is on.", "",
-      `<svg viewBox="0 0 420 297" style="width:${mm(420 * s0)};height:${mm(297 * s0)}"><rect x="8" y="8" width="404" height="281" fill="#fff" stroke="#000" stroke-width="0.6"/><use href="#${id}"/>${marks}</svg>`);
+    body += page(sh, `The whole sheet — then each view on its own page, ${n + 2} to ${n + 1 + pages.length}`, "",
+      `<svg viewBox="0 0 420 297" style="width:${mm(420 * s0)};height:${mm(297 * s0)}"><rect x="8" y="8" width="404" height="281" fill="#fff" stroke="#000" stroke-width="0.6"/><use href="#${id}"/></svg>`);
     pages.forEach((p) => { const [x, y, w, h] = p.box;
       body += page(sh, p.name, p.part, `<svg viewBox="${x} ${y} ${w} ${h}" style="width:${mm(w * p.s)};height:${mm(h * p.s)}"><use href="#${id}"/></svg>`); });
   });

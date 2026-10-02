@@ -32,8 +32,8 @@ const VANITY = {
 };
 
 // The inner drawer's outline in plan — a U, or an L where the pipe leaves one arm too thin to keep.
-function innerOutline(open, AX) {
-  const K = VANITY, I = K.inner, x0 = open[0] + 13 + 28, x1 = open[1] - 13 - 28, d0 = I.back, d1 = K.D - 58;
+function innerOutline(open, AX, D = VANITY.D) {
+  const K = VANITY, I = K.inner, x0 = open[0] + 13 + 28, x1 = open[1] - 13 - 28, d0 = I.back, d1 = D - 58;
   const n0 = AX - I.notch, n1 = AX + I.notch, nd = I.notchD;
   if (x1 - n1 < 80) return { x0, x1, d0, d1, arm: "right", path: `M ${x0} ${d0} L ${n0} ${d0} L ${n0} ${nd} L ${x1} ${nd} L ${x1} ${d1} L ${x0} ${d1} Z` };
   if (n0 - x0 < 80) return { x0, x1, d0, d1, arm: "left", path: `M ${x0} ${nd} L ${n1} ${nd} L ${n1} ${d0} L ${x1} ${d0} L ${x1} ${d1} L ${x0} ${d1} Z` };
@@ -43,7 +43,11 @@ function innerOutline(open, AX) {
 // Scheme C, as chosen (30.09): the middle bank is beige marble and runs to the FLOOR — it is the support —
 // and it uses its full 33 in. The top pair of drawers grows to 6½ in fronts, the drawer within the big one
 // to a 5½ in box, and the big drawer takes the rest. The two ends are pull-out cabinets, unchanged in height.
+// Owner, 2 Oct: the top and the front meet as ONE mitred marble corner — no lip, no step. The fronts come forward
+// the 1 in the marble used to oversail, so every drawer front is flush with the edge of the top (2 ft 1 in deep).
+// The top mitres into a fixed marble strip across the top of the bank; the drawers start under it, push-to-open.
 const VANITY_C = {
+  D: 635, over: 0, mitre: true,
   top2: [591, 762], big: [38, 566],
   inner: { h0: 377, h1: 537, bot: 387, side: 527, back: 115, notch: 125, notchD: 355 },
   bigSide: 347,
@@ -94,7 +98,7 @@ function buildVanity(V) {
       o += RE(0, K.clear, bank[0], K.top, t * 1.3, VEN) + RE(bank[1], K.clear, L, K.top, t * 1.3, VEN);
       o += RE(bank[0], 0, bank[1], K.top, t * 1.3, MARBLE);
     } else o += RE(0, K.clear, L, K.top, t * 1.3, VEN);                                    // the carcass
-    o += RE(V.marble[0], K.top, V.marble[1], K.counter, t * 1.3, MARBLE);                  // the marble, over the bank
+    o += RE(V.marble[0], K.mitre ? K.top2[1] : K.top, V.marble[1], K.counter, t * 1.3, MARBLE);   // the marble over the bank (mitred: the top and its strip read as one)
     FRONTS.forEach((F) => {
       o += RE(F.x0 + gap, F.h0 + gap, F.x1 - gap, F.h1 - gap, t * 1.1, F.kind === "door" || F.kind === "pullout" ? VEN : FF);
       if (F.kind === "door" || F.kind === "pullout") o += pull(F.x1 > SP ? F.x0 + 70 : F.x1 - 70, F.h1 - 70, t);   // drawers have no handles: push-to-open
@@ -123,6 +127,16 @@ function buildVanity(V) {
     return o;
   }
 
+  // the mitred corner (scheme C): ply sub-top, the slab mitred at its front edge, and a fixed marble strip the same
+  // thickness running down the front from the counter to the top drawers, mitred to meet it — one corner, flush
+  function mitreCorner(x0, t) {
+    const T = K.slab, s0 = K.top2[1];
+    let o = RE(x0, K.top, D - T, K.top + K.sub, t * 0.8, VEN);                                       // ply sub-top
+    o += PT(`M ${f(x0)} ${f(E(K.counter))} L ${f(D)} ${f(E(K.counter))} L ${f(D - T)} ${f(E(K.counter - T))} L ${f(x0)} ${f(E(K.counter - T))} Z`, t * 1.2, MARBLE);   // the slab
+    o += PT(`M ${f(D - T)} ${f(E(K.counter - T))} L ${f(D)} ${f(E(K.counter))} L ${f(D)} ${f(E(s0))} L ${f(D - T)} ${f(E(s0))} Z`, t * 1.2, MARBLE);   // the front strip
+    return o;
+  }
+
   // ═════════════ SECTION A–A, on the faucet axis ═════════════
   function section(t) {
     const P = (d) => d;                                                    // depth from the wall is x here
@@ -131,13 +145,16 @@ function buildVanity(V) {
     // hanging rail, back, top, bottom, face
     o += RE(0, 700, 18, 760, t, VEN);
     o += RE(18, BOT + 18, 30, K.top - 18, t * 0.8, VEN);
-    o += RE(0, K.top - 18, D, K.top, t, VEN) + RE(0, BOT, D, BOT + 18, t, VEN);
-    // sub-top, slab, and the mitred apron that hides both edges
-    o += RE(0, K.top, D + K.over - K.slab, K.top + K.sub, t * 0.8, VEN);
-    o += PT(`M 0 ${f(E(K.counter))} L ${f(D + K.over)} ${f(E(K.counter))} L ${f(D + K.over)} ${f(E(K.top))} L ${f(D + K.over - K.slab)} ${f(E(K.top))} L ${f(D + K.over - K.slab)} ${f(E(K.counter - K.slab))} L 0 ${f(E(K.counter - K.slab))} Z`, t * 1.2, MARBLE);
-    o += LN(D + K.over - K.slab, E(K.counter - K.slab), D + K.over, E(K.counter), t * 0.6);
-    // face frame: top rail, mid rail, bottom rail
-    [[K.top - K.rail, K.top - 18], [K.big[1], K.top2[0]], [BOT + 18, K.big[0]]].forEach(([a, b]) => (o += RE(D - 18, a, D, b, t, FF)));
+    o += RE(0, K.top - 18, K.mitre ? D - K.slab : D, K.top, t, VEN) + RE(0, BOT, D, BOT + 18, t, VEN);
+    if (K.mitre) o += mitreCorner(0, t);
+    else {
+      // sub-top, slab, and the mitred apron that hides both edges
+      o += RE(0, K.top, D + K.over - K.slab, K.top + K.sub, t * 0.8, VEN);
+      o += PT(`M 0 ${f(E(K.counter))} L ${f(D + K.over)} ${f(E(K.counter))} L ${f(D + K.over)} ${f(E(K.top))} L ${f(D + K.over - K.slab)} ${f(E(K.top))} L ${f(D + K.over - K.slab)} ${f(E(K.counter - K.slab))} L 0 ${f(E(K.counter - K.slab))} Z`, t * 1.2, MARBLE);
+      o += LN(D + K.over - K.slab, E(K.counter - K.slab), D + K.over, E(K.counter), t * 0.6);
+    }
+    // face frame: top rail (the marble strip takes its place with the mitre), mid rail, bottom rail
+    (K.mitre ? [] : [[K.top - K.rail, K.top - 18]]).concat([[K.big[1], K.top2[0]], [BOT + 18, K.big[0]]]).forEach(([a, b]) => (o += RE(D - 18, a, D, b, t, FF)));
     if (FLOOR) o += RE(D - 18, 0, D, BOT + 18, t, FF);
     // top drawer: cut if the pipe goes through it, seen beyond if the pipe drops beside it
     const box = (h0, h1, cut, low) => {
@@ -168,6 +185,13 @@ function buildVanity(V) {
   // ═════════════ DETAIL 1 — the marble edge, 1:2 ═════════════
   function edge(t) {
     const x0 = D - 70, x1 = D + K.over;
+    if (K.mitre) {
+      let o = RE(x0, K.top - 18, D - K.slab, K.top, t, VEN);                                // carcass top, stopping behind the strip
+      o += mitreCorner(x0, t);
+      o += RE(D - 18, K.top2[1] - 28, D, K.top2[1] - gap, t, FF, dash(t));                  // top drawer front, flush below
+      o += LN(x0, E(K.counter + 6), x0, E(K.top2[1] - 30), t * 0.5, dash(t));               // break line
+      return o;
+    }
     let o = RE(x0, K.top - 18, D, K.top, t, VEN);                                          // carcass top
     o += RE(D - 18, K.top - K.rail, D, K.top - 18, t, FF);                                // top rail
     o += RE(D - 18, K.top - 55, D, K.top - K.rail - gap, t, FF, dash(t));                // drawer front, below
@@ -184,7 +208,7 @@ function buildVanity(V) {
     let o = PT(`M ${x0} ${d0} L ${n0} ${d0} L ${n0} ${nd} L ${n1} ${nd} L ${n1} ${d0} L ${x1} ${d0} L ${x1} ${d1} L ${x0} ${d1} Z`, t * 1.2, VEN);
     o += PT(`M ${x0 + 15} ${d0 + 15} L ${n0 - 15} ${d0 + 15} L ${n0 - 15} ${nd + 15} L ${n1 + 15} ${nd + 15} L ${n1 + 15} ${d0 + 15} L ${x1 - 15} ${d0 + 15} L ${x1 - 15} ${d1 - 15} L ${x0 + 15} ${d1 - 15} Z`, t * 0.5);
     o += RC(open[0] - gap, d1, open[1] + gap, D, t, VEN);                                   // the front
-    { const io = innerOutline(open, AX);
+    { const io = innerOutline(open, AX, D);
       o += PT(io.path, t * 0.9, "none", `stroke="${DIM}" ${dash(t)}`) + RC(x0 + 18, D - 58, x1 - 18, D - 40, t * 0.9, "none", `stroke="${DIM}"`); }
     o += `<circle cx="${AX}" cy="${K.bowl.c}" r="20" fill="#fff" stroke-width="${f(t)}"/>`;
     o += PT(`M ${AX} ${K.bowl.c} L ${AX} ${K.bowl.c - 140} L ${AX} 0`, t * 2.6, "none", `stroke="${THIN}"`);
@@ -218,7 +242,7 @@ function buildVanity(V) {
   s += heading(214, 17, "SECTION A–A", "ON THE FAUCET AXIS · 1:10", 76);
   const vs = view(228, oyE, sc, "Vanity section"), ts = vs.w(0.12);
   s += vs.g(section(ts), 0.3);
-  s += chainH([vs.X(0), vs.X(D - K.setback), vs.X(D), vs.X(D + K.over)], yF + 5.5, V.support ? [D - K.setback, K.setback, K.over] : ["", "", K.over], { from: yF + 1, size: 1.2 });
+  s += chainH([vs.X(0), vs.X(D - K.setback), vs.X(D), vs.X(D + K.over)], yF + 5.5, V.support ? [D - K.setback, K.setback, K.over] : ["", "", K.over || ""], { from: yF + 1, size: 1.2 });
   s += chainH([vs.X(0), vs.X(D)], yF + 11.5, [`${D} DEEP`], { from: yF + 1, size: 1.3 });
   s += chainV([vs.Y(E(0)), vs.Y(E(K.trap)), vs.Y(E(700)), vs.Y(E(760))], vs.X(0) - 9, [K.trap, "", 60], { from: vs.X(0) - 7, size: 1.15 });
   [[1, 9, 730], [2, 470, 330], [3, 150, 520], [4, 260, 95], [5, 150, K.spout.h + 70], [6, 400, K.top + 10], [7, 470, 508]].forEach(([n, d, h]) => {
@@ -231,7 +255,8 @@ function buildVanity(V) {
   const vp = view(34, 184, sc, "Vanity plan"), tp = vp.w(0.12);
   s += vp.g(plan(tp), 0.3);
   s += cutMark(vp.X(AX) - 3, vp.Y(-55), "A", "up") + cutMark(vp.X(AX) - 3, vp.Y(D + K.over + 45), "A", "down");
-  s += chainV([vp.Y(0), vp.Y(D), vp.Y(D + K.over)], vp.X(0) - 5, [D, K.over], { from: vp.X(0) - 1, size: 1.2 });
+  s += K.over ? chainV([vp.Y(0), vp.Y(D), vp.Y(D + K.over)], vp.X(0) - 5, [D, K.over], { from: vp.X(0) - 1, size: 1.2 })
+    : chainV([vp.Y(0), vp.Y(D)], vp.X(0) - 5, [`${D} TOP AND FRONTS FLUSH`], { from: vp.X(0) - 1, size: 1.2 });
   if (SP !== AX) s += chainH([vp.X(SP), vp.X(AX)], vp.Y(570), [`${AX - SP} OFF CENTRE`], { from: vp.Y(560), size: 1.25 });
   else s += chainH([vp.X(V.marble[0]), vp.X(AX), vp.X(V.marble[1])], vp.Y(570), [AX - V.marble[0], V.marble[1] - AX], { from: vp.Y(560), size: 1.25 });
 
@@ -244,14 +269,18 @@ function buildVanity(V) {
 
   // ── the right-hand column: detail 1, fronts, materials, open ──
   const RX = 302;
-  s += heading(RX, 17, "DETAIL 1 · THE MARBLE EDGE", "SECTION · 1:2", 108);
+  s += heading(RX, 17, "DETAIL 1 · THE MARBLE EDGE", K.mitre ? "SECTION · 1:2 · ONE MITRED CORNER, FRONTS FLUSH" : "SECTION · 1:2", 108);
   const ve = view(RX + 4 - (D - 70) / 2, 30 - E(K.counter + 10) / 2, 2, "Vanity edge"), te = ve.w(0.12);
   s += ve.g(edge(te), 0.3);
   s += chainV([ve.Y(E(K.top)), ve.Y(E(K.top + K.sub)), ve.Y(E(K.counter))], ve.X(D + K.over) + 5, [K.sub, K.slab], { from: ve.X(D + K.over) + 1, size: 1.15 });
   s += chainV([ve.Y(E(K.top)), ve.Y(E(K.counter))], ve.X(D + K.over) + 11, [K.counter - K.top], { from: ve.X(D + K.over) + 1, size: 1.2 });
-  s += chainH([ve.X(D), ve.X(D + K.over)], ve.Y(E(K.top)) + 5, [K.over], { from: ve.Y(E(K.top)) + 1, size: 1.15 });
-  [["MARBLE SLAB 18", ve.X(D - 40), ve.Y(E(K.counter - 9))], ["BWP PLY SUB-TOP 20", ve.X(D - 40), ve.Y(E(K.top + 10))], ["MITRED APRON, 18 × 38", ve.X(D + K.over - 9), ve.Y(E(K.top + 12))],
-   ["CARCASS TOP 18", ve.X(D - 40), ve.Y(E(K.top - 9))], ["TOP RAIL", ve.X(D - 9), ve.Y(E(K.top - 28))]].forEach(([l, x, y], i) => {
+  if (K.over) s += chainH([ve.X(D), ve.X(D + K.over)], ve.Y(E(K.top)) + 5, [K.over], { from: ve.Y(E(K.top)) + 1, size: 1.15 });
+  if (K.mitre) s += chainV([ve.Y(E(K.top2[1])), ve.Y(E(K.counter))], ve.X(D) + 17, [`${K.counter - K.top2[1]} STRIP`], { from: ve.X(D) + 1, size: 1.2 });
+  (K.mitre
+    ? [["MARBLE SLAB 18, MITRED", ve.X(D - 40), ve.Y(E(K.counter - 9))], ["BWP PLY SUB-TOP 20", ve.X(D - 40), ve.Y(E(K.top + 10))], [`FIXED MARBLE STRIP 18 × ${K.counter - K.top2[1]}`, ve.X(D - 9), ve.Y(E(K.top - 10))],
+       ["CARCASS TOP 18", ve.X(D - 40), ve.Y(E(K.top - 9))], ["TOP DRAWER, FLUSH", ve.X(D - 9), ve.Y(E(K.top2[1] - 16))]]
+    : [["MARBLE SLAB 18", ve.X(D - 40), ve.Y(E(K.counter - 9))], ["BWP PLY SUB-TOP 20", ve.X(D - 40), ve.Y(E(K.top + 10))], ["MITRED APRON, 18 × 38", ve.X(D + K.over - 9), ve.Y(E(K.top + 12))],
+       ["CARCASS TOP 18", ve.X(D - 40), ve.Y(E(K.top - 9))], ["TOP RAIL", ve.X(D - 9), ve.Y(E(K.top - 28))]]).forEach(([l, x, y], i) => {
     const ty = 36 + i * 5;
     s += `<path d="M ${f(x)} ${f(y)} L ${RX + 66} ${f(ty - 0.6)} L ${RX + 69} ${f(ty - 0.6)}" fill="none" stroke="${INK}" stroke-width="0.12"/><circle cx="${f(x)}" cy="${f(y)}" r="0.4" fill="${INK}"/>`;
     s += text(RX + 70, ty, l, { size: 1.45 });
@@ -335,14 +364,15 @@ buildVanity({
   ],
 });
 buildVanity({
-  key: "vanity-c", dwg: "AST-DR-021", name: "Vanity — scheme C (chosen)", date: "30.09.2026", rev: "2 — chosen: marble bank to the floor",
+  key: "vanity-c", dwg: "AST-DR-021", name: "Vanity — scheme C (chosen)", date: "02.10.2026", rev: "3 — one mitred corner, fronts flush with the top",
   title: "VANITY — SCHEME C", sub: "Chosen · marble bank to the floor · pull-outs each end",
   headline: "CHOSEN · 1 FT 6 LEFT, 6 IN RIGHT · 3 FT MARBLE BANK ON THE FAUCET, DOWN TO THE FLOOR",
   bank: [457, 1371], marble: [457, 1371], support: null, ledges: "two", toFloor: true, pullouts: true, dims: VANITY_C,
   doors: [[0, 457], [1371, 1524, 19]],
   stations: [0, 457, 1371, 1524], spans: [457, "914 MARBLE", 153],
   materials: [
-    ["Top", "Beige-gold marble, the bathroom stone. 18 slab"], ["", "on a 20 BWP sub-top, mitred 38 apron, polished."],
+    ["Top", "Beige-gold marble, the bathroom stone. 18 slab"], ["", "on a 20 BWP sub-top, mitred at the front edge into"],
+    ["", "a fixed 18 marble strip: one corner, fronts flush."],
     ["Bank", "The same beige marble on the face frame and on"], ["", "every drawer front, floor to counter. It stands"],
     ["", "on the floor and carries the top — no support."],
     ["Ends", "Two pull-out cabinets, 9292 cream burl veneer,"], ["", "high gloss, 18 BWP, edges sealed. 6 in off the floor."],
@@ -358,7 +388,7 @@ buildVanity({
     "OPEN — bowl Ø406 × 127 and the spout are assumed.",
     "OPEN — marble front thickness and how it is bonded to the",
     "   drawer boxes: stone supplier to confirm.",
-    "The ends are pull-outs, the same height as before.",
+    "Rev 3: top and front meet in one mitred corner, flush.",
   ],
 });
 
@@ -412,7 +442,7 @@ buildVanity({
     const x0 = openC[0] + 13, x1 = openC[1] - 13, d0 = 92, d1 = D - 18, n0 = AX - 100, n1 = AX + 100, nd = 330;
     let o = LN(openC[0] - 80, 0, openC[1] + 80, 0, t * 1.6);
     o += PT(`M ${x0} ${d0} L ${n0} ${d0} L ${n0} ${nd} L ${n1} ${nd} L ${n1} ${d0} L ${x1} ${d0} L ${x1} ${d1} L ${x0} ${d1} Z`, t * 1.2, VEN);
-    const io = innerOutline(openC, AX);
+    const io = innerOutline(openC, AX, D);
     o += PT(io.path, t * 1.1, "#fbf6ec", `stroke="${DIM}"`);
     o += RC(x0 + 18, D - 58, x1 - 18, D - 40, t, VEN, `stroke="${DIM}"`);
     o += RC(openC[0] - gap, d1, openC[1] + gap, D, t * 1.2, MARBLE);
@@ -428,7 +458,7 @@ buildVanity({
       .forEach(([a, b, h0, h1]) => (o += RE(a + gap, h0 + gap, b - gap, h1 - gap, t, MARBLE)));
     o += `<line x1="${f(bankC[0] - 120)}" y1="${f(E(0))}" x2="${f(bankC[1] + 120)}" y2="${f(E(0))}" stroke-width="${f(t * 3.5)}"/>`;   // the floor it stands on
     o += RE(openC[0] + 31, I.h0, openC[1] - 31, I.h1, t * 0.9, "none", `stroke="${DIM}" ${dash(t)}`);
-    o += RE(bankC[0], K.top, bankC[1], K.counter, t * 1.2, MARBLE);
+    o += RE(bankC[0], K.mitre ? K.top2[1] : K.top, bankC[1], K.counter, t * 1.2, MARBLE);
     return o;
   }
 

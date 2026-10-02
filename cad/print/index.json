@@ -10,8 +10,8 @@
   "starts": [
    0
   ],
-  "pages": 9,
-  "pagesA4": 14
+  "pages": 3,
+  "pagesA4": 3
  },
  "doorveneer": {
   "title": "DOORS — MADE IN VENEER",
@@ -24,8 +24,8 @@
   "starts": [
    0
   ],
-  "pages": 17,
-  "pagesA4": 21
+  "pages": 7,
+  "pagesA4": 7
  },
  "door": {
   "title": "DOOR D1 — 7 FT 7 IN × 3 FT",
@@ -38,8 +38,8 @@
   "starts": [
    0
   ],
-  "pages": 20,
-  "pagesA4": 26
+  "pages": 8,
+  "pagesA4": 8
  },
  "door-narrow": {
   "title": "DOOR D2 · D3 — 7 FT 7 IN × 2 FT 6 IN",
@@ -52,8 +52,8 @@
   "starts": [
    0
   ],
-  "pages": 16,
-  "pagesA4": 24
+  "pages": 8,
+  "pagesA4": 8
  },
  "architrave": {
   "title": "DOOR CASINGS",
@@ -66,8 +66,8 @@
   "starts": [
    0
   ],
-  "pages": 21,
-  "pagesA4": 28
+  "pages": 9,
+  "pagesA4": 9
  },
  "casingb": {
   "title": "DOOR CASINGS — OPTION B",
@@ -80,8 +80,8 @@
   "starts": [
    0
   ],
-  "pages": 17,
-  "pagesA4": 20
+  "pages": 8,
+  "pagesA4": 8
  },
  "desk-square": {
   "title": "DESK (SQUARE CORNERS) — GENERAL ARRANGEMENT",
@@ -98,10 +98,10 @@
   "starts": [
    0,
    9,
-   24
+   20
   ],
-  "pages": 39,
-  "pagesA4": 62
+  "pages": 25,
+  "pagesA4": 25
  },
  "desk": {
   "title": "DESK — GENERAL ARRANGEMENT",
@@ -118,10 +118,10 @@
   "starts": [
    0,
    9,
-   24
+   20
   ],
-  "pages": 39,
-  "pagesA4": 62
+  "pages": 25,
+  "pagesA4": 25
  },
  "studywall": {
   "title": "STUDY WALL — GENERAL ARRANGEMENT",
@@ -135,10 +135,10 @@
   ],
   "starts": [
    0,
-   15
+   5
   ],
-  "pages": 30,
-  "pagesA4": 36
+  "pages": 14,
+  "pagesA4": 14
  },
  "leftwall": {
   "title": "LEFT WALL",
@@ -151,8 +151,8 @@
   "starts": [
    0
   ],
-  "pages": 12,
-  "pagesA4": 15
+  "pages": 4,
+  "pagesA4": 4
  },
  "rightwall": {
   "title": "RIGHT WALL — PANEL MOULDING",
@@ -165,8 +165,8 @@
   "starts": [
    0
   ],
-  "pages": 20,
-  "pagesA4": 24
+  "pages": 9,
+  "pagesA4": 9
  },
  "dressingshell": {
   "title": "DRESSING ROOM",
@@ -179,8 +179,8 @@
   "starts": [
    0
   ],
-  "pages": 14,
-  "pagesA4": 15
+  "pages": 3,
+  "pagesA4": 3
  },
  "mirror": {
   "title": "DRESSING MIRROR",
@@ -193,8 +193,8 @@
   "starts": [
    0
   ],
-  "pages": 14,
-  "pagesA4": 18
+  "pages": 3,
+  "pagesA4": 3
  },
  "vanity": {
   "title": "VANITY — NORMAL",
@@ -207,8 +207,8 @@
   "starts": [
    0
   ],
-  "pages": 22,
-  "pagesA4": 25
+  "pages": 10,
+  "pagesA4": 10
  },
  "vanity-b": {
   "title": "VANITY — SCHEME B",
@@ -221,8 +221,8 @@
   "starts": [
    0
   ],
-  "pages": 22,
-  "pagesA4": 25
+  "pages": 10,
+  "pagesA4": 10
  },
  "vanity-c": {
   "title": "VANITY — SCHEME C",
@@ -236,9 +236,9 @@
   ],
   "starts": [
    0,
-   22
+   10
   ],
-  "pages": 36,
-  "pagesA4": 47
+  "pages": 18,
+  "pagesA4": 18
  }
 }
