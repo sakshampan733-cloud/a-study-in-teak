@@ -240,5 +240,25 @@
   ],
   "pages": 18,
   "pagesA4": 18
+ },
+ "desk-plain": {
+  "title": "DESK (PLAIN, SQUARE) — GENERAL ARRANGEMENT",
+  "dwgs": [
+   "AST-DR-031",
+   "AST-DR-032",
+   "AST-DR-033"
+  ],
+  "keys": [
+   "desk-plain",
+   "desk-plain-details",
+   "desk-plain-3d"
+  ],
+  "starts": [
+   0,
+   9,
+   19
+  ],
+  "pages": 24,
+  "pagesA4": 24
  }
 }
