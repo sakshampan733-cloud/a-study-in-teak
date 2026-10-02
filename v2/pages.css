@@ -533,9 +533,13 @@ body.sheets-dark .lb-inner.is-dwg svg { filter: invert(1) hue-rotate(180deg) bri
 /* the walk-through — the rendered film, with a button for each shot */
 .film-frame { border-radius: 10px; overflow: hidden; background: var(--void); aspect-ratio: 16 / 9; }
 .film-frame video { display: block; width: 100%; height: 100%; background: #000; }
-.film-music { margin-top: 12px; min-height: 80px; border-radius: 12px; overflow: hidden; }
-.film-music iframe { display: block; border: 0; }
-.film-hint { margin: 10px 0 0; font-size: 11px; line-height: 1.5; color: var(--dim); max-width: 760px; }
+.film-music { margin-top: 14px; display: flex; align-items: center; gap: 18px; }
+.film-song { flex: none; width: 356px; height: 200px; border-radius: 10px; overflow: hidden; background: #000; }   /* YouTube asks for 200 px at least */
+.film-song iframe { display: block; border: 0; width: 100%; height: 100%; }
+.film-song-t { display: flex; flex-direction: column; gap: 6px; }
+.film-song-t b { font-weight: 500; font-size: 18px; }
+.film-song-t span:last-child { color: var(--dim); font-size: 13px; }
+@media (max-width: 640px) { .film-music { flex-direction: column; align-items: stretch; } .film-song { width: 100%; } }
 .film-chapters { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .film-chapters .btn { height: 34px; font-size: 11px; padding: 0 14px; gap: 8px; }
 .film-chapters .mono { color: var(--dim); font-size: 10px; }

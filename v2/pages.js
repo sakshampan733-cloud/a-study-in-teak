@@ -162,8 +162,8 @@ function overview() {
     ["The dressing-room door", 37.5], ["The dressing room", 43], ["The vault", 48.5], ["The vanity", 53.5]];
   const walk = `<section class="section" style="padding-bottom:24px">${head("The walk-through", "Walk the rooms.", "Rendered in Blender from the drawings, in the real finishes and light: in through the door, the partition, the study and desk, the bed, the dressing room and the vanity. The bed back, the way the curved drawers open and the wardrobe interiors are not designed yet, so they are shown as placeholders.")}</section>
     <section class="film reveal" id="film"><div class="wrap"><div class="film-frame"><video controls playsinline muted preload="none" poster="media/room-film-poster.jpg"></video></div>
-      <div class="film-music"><div id="film-spotify"></div></div>
-      <p class="film-hint mono" hidden>Spotify is playing its 30-second preview, which starts partway into the song and stops after 30 seconds. Log in at open.spotify.com in this browser, reload, and the whole song plays from the start with the film.</p>
+      <div class="film-music"><div class="film-song"><div id="film-song"></div></div>
+        <div class="film-song-t"><span class="mono">Soundtrack</span><b>Devil In A New Dress</b><span>Kanye West ft. Rick Ross · plays with the film, from the start</span></div></div>
       <div class="film-chapters">${FILM.map(([n, t], k) => `<button class="btn" data-film="${t}"><span class="mono">${pad2(k + 1)}</span>${esc(n)}</button>`).join("")}</div></div></section>`;
   const plan2d = `<section class="section">${head("The plan", "Switch things on and off.", "The whole suite from above. Show the measurements and the lights, and put each piece of furniture in or take it out, one at a time.")}
     <div class="wrap reveal"><div class="p2d" id="p2d"></div></div></section>`;
@@ -205,22 +205,35 @@ function mountFilm(el) {
   v.src = small ? "media/room-film-720.mp4" : "media/room-film.mp4";
   mountSoundtrack(v);
 }
-// The soundtrack (owner, 2 Oct): Devil In A New Dress, Kanye West ft. Rick Ross. The song can't be hosted here, so it
-// plays through Spotify's own player, which the film drives, in step with it: play starts it, pause and the end stop it. Spotify plays
-// the whole song to a listener logged in to Spotify in this browser, and a 30-second preview to anyone else.
-const SOUNDTRACK = "spotify:track:1UGD3lW3tDmgZfAVDh6w7r";
+// The soundtrack (owner, 2 Oct): Devil In A New Dress, Kanye West ft. Rick Ross — the whole song, from the very start.
+// It can't be hosted here, so it plays through YouTube's own player, from the official upload (Kanye West – Topic,
+// provided by the label): full length, for anyone, no login (Spotify gave a 30-second preview from mid-song unless
+// logged in). The film drives the song and waits for it: play starts the song from the film's own time, pause stops
+// both, a jump moves both, and if the song stalls (loading, an advert) the film holds until it plays.
+const SOUNDTRACK = "sk3rpYkiHe8";
 function mountSoundtrack(v) {
-  const box = $("#film-spotify"); if (!box || box.dataset.on) return; box.dataset.on = "1";
-  window.onSpotifyIframeApiReady = (API) => API.createController(box, { uri: SOUNDTRACK, width: "100%", height: 80 }, (c) => {
-    // the song runs in step with the film: film 0:00 is song 0:00, and a jump in the film jumps the song
-    v.addEventListener("play", () => { if (v.currentTime < 0.5) c.restart(); else { c.seek(v.currentTime); c.resume(); } });
-    v.addEventListener("seeked", () => { if (!v.paused) c.seek(v.currentTime); });
-    v.addEventListener("pause", () => c.pause());
-    v.addEventListener("ended", () => c.pause());
-    // a listener who isn't logged in to Spotify gets a 30-second preview cut from the middle of the song: say so
-    c.addListener("playback_update", (e) => { const d = e?.data?.duration; if (d && d < 31000) { const h = $("#film .film-hint"); if (h) h.hidden = false; } });
+  const box = $("#film-song"); if (!box || box.dataset.on) return; box.dataset.on = "1";
+  let yt = null, ready = false, wait = false;              // wait: the film is paused only while the song starts
+  const PLAYING = 1, PAUSED = 2;
+  const start = () => { yt = new YT.Player(box, { videoId: SOUNDTRACK, width: "100%", height: "100%",
+    playerVars: { playsinline: 1, rel: 0, modestbranding: 1 },
+    events: { onReady: () => (ready = true), onStateChange: (e) => {
+      if (e.data === PLAYING && wait) { wait = false; v.play().catch(() => {}); }
+      else if (e.data === PLAYING && v.paused && yt.getCurrentTime() < (v.duration || 59)) { v.currentTime = yt.getCurrentTime(); v.play().catch(() => {}); }   // played from YouTube's own button
+      else if (e.data === PAUSED && !v.paused && !wait) v.pause();
+    } } }); };
+  v.addEventListener("play", () => {
+    if (!ready || yt.getPlayerState() === PLAYING) return;
+    wait = true; v.pause(); yt.seekTo(v.currentTime, true); yt.playVideo();
   });
-  const sc = document.createElement("script"); sc.src = "https://open.spotify.com/embed/iframe-api/v1"; sc.async = true; document.head.appendChild(sc);
+  v.addEventListener("pause", () => { if (ready && !wait) yt.pauseVideo(); });
+  v.addEventListener("seeked", () => { if (ready && Math.abs(yt.getCurrentTime() - v.currentTime) > 0.4) yt.seekTo(v.currentTime, true); });
+  v.addEventListener("ended", () => { if (ready) yt.pauseVideo(); });
+  // keep them together: the film follows the song's clock
+  setInterval(() => { if (ready && !v.paused && yt.getPlayerState() === PLAYING) { const t = yt.getCurrentTime(); if (Math.abs(t - v.currentTime) > 0.5 && t < (v.duration || 59)) v.currentTime = t; } }, 500);
+  if (window.YT && YT.Player) start();
+  else { const prev = window.onYouTubeIframeAPIReady; window.onYouTubeIframeAPIReady = () => { prev?.(); start(); };
+    const sc = document.createElement("script"); sc.src = "https://www.youtube.com/iframe_api"; document.head.appendChild(sc); }
 }
 document.addEventListener("click", (e) => {
   const b = e.target.closest("[data-film]"); if (!b) return;
