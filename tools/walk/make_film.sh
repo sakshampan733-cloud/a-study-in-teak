@@ -13,6 +13,7 @@ for attempt in 1 2 3 4; do
   grep -q "^DONE film" build/film/render.log && break
   echo "render attempt $attempt stopped; retrying" >> build/film/render.log
 done
-for s in $ORDER; do $PY tools/walk/post.py --dir build/film/$s build/film/graded/$s --size 1920x1080; done
+if ! grep -q "^DONE film" build/film/render.log; then echo "RENDER INCOMPLETE: not grading or cutting. Check disk space and run again. $(date)" >> build/film/render.log; exit 1; fi
+for s in $ORDER; do $PY tools/walk/post.py --dir build/film/$s build/film/graded/$s --size 1920x1080 --jpg; done
 $B -b --factory-startup --python tools/walk/cut.py -- "$PWD/build/film/graded" "$PWD/build/film/room_film.mp4" ${(j:,:)ORDER} 12 1920x1080 >> build/film/render.log 2>&1
 echo "FILM READY $(date)" >> build/film/render.log

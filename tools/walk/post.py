@@ -2,7 +2,7 @@
 # a little coarser than a pixel, fresh every frame). A render is too clean to read as a photograph without them.
 #
 #   python3 tools/walk/post.py in.png out.jpg [--grain 0.10] [--vig 0.16]
-#   python3 tools/walk/post.py --dir in_dir out_dir [--size 1920x1080]   (every .png in a folder, for a shot's frames)
+#   python3 tools/walk/post.py --dir in_dir out_dir [--size 1920x1080]   [--jpg]   (every .png in a folder, for a shot's frames)
 import os, sys
 from PIL import Image, ImageChops, ImageFilter
 
@@ -39,7 +39,9 @@ if __name__ == "__main__":
     a = [x for x in sys.argv[1:] if not x.startswith("--") and not (sys.argv[sys.argv.index(x) - 1] in ("--grain", "--vig", "--size"))]
     if "--dir" in sys.argv:
         src, dst = a[0], a[1]; os.makedirs(dst, exist_ok=True)
+        ext = ".jpg" if "--jpg" in sys.argv else ".png"                      # --jpg: quality 95, about a tenth the size
         for f in sorted(os.listdir(src)):
-            if f.endswith(".png"): post(os.path.join(src, f), os.path.join(dst, f[:-4] + ".png"))
+            out = os.path.join(dst, f[:-4] + ext)
+            if f.endswith(".png") and not (os.path.exists(out) and os.path.getsize(out) > 0): post(os.path.join(src, f), out)   # resumable
     else:
         post(a[0], a[1])
