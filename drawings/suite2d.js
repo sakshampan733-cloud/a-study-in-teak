@@ -36,7 +36,7 @@
   // partition (owner, 1 Oct): Mano cast-glass blocks, 95 deep, 16 blocks of 150 = 2400 along its run, on the old
   // centre line 11 ft off the bed wall. A straight middle of 8 blocks; each end turns TOWARDS THE BED only, on a 1.3 m
   // radius over 4 blocks (26°, 136 out) — about as tight as the blocks go. One foot-wide wood column up the middle;
-  // the TV floats on the bed side; eight drawers (4 across × 2 high, 450 high, 400 deep) run the whole length.
+  // the TV floats on the bed side; under it the TV unit, a pill in plan, 450 high and 400 deep (AST-DR-036).
   const pT = 95, yP = L - 3353, MOD = 150, RUN = 16 * MOD, pR = 1300, straight = 8 * MOD / 2;
   const pTurn = (RUN / 2 - straight) / pR, reach = pR * (1 - Math.cos(pTurn));
   const pAt = (u, w) => {                                    // run position u (from the middle) and offset w (+ towards the bed) to plan x, y
@@ -134,17 +134,20 @@
     },
     partition() {
       const ring = (wa, wb, u0, u1) => { const a = along(wa, u0, u1), b = along(wb, u0, u1).reverse(); return a.concat(b); };
-      let o = `<path class="fu" d="${poly(ring(pT / 2 + drw.gap, drFront))}"/>`;            // the drawers, the whole length
-      for (let i = 1; i < drw.n; i++) { const u = -RUN / 2 + i * RUN / drw.n, [ax, ay] = pAt(u, pT / 2 + drw.gap), [bx, by] = pAt(u, drFront);
-        o += `<line class="thin" x1="${f(ax)}" y1="${f(ay)}" x2="${f(bx)}" y2="${f(by)}"/>`; }
-      for (let i = 0; i < drw.n; i++) { const u = -RUN / 2 + (i + 0.5) * RUN / drw.n, [ax, ay] = pAt(u - 70, drFront - 45), [bx, by] = pAt(u + 70, drFront - 45);
-        o += `<line class="thin" x1="${f(ax)}" y1="${f(ay)}" x2="${f(bx)}" y2="${f(by)}"/>`; }
+      // the TV unit (AST-DR-036): a pill in plan — a straight front, a quarter-round at each end back to the glass's tip;
+      // four bays, two drawer stacks in the middle and a flat-doored cabinet at each end
+      const TG = window.TVGEOM, at = ([x, y]) => [cx + x, yP + y];
+      let o = `<path class="fu" d="${poly(TG.outline(0).map(at))}"/>`;
+      TG.bayX.slice(1, -1).forEach((x) => { const [ax, ay] = at([x, TG.W0 + 9]), [bx, by] = at([x, TG.YF]);
+        o += `<line class="thin" x1="${f(ax)}" y1="${f(ay)}" x2="${f(bx)}" y2="${f(by)}"/>`; });
+      { const [ax, ay] = at([-TG.X1, TG.YF - 20]), [bx, by] = at([TG.X1, TG.YF - 20]); o += `<line class="thin" x1="${f(ax)}" y1="${f(ay)}" x2="${f(bx)}" y2="${f(by)}"/>`; }
+      [-225, 225].forEach((c) => { const [ax, ay] = at([c - 130, TG.YF + 28]), [bx] = at([c + 130, 0]); o += `<line class="thin" x1="${f(ax)}" y1="${f(ay)}" x2="${f(bx)}" y2="${f(ay)}"/>`; });
       o += `<path class="glassb" d="${poly(ring(-pT / 2, pT / 2))}"/>`;                // the glass blocks
       for (let i = 1; i < 16; i++) { const [ax, ay] = pAt(-RUN / 2 + i * MOD, -pT / 2), [bx, by] = pAt(-RUN / 2 + i * MOD, pT / 2);
         o += `<line class="thin" x1="${f(ax)}" y1="${f(ay)}" x2="${f(bx)}" y2="${f(by)}"/>`; }
       o += R(cx - col / 2, yP - pT / 2, cx + col / 2, yP + pT / 2, "solidf");                // the wood column, a foot wide
       o += R(cx - tv.w / 2, yP + pT / 2 + tv.stand, cx + tv.w / 2, yP + pT / 2 + tv.stand + tv.d, "tv");
-      o += Tx(cx, yP + drFront - 110, `DRAWERS 4 × 2 · ${ftin(drw.d)} DEEP · TV FLOATS ABOVE`, "tx2", { size: 66 });
+      o += Tx(cx, yP + drFront - 110, `TV UNIT · 4 DRAWERS, 2 CABINETS · ${ftin(drw.d)} DEEP · AST-DR-036`, "tx2", { size: 66 });
       const [lx] = pAt(-RUN / 2, 0), [rx] = pAt(RUN / 2, 0);
       o += `<g class="fdim">` +
         dimH(lx - pT / 2, rx + pT / 2, yP - 330, yP - pT / 2, `${ftin(rx - lx + pT)} GLASS-BLOCK PARTITION`, { size: 90 }) +

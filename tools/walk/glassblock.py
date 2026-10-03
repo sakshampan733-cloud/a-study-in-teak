@@ -1,8 +1,8 @@
 # The partition (owner, 1 Oct): a wall of Mano cast-glass blocks between the desk and the bed, with one wood column
 # a foot wide down the middle, floor to ceiling (the TV's power comes down it), and a wood board on it that holds the
-# 55" TV. The board is smaller than the TV, so from the bed the TV floats on the glass with no wood round it. A low
-# unit of drawers runs the whole length on the bed side, four wide drawers across and two high, the end ones curving
-# with the wall, in the 9292 burl re-tinted to the Dark Diva colour. (The wood bands, LED strips and twin columns
+# 55" TV. The board is smaller than the TV, so from the bed the TV floats on the glass with no wood round it. Under it
+# on the bed side, the TV unit (AST-DR-036): a low pill in plan, two drawer stacks and two end cabinets, its round ends
+# wrapping back to the glass, in the 9292 burl re-tinted to the Dark Diva colour. (The wood bands, LED strips and twin columns
 # tried earlier the same day were withdrawn by the owner.) Run by realism.py in real.py's namespace.
 #
 # Mano Vetra block (Eco Outdoor, Tom Fereday): 5½ in square (140 mm), 3¾ in deep (95 mm), solid hand-cast glass,
@@ -174,29 +174,60 @@ bm_mt = bmesh.new(); slab(bm_mt, -200, 200, DEP / 2, wf, zc - 150, zc + 150); be
 cy.transmission_bounces = max(cy.transmission_bounces, 12); cy.max_bounces = max(cy.max_bounces, 12)
 cy.volume_bounces = max(getattr(cy, "volume_bounces", 0), 2)
 
-# ── the drawers (owner, 1 Oct): the whole length of the partition on the bed side, four wide drawers across and
-#    two high (eight), each 600 mm — four blocks — so the joints between them meet the glass joints and the two end
-#    drawers are exactly the curved ends. The 9292 burl re-tinted to the Dark Diva colour (tex/burl_darkdiva.jpg),
-#    in the same polish as the Dark Diva so the two read as one wood, a slim brass bar on each. Height 450 ("not too high") and depth 400 are mine.
+# ── the TV unit (owner, 3 Oct; AST-DR-036). The 4 × 2 run that followed the curve could not open at its curved ends:
+#    now it is a pill in plan — a straight front across the middle, a quarter-round at each end wrapping back to the
+#    partition's tip. Four bays of 450 on the glass joints: two stacks of two drawers in the middle, and at each end one
+#    cabinet two drawers tall behind a flat door, hinged on the drawer side. The round ends are fixed; nothing that
+#    moves is curved. The 9292 burl re-tinted to the Dark Diva colour (tex/burl_darkdiva.jpg), in the Dark Diva's satin
+#    polish; a bullnose top oversailing 10; a dark plinth set back 50; the slim brass bars. Low (450) and 400 deep.
 M_BURL_DD = veneer("burl_darkdiva", 0.32, 0.4, 1.12, 1.0, "burl_darkdiva.jpg", 0.6)   # the same satin polish as the Dark Diva
 depth(M_BURL_DD, 0.03, 0.0)
-CDP, CHT, PL, TOP = 400.0, 450.0, 60.0, 26.0
-w0 = DEP / 2 + 5; w1 = w0 + CDP; FR = 20.0                         # carcase back at the glass; fronts 20 mm thick
-bm_c = bmesh.new()
-slab(bm_c, -L / 2, L / 2, w0, w1 - FR, PL, CHT - TOP, nu=nseg(-L / 2, L / 2))                 # the carcase
-slab(bm_c, -L / 2 - 10, L / 2 + 10, w0, w1 + 10, CHT - TOP, CHT, nu=nseg(-L / 2, L / 2))      # the top, oversailing 10
-bend(bm_c); CON_B = obj("gb_console", bm_c, [M_BURL_DD]); bevel(CON_B, 0.004, 3)
-bm_p = bmesh.new(); slab(bm_p, -L / 2 + 30, L / 2 - 30, w0, w1 - 50, 0, PL, nu=nseg(-L / 2, L / 2)); bend(bm_p)
-obj("gb_console_plinth", bm_p, [M_DARK])
-GAP = 3.0; fh = (CHT - TOP - PL - 3 * GAP) / 2; fz = [PL + GAP, PL + 2 * GAP + fh]
+CDP, CHT, PL, TOP, FR, GAP, OVER, BAY = 400.0, 450.0, 60.0, 26.0, 20.0, 3.0, 10.0, 450.0
+W0 = DEP / 2 + 5; YF = W0 + CDP; X1 = 2 * BAY; UE = L / 2 + 14                 # back 5 off the glass; the tip of the end channel
+def tv_loc(u, w):                                                                   # developed (u, w) to plan, from the partition's middle
+    x_, s_ = place(u, w); return x_ - PX, s_ - PS
+EX, EY = tv_loc(UE, W0)
+RR = ((EX - X1) ** 2 + (YF - EY) ** 2) / (2 * (YF - EY)); CYc = YF - RR; TE = math.atan2(EY - CYc, EX - X1)   # the round end: tangent to the front, landing on the tip
+def tv_outline(off, wb=W0, n=28):
+    arc = lambda sg: [(sg * (X1 + (RR + off) * math.cos(t)), CYc + (RR + off) * math.sin(t)) for t in (math.pi / 2 + (TE - math.pi / 2) * i / n for i in range(n + 1))]
+    back = [tv_loc(UE + off - 2 * (UE + off) * i / 48, wb) for i in range(49)]
+    return arc(1) + back + arc(-1)[::-1]
+def tv_prism(name, pts, z0, z1, mat):
+    q = []
+    for p_ in pts:                                                               # drop coincident points
+        if not q or math.hypot(p_[0] - q[-1][0], p_[1] - q[-1][1]) > 0.5: q.append(p_)
+    if math.hypot(q[0][0] - q[-1][0], q[0][1] - q[-1][1]) <= 0.5: q.pop()
+    bm = bmesh.new()
+    lo = [bm.verts.new(P(PX + x_, PS + y_, z0)) for x_, y_ in q]; hi = [bm.verts.new(P(PX + x_, PS + y_, z1)) for x_, y_ in q]
+    bm.faces.new(lo[::-1]); bm.faces.new(hi)
+    for k_ in range(len(q)):
+        j_ = (k_ + 1) % len(q); bm.faces.new((lo[k_], lo[j_], hi[j_], hi[k_]))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    for e in bm.edges:
+        if len(e.link_faces) == 2 and e.calc_face_angle(0) > math.radians(35): e.smooth = False
+    me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
+    o_ = bpy.data.objects.new(name, me); GB.objects.link(o_); me.materials.append(mat)
+    for p_ in me.polygons: p_.use_smooth = True
+    return o_
+tv_body = [(X1, YF - FR)] + tv_outline(0) + [(-X1, YF - FR)]                           # the carcase, its straight front set back behind the fronts
+CON_B = tv_prism("gb_console", tv_body, PL, CHT - TOP, M_BURL_DD); bevel(CON_B, 0.002, 2)
+tv_top = tv_prism("gb_console_top", tv_outline(OVER), CHT - TOP, CHT, M_BURL_DD); bevel(tv_top, 0.012, 6)   # a full bullnose
+tv_prism("gb_console_plinth", tv_outline(-50, W0 + 9), 0, PL, M_DARK)
+tv_fh = (CHT - TOP - PL - 3 * GAP) / 2; tv_zD = [PL + GAP, PL + 2 * GAP + tv_fh]; tv_zmid = (PL + CHT - TOP) / 2
+tv_bayX = [-X1, -BAY, 0.0, BAY, X1]
+def tv_pull(nm, xc, zc, upright):
+    a_, b_ = (5, 130) if upright else (130, 5)
+    ps = [(0, -110), (0, 110)] if upright else [(-110, 0), (110, 0)]
+    dbox(nm, PX + xc - a_, PS + YF + 18, zc - b_, PX + xc + a_, PS + YF + 28, zc + b_, M_BRASS)    # a slim brass bar, 260 long,
+    for k_, (dx_, dz_) in enumerate(ps):                                                       # on two posts
+        dbox(f"{nm}_post{k_}", PX + xc + dx_ - 4, PS + YF, zc + dz_ - 4, PX + xc + dx_ + 4, PS + YF + 18, zc + dz_ + 4, M_BRASS)
 for i in range(4):
-    for j in range(2):
-        u0 = -L / 2 + i * 4 * MOD + GAP / 2; u1 = u0 + 4 * MOD - GAP; z0 = fz[j]
-        bm_f = bmesh.new(); slab(bm_f, u0, u1, w1 - FR, w1, z0, z0 + fh, nu=nseg(u0, u1))
-        bend(bm_f); fo = obj(f"gb_drawer{i}{j}", bm_f, [M_BURL_DD]); bevel(fo, 0.0025, 3)
-        um, zm = (u0 + u1) / 2, z0 + fh / 2
-        bm_h = bmesh.new()
-        slab(bm_h, um - 130, um + 130, w1 + 18, w1 + 28, zm - 5, zm + 5, nu=8)           # a slim brass bar, 260 long,
-        for sx in (-110, 110): slab(bm_h, um + sx - 5, um + sx + 5, w1, w1 + 18, zm - 4, zm + 4)   # on two posts
-        bend(bm_h); ho = obj(f"gb_pull{i}{j}", bm_h, [M_BRASS]); bevel(ho, 0.002, 2)
-print(f"drawers: 4 x 2 along {L:.0f}, {CHT:.0f} high, {CDP:.0f} deep", flush=True)
+    a_ = tv_bayX[i] + (GAP if i == 0 else GAP / 2); b_ = tv_bayX[i + 1] - (GAP if i == 3 else GAP / 2)
+    if i in (0, 3):                                                              # a cabinet: one flat door, two drawers tall
+        fo = dbox(f"gb_door{i}", PX + a_, PS + YF - FR, tv_zD[0], PX + b_, PS + YF, tv_zD[1] + tv_fh, M_BURL_DD); bevel(fo, 0.005, 4)
+        tv_pull(f"gb_pull{i}", (a_ + 50) if i == 0 else (b_ - 50), tv_zmid, True)
+    else:                                                                        # a stack of two drawers
+        for j, z0 in enumerate(tv_zD):
+            fo = dbox(f"gb_drawer{i}{j}", PX + a_, PS + YF - FR, z0, PX + b_, PS + YF, z0 + tv_fh, M_BURL_DD); bevel(fo, 0.005, 4)
+            tv_pull(f"gb_pull{i}{j}", (a_ + b_) / 2, z0 + tv_fh / 2, False)
+print(f"TV unit: pill, front {2 * X1:.0f} straight, round ends R {RR:.0f}, {CHT:.0f} high, {CDP:.0f} deep", flush=True)

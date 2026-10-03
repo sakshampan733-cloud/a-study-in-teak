@@ -111,8 +111,9 @@ window.MODEL3D = (function () {
       run(path(0), H, 0, "glassbay");                                         // the glass blocks, floor to ceiling
       slab(cx - 145, Y.yP - pT / 2, 290, pT, H);                              // the wood column, a foot wide
       P.push({ id: "tv", w: 1227, h: 706, cls: "tvpanel", tf: `translate3d(${cx - 613}px,${H - 1408}px,${Y.yP + pT / 2 + 61}px)` });   // the TV, floating
-      run(path(Y.drF), 450, 0, "solid");                                      // the drawers' front, the whole length
-      slab(cx - 600, Y.yP + pT / 2 + 5, 1200, Y.drF - pT / 2 - 5, 450);       // and their top across the straight middle
+      { const TG = window.TVGEOM, ol = TG.outline(0), n = ol.length;        // the TV unit (AST-DR-036): its pill-shaped front
+        run(ol.slice(n - 29).concat(ol.slice(0, 29)).map(([x, y]) => [cx + x, Y.yP + y]), 450, 0, "solid");
+        slab(cx - TG.X1, Y.yP + TG.W0, 2 * TG.X1, TG.YF - TG.W0, 450); }       // and its top across the straight front
       slab(cx - Y.desk.L / 2, Y.desk.front, Y.desk.L, Y.desk.D, Y.desk.H);   // the desk, square corners, 2 in off the glass
       slab(cx - Y.bed.w / 2, Y.bedFoot, Y.bed.w, Y.bed.l, 533);              // the bed, frame and mattress
       slab(cx - 914, Y.bedHead - 296, 1829, 230, 957);                       // the long white cushion along the back
