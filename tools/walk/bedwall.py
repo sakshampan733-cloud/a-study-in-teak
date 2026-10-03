@@ -1,19 +1,20 @@
 # The bed wall and the bed (AST-DR-034 / -035, owner 3 Oct): exec'd by realism.py just before it makes the bed, in its
 # namespace (real.py's helpers and materials, the skeleton's P / box / prism).
 #   · the whole wall built out 3 in in Dark Diva veneer, polished DARKER than the rest of the room, sweeping forward in a
-#     concave cove — up both sides and across the top — to 10 in at the edge of a niche that holds the bed and both
+#     concave cove — up both sides and across the top — to 16 in at the edge of a niche that holds the bed and both
 #     side tables; the coves meet in a mitre at the two top corners
-#   · the niche: 10 in deep, 6 ft 6 in high, its back in parchment-plaster panels five across and three up, its sides and
+#   · the niche: 16 in deep, 6 ft 6 in high, its back in parchment-plaster panels five across and three up, its sides and
 #     soffit plain parchment plaster
-#   · the bed from the owner's photo: a low teak platform (the room's tone) on turned bun feet, a slim headboard in
-#     dusty-rose suede; a wooden side table and a brass twin-arm wall lamp either side
+#   · the bed from the owner's photo: a low teak platform (the room's tone) on turned bun feet; no headboard — a long
+#     white cushion along the back, resting on the mattress and leaning on the parchment (owner's second photo);
+#     a wooden side table and a brass twin-arm wall lamp either side
 # Plan: x east, s south from the study wall; the bed wall's face is s = Lb. Along the wall u runs from the dressing
 # (right-wall) corner, v comes out from the wall: x = xR − u, s = Lb − v.
 import bpy, bmesh, math
-from mathutils import Vector
+from mathutils import Vector, Matrix
 
 W_ = xR - xLb                              # 15 ft 6 in
-EDGE, DEEP = 76.0, 254.0                   # 3 in everywhere, 10 in at the niche
+EDGE, DEEP = 76.0, 406.0                   # 3 in everywhere, 16 in at the niche — as deep as the side tables (owner)
 U0, U1, NH = 787.0, 3632.0, 1981.0         # the niche: the old bed-back span, 6 ft 6 in high
 CA, CF = 152.0, 25.0                       # cove: 6 in along the wall (7 in out), then a 1 in flat edge
 CW, CB = CA + CF, DEEP - EDGE
@@ -27,14 +28,14 @@ for n_ in ("parchment_wall", "sk_bed", "bed_base", "bed_frame", "mattress", "duv
     if o_: bpy.data.objects.remove(o_, do_unlink=True)
 
 M_VEN_DK = veneer("dark_diva_bedwall", 0.30, 0.42, 0.80, 1.0, "dark_diva_crown.jpg", (0.9, 0.9, 1.1))   # the same Dark Diva, polished darker
-M_SUEDE = fabric("suede_dusty_rose", (0.50, 0.32, 0.29), 0.85, 0.88, 1400)                             # the headboard (owner: yes)
+M_WEAVE = fabric("weave_cream", (0.80, 0.77, 0.70), 0.55, 0.92, 420)                                   # the back cushion: a cream textured weave
 BW_ = bpy.data.collections.new("bedwall"); sc.collection.children.link(BW_)
 
 def mesh_obj(name, bm, mat, coll=BW_):
     me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
     o = bpy.data.objects.new(name, me); coll.objects.link(o); o.data.materials.append(mat); return o
 
-# ── the build-out's face, a height field v(u, z): 10 in at the niche, the cove, then 3 in ──────────────────────────
+# ── the build-out's face, a height field v(u, z): 16 in at the niche, the cove, then 3 in ──────────────────────────
 def prof(d):                                # depth for a distance d out from the niche's edge
     if d <= CF: return DEEP
     if d >= CW: return EDGE
@@ -64,7 +65,7 @@ for j in range(len(zs) - 1):
 bm.normal_update()
 if sum(f_.normal.y for f_ in bm.faces) < 0: bmesh.ops.reverse_faces(bm, faces=list(bm.faces))   # face the room (+y)
 face_ = mesh_obj("bw_face", bm, M_VEN_DK)
-# the niche: its two side returns (facing into the niche) and the soffit (facing down), 10 in deep — lined in parchment
+# the niche: its two side returns (facing into the niche) and the soffit (facing down), 16 in deep — lined in parchment
 # plaster like its back (owner, 3 Oct: the inside of the frame is parchment too)
 rt = bmesh.new()
 def quad(pts, want):
@@ -101,9 +102,9 @@ dbox("bw_panel_bed", XU(U1), SV(1), SKH, XU(U0), SV(0), NH, M_DARK)          # t
 # ── the bed, from the owner's photo ─────────────────────────────────────────────────────────────────────────────────
 BC = (U0 + U1) / 2                                      # centred in the niche, on the TV's line
 FW, ML, MW, OV = 1929.0, 1981.0, 1829.0, 51.0          # frame 6 ft 4 in; mattress 6 ft × 6 ft 6 in; 2 in past it
-HB_B, HB_F = PL + 25.0, PL + 25.0 + 76.0               # headboard 1 in off the plaster, 3 in thick
-LEG, RAIL, MATT, HBT = 178.0, 102.0, 254.0, 1016.0
-vF0, vF1 = HB_F, HB_F + ML + OV
+HB_B = HB_F = PL + 25.0                                 # no headboard: the frame's head 1 in off the plaster
+LEG, RAIL, MATT = 178.0, 102.0, 254.0
+vF0, vF1 = HB_F, HB_F + ML + 2 * OV                     # the frame 2 in past the mattress all round
 xa, xb = XU(BC + FW / 2), XU(BC - FW / 2)
 # the frame: a 4 in rail with a 1 in lip round a slatted deck
 rl = 45.0
@@ -124,17 +125,26 @@ def bun(name, x, s):
 for k, (u_, v_) in enumerate(((BC - FW / 2 + 150, vF0 + 150), (BC + FW / 2 - 150, vF0 + 150), (BC - FW / 2 + 150, vF1 - 150), (BC + FW / 2 - 150, vF1 - 150), (BC, (vF0 + vF1) / 2))):
     bun(f"bed_foot{k}", XU(u_), SV(v_))
 # the mattress (the bedding is made on it next, in realism.py)
-o_ = box("mattress", XU(BC + MW / 2), SV(vF0 + ML), LEG + RAIL - 12, XU(BC - MW / 2), SV(vF0), LEG + RAIL - 12 + MATT, WALL, FUR)
+o_ = box("mattress", XU(BC + MW / 2), SV(vF0 + OV + ML), LEG + RAIL - 12, XU(BC - MW / 2), SV(vF0 + OV), LEG + RAIL - 12 + MATT, WALL, FUR)
 setmat(o_, M_LINEN_WHITE); bevel(o_, 0.035, 5)
 for p_ in o_.data.polygons: p_.use_smooth = True
-# the headboard: a plain upholstered panel, the frame's width, its edges eased, standing on the frame's head rail
-o_ = box("headboard", xa, SV(HB_F), LEG + 40, xb, SV(HB_B), HBT, WALL, FUR); setmat(o_, M_SUEDE); bevel(o_, 0.022, 6)
+# the long white cushion along the back: the mattress's width, 17 in × 8 in, eased and piped, sitting on the mattress at its
+# head and leaning back 10° until it rests on the parchment
+CUH, CUD, CUL = 430.0, 200.0, math.radians(10)
+zm = LEG + RAIL - 12 + MATT; vm = vF0 + OV
+o_ = box("back_cushion", XU(BC + MW / 2), SV(vm + CUD), zm, XU(BC - MW / 2), SV(vm), zm + CUH, WALL, FUR); setmat(o_, M_WEAVE); bevel(o_, 0.05, 8)
 for p_ in o_.data.polygons: p_.use_smooth = True
+piv = Vector(P(0, SV(vm), zm))
+o_.data.transform(Matrix.Translation(-piv))                              # pivot on its bottom-back edge, then tip it back to the wall
+o_.location = piv; o_.rotation_euler.x = CUL
+ssub = o_.modifiers.new("soft", "SUBSURF"); ssub.levels = 1; ssub.render_levels = 2
+tx_c = bpy.data.textures.new("cushion_slump", "CLOUDS"); tx_c.noise_scale = 0.35
+dpc = o_.modifiers.new("slump", "DISPLACE"); dpc.texture = tx_c; dpc.strength = 0.006; dpc.mid_level = 0.5
 
 # ── side tables, all wood (owner: no marble): top, one drawer with a brass keyhole, four slim splayed legs ────────────────────────────────
-TW, TD, THt = 406.0, 406.0, 610.0
+TW, TD, THt = 406.0, 381.0, 610.0                     # 16 in wide, 15 in deep — inside the niche
 def side_table(k, uc):
-    x0_, x1_ = XU(uc + TW / 2), XU(uc - TW / 2); s0_, s1_ = SV(HB_B + TD), SV(HB_B)
+    x0_, x1_ = XU(uc + TW / 2), XU(uc - TW / 2); s0_, s1_ = SV(PL + TD), SV(PL)
     o_ = dbox(f"st{k}_top", x0_ - 8, s0_ - 8, THt - 25, x1_ + 8, s1_ + 4, THt, M_VEN); bevel(o_, 0.004, 3)
     o_ = dbox(f"st{k}_box", x0_, s0_, THt - 150, x1_, s1_, THt - 25, M_VEN); bevel(o_, 0.003, 2)
     o_ = dbox(f"st{k}_drawer", x0_ + 18, s0_ - 3, THt - 138, x1_ - 18, s0_ + 2, THt - 37, M_VEN); bevel(o_, 0.002, 2)

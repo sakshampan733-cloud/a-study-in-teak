@@ -48,7 +48,7 @@ for n_ in ("duvet", "duvet_fold", "throw", "pillow_b0", "pillow_b1", "pillow_f0"
     if o_: bpy.data.objects.remove(o_, do_unlink=True)
 mat_ = sc.objects["mattress"]; mx0, ms0, mz0, mx1, ms1, mz1 = bb(mat_)
 bcx = (mx0 + mx1) / 2
-for n_ in ("mattress", "bed_frame", "bed_base", "bed_rail_l", "bed_rail_r", "headboard"):
+for n_ in ("mattress", "bed_frame", "bed_base", "bed_rail_l", "bed_rail_r", "headboard", "back_cushion"):
     o_ = sc.objects.get(n_)
     if o_:
         o_.modifiers.new("col", "COLLISION"); o_.collision.thickness_outer = 0.006; o_.collision.cloth_friction = 80
@@ -147,7 +147,8 @@ def lean(o, x, s_wall, tilt, h, depth_off, z_seat):
     o.location = Vector(P(x, sc_, z_seat + (h / 2) * math.cos(t)))
 
 if STYLE:
-    wall_s = ms1 + (2 if sc.objects.get("headboard") else 60)          # the headboard (or the wall) just behind the mattress head
+    _bc = sc.objects.get("back_cushion")                               # pillows lean on the long cushion, else a headboard, else the wall
+    wall_s = (bb(_bc)[1] + 40) if _bc else (ms1 + 2 if sc.objects.get("headboard") else ms1 + 60)
     for k, sg in enumerate((-1, 1)):
         e = pillow(f"pillow_euro{k}", 640, 640, M_LINEN_IVORY, 2.6); lean(e, bcx + sg * 420, wall_s, 18, 640, 80, mz1 - 10)
         p_ = pillow(f"pillow_std{k}", 720, 480, M_LINEN_WHITE, 2.2); lean(p_, bcx + sg * 400, wall_s, 28, 480, 250, mz1 - 15)
@@ -179,7 +180,7 @@ if STYLE:
     dv.modifiers.remove(dv.modifiers["col"])
     M_KNIT = fabric("knit_taupe", (0.30, 0.24, 0.18), 0.9, 1.0, 220)
     finish(th, 0.009, 2, 0.0, M_KNIT)
-for n_ in ("mattress", "bed_frame", "bed_base", "bed_rail_l", "bed_rail_r", "headboard", "floor"):
+for n_ in ("mattress", "bed_frame", "bed_base", "bed_rail_l", "bed_rail_r", "headboard", "back_cushion", "floor"):
     o_ = sc.objects.get(n_)
     if o_ and "col" in o_.modifiers: o_.modifiers.remove(o_.modifiers["col"])
 
