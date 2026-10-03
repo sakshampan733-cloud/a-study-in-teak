@@ -552,7 +552,7 @@ window.PROJECT = {
             { src: "assets/refs/bed-ref-1-low-platform-bed.jpg", caption: "Bed reference (Newberry Projects) — low bed with a thick upholstered base" },
           ],
           parts: [
-            { label: "The bed (owner, 3 Oct)", value: "The same exact bed and headboard as in the owner's photo: a low dark-wood platform — a 4 in rail with a 1 in lip on turned bun feet — and a slim, plain upholstered headboard the frame's width, standing in the bed-wall niche. Drawn on AST-DR-035, sized to the 6 ft × 6 ft 6 in mattress; mattress thickness, headboard height and fabric still to choose." },
+            { label: "The bed (owner, 3 Oct)", value: "The same exact bed and headboard as in the owner's photo: a low dark-wood platform — a 4 in rail with a 1 in lip on turned bun feet — and a slim, plain upholstered headboard the frame's width, standing in the bed-wall niche. Drawn on AST-DR-035, sized to the 6 ft × 6 ft 6 in mattress; mattress thickness and headboard height still to choose. Headboard: dusty-rose suede (owner, 3 Oct)." },
             { label: "Bed back (before)", value: "Superseded by the niche and headboard (3 Oct). DECIDED (owner, 1 Oct): NOT curved. A plain, straight bed back running corner to corner across the whole 15 ft 6 in bed wall. Its height (the owner said \"about 4\" — to confirm whether inches or feet) and what it is made of are still open. The curled bed back with a ledge at each end, and the sheet AST-DR-013 that draws it, are withdrawn." },
             { label: "Bedside tables", value: "The curled ledges went with the curved bed back. Nothing is drawn either side of the bed for now." },
             { label: "Size", value: "6 ft × 6 ft 6 in, centred on the room's bed axis. Base and mattress heights assumed until the mattress is chosen." },
@@ -576,7 +576,8 @@ window.PROJECT = {
           ],
           parts: [
             { label: "The idea (owner, 3 Oct)", value: "The whole bed wall is built out 3 in in Dark Diva veneer, polished darker. Round the niche that holds the bed and both side tables, the face sweeps forward in a concave 7 in cove — up both sides AND across the top (owner's second sketch, 3 Oct) — to 10 in at the niche's edge, with a 1 in flat edge. The niche is 10 in deep and 6 ft 6 in high (lowered), lined with parchment plaster in a grid (five across, three up — nearly square panels). Drawn on AST-DR-034 rev 2 — still the owner's to approve." },
-            { label: "Problems found", value: "1) The entrance door's hinge pin stands only 2 in off this wall, so a 3 in face there stops the door opening flat — projecting (parliament) hinges, or 1½ in at that corner instead. 2) The bed comes 4½ in further out (headboard + frame), leaving 2 ft 5½ in to the TV drawers instead of 2 ft 9¾ in. 3) The ceiling cove light along this wall: stop the build-out under it or run it in the top. 4) Lamp sockets and switches go through the plaster panels — their places needed first." },
+            { label: "Decided (owner, 3 Oct)", value: "Niche height 6 ft 6 in is good. The cove light stays in the ceiling — no other light on this wall except a brass twin-arm wall lamp over each side table, the same lamp as the right wall. Headboard in dusty-rose suede. The bed-back wall's Dark Diva polish a bit darker than the rest of the room; the bed itself in the room's tone. The niche keeps the old bed-back span (9 ft 4 in on the drawings), centred on the TV; the cove stops where the open door's leaf ends, so the door keeps its 3 ft." },
+            { label: "Problems found", value: "1) The entrance door's hinge pin stands only 2 in off this wall, so a 3 in face there stops the door opening flat (it is the depth, not the 3 ft) — projecting (parliament) hinges, or 1½ in at that corner instead. 2) The bed comes 4½ in further out (headboard + frame), leaving 2 ft 5½ in to the TV drawers instead of 2 ft 9¾ in. 3) Lamp sockets and switches go through the plaster panels — their places needed first." },
             { label: "Direction", value: "Parchment on the wall behind the bed — pale, warm, cloudy tone like vellum." },
             { label: "Two ways to do it", value: "Real parchment / vellum panels (as in your references) — large sheets with hairline joints; or parchment-effect plaster in the same colour with no joints." },
             { label: "Panels or seamless", value: "Probably large panels — not decided yet." },
@@ -585,7 +586,7 @@ window.PROJECT = {
             { label: "Extent", value: "", hint: "Whole bed wall, floor to ceiling?" },
             { label: "Edges", value: "", hint: "Dark slim edge / stone skirting as in ref 2, or plain" },
           ],
-          questions: ["The entrance corner: projecting hinges on the door, or 1½ in there instead of 3 in?", "Niche height (drawn 6 ft 6 in) and the panel grid (drawn 5 × 3)", "The ceiling cove along this wall", "Skirting along the build-out and into the niche?"],
+          questions: ["The entrance corner: projecting hinges on the door, or 1½ in there instead of 3 in?", "Niche height (drawn 6 ft 6 in) and the panel grid (drawn 5 × 3)", "Skirting along the build-out and into the niche?"],
         },
         {
           id: "partition", name: "Partition", status: "final",

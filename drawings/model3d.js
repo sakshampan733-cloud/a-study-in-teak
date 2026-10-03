@@ -31,9 +31,10 @@ window.MODEL3D = (function () {
       const sg = Math.sign(u), th = (Math.abs(u) - straight) / pR;
       return [cx + sg * (straight + pR * Math.sin(th)) - sg * w * Math.sin(th), yP + pR * (1 - Math.cos(th)) + w * Math.cos(th)];
     };
-    const drF = pT / 2 + 5 + 400, bed = { w: 1829, l: 1981 }, bedFoot = L - 60 - bed.l;
+    // the bed in the bed-wall niche (AST-DR-034/035): headboard 1 in off the plaster, 6 ft 4 in frame 2 in past the mattress
+    const drF = pT / 2 + 5 + 400, bed = { w: 1929, l: 2032 }, bedHead = L - 121, bedFoot = bedHead - bed.l;
     const desk = { L: 2286, D: 914, H: 750 }; desk.back = yP - pT / 2 - 50; desk.front = desk.back - desk.D;
-    return { cx, yP, pT, RUN, pAt, drF, bed, bedFoot, desk };
+    return { cx, yP, pT, RUN, pAt, drF, bed, bedFoot, bedHead, desk };
   }
 
   function floorDims(S, Wd, L) {
@@ -51,7 +52,7 @@ window.MODEL3D = (function () {
     const runH = (y, x0, x1, label) => `<path d="M ${x0} ${y} L ${x1} ${y}"/>` + tick(x0, y, 0) + tick(x1, y, 0)
       + `<text x="${(x0 + x1) / 2}" y="${y - 70}" font-size="${T}" fill="${RED}" stroke="none" text-anchor="middle" font-family="Helvetica" font-weight="700">${label}</text>`;
     const yPart = Y.yP, face = Y.yP + Y.drF;
-    const bedFoot = Y.bedFoot, bedHead = L - 60;
+    const bedFoot = Y.bedFoot, bedHead = Y.bedHead;
     const cup = 280, dD = Y.desk.D, dBack = Y.desk.back;
     // along the room, down the left-hand side
     o += runV(330, 0, yPart, ft(yPart) + "  STUDY SIDE");
@@ -80,7 +81,7 @@ window.MODEL3D = (function () {
     // The left wall plane runs from the bed end back to the study end, so its elevation — drawn
     // the other way round — is flipped rather than redrawn.
     P.push({ id: "left", w: S.lLeft, h: H, tf: `translate3d(0px,0px,${L}px) rotateY(90deg)`, art: view("leftwall", "Left wall elevation"), mirror: true });
-    P.push({ id: "bed", w: S.wBed, h: H, tf: `translate3d(${Wd}px,0px,${L}px) rotateY(180deg)`, plain: true });
+    P.push({ id: "bed", w: S.wBed, h: H, tf: `translate3d(${Wd}px,0px,${L}px) rotateY(180deg)`, art: view("bedwall", "Bed wall face") });   // AST-DR-034, the wall alone
     P.push({ id: "floor", w: Wd, h: L, tf: `translate3d(0px,${H}px,0px) rotateX(90deg)`, floor: true,
       art: { svg: floorDims(S, Wd, L) } });
 
@@ -113,7 +114,9 @@ window.MODEL3D = (function () {
       run(path(Y.drF), 450, 0, "solid");                                      // the drawers' front, the whole length
       slab(cx - 600, Y.yP + pT / 2 + 5, 1200, Y.drF - pT / 2 - 5, 450);       // and their top across the straight middle
       slab(cx - Y.desk.L / 2, Y.desk.front, Y.desk.L, Y.desk.D, Y.desk.H);   // the desk, square corners, 2 in off the glass
-      slab(cx - Y.bed.w / 2, Y.bedFoot, Y.bed.w, Y.bed.l, 580);              // the bed (its back is not decided)
+      slab(cx - Y.bed.w / 2, Y.bedFoot, Y.bed.w, Y.bed.l, 533);              // the bed, frame and mattress
+      slab(cx - Y.bed.w / 2, Y.bedHead, Y.bed.w, 76, 1016);                  // the headboard, dusty-rose suede
+      [cx - Y.bed.w / 2 - 254, cx + Y.bed.w / 2 + 254].forEach((t) => slab(t - 203, L - 451, 406, 406, 610));   // side tables
     }
     return { P, Wd, H, L };
   }

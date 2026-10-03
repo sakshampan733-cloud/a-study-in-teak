@@ -10,17 +10,19 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const BEDWALL = {
-  rev: "2 — a 7 in cove round the niche, sides and top; niche 6 ft 6 in",
+  rev: "3 — niche on the old bed-back span, cove clear of the door, cove light kept",
   date: "03.10.2026",
   W: 4724, H: 2769, T: 230,                 // 15 ft 6 in wall, 9 ft 1 in ceiling, 9 in walls (AST-DR-001)
   deep: 254, edge: 76,                      // 10 in either side of the niche; 3 in at both corners (owner)
-  niche: { u0: 787, u1: 3632, h: 1981 },    // bed + both side tables, as on the plan; 6 ft 6 in high (owner: lower) — ASSUMED
-  cove: { r: 178, flat: 25 },               // a concave quarter-round, 7 in radius, out of the 3 in face to 10 in, then a 1 in flat edge
+  niche: { u0: 787, u1: 3632, h: 1981 },    // the old bed-back span exactly (owner: "we're keeping that"), centred on the TV; 6 ft 6 in high (owner: good)
+  cove: { r: 152, flat: 25 },               // a concave quarter-round, 6 in radius, out of the 3 in face to 10 in, then a 1 in flat edge —
+                                            // 7 in in all, which is exactly the gap between the open door's edge and the niche
   grid: { cols: 5, rows: 3 },               // as sketched: five across, three up
   plaster: 20,                              // parchment plaster on 12 mm board
   skirt: 102,                               // the room's 4 in white marble skirting, carried on — ASSUMED
   door: { leaf: 914, lin: 51, t: 45 },      // D1: 3 ft leaf, 2 in lining — its hinge pin stands 2 in off this wall
-  side: { w: 457, d: 406, h: 610 },         // side tables, 18 × 16 in, 24 in high — read off the photo, ASSUMED
+  side: { w: 406, d: 406, h: 610 },
+  lamp: { y: 1290, span: 150, proj: 230 },  // a wall lamp over each side table (owner): the room's brass twin-arm sconce, as AST-DR-007         // side tables, 16 × 16 in, 24 in high — 1 in clear each side in the niche; from the photo, ASSUMED
 };
 
 // The bed in the owner's photo, sized to the 6 ft × 6 ft 6 in mattress on the plan. Proportions read off the photo.
@@ -88,7 +90,7 @@ const BEDFRAME = {
   }
 
   // ════════ ELEVATION — seen from the room, floor to ceiling ════════
-  function elevation(th) {
+  function elevation(th, bare = false) {
     const Y = (h) => H - h;
     let o = "";
     // the build-out face, all of it veneer; the niche cut into it
@@ -113,13 +115,14 @@ const BEDFRAME = {
     for (let j = 1; j < K.grid.rows; j++) o += `<line x1="${N.u0}" y1="${f(Y(K.skirt + j * rh))}" x2="${N.u1}" y2="${f(Y(K.skirt + j * rh))}" stroke-width="${th * 0.6}"/>`;
     // marble skirting, carried along the build-out and into the niche
     o += RC(0, Y(K.skirt), W, Y(0), `fill="${MARB}" stroke-width="${th}"`);
-    // side tables: a single drawer with a keyhole, slim splayed legs, a pale top
-    tables.forEach((c) => {
+    if (!bare) tables.forEach((c) => {
       const w = K.side.w, h = K.side.h, x0 = c - w / 2;
       o += RC(x0 - 8, Y(h), x0 + w + 8, Y(h - 25), `fill="#f3efe6" stroke-width="${th}"`);
       o += RC(x0, Y(h - 25), x0 + w, Y(h - 150), `fill="${WOOD}" stroke-width="${th}"`) + `<circle cx="${f(c)}" cy="${f(Y(h - 88))}" r="9" fill="#fff" stroke-width="${th * 0.8}"/>`;
       o += `<path d="M ${f(x0 + 12)} ${Y(h - 150)} L ${f(x0 - 10)} ${Y(0)} L ${f(x0 + 14)} ${Y(0)} L ${f(x0 + 40)} ${Y(h - 150)} M ${f(x0 + w - 12)} ${Y(h - 150)} L ${f(x0 + w + 10)} ${Y(0)} L ${f(x0 + w - 14)} ${Y(0)} L ${f(x0 + w - 40)} ${Y(h - 150)}" fill="${WOOD}" stroke-width="${th}"/>`;
     });
+    tables.forEach((c) => (o += sconce(c, Y, th)));                     // a wall lamp over each side table, on the plaster
+    if (bare) return o + `<line x1="-150" y1="${Y(0)}" x2="${W + 150}" y2="${Y(0)}" stroke-width="${th * 4}"/>`;
     // the bed from its foot: headboard behind, the frame on turned feet, mattress and pillows
     o += RC(bc - fw / 2, Y(B.head.h), bc + fw / 2, Y(yMat - 40), `fill="${UPH}" stroke-width="${th * 1.2}"`);
     o += `<path d="M ${f(bc - fw / 2 + 25)} ${Y(B.head.h)} L ${f(bc + fw / 2 - 25)} ${Y(B.head.h)}" stroke-width="${th * 0.5}"/>`;
@@ -130,6 +133,19 @@ const BEDFRAME = {
     // the entrance door, open flat against this wall (dashed): where it stands in front of the 3 in zone
     o += RC(leafTip, Y(2311), W, Y(0), `fill="none" stroke="${DIM}" stroke-width="${th * 1.1}" stroke-dasharray="${th * 9} ${th * 6}"`);
     o += `<line x1="-150" y1="${Y(0)}" x2="${W + 150}" y2="${Y(0)}" stroke-width="${th * 4}"/><line x1="-150" y1="${Y(H)}" x2="${W + 150}" y2="${Y(H)}" stroke-width="${th * 2}" stroke-dasharray="40 20"/>`;
+    return o;
+  }
+  // the room's twin-arm brass sconce with fabric shades (AST-DR-007, detail 4), centred on u
+  function sconce(u, Y, th) {
+    const y = K.lamp.y, sp = K.lamp.span;
+    let o = `<ellipse cx="${f(u)}" cy="${f(Y(y))}" rx="28" ry="60" fill="#fff" stroke-width="${th}"/><ellipse cx="${f(u)}" cy="${f(Y(y))}" rx="18" ry="44" stroke-width="${th * 0.6}"/>`;
+    [-1, 1].forEach((m) => {
+      const ax = u + m * sp;
+      o += `<path fill="none" stroke-width="${th}" d="M ${f(u + m * 12)} ${f(Y(y - 10))} C ${f(u + m * 70)} ${f(Y(y - 80))} ${f(ax - m * 10)} ${f(Y(y - 50))} ${f(ax)} ${f(Y(y + 20))}"/>`;
+      o += RC(ax - 8, Y(y + 36), ax + 8, Y(y + 90), `fill="#fff" stroke-width="${th}"`);
+      o += `<path d="M ${f(ax - 60)} ${f(Y(y + 90))} L ${f(ax + 60)} ${f(Y(y + 90))} L ${f(ax + 36)} ${f(Y(y + 190))} L ${f(ax - 36)} ${f(Y(y + 190))} Z" fill="#fff" stroke-width="${th}"/>`;
+      o += [-40, -20, 0, 20, 40].map((d) => `<line x1="${f(ax + d)}" y1="${f(Y(y + 92))}" x2="${f(ax + d * 0.6)}" y2="${f(Y(y + 188))}" stroke-width="${th * 0.5}"/>`).join("");
+    });
     return o;
   }
   // a turned bun foot, centred on u, as seen square-on
@@ -154,6 +170,9 @@ const BEDFRAME = {
     // beyond: the side table (thin), and the build-out's 10 in face at the niche edge
     o += RC(vHb, Y(K.side.h), vHb + K.side.d, Y(0), `fill="none" stroke-width="${th * 0.5}" stroke-dasharray="${th * 6} ${th * 4}"`);
     o += `<line x1="${K.deep}" y1="${Y(N.h)}" x2="${K.deep}" y2="${Y(0)}" stroke-width="${th * 0.5}" stroke-dasharray="${th * 6} ${th * 4}"/>`;
+    // the wall lamp over the side table, beyond (dashed): backplate on the plaster, arm, shade
+    { const y = K.lamp.y, p = K.plaster + K.lamp.proj, d = `stroke-dasharray="${th * 6} ${th * 4}"`;
+      o += `<g fill="none" stroke-width="${th * 0.8}" ${d}><rect x="${K.plaster}" y="${Y(y + 60)}" width="18" height="120"/><path d="M ${K.plaster + 18} ${Y(y - 10)} C ${K.plaster + 90} ${Y(y - 70)} ${p - 20} ${Y(y - 50)} ${p} ${Y(y + 20)}"/><path d="M ${p - 60} ${Y(y + 90)} L ${p + 60} ${Y(y + 90)} L ${p + 36} ${Y(y + 190)} L ${p - 36} ${Y(y + 190)} Z"/></g>`; }
     // the bed: headboard, frame rail, mattress, a foot beyond
     o += RC(vHb, Y(B.head.h), vHf, Y(yLeg), `fill="${UPH}" stroke-width="${th * 1.2}"`);
     o += RC(vHf, Y(yMat), vMat1, Y(yRail), `fill="#fff" stroke-width="${th * 1.2}"`) + RC(vHf + 40, Y(yMat + 150), vHf + 560, Y(yMat), `fill="#fff" stroke-width="${th * 0.8}"`);
@@ -195,17 +214,19 @@ const BEDFRAME = {
   const sc = 30, ve = view(26, 32, sc, "Bed wall elevation"), te = ve.w(0.12);
   s += heading(18, 17, "ELEVATION — THE BED WALL", `SCALE 1:${sc} · SEEN FROM THE ROOM · DRESSING CORNER LEFT, ENTRANCE CORNER RIGHT`, 160);
   s += ve.g(elevation(te), 0.3);
+  view(0, 0, sc, "Bed wall face").g(elevation(te, true), 0.3);           // captured only: the wall alone, for the 3D room
   { const yb = ve.Y(H);
     s += chainH([0, N.u0 - CW, N.u0, N.u1, N.u1 + CW, W].map(ve.X), yb + 5, [N.u0 - CW, `${CW} COVE`, `${N.u1 - N.u0} NICHE`, `${CW} COVE`, W - N.u1 - CW], { from: yb + 1, size: 1.2 });
     s += chainH([ve.X(0), ve.X(W)], yb + 11, [`${W} BED WALL`], { from: yb + 1, size: 1.4 });
     s += chainV([ve.Y(H), ve.Y(H - K.skirt), ve.Y(H - N.h), ve.Y(H - hTop), ve.Y(0)], ve.X(W) + 6, [K.skirt, `${N.h - K.skirt} PANELS`, `${CW} COVE`, H - hTop], { from: ve.X(W) + 1, size: 1.2 });
     s += chainV([ve.Y(H), ve.Y(0)], ve.X(W) + 13, [`${H} CEILING`], { from: ve.X(W) + 1, size: 1.3 });
     s += note(ve.X(N.u0 + 500), ve.Y(250), ve.X(N.u0 + 700), ve.Y(330), "DARK DIVA VENEER — WHOLE WALL, DARKER POLISH", "");
-    s += note(ve.X(N.u0 + 300), ve.Y(H - hTop + 90), ve.X(N.u0 + 700), ve.Y(470), "7 IN COVE ROUND THE NICHE — 3 IN OUT TO 10 IN", "");
+    s += note(ve.X(N.u0 + 300), ve.Y(H - hTop + 90), ve.X(N.u0 + 700), ve.Y(470), "6 IN COVE + 1 IN EDGE ROUND THE NICHE — 3 IN OUT TO 10 IN", "");
     s += note(ve.X(N.u0 + (N.u1 - N.u0) * 0.1), ve.Y(H - 1700), ve.X(N.u0 + 40) , ve.Y(-110), "PARCHMENT PLASTER", "5 × 3 PANELS, HAIRLINE JOINTS");
     s += note(ve.X(bc + fw / 2 - 150), ve.Y(H - 760), ve.X(bc + fw / 2 + 120), ve.Y(H - 1150), "HEADBOARD", "UPHOLSTERED — AST-DR-035");
     s += note(ve.X(leafTip + 120), ve.Y(H - 1500), ve.X(leafTip - 120), ve.Y(-110), "ENTRANCE DOOR OPEN (DASHED)", "LIES IN FRONT OF THE 3 IN ZONE", "end");
     s += note(ve.X(tables[0]), ve.Y(H - 560), ve.X(tables[0] - 200), ve.Y(H - 300), "SIDE TABLE", "", "end");
+    s += note(ve.X(tables[1] + K.lamp.span), ve.Y(H - K.lamp.y - 140), ve.X(tables[1] + 260), ve.Y(H - 1700), "WALL LAMP, EACH SIDE", "BRASS TWIN-ARM, AS THE RIGHT WALL");
     s += cutMark(ve.X(bc) + 4, ve.Y(-60), "A", "down");
   }
 
@@ -230,7 +251,7 @@ const BEDFRAME = {
   s += chainH([vs.X(0), vs.X(K.edge), vs.X(K.deep)], vs.Y(0) - 3, [K.edge, C.r], { from: vs.Y(0), size: 1.2 });
   s += chainV([vs.Y(H), vs.Y(H - yLeg), vs.Y(H - yRail), vs.Y(H - yMat), vs.Y(H - B.head.h)], vs.X(vFr1) + 6, [yLeg, B.rail.h, B.mat.h, B.head.h - yMat], { from: vs.X(vFr1) + 1, size: 1.1 });
   s += chainH([vs.X(0), vs.X(vFr1)], vs.Y(H) + 6, [`${vFr1} WALL TO FOOT`], { from: vs.Y(H) + 1, size: 1.2 });
-  s += note(vs.X(K.deep - 50), vs.Y(H - N.h - C.flat - 60), vs.X(K.deep) + 14, vs.Y(300), "COVE OVER THE NICHE, 7 IN RADIUS", "BENT PLY ON FORMERS, VENEERED");
+  s += note(vs.X(K.deep - 50), vs.Y(H - N.h - C.flat - 60), vs.X(K.deep) + 14, vs.Y(300), "COVE OVER THE NICHE, 6 IN RADIUS", "BENT PLY ON FORMERS, VENEERED");
   s += note(vs.X(K.plaster / 2), vs.Y(1400), vs.X(K.deep) + 14, vs.Y(700), "PARCHMENT PLASTER", "ON 12 MM BOARD");
   s += note(vs.X(vHb + 30), vs.Y(H - 900), vs.X(K.deep) + 14, vs.Y(1150), "HEADBOARD, 3 IN", "1 IN OFF THE PLASTER");
 
@@ -250,8 +271,8 @@ const BEDFRAME = {
 
   // what is assumed
   s += heading(206, 192, "ASSUMED", "TELL ME IF ANY OF THESE IS WRONG", 90);
-  ["Niche 6 ft 6 in high (lowered); the cove tops out at 7 ft 2 in.", "Five panels across and three up, as sketched:", "   each about 1 ft 10⅜ × 2 ft ⅝ in — nearly square.",
-   "The 4 in white marble skirting runs along the build-out", "   and into the niche.", "The build-out runs to the ceiling.", "Side tables 18 × 16 in, 24 in high (from the photo).",
+  ["Niche 9 ft 4 in wide — the old bed-back span (you said 9 ft 6 in).", "Five panels across and three up, as sketched:", "   each about 1 ft 10⅜ × 2 ft ⅝ in — nearly square.",
+   "The 4 in white marble skirting runs along the build-out", "   and into the niche.", "The build-out runs to the ceiling.", "Side tables 16 × 16 in, 24 in high (from the photo).",
    "Bed and headboard heights: AST-DR-035."]
     .forEach((n, i) => (s += text(206, 203 + i * 4.4, n, { size: 1.5 })));
 
@@ -259,21 +280,24 @@ const BEDFRAME = {
   s += heading(18, 238, "NOTES", `REVISION ${K.rev.split(" ")[0]}`, 90);
   ["From the owner's sketches and photo. The whole wall is built out 3 in in Dark Diva",
    "veneer, polished darker, on a ply carcase. Round the niche it sweeps forward in a",
-   "7 in concave cove to 10 in at the niche's edge — up both sides and across the top.",
+   "6 in concave cove to 10 in at the niche's edge — up both sides and across the top.",
    "The niche — bed and both tables — is 10 in deep, in parchment plaster, 5 × 3 panels.",
    "The build-out is set square to the bed's centre line and scribed at both corners,",
-   "so it also hides the room's 2 in splay. The bed, headboard and side tables",
-   "stand in the niche; the bed is drawn on AST-DR-035."]
+   "so it also hides the room's 2 in splay. The niche is the old bed-back span, centred",
+   "on the TV; the cove stops where the open door's leaf ends. Cove light: in the ceiling.",
+   "Headboard: dusty-rose suede (owner). A brass twin-arm wall lamp over each table.",
+   "The bed is drawn on AST-DR-035."]
     .forEach((n, i) => (s += text(18, 248 + i * 4.4, n, { size: 1.55 })));
   s += heading(322, 17, "PROBLEMS FOUND", "TO DECIDE", 88);
-  ["1 · DOOR: the 3 in face stands 1 in proud of D1's hinge pin — the open leaf",
-   "   hits it (detail 2). Projecting hinges (A), or 1½ in at that corner (B).",
+  ["1 · DOOR — not its 3 ft, which is kept clear, but the DEPTH: D1's hinge pin",
+   "   is 2 in off this wall, so a 3 in face there stops it opening flat (detail 2).",
+   "   Projecting hinges (A), or 1½ in deep at that corner (B).",
    "2 · The bed comes 4½ in further out (headboard + frame): 2 ft 5½ in left",
    "   to the TV drawers instead of 2 ft 9¾ in.",
-   "3 · The ceiling cove light along this wall: stop the build-out under it,",
-   "   or run the cove in its top. Your call.",
-   "4 · Lamp sockets and switches go through the plaster panels — fix their",
-   "   places (list item B2) before the panels are made."]
+   "3 · Lamp sockets and switches go through the plaster panels — fix their",
+   "   places (list item B2) before the panels are made.",
+   "DECIDED: the cove light stays in the ceiling; no other light on this wall",
+   "   but the two wall lamps over the side tables (owner)."]
     .forEach((n, i) => (s += text(322, 28 + i * 4.4, n, { size: 1.4, fill: /^\d/.test(n) ? "#b3261e" : INK })));
 
   s += titleBlock({ title: "BED WALL — THE NICHE", sub: "Elevation · Plan · Section · The entrance corner", date: K.date, rev: K.rev, dwg: "AST-DR-034", scale: "AS NOTED @ A3" });
