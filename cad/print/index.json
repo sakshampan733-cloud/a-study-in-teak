@@ -260,5 +260,33 @@
   ],
   "pages": 24,
   "pagesA4": 24
+ },
+ "bedframe": {
+  "title": "THE BED",
+  "dwgs": [
+   "AST-DR-035"
+  ],
+  "keys": [
+   "bedframe"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 8,
+  "pagesA4": 8
+ },
+ "bedwall": {
+  "title": "BED WALL — THE NICHE",
+  "dwgs": [
+   "AST-DR-034"
+  ],
+  "keys": [
+   "bedwall"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 8,
+  "pagesA4": 8
  }
 }
