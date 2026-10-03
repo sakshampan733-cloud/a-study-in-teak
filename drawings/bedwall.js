@@ -72,8 +72,9 @@ const BEDFRAME = {
     // the build-out, Dark Diva on a ply carcase; the cove over the niche dashed (above the cut)
     o += P(solidL(), `fill="${VEN}" stroke-width="${th * 1.3}"`) + P(solidR(), `fill="${VEN}" stroke-width="${th * 1.3}"`);
     o += `<line x1="${N.u0}" y1="${K.deep}" x2="${N.u1}" y2="${K.deep}" stroke-width="${th}" stroke-dasharray="${dash}"/>`;
-    // the niche back: parchment plaster
+    // the niche back, and its two sides, in parchment plaster (the sides lined into the carcase, so the niche stays its width)
     o += RC(N.u0, 0, N.u1, K.plaster, `fill="${PAR}" stroke-width="${th}"`);
+    o += RC(N.u0 - K.plaster, K.plaster, N.u0, K.deep, `fill="${PAR}" stroke-width="${th * 0.8}"`) + RC(N.u1, K.plaster, N.u1 + K.plaster, K.deep, `fill="${PAR}" stroke-width="${th * 0.8}"`);
     // side tables, headboard, frame, mattress, pillows
     tables.forEach((c) => (o += RC(c - K.side.w / 2, vHb, c + K.side.w / 2, vHb + K.side.d, `fill="#fff" stroke-width="${th}"`)));
     o += RC(bc - fw / 2, vHb, bc + fw / 2, vHf, `fill="${UPH}" stroke-width="${th}"`);
@@ -117,7 +118,7 @@ const BEDFRAME = {
     o += RC(0, Y(K.skirt), W, Y(0), `fill="${MARB}" stroke-width="${th}"`);
     if (!bare) tables.forEach((c) => {
       const w = K.side.w, h = K.side.h, x0 = c - w / 2;
-      o += RC(x0 - 8, Y(h), x0 + w + 8, Y(h - 25), `fill="#f3efe6" stroke-width="${th}"`);
+      o += RC(x0 - 8, Y(h), x0 + w + 8, Y(h - 25), `fill="${WOOD}" stroke-width="${th}"`);
       o += RC(x0, Y(h - 25), x0 + w, Y(h - 150), `fill="${WOOD}" stroke-width="${th}"`) + `<circle cx="${f(c)}" cy="${f(Y(h - 88))}" r="9" fill="#fff" stroke-width="${th * 0.8}"/>`;
       o += `<path d="M ${f(x0 + 12)} ${Y(h - 150)} L ${f(x0 - 10)} ${Y(0)} L ${f(x0 + 14)} ${Y(0)} L ${f(x0 + 40)} ${Y(h - 150)} M ${f(x0 + w - 12)} ${Y(h - 150)} L ${f(x0 + w + 10)} ${Y(0)} L ${f(x0 + w - 14)} ${Y(0)} L ${f(x0 + w - 40)} ${Y(h - 150)}" fill="${WOOD}" stroke-width="${th}"/>`;
     });
@@ -164,7 +165,7 @@ const BEDFRAME = {
     // concave: centred out in the room at (10 in, cove top) — leaves the flat edge running straight out, meets the 3 in face tangent
     const cv = Array.from({ length: 19 }, (_, i) => { const t = (1 - i / 18) * Math.PI / 2; return [K.deep - CB * Math.cos(t), hTop - C.r * Math.sin(t)]; });
     o += P([[0, Y(N.h)], [K.deep, Y(N.h)], [K.deep, Y(N.h + C.flat)], ...cv.map(([v, h]) => [v, Y(h)]), [K.edge, Y(H)], [0, Y(H)]], `fill="${VEN}" stroke-width="${th * 1.4}"`);
-    o += PL([[18, Y(N.h) - 18], [K.deep - 18, Y(N.h) - 18], [K.deep - 18, Y(N.h + C.flat)]], `stroke-width="${th * 0.5}"`);
+    o += RC(0, Y(N.h + K.plaster), K.deep, Y(N.h), `fill="${PAR}" stroke-width="${th * 0.8}"`);          // the soffit, parchment plaster too
     // the niche back: parchment plaster on board, marble skirting at its foot
     o += RC(0, Y(N.h), K.plaster, Y(K.skirt), `fill="${PAR}" stroke-width="${th}"`) + RC(0, Y(K.skirt), K.plaster + 12, Y(0), `fill="${MARB}" stroke-width="${th}"`);
     // beyond: the side table (thin), and the build-out's 10 in face at the niche edge
@@ -222,7 +223,7 @@ const BEDFRAME = {
     s += chainV([ve.Y(H), ve.Y(0)], ve.X(W) + 13, [`${H} CEILING`], { from: ve.X(W) + 1, size: 1.3 });
     s += note(ve.X(N.u0 + 500), ve.Y(250), ve.X(N.u0 + 700), ve.Y(330), "DARK DIVA VENEER — WHOLE WALL, DARKER POLISH", "");
     s += note(ve.X(N.u0 + 300), ve.Y(H - hTop + 90), ve.X(N.u0 + 700), ve.Y(470), "6 IN COVE + 1 IN EDGE ROUND THE NICHE — 3 IN OUT TO 10 IN", "");
-    s += note(ve.X(N.u0 + (N.u1 - N.u0) * 0.1), ve.Y(H - 1700), ve.X(N.u0 + 40) , ve.Y(-110), "PARCHMENT PLASTER", "5 × 3 PANELS, HAIRLINE JOINTS");
+    s += note(ve.X(N.u0 + (N.u1 - N.u0) * 0.1), ve.Y(H - 1700), ve.X(N.u0 + 40) , ve.Y(-110), "PARCHMENT PLASTER — BACK IN 5 × 3 PANELS", "THE NICHE'S SIDES AND SOFFIT PLAIN PARCHMENT TOO");
     s += note(ve.X(bc + fw / 2 - 150), ve.Y(H - 760), ve.X(bc + fw / 2 + 120), ve.Y(H - 1150), "HEADBOARD", "UPHOLSTERED — AST-DR-035");
     s += note(ve.X(leafTip + 120), ve.Y(H - 1500), ve.X(leafTip - 120), ve.Y(-110), "ENTRANCE DOOR OPEN (DASHED)", "LIES IN FRONT OF THE 3 IN ZONE", "end");
     s += note(ve.X(tables[0]), ve.Y(H - 560), ve.X(tables[0] - 200), ve.Y(H - 300), "SIDE TABLE", "", "end");
@@ -252,7 +253,7 @@ const BEDFRAME = {
   s += chainV([vs.Y(H), vs.Y(H - yLeg), vs.Y(H - yRail), vs.Y(H - yMat), vs.Y(H - B.head.h)], vs.X(vFr1) + 6, [yLeg, B.rail.h, B.mat.h, B.head.h - yMat], { from: vs.X(vFr1) + 1, size: 1.1 });
   s += chainH([vs.X(0), vs.X(vFr1)], vs.Y(H) + 6, [`${vFr1} WALL TO FOOT`], { from: vs.Y(H) + 1, size: 1.2 });
   s += note(vs.X(K.deep - 50), vs.Y(H - N.h - C.flat - 60), vs.X(K.deep) + 14, vs.Y(300), "COVE OVER THE NICHE, 6 IN RADIUS", "BENT PLY ON FORMERS, VENEERED");
-  s += note(vs.X(K.plaster / 2), vs.Y(1400), vs.X(K.deep) + 14, vs.Y(700), "PARCHMENT PLASTER", "ON 12 MM BOARD");
+  s += note(vs.X(K.plaster / 2), vs.Y(1400), vs.X(K.deep) + 14, vs.Y(700), "PARCHMENT PLASTER", "BACK, SIDES AND SOFFIT, ON 12 MM BOARD");
   s += note(vs.X(vHb + 30), vs.Y(H - 900), vs.X(K.deep) + 14, vs.Y(1150), "HEADBOARD, 3 IN", "1 IN OFF THE PLASTER");
 
   // detail 2 — the entrance corner, plan 1:20, in the right-hand column; marks keyed underneath
@@ -272,7 +273,7 @@ const BEDFRAME = {
   // what is assumed
   s += heading(206, 192, "ASSUMED", "TELL ME IF ANY OF THESE IS WRONG", 90);
   ["Niche 9 ft 4 in wide — the old bed-back span (you said 9 ft 6 in).", "Five panels across and three up, as sketched:", "   each about 1 ft 10⅜ × 2 ft ⅝ in — nearly square.",
-   "The 4 in white marble skirting runs along the build-out", "   and into the niche.", "The build-out runs to the ceiling.", "Side tables 16 × 16 in, 24 in high (from the photo).",
+   "The 4 in white marble skirting runs along the build-out", "   and into the niche.", "The build-out runs to the ceiling.", "Side tables 16 × 16 in, 24 in high, all wood (from the photo).",
    "Bed and headboard heights: AST-DR-035."]
     .forEach((n, i) => (s += text(206, 203 + i * 4.4, n, { size: 1.5 })));
 
@@ -281,7 +282,8 @@ const BEDFRAME = {
   ["From the owner's sketches and photo. The whole wall is built out 3 in in Dark Diva",
    "veneer, polished darker, on a ply carcase. Round the niche it sweeps forward in a",
    "6 in concave cove to 10 in at the niche's edge — up both sides and across the top.",
-   "The niche — bed and both tables — is 10 in deep, in parchment plaster, 5 × 3 panels.",
+   "The niche — bed and both tables — is 10 in deep, all parchment plaster: its back in",
+   "5 × 3 panels, its two sides and soffit plain (owner).",
    "The build-out is set square to the bed's centre line and scribed at both corners,",
    "so it also hides the room's 2 in splay. The niche is the old bed-back span, centred",
    "on the TV; the cove stops where the open door's leaf ends. Cove light: in the ceiling.",

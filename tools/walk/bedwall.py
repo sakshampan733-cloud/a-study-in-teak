@@ -3,9 +3,10 @@
 #   · the whole wall built out 3 in in Dark Diva veneer, polished DARKER than the rest of the room, sweeping forward in a
 #     concave cove — up both sides and across the top — to 10 in at the edge of a niche that holds the bed and both
 #     side tables; the coves meet in a mitre at the two top corners
-#   · the niche: 10 in deep, 6 ft 6 in high, lined with parchment-plaster panels five across and three up
+#   · the niche: 10 in deep, 6 ft 6 in high, its back in parchment-plaster panels five across and three up, its sides and
+#     soffit plain parchment plaster
 #   · the bed from the owner's photo: a low teak platform (the room's tone) on turned bun feet, a slim headboard in
-#     dusty-rose suede; a side table and a brass twin-arm wall lamp either side
+#     dusty-rose suede; a wooden side table and a brass twin-arm wall lamp either side
 # Plan: x east, s south from the study wall; the bed wall's face is s = Lb. Along the wall u runs from the dressing
 # (right-wall) corner, v comes out from the wall: x = xR − u, s = Lb − v.
 import bpy, bmesh, math
@@ -63,7 +64,8 @@ for j in range(len(zs) - 1):
 bm.normal_update()
 if sum(f_.normal.y for f_ in bm.faces) < 0: bmesh.ops.reverse_faces(bm, faces=list(bm.faces))   # face the room (+y)
 face_ = mesh_obj("bw_face", bm, M_VEN_DK)
-# the niche: its two side returns (facing into the niche) and the soffit (facing down), 10 in deep, in the same veneer
+# the niche: its two side returns (facing into the niche) and the soffit (facing down), 10 in deep — lined in parchment
+# plaster like its back (owner, 3 Oct: the inside of the frame is parchment too)
 rt = bmesh.new()
 def quad(pts, want):
     f_ = rt.faces.new([rt.verts.new(p_) for p_ in pts]); f_.normal_update()
@@ -71,7 +73,7 @@ def quad(pts, want):
 quad([P(XU(U0), SV(v), z) for v, z in ((0, 0), (DEEP, 0), (DEEP, NH), (0, NH))], (-1, 0, 0))     # left return: toward −x (into the niche)
 quad([P(XU(U1), SV(v), z) for v, z in ((0, 0), (DEEP, 0), (DEEP, NH), (0, NH))], (1, 0, 0))      # right return: toward +x
 quad([P(XU(u), SV(v), NH) for u, v in ((U0, 0), (U1, 0), (U1, DEEP), (U0, DEEP))], (0, 0, -1))   # soffit: down
-mesh_obj("bw_niche_returns", rt, M_VEN_DK)
+mesh_obj("bw_niche_returns", rt, M_PARCH)
 
 # marble skirting, 4 in, standing ½ in proud of the build-out and following it round the coves, and along the niche back
 SKH, SKP = 102.0, 12.0
@@ -129,11 +131,11 @@ for p_ in o_.data.polygons: p_.use_smooth = True
 o_ = box("headboard", xa, SV(HB_F), LEG + 40, xb, SV(HB_B), HBT, WALL, FUR); setmat(o_, M_SUEDE); bevel(o_, 0.022, 6)
 for p_ in o_.data.polygons: p_.use_smooth = True
 
-# ── side tables: a pale top, one drawer with a brass keyhole, four slim splayed legs ────────────────────────────────
+# ── side tables, all wood (owner: no marble): top, one drawer with a brass keyhole, four slim splayed legs ────────────────────────────────
 TW, TD, THt = 406.0, 406.0, 610.0
 def side_table(k, uc):
     x0_, x1_ = XU(uc + TW / 2), XU(uc - TW / 2); s0_, s1_ = SV(HB_B + TD), SV(HB_B)
-    o_ = dbox(f"st{k}_top", x0_ - 8, s0_ - 8, THt - 25, x1_ + 8, s1_ + 4, THt, M_WHITE); bevel(o_, 0.004, 3)
+    o_ = dbox(f"st{k}_top", x0_ - 8, s0_ - 8, THt - 25, x1_ + 8, s1_ + 4, THt, M_VEN); bevel(o_, 0.004, 3)
     o_ = dbox(f"st{k}_box", x0_, s0_, THt - 150, x1_, s1_, THt - 25, M_VEN); bevel(o_, 0.003, 2)
     o_ = dbox(f"st{k}_drawer", x0_ + 18, s0_ - 3, THt - 138, x1_ - 18, s0_ + 2, THt - 37, M_VEN); bevel(o_, 0.002, 2)
     bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.008, depth=0.004, location=P((x0_ + x1_) / 2, s0_ - 4, THt - 88))
