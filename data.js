@@ -564,7 +564,7 @@ window.PROJECT = {
         },
         {
           id: "headboard", name: "Bed Wall", status: "open",
-          glance: {"line": "A Dark Diva wall with a 10 in niche behind the bed, lined with parchment plaster in a grid.", "facts": [["10 in", "niche, bed + both tables"], ["3 in", "at both corners"], ["5 × 3", "parchment plaster panels"], ["Darker", "polish on the veneer"]], "mats": ["parchment"]},
+          glance: {"line": "A Dark Diva wall with a 10 in niche behind the bed, lined with parchment plaster in a grid.", "facts": [["10 in", "niche, 6 ft 6 high"], ["7 in", "cove, sides and top"], ["3 in", "the rest of the wall"], ["5 × 3", "parchment plaster panels"]], "mats": ["parchment"]},
           drawings: ["bedwall"],
           refs: [
             { src: "assets/refs/bedwall-ref-6-plaster-grid-bed.jpg", caption: "Your ref (3 Oct) — parchment-plaster panels in a grid, in a niche behind a low bed with a slim upholstered headboard" },
@@ -575,7 +575,7 @@ window.PROJECT = {
             { src: "assets/refs/bedwall-ref-2-parchment-entry-niche.jpg", caption: "Your ref — parchment niche with a dark stone skirting and a slim dark edge" },
           ],
           parts: [
-            { label: "The idea (owner, 3 Oct)", value: "The whole bed wall is built out in Dark Diva veneer, polished darker: 10 in proud either side of a niche that holds the bed and both side tables, easing down to 3 in at both room corners so the entrance door keeps its swing. The niche is 10 in deep and lined with parchment plaster in a grid (five across, three up, as sketched). Drawn on AST-DR-034 — still the owner's to approve." },
+            { label: "The idea (owner, 3 Oct)", value: "The whole bed wall is built out 3 in in Dark Diva veneer, polished darker. Round the niche that holds the bed and both side tables, the face sweeps forward in a concave 7 in cove — up both sides AND across the top (owner's second sketch, 3 Oct) — to 10 in at the niche's edge, with a 1 in flat edge. The niche is 10 in deep and 6 ft 6 in high (lowered), lined with parchment plaster in a grid (five across, three up — nearly square panels). Drawn on AST-DR-034 rev 2 — still the owner's to approve." },
             { label: "Problems found", value: "1) The entrance door's hinge pin stands only 2 in off this wall, so a 3 in face there stops the door opening flat — projecting (parliament) hinges, or 1½ in at that corner instead. 2) The bed comes 4½ in further out (headboard + frame), leaving 2 ft 5½ in to the TV drawers instead of 2 ft 9¾ in. 3) The ceiling cove light along this wall: stop the build-out under it or run it in the top. 4) Lamp sockets and switches go through the plaster panels — their places needed first." },
             { label: "Direction", value: "Parchment on the wall behind the bed — pale, warm, cloudy tone like vellum." },
             { label: "Two ways to do it", value: "Real parchment / vellum panels (as in your references) — large sheets with hairline joints; or parchment-effect plaster in the same colour with no joints." },
@@ -585,7 +585,7 @@ window.PROJECT = {
             { label: "Extent", value: "", hint: "Whole bed wall, floor to ceiling?" },
             { label: "Edges", value: "", hint: "Dark slim edge / stone skirting as in ref 2, or plain" },
           ],
-          questions: ["The entrance corner: projecting hinges on the door, or 1½ in there instead of 3 in?", "Niche height (drawn 7 ft) and the panel grid (drawn 5 × 3)", "The ceiling cove along this wall", "Skirting along the build-out and into the niche?"],
+          questions: ["The entrance corner: projecting hinges on the door, or 1½ in there instead of 3 in?", "Niche height (drawn 6 ft 6 in) and the panel grid (drawn 5 × 3)", "The ceiling cove along this wall", "Skirting along the build-out and into the niche?"],
         },
         {
           id: "partition", name: "Partition", status: "final",
