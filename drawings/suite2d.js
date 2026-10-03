@@ -112,7 +112,7 @@
       o += Tx(cx - rug.w / 2 + 420, rug.y0 + 170, "RUG 10'×8'", "tx2", { size: 70 });
       // the bed wall's build-out in plan: 3 in, the cove out to 10 in, the niche between (its plaster back a thin line)
       const cw = BW.cove + BW.flat, cv = (xe, dir) => Array.from({ length: 13 }, (_, i) => { const t = (i / 12) * Math.PI / 2;
-        return [xe + dir * (cw - BW.cove * Math.sin(t)), L - (BW.deep - BW.cove * Math.cos(t))]; });
+        return [xe + dir * (cw - BW.cove * Math.sin(t)), L - (BW.deep - (BW.deep - BW.edge) * Math.cos(t))]; });
       const poly = (pts) => `<path class="fu3" d="M ${pts.map(([x, y]) => `${f(x)} ${f(y)}`).join(" L ")} Z"/>`;
       o += poly([[xLb, L], [xLb, L - BW.edge], ...cv(bx0, -1), [bx0, L - BW.deep], [bx0, L]]);
       o += poly([[bx1, L], [bx1, L - BW.deep], ...cv(bx1, 1).reverse(), [xR, L - BW.edge], [xR, L]]);

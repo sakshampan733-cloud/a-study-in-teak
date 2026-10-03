@@ -15,7 +15,7 @@ const BEDWALL = {
   W: 4724, H: 2769, T: 230,                 // 15 ft 6 in wall, 9 ft 1 in ceiling, 9 in walls (AST-DR-001)
   deep: 254, edge: 76,                      // 10 in either side of the niche; 3 in at both corners (owner)
   niche: { u0: 787, u1: 3632, h: 1981 },    // the old bed-back span exactly (owner: "we're keeping that"), centred on the TV; 6 ft 6 in high (owner: good)
-  cove: { r: 152, flat: 25 },               // a concave quarter-round, 6 in radius, out of the 3 in face to 10 in, then a 1 in flat edge —
+  cove: { r: 152, flat: 25 },               // a concave quarter-ellipse, 6 in along the wall × 7 in out (3 in to 10 in), then a 1 in flat edge —
                                             // 7 in in all, which is exactly the gap between the open door's edge and the niche
   grid: { cols: 5, rows: 3 },               // as sketched: five across, three up
   plaster: 20,                              // parchment plaster on 12 mm board
@@ -39,7 +39,7 @@ const BEDFRAME = {
 (function () {
   const { INK, THIN, DIM, f, text, mmToFt, view, chainH, chainV, note, labels, heading, cutMark, bubble, frame, titleBlock, sheet } = window.DK;
   const K = BEDWALL, B = BEDFRAME, W = K.W, H = K.H, N = K.niche, C = K.cove;
-  const CW = C.r + C.flat;                    // the cove band, measured from the niche's edge: 1 in flat, then the 7 in cove
+  const CW = C.r + C.flat, CB = K.deep - K.edge;   // the cove band from the niche's edge: 1 in flat, then the cove — 6 in along, 7 in out
   const hTop = N.h + CW;                      // where the top cove meets the 3 in face
   const ft = (mm) => mmToFt(mm).replace("'-", " ft ").replace('"', " in").replace(/^0 ft /, "").replace(/ 0 in$/, "");
   const VEN = "#dcc6a8", VEN2 = "#cdb391", PAR = "#f6eedd", UPH = "#ead6cd", WOOD = "#c9a88a", MARB = "#f1efea", RUG = "#ecebe7";
@@ -54,7 +54,7 @@ const BEDFRAME = {
   // the build-out's face in plan: 3 in, then the concave cove — tangent to the 3 in face, turning to run straight out
   // at the niche — then the 1 in flat edge at 10 in. (u, v) for a niche edge at ue, the band running dir (−1 left, +1 right)
   const covePts = (ue, dir, n = 18) => Array.from({ length: n + 1 }, (_, i) => { const t = (i / n) * Math.PI / 2;   // t = 0 at the 3 in face
-    return [ue + dir * (CW - C.r * Math.sin(t)), K.deep - C.r * Math.cos(t)]; });
+    return [ue + dir * (CW - C.r * Math.sin(t)), K.deep - CB * Math.cos(t)]; });
   const solidL = () => [[0, 0], [0, K.edge], ...covePts(N.u0, -1), [N.u0, K.deep], [N.u0, 0]];
   const solidR = () => [[N.u1, 0], [N.u1, K.deep], ...covePts(N.u1, 1).reverse(), [W, K.edge], [W, 0]];
   const P = (pts, a = "") => `<path d="M ${pts.map(([x, y]) => `${f(x)} ${f(y)}`).join(" L ")} Z" ${a}/>`;
@@ -162,7 +162,7 @@ const BEDFRAME = {
     let o = RC(-K.T, Y(H), 0, Y(0), hatch) + `<line x1="0" y1="${Y(H)}" x2="0" y2="${Y(0)}" stroke-width="${th * 1.6}"/>`;
     // over the niche: the soffit, the 1 in flat edge, the cove sweeping back to the 3 in face, and 3 in up to the ceiling
     // concave: centred out in the room at (10 in, cove top) — leaves the flat edge running straight out, meets the 3 in face tangent
-    const cv = Array.from({ length: 19 }, (_, i) => { const t = (i / 18) * Math.PI / 2; return [K.deep - C.r * Math.sin(t), hTop - C.r * Math.cos(t)]; });
+    const cv = Array.from({ length: 19 }, (_, i) => { const t = (1 - i / 18) * Math.PI / 2; return [K.deep - CB * Math.cos(t), hTop - C.r * Math.sin(t)]; });
     o += P([[0, Y(N.h)], [K.deep, Y(N.h)], [K.deep, Y(N.h + C.flat)], ...cv.map(([v, h]) => [v, Y(h)]), [K.edge, Y(H)], [0, Y(H)]], `fill="${VEN}" stroke-width="${th * 1.4}"`);
     o += PL([[18, Y(N.h) - 18], [K.deep - 18, Y(N.h) - 18], [K.deep - 18, Y(N.h + C.flat)]], `stroke-width="${th * 0.5}"`);
     // the niche back: parchment plaster on board, marble skirting at its foot

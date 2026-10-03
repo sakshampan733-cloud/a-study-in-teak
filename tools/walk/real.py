@@ -783,6 +783,11 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
     "r_mon": ((2337, 900, 1250), (2337, 2300, 1050), {"lens": 28, "fstop": 4.0}),
     "r_pdesk": ((1000, 650, 1450), (2337, 2413, 1250), {"lens": 24, "fstop": 5.6}),
     "p_plan": ((2337, 2900, 7000), (2337, 2900, 0), {"ortho": 5.2, "hide": ("ceiling",)}),
+    # the bed wall and the bed (3 Oct): straight on, three-quarter from the door side, the cove, the headboard
+    "b_front": ((2337, 2500, 1250), (2337, 5766, 1150), {"lens": 22, "fstop": 8.0}),
+    "b_three": ((300, 3500, 1350), (2700, 5650, 900), {"lens": 26, "fstop": 5.6}),
+    "b_cove": ((4380, 5080, 1650), (3150, 5740, 1700), {"lens": 26, "fstop": 5.6}),   # along the wall from the dressing corner: the cove in profile
+    "b_head": ((3150, 4150, 1050), (3200, 5700, 850), {"lens": 38, "fstop": 2.8}),
     "vanity": ((6250, 1150, 1400), (6600, 2718, 950)),
     "door": ((2600, 3500), (-177, 5200, 1250)),
     "dress": ((4900, 4450), (8400, 4356, 1500)),
