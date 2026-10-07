@@ -615,9 +615,11 @@ const SW2 = {
       return v;
     };
     s += heading(18, 17, "1 · BOOKCASE ARCH — ITS UNDERSIDE", "LOOKING UP, UNROLLED FLAT · 1:12 · WALL AT THE TOP, ROOM BELOW", 140);
-    soffit(gB, BK.back, BK.d, N.cB, 22, 32, 12, "Bookcase soffit unrolled", (th, L) => `<text x="${f(L / 2)}" y="${BK.d + 14}" font-size="14" text-anchor="middle" fill="#666" font-family="Helvetica">ARCHIVOLT ON THE FACE (18 PROUD)</text>`);
+    soffit(gB, BK.back, BK.d, N.cB, 22, 32, 12, "Bookcase soffit unrolled", () => "");
+    s += text(22 + 780 / 12, 32 + (BK.d + 14) / 12, "ARCHIVOLT ON THE FACE (18 PROUD)", { size: 1.2, fill: THIN, anchor: "middle" });
     s += heading(222, 17, "2 · WINDOW ARCH — ITS UNDERSIDE", "LOOKING UP, UNROLLED FLAT · 1:12", 120);
-    soffit(gW, WN.glass + WN.frameD / 2 + 18, WN.set, N.cW, 226, 32, 12, "Window soffit unrolled", (th, L) => `<line x1="0" y1="0" x2="${f(L)}" y2="0" stroke-dasharray="40 24" ${W(th)}/><text x="${f(L / 2)}" y="-14" font-size="14" text-anchor="middle" fill="#666" font-family="Helvetica">BRICK LINTEL ABOVE (WALL SIDE OF THIS LINE) — LINING ONLY</text>`);
+    soffit(gW, WN.glass + WN.frameD / 2 + 18, WN.set, N.cW, 226, 32, 12, "Window soffit unrolled", (th, L) => `<line x1="0" y1="0" x2="${f(L)}" y2="0" stroke-dasharray="40 24" ${W(th)}/>`);
+    s += text(226 + 700 / 12, 32 - 14 / 12, "BRICK LINTEL ON THE WALL SIDE OF THE DASHED LINE — LINING ONLY", { size: 1.2, fill: THIN, anchor: "middle" });
 
     // 3 — a niche in section, across the soffit at the crown (bookcase)
     s += heading(18, 82, "3 · A NICHE IN SECTION", "ACROSS THE SOFFIT AT THE CROWN · 1:5", 70);
