@@ -4,6 +4,7 @@ const root = path.join(__dirname, "..", "..");
 const [file, key, outDir = "build/final"] = process.argv.slice(2);
 global.window = {};
 require(path.join(root, "drawings/kit.js"));
+require(path.join(root, "drawings/iso.js"));
 require(path.join(root, file));
 const d = window.DRAWINGS[key];
 if (!d) { console.error("no sheet", key, Object.keys(window.DRAWINGS)); process.exit(1); }
