@@ -301,7 +301,7 @@ function sheets(list) {
   const ds = [].concat(list || []).filter((d) => window.DRAWINGS?.[d]);
   if (!ds.length) return "";
   // the large-print sets (tools/node/print-drawings.js): a drawing's sheets together — desk + details + 3D, vanity C + its drawer
-  const fam = (k) => ({ "vanity-drawer": "vanity-c" })[k] || k.replace(/-(details|3d)$/, ""), fams = {}, PS = window.PRINTSETS || {};
+  const fam = (k) => k.replace(/-(details|3d)$/, ""), fams = {}, PS = window.PRINTSETS || {};
   ds.forEach((k) => { (fams[fam(k)] = fams[fam(k)] || []).push(k); });
   const pdfs = (f) => `<a class="btn" href="../cad/print/${f}.pdf" download>A3 PDF</a><a class="btn" href="../cad/print/${f}-a4.pdf" download>A4 PDF</a>`;
   const sets = Object.entries(fams).filter(([f]) => PS[f]).map(([f, v]) => `<div class="ps-row"><b>${esc(window.DRAWINGS[v[0]].title.split(" · ")[0].replace(/ — General arrangement$/, ""))}</b><span class="mono">${v.length > 1 ? `${v.length} sheets · ` : ""}${PS[f].pages} pages</span><span class="ps-btns"><button class="btn steel" data-print="${f}">Read</button>${pdfs(f)}</span></div>`).join("");

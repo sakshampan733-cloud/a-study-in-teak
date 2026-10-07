@@ -31,7 +31,7 @@ function siteOrder() {
   })(ctx.window.PROJECT);
   return seen.filter((k) => fs.existsSync(path.join(CAD, k + ".svg")));
 }
-const JOIN = { "vanity-drawer": "vanity-c" };
+const JOIN = {};
 const family = (k) => JOIN[k] || k.replace(/-(details|3d)$/, "");
 
 // ── in the browser: drop the mm layer, convert the notes, thicken, and map the ink ───────────────────────────────

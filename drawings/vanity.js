@@ -40,17 +40,18 @@ function innerOutline(open, AX, D = VANITY.D) {
   return { x0, x1, d0, d1, arm: "", path: `M ${x0} ${d0} L ${n0} ${d0} L ${n0} ${nd} L ${n1} ${nd} L ${n1} ${d0} L ${x1} ${d0} L ${x1} ${d1} L ${x0} ${d1} Z` };
 }
 
-// Scheme C, as chosen (30.09): the middle bank is beige marble and runs to the FLOOR — it is the support —
-// and it uses its full 33 in. The top pair of drawers grows to 6½ in fronts, the drawer within the big one
-// to a 5½ in box, and the big drawer takes the rest. The two ends are pull-out cabinets, unchanged in height.
+// Scheme C, as chosen (30.09), revised 8 Oct (owner): the marble no longer comes down — it is the top only, with its one
+// mitred corner. The middle bank is now veneer like the ends, its drawers on the SAME level as the ends' (6 in off the
+// floor), the whole row standing on one recessed support, so the drawers have less height than when the stone ran to the
+// floor. The veneer is the 9292 burl, polished as dark as the owner's first vanity photo.
 // Owner, 2 Oct: the top and the front meet as ONE mitred marble corner — no lip, no step. The fronts come forward
 // the 1 in the marble used to oversail, so every drawer front is flush with the edge of the top (2 ft 1 in deep).
 // The top mitres into a fixed marble strip across the top of the bank; the drawers start under it, push-to-open.
 const VANITY_C = {
   D: 635, over: 0, mitre: true,
-  top2: [591, 762], big: [38, 566],
-  inner: { h0: 377, h1: 537, bot: 387, side: 527, back: 115, notch: 125, notchD: 355 },
-  bigSide: 347,
+  top2: [591, 762], big: [190, 566],
+  inner: { h0: 430, h1: 537, bot: 395, side: 535, back: 115, notch: 125, notchD: 355 },
+  bigSide: 360,
 };
 
 function buildVanity(V) {
@@ -61,7 +62,7 @@ function buildVanity(V) {
   const bank = V.bank, mid = (bank[0] + bank[1]) / 2;
   const SP = Math.abs(mid - AX) < 3 ? AX : mid;                        // the drawers split on the bank's centre
   const open = [bank[0] + K.stile, bank[1] - K.stile];
-  const MARBLE = "#efede7", VEN = "#f3ead8", id = V.key.replace(/\W/g, "");
+  const MARBLE = "#efede7", VEN = "#a39485", id = V.key.replace(/\W/g, "");
   const FF = FLOOR ? MARBLE : VEN;                                      // the bank's face frame and fronts
 
   const TOPH = 1130, E = (h) => TOPH - h;                                  // elevation and section: y down from 1130
@@ -311,7 +312,7 @@ function buildVanity(V) {
    ["Fittings", "Chrome — already bought. Door cup pulls to match."],
    ["Hanging", "18 ply cleat on the wall, 700–760 high."],
    ["Inner", "A U-box on its own runners, above the big"],
-   ["", "drawer's low sides — see AST-DR-022."]])
+   ["", "drawer's low sides."]])
     .forEach(([a, b], i) => (s += text(RX, my + 11 + i * 3.9, a, { size: 1.5, weight: 700 }) + text(RX + 15, my + 11 + i * 3.9, b, { size: 1.5 })));
 
   // key to the section, and notes, along the foot
@@ -327,213 +328,31 @@ function buildVanity(V) {
   window.DRAWINGS[V.key] = { title: `${V.name} · ${V.dwg}`, svg: sheet(s), model: true };
 }
 
-const VANITY_OPEN = [
-  "OPEN — bowl Ø406 × 127 and the spout are assumed.",
-  "   With the bowl on a 838 counter its rim is at 965 (38 in).",
-];
 buildVanity({
-  key: "vanity", dwg: "AST-DR-019", name: "Vanity — normal", rev: "1 — as sketched",
-  title: "VANITY — NORMAL", sub: "Marble full length · Door · Drawers · Door",
-  headline: "MARBLE THE FULL 5 FT · THE BOWL SITS UNDER THE FAUCET, 6 IN RIGHT OF CENTRE",
-  bank: [381, 1143], marble: [0, 1524], support: [457, 1067],
-  doors: [[0, 381], [1143, 1524]],
-  stations: [0, 381, 1143, 1524], spans: [381, 762, 381],
-  notes: [
-    "Symmetric about the vanity's centre — except the bowl,",
-    "which has to sit under the faucet, 152 right of it.",
-    "The waste drops through the right-hand TOP drawer as",
-    "well as the big one: both are U-boxes (see section).",
-    ...VANITY_OPEN,
-    "OPEN — the support's design: reference photos to come.",
-  ],
-});
-buildVanity({
-  key: "vanity-b", dwg: "AST-DR-020", name: "Vanity — scheme B", rev: "1 — as sketched",
-  title: "VANITY — SCHEME B", sub: "1 ft cupboard left · 4 ft marble on the faucet",
-  headline: "A 1 FT VENEER CUPBOARD LEFT · 4 FT OF MARBLE CENTRED ON THE FAUCET",
-  bank: [304, 1524], marble: [304, 1524], support: [406, 1422], ledges: "1 ft",
-  doors: [[0, 304]],
-  stations: [0, 304, 1524], spans: [304, "1220 MARBLE"],
-  notes: [
-    "Taking 1 ft off the left moves the marble's centre 6 in",
-    "right — onto the faucet. Bowl, drawer split and support",
-    "all sit on that one line. The top drawers split on it,",
-    "so the waste drops between them: only the big one is a U.",
-    ...VANITY_OPEN,
-    "OPEN — the support's design: reference photos to come.",
-  ],
-});
-buildVanity({
-  key: "vanity-c", dwg: "AST-DR-021", name: "Vanity — scheme C (chosen)", date: "02.10.2026", rev: "3 — one mitred corner, fronts flush with the top",
-  title: "VANITY — SCHEME C", sub: "Chosen · marble bank to the floor · pull-outs each end",
-  headline: "CHOSEN · 1 FT 6 LEFT, 6 IN RIGHT · 3 FT MARBLE BANK ON THE FAUCET, DOWN TO THE FLOOR",
-  bank: [457, 1371], marble: [457, 1371], support: null, ledges: "two", toFloor: true, pullouts: true, dims: VANITY_C,
+  key: "vanity-c", dwg: "AST-DR-021", name: "Vanity — scheme C (final)", date: "08.10.2026", rev: "4 — marble the top only; bank and ends in dark burl, one level, on a support",
+  title: "VANITY — SCHEME C", sub: "Final · marble top · dark-burl bank and pull-outs, one level on a support",
+  headline: "FINAL · 1 FT 6 LEFT, 6 IN RIGHT · 3 FT BANK ON THE FAUCET · MARBLE THE TOP ONLY, THE ROW 6 IN OFF THE FLOOR",
+  bank: [457, 1371], marble: [457, 1371], support: [38, 1486], ledges: "two", pullouts: true, dims: VANITY_C,
   doors: [[0, 457], [1371, 1524, 19]],
-  stations: [0, 457, 1371, 1524], spans: [457, "914 MARBLE", 153],
+  stations: [0, 457, 1371, 1524], spans: [457, "914 BANK", 153],
   materials: [
     ["Top", "Beige-gold marble, the bathroom stone. 18 slab"], ["", "on a 20 BWP sub-top, mitred at the front edge into"],
     ["", "a fixed 18 marble strip: one corner, fronts flush."],
-    ["Bank", "The same beige marble on the face frame and on"], ["", "every drawer front, floor to counter. It stands"],
-    ["", "on the floor and carries the top — no support."],
-    ["Ends", "Two pull-out cabinets, 9292 cream burl veneer,"], ["", "high gloss, 18 BWP, edges sealed. 6 in off the floor."],
+    ["Bank", "9292 burl veneer, polished very dark (the owner's"], ["", "first vanity photo), high gloss. Face frame and"],
+    ["", "every drawer front, level with the ends."],
+    ["Ends", "Two pull-out cabinets, the same dark burl, gloss,"], ["", "18 BWP, edges sealed. 6 in off the floor."],
+    ["Support", "One recessed support under the row, set back 3 in,"], ["", "BWP, dark: the marble carries nothing."],
     ["Ledges", "The two veneer tops: solid nosing, sealed."],
     ["Runners", "Drawers: undermount, push-to-open. Pull-outs:"], ["", "heavy full-extension runners, cup pull."],
-    ["Fittings", "Chrome — already bought."],
-    ["Inner", "U-box, 5½ in deep, on its own runners — AST-DR-022."]],
+    ["Fittings", "Chrome — already bought."]],
   notes: [
-    "The marble bank now runs to the floor and is the support.",
-    "Top drawers: 6½ in fronts. Drawer within: a 5½ in box.",
-    "The big drawer takes the rest: 20½ in front, 12¾ in clear",
-    "under the inner drawer for tall bottles.",
+    "Rev 4: the marble stays on the top only. The bank is veneer,",
+    "6 in off the floor like the ends, on one recessed support.",
+    "Top drawers: 6½ in fronts. Drawer within: a 4 in front on a",
+    "5½ in box. The big drawer: 14½ in front, 6 in clear below.",
     "OPEN — bowl Ø406 × 127 and the spout are assumed.",
-    "OPEN — marble front thickness and how it is bonded to the",
-    "   drawer boxes: stone supplier to confirm.",
+    "OPEN — the support's design: set back 3 in, dark; to confirm.",
     "Rev 3: top and front meet in one mitred corner, flush.",
+    "Veneer: as dark as the first photo, glossy; brass-free.",
   ],
 });
-
-// ═════════════ AST-DR-022 — the drawer within the big drawer ═════════════
-// The big drawer's front hides a second, shallower drawer riding at the top of it on its own runners:
-// open the big drawer, then pull the inner one out further, like a cutlery tray in a kitchen pan drawer.
-// Below it the big drawer stays deep enough for tall bottles. Drawn on scheme C; B and the normal
-// version are the same drawer at a different width — the table gives all three.
-(function () {
-  const { INK, THIN, DIM, f, text, mmToFt, view, chainH, chainV, heading, frame, titleBlock, sheet } = window.DK;
-  const K = { ...VANITY, ...VANITY_C }, D = K.D, AX = K.AX, I = K.inner, P = K.pullOut, gap = 3;
-  const MARBLE = "#efede7", VEN = "#f3ead8";
-  const E = (h) => 1130 - h;
-  const RUN = [I.bot + 22, I.bot + 32];                                                  // the inner drawer's runners
-  const LN = (a, b, c, d, w, x = "") => `<line x1="${f(a)}" y1="${f(b)}" x2="${f(c)}" y2="${f(d)}" stroke-width="${f(w)}" ${x}/>`;
-  const RC = (a, b, c, d, w, fl = "none", x = "") => `<rect x="${f(Math.min(a, c))}" y="${f(Math.min(b, d))}" width="${f(Math.abs(c - a))}" height="${f(Math.abs(d - b))}" fill="${fl}" stroke-width="${f(w)}" ${x}/>`;
-  const RE = (x0, h0, x1, h1, w, fl, x) => RC(x0, E(h1), x1, E(h0), w, fl, x);
-  const PT = (d, w, fl = "none", x = "") => `<path d="${d}" fill="${fl}" stroke-width="${f(w)}" ${x}/>`;
-  const dash = (t) => `stroke-dasharray="${f(t * 6)} ${f(t * 4)}"`;
-  const cen = (t) => `stroke-dasharray="${f(t * 16)} ${f(t * 4)} ${f(t * 3)} ${f(t * 4)}"`;
-  const bankC = [457, 1371], openC = [bankC[0] + K.stile, bankC[1] - K.stile];
-
-  // side section through one ARM of the drawers — clear of the notch, so both boxes run full depth.
-  // po: how far the big drawer is out; pi: how much further the inner one is out.
-  function side(t, po, pi) {
-    let o = "";
-    o += RE(0, 0, D, 18, t, VEN);                                                          // carcass bottom, on the floor
-    o += RE(18, 18, 30, 650, t * 0.8, VEN);                                                // carcass back
-    o += RE(D - 18, K.big[1], D, K.top2[0], t, MARBLE);                                    // mid rail
-    o += RE(D - 18, 0, D, K.big[0], t, MARBLE);                                            // bottom rail
-    o += RE(D - 18, K.top2[0] + gap, D, 650, t, MARBLE);                                   // top drawer front, broken
-    o += RE(92, K.top2[0] + 20, D - 18, 650, t * 0.6, "none", dash(t));                    // top drawer box, broken
-    o += LN(-40, E(650), D + 40, E(650), t * 0.5, dash(t));
-    // the big drawer
-    const q = po, bo = K.big[0] + 13, bs = K.bigSide;
-    o += RE(92 + q, bo, D - 18 + q, bo + 12, t, VEN) + RE(92 + q, bo, 107 + q, bs, t, VEN);
-    o += RE(107 + q, bo + 12, D - 18 + q, bs, t * 0.45, "none");                           // its side, beyond
-    o += RE(D - 18 + q, K.big[0] + gap, D + q, K.big[1] - gap, t * 1.2, MARBLE);           // its front, marble
-    o += RE(110 + q, bo - 7, D - 40 + q, bo, t * 0.5, "none", dash(t));                    // undermount runner
-    // the inner drawer, riding on the big drawer's sides
-    const r = pi;                                                                        // the inner drawer moves on its own
-    o += RE(I.back + r, I.bot, D - 58 + r, I.bot + 12, t, VEN) + RE(I.back + r, I.bot, I.back + 12 + r, I.side, t, VEN);
-    o += RE(I.back + 12 + r, I.bot + 12, D - 58 + r, I.side, t * 0.45, "none");
-    o += PT(`M ${f(D - 58 + r)} ${f(E(I.h0))} L ${f(D - 40 + r)} ${f(E(I.h0))} L ${f(D - 40 + r)} ${f(E(I.h1 - 22))} Q ${f(D - 40 + r)} ${f(E(I.h1))} ${f(D - 58 + r)} ${f(E(I.h1))} Z`, t * 1.2, VEN);   // front, top edge scooped
-    o += RE(I.back + 20, RUN[0], D - 70, RUN[1], t * 0.5, "none", dash(t));               // side runner, fixed to the carcass
-    return o;
-  }
-
-  // plan: both U-boxes, the pipe in the notch
-  function plan(t) {
-    const x0 = openC[0] + 13, x1 = openC[1] - 13, d0 = 92, d1 = D - 18, n0 = AX - 100, n1 = AX + 100, nd = 330;
-    let o = LN(openC[0] - 80, 0, openC[1] + 80, 0, t * 1.6);
-    o += PT(`M ${x0} ${d0} L ${n0} ${d0} L ${n0} ${nd} L ${n1} ${nd} L ${n1} ${d0} L ${x1} ${d0} L ${x1} ${d1} L ${x0} ${d1} Z`, t * 1.2, VEN);
-    const io = innerOutline(openC, AX, D);
-    o += PT(io.path, t * 1.1, "#fbf6ec", `stroke="${DIM}"`);
-    o += RC(x0 + 18, D - 58, x1 - 18, D - 40, t, VEN, `stroke="${DIM}"`);
-    o += RC(openC[0] - gap, d1, openC[1] + gap, D, t * 1.2, MARBLE);
-    o += `<circle cx="${AX}" cy="${K.bowl.c}" r="20" fill="#fff" stroke-width="${f(t)}"/>` + PT(`M ${AX} ${K.bowl.c} L ${AX} 0`, t * 2.6, "none", `stroke="${THIN}"`);
-    o += LN(AX, -50, AX, D + 50, t * 0.6, `stroke="${DIM}" ${cen(t)}`);
-    return o;
-  }
-
-  // front: the bank, with the inner drawer seen through the big front
-  function front(t) {
-    let o = RE(bankC[0], 0, bankC[1], K.top, t * 1.2, MARBLE);
-    [[openC[0], AX - 12.5, K.top2[0], K.top2[1]], [AX + 12.5, openC[1], K.top2[0], K.top2[1]], [openC[0], openC[1], K.big[0], K.big[1]]]
-      .forEach(([a, b, h0, h1]) => (o += RE(a + gap, h0 + gap, b - gap, h1 - gap, t, MARBLE)));
-    o += `<line x1="${f(bankC[0] - 120)}" y1="${f(E(0))}" x2="${f(bankC[1] + 120)}" y2="${f(E(0))}" stroke-width="${f(t * 3.5)}"/>`;   // the floor it stands on
-    o += RE(openC[0] + 31, I.h0, openC[1] - 31, I.h1, t * 0.9, "none", `stroke="${DIM}" ${dash(t)}`);
-    o += RE(bankC[0], K.mitre ? K.top2[1] : K.top, bankC[1], K.counter, t * 1.2, MARBLE);
-    return o;
-  }
-
-  window.DK.begin("vanity-drawer");
-  let s = frame();
-
-  // 1 · closed, 1:5
-  s += heading(18, 17, "1 · CLOSED", "SECTION THROUGH ONE ARM · 1:5 · SCHEME C, CHOSEN — BANK TO THE FLOOR", 120);
-  const sc1 = 5, v1 = view(30, 30 - E(650) / sc1, sc1, "Drawer within, closed"), t1 = v1.w(0.12);
-  s += v1.g(side(t1, 0, 0), 0.3);
-  s += chainV([v1.Y(E(K.big[0] + 13 + 12)), v1.Y(E(I.bot)), v1.Y(E(I.h1)), v1.Y(E(K.big[1] - gap))], v1.X(D) + 7,
-    [`${I.bot - K.big[0] - 25} CLEAR FOR BOTTLES`, I.h1 - I.bot, K.big[1] - gap - I.h1], { from: v1.X(D) + 1, size: 1.3 });
-  s += chainV([v1.Y(E(I.h0)), v1.Y(E(I.h1))], v1.X(D) + 15, [`${I.h1 - I.h0} INNER FRONT`], { from: v1.X(D - 40) + 1, size: 1.3 });
-  s += chainH([v1.X(D - 58), v1.X(D - 40), v1.X(D - 18), v1.X(D)], v1.Y(E(I.h1)) - 7, [18, 22, 18], { from: v1.Y(E(I.h1)) - 1, size: 1.2 });
-  s += chainH([v1.X(I.back), v1.X(D - 58)], v1.Y(E(I.bot)) + 7, [`${D - 58 - I.back} INNER BOX`], { from: v1.Y(E(I.bot)) + 1, size: 1.25 });
-  s += chainH([v1.X(92), v1.X(D - 18)], v1.Y(E(K.big[0] + 13)) + 7, [`${D - 18 - 92} BIG BOX`], { from: v1.Y(E(K.big[0] + 13)) + 1, size: 1.25 });
-
-  // 2 · open, 1:10
-  s += heading(170, 17, "2 · OPEN", "BIG DRAWER OUT · INNER ONE PULLED OUT BEHIND ITS FRONT · 1:10", 120);
-  const sc2 = 10, v2 = view(178, 34 - E(650) / sc2, sc2, "Drawer within, open"), t2 = v2.w(0.12);
-  s += v2.g(side(t2, P.outer, P.inner), 0.3);
-  s += chainH([v2.X(D), v2.X(D + P.outer)], v2.Y(E(K.big[0])) + 5, [`${P.outer} BIG DRAWER OUT`], { from: v2.Y(E(K.big[0])) + 1, size: 1.25 });
-  s += chainH([v2.X(D - 40), v2.X(D - 40 + P.inner)], v2.Y(E(650)) - 4, [`${P.inner} INNER OUT`], { from: v2.Y(E(650)) - 1, size: 1.25 });
-  s += text(v2.X(D + 120), v2.Y(E(320)), "BIG DRAWER", { size: 1.5, anchor: "middle" });
-  s += text(v2.X(D + 120), v2.Y(E(I.side + 30)), "INNER DRAWER", { size: 1.5, anchor: "middle", fill: DIM });
-
-  // 3 · plan, 1:10
-  s += heading(170, 104, "3 · PLAN", "BOTH DRAWERS SHUT · 1:10 · THE PIPE DROPS THROUGH BOTH NOTCHES", 120);
-  const sc3 = 10, v3 = view(185 - (openC[0] - 80) / sc3, 118, sc3, "Drawer within, plan"), t3 = v3.w(0.12);
-  s += v3.g(plan(t3), 0.3);
-  s += chainH([v3.X(AX - I.notch), v3.X(AX + I.notch)], v3.Y(0) - 3, [I.notch * 2], { from: v3.Y(0) - 0.5, size: 1.15 });
-  s += chainV([v3.Y(I.back), v3.Y(I.notchD)], v3.X(openC[1] + 13) + 5, [I.notchD - I.back], { from: v3.X(openC[1] - 41) + 1, size: 1.15 });
-  s += text(v3.X(AX), v3.Y(D) + 5.5, "INNER DRAWER · RED", { size: 1.4, anchor: "middle", fill: DIM });
-
-  // 4 · front, 1:10
-  s += heading(18, 172, "4 · FRONT", "THE INNER DRAWER HIDES BEHIND THE BIG FRONT · 1:10 · MARBLE BANK, FLOOR TO COUNTER", 120);
-  const v4 = view(30 - bankC[0] / 10, 184 - E(K.counter + 20) / 10, 10, "Drawer within, front"), t4 = v4.w(0.12);
-  s += v4.g(front(t4), 0.3);
-
-  // the right-hand column: sizes, hardware
-  const RX = 302;
-  s += heading(RX, 17, "SIZES", "THE SAME DRAWER IN ALL THREE SCHEMES", 108);
-  s += text(RX, 29, "", { size: 1.4 }) + ["SCHEME", "BIG FRONT", "INNER FRONT", "INNER BOX W"].map((h, i) => text(RX + [0, 22, 50, 80][i], 29, h, { size: 1.35, fill: THIN })).join("");
-  [["Normal", [419, 1105], VANITY], ["B", [342, 1486], VANITY], ["C", openC, K]].forEach(([n, o, Q], i) => {
-    const W = o[1] - o[0], y = 34 + i * 4.4, io = innerOutline(o, AX);
-    s += text(RX, y, n, { size: 1.55, weight: 700 }) + text(RX + 22, y, `${W - 6} × ${Q.big[1] - Q.big[0] - 6}`, { size: 1.5 })
-      + text(RX + 50, y, `${W - 62} × ${Q.inner.h1 - Q.inner.h0}`, { size: 1.5, fill: DIM }) + text(RX + 80, y, `${io.x1 - io.x0}${io.arm ? " · L" : " · U"}`, { size: 1.5 });
-  });
-  s += text(RX, 50, `Scheme C (chosen): inner box ${D - 58 - I.back} deep, ${I.side - I.bot} high (5½ in), 12 ply; notch ${I.notch * 2} wide.`, { size: 1.45, fill: THIN });
-
-  s += heading(RX, 60, "HARDWARE", "", 108);
-  [["Big drawer", "Undermount runners, full extension, push-to-"], ["", `open. Its sides stop at ${K.bigSide} to pass under the inner.`],
-   ["Inner drawer", "Side-mounted runners 400, full extension, on"], ["", `the carcass partitions at ${RUN[0]}–${RUN[1]}. Independent.`],
-   ["Inner front", "18 BWP, teak veneer both faces, top edge"], ["", "scooped for a finger. No handle."]]
-    .forEach(([a, b], i) => (s += text(RX, 70 + i * 4, a, { size: 1.5, weight: 700 }) + text(RX + 22, 70 + i * 4, b, { size: 1.5 })));
-
-  s += heading(RX, 102, "NOTES", "REVISION 2", 108);
-  ["Open the big drawer: the inner one stays put. Pull it",
-   `and it comes out ${P.inner} behind the big front, over the`,
-   "bottles — the tray in the kitchen drawer photographed.",
-   "",
-   "Both are U-boxes. The waste pipe drops through their",
-   "notches whichever drawer is shut; neither may be solid",
-   "across the back.",
-   "",
-   "It can never pass the big front — that front is solid.",
-   "Shut, it stands 22 behind it.",
-   "",
-   `Below the inner drawer: ${I.bot - K.big[0] - 25} clear — tall bottles stand.`,
-   "",
-   "Normal version: the pipe is off centre, which leaves",
-   "the inner drawer a 25 right arm. Too thin to keep — that",
-   "arm is left off and the inner drawer is an L.",
-  ].forEach((n, i) => (s += text(RX, 114 + i * 4.2, n, { size: 1.5, fill: n.startsWith("OPEN") ? "#b3261e" : INK })));
-
-  s += titleBlock({ title: "VANITY — DRAWER WITHIN", sub: "The big drawer, and a drawer inside it", date: "30.09.2026", rev: "2 — scheme C: 5½ in inner box, bank to the floor", dwg: "AST-DR-022", scale: "AS NOTED @ A3" });
-  window.DRAWINGS["vanity-drawer"] = { title: "Vanity — drawer within · AST-DR-022", svg: sheet(s), model: true };
-})();
