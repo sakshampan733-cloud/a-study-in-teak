@@ -5,6 +5,7 @@ const [file, key, outDir = "build/final"] = process.argv.slice(2);
 global.window = {};
 require(path.join(root, "drawings/kit.js"));
 require(path.join(root, "drawings/iso.js"));
+for (const pre of process.env.PRE ? process.env.PRE.split(",") : []) require(path.join(root, pre));   // sheets that lean on another (e.g. window.CASING)
 require(path.join(root, file));
 const d = window.DRAWINGS[key];
 if (!d) { console.error("no sheet", key, Object.keys(window.DRAWINGS)); process.exit(1); }

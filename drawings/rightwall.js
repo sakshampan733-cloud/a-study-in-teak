@@ -4,8 +4,8 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const RWALL = {
-  rev: "18 — SELECTED: the rail at 2 ft 3 in, carrying the study counter round",
-  date: "20.09.2026",
+  rev: "19 — the owner's layered panel moulding (8 Oct); the rail kept",
+  date: "08.10.2026",
   run: 4318,                   // corner to the door LEAF. Set out backwards from the owner's measurement of
                                // 2 ft 4 in (711) from the dressing corner to the door FRAME, both sides of the wall,
                                // plus the 2 in frame. OPEN: with the leaf at 2 ft 3 in the frame then lands 14 ft 0 in
@@ -16,7 +16,7 @@ const RWALL = {
   study: { w: 280, h: 646 },   // study unit 280 (11 in) deep; cupboard carcase to 646, reeded counter 646–686 on top
   skirt: { h: 102, t: 20 },          // white marble skirting, 4 in, already laid
   dado: { y: 646, h: 40, proj: 28, reeds: 4 },   // the study counter band carried round the corner: same 646–686 band, same reeds
-  mould: { w: 55, proj: 24 },          // panel moulding, painted the wall colour
+  mould: { w: 72, proj: 26 },          // panel moulding, painted the wall colour — the owner's layered French profile (8 Oct, his photos)
   stile: 150, edge: 100,               // gap between panels; margin beside the door architrave and at the corner
   bays: 5,
   lamps: [1, 3, 5],                    // lamps centred inside tall panels 1, 3 and 5
@@ -131,10 +131,12 @@ const RWALL = {
     const h = K.skirt.h, t = K.skirt.t;
     return `M 0 ${ey(0)} L ${t} ${ey(0)} L ${t} ${ey(h - 10)} L ${t - 10} ${ey(h)} L 0 ${ey(h)} Z`;
   }
-  // Panel moulding across its width: flat back on the wall, ogee rising to a bead, small step at the inner edge.
+  // Panel moulding across its width (owner, 8 Oct — his third photo): a deep layered French profile that reads as several
+  // parallel lines — a rounded outer roll, a flat, a step down into a cove, a small bead, a last cove into the panel.
   function mouldPath(x0, yBase, s = 1) {
     const P = (x, y) => `${f(x0 + x * s)} ${f(yBase - y * s)}`;
-    return `M ${P(0, 0)} L ${P(0, 5)} Q ${P(2, 14)} ${P(12, 15)} Q ${P(22, 16)} ${P(26, 22)} Q ${P(32, 24)} ${P(37, 20)} Q ${P(44, 9)} ${P(50, 8)} L ${P(55, 8)} L ${P(55, 0)} Z`;
+    return `M ${P(0, 0)} L ${P(0, 8)} Q ${P(1, 24)} ${P(10, 26)} L ${P(22, 26)} L ${P(22, 20)} Q ${P(26, 12)} ${P(42, 12)} L ${P(48, 12)}`
+      + ` Q ${P(54, 18)} ${P(60, 12)} L ${P(60, 6)} Q ${P(70, 6)} ${P(72, 0)} Z`;
   }
 
   // SECTION through tall panel 1 and its lamp: wall on the left, room to the right.
@@ -229,10 +231,10 @@ const RWALL = {
     .forEach((n, i) => { s += text(318, 191 + i * 4.3, n, { size: 1.55 }); });
 
   // Details along the bottom
-  s += heading(18, 238, "1 · PANEL MOULDING", "SECTION · 1:1", 40);
+  s += heading(18, 238, "1 · PANEL MOULDING", "SECTION · 1:2 · THE OWNER'S LAYERED PROFILE", 60);
   {
-    const v = view(22, 268, 1, "Panel moulding section");
-    s += v.g(`<path d="${mouldPath(0, 0)}" fill="url(#hatchD2)"/><line x1="-6" y1="0" x2="62" y2="0" stroke-width="0.6"/>`, 0.25);
+    const v = view(26, 268, 2, "Panel moulding section");
+    s += v.g(`<path d="${mouldPath(0, 0)}" fill="url(#hatchD2)"/><line x1="-8" y1="0" x2="${M.w + 8}" y2="0" stroke-width="1.2"/>`, 0.25);
     s += chainH([v.X(0), v.X(M.w)], 276, [M.w], { from: 269, size: 1.3 });
     s += chainV([v.Y(-M.proj), v.Y(0)], v.X(M.w) + 5, [M.proj], { from: v.X(M.w) + 1, size: 1.3 });
     s += text(22, 283, "WALL FACE BELOW · MITRED CORNERS", { size: 1.3, fill: THIN });
