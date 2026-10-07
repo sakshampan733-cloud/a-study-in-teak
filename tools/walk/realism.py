@@ -239,7 +239,7 @@ def brindle_ramp(nt):
     mx = nt.nodes.new("ShaderNodeMix"); mx.data_type = "FLOAT"; mx.inputs["Factor"].default_value = 0.4
     nt.links.new(wv.outputs["Fac"], mx.inputs["A"]); nt.links.new(nz.outputs["Fac"], mx.inputs["B"])
     cr = nt.nodes.new("ShaderNodeValToRGB"); cr.color_ramp.elements[0].position = 0.50; cr.color_ramp.elements[1].position = 0.86
-    cr.color_ramp.elements[0].color = (0.011, 0.0055, 0.003, 1); cr.color_ramp.elements[1].color = (0.075, 0.036, 0.016, 1)
+    cr.color_ramp.elements[0].color = (0.011, 0.0055, 0.003, 1); cr.color_ramp.elements[1].color = (0.12, 0.058, 0.024, 1)
     nt.links.new(mx.outputs["Result"], cr.inputs["Fac"]); return cr
 m_skin, nts, bs_ = node_mat("hide_skin"); bs_.inputs["Roughness"].default_value = 0.8
 nt_c = brindle_ramp(nts); nts.links.new(nt_c.outputs["Color"], bs_.inputs["Base Color"])
@@ -265,11 +265,13 @@ def _set(k, v):
         try: setattr(st, k, v)
         except Exception as e: print("fur setting skipped:", k, e, flush=True)
     else: print("fur setting missing:", k, flush=True)
-for k, v in (("count", int(os.environ.get("FUR_N", 90000))), ("hair_length", 0.022), ("use_advanced_hair", True), ("emit_from", "FACE"),
-             ("use_emit_random", True), ("use_even_distribution", True), ("normal_factor", 0.5), ("object_align_factor", (0.7 * lie.x, 0.7 * lie.y, 0.0)),
+# NB in this Blender the hair's length IS the emission speed × 4: normal_factor and hair_length are one setting, and the
+# lean (object_align_factor) adds to it — so 28 mm hairs that lie down toward the tail = 0.0025 up + 0.0065 along.
+for k, v in (("count", int(os.environ.get("FUR_N", 90000))), ("use_advanced_hair", True), ("emit_from", "FACE"),
+             ("use_emit_random", True), ("use_even_distribution", True), ("normal_factor", 0.0025), ("object_align_factor", (0.0065 * lie.x, 0.0065 * lie.y, 0.0)),
              ("factor_random", 0.08), ("child_type", "INTERPOLATED"), ("child_percent", 3), ("child_nbr", 3),
-             ("rendered_child_count", int(os.environ.get("FUR_KIDS", 10))), ("child_radius", 0.004), ("roughness_1", 0.0015), ("roughness_1_size", 1.0),
-             ("roughness_endpoint", 0.004), ("length_random", 0.35), ("clump_factor", 0.25), ("root_radius", 1.0), ("tip_radius", 0.25), ("radius_scale", 0.0004)):
+             ("rendered_child_count", int(os.environ.get("FUR_KIDS", 10))), ("child_radius", 0.003), ("roughness_1", 0.0008), ("roughness_1_size", 1.0),
+             ("roughness_endpoint", 0.0015), ("length_random", 0.35), ("clump_factor", 0.25), ("root_radius", 1.0), ("tip_radius", 0.2), ("radius_scale", 0.00016)):
     if k == "child_nbr" and hasattr(st, "child_percent"): continue
     _set(k, v)
 st.material_slot = "hide_fur"

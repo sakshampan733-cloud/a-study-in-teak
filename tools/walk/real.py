@@ -898,8 +898,8 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
     "st_arch": ((1250, 1350, 1350), (744, 200, 2250), {"lens": 22, "fstop": 5.6}),     # up into the bookcase arch and its niches
     "st_chair": ((3600, 2250, 1300), (2337, 1050, 650), {"lens": 26, "fstop": 5.6}),   # the green chair at the desk
     "hide_close": ((3350, 3150, 520), (2700, 3700, 0), {"lens": 32, "fstop": 4.0}),     # low over the hide's fur
-    "wd_open": ((6250, 4900, 1550), (7650, 3350, 1350), {"lens": 20, "fstop": 6.3}),   # L2 and L3 open: shirts, the lit perfume niche
-    "wd_shoes": ((7700, 3800, 1350), (7150, 5400, 900), {"lens": 22, "fstop": 6.3}),   # R3 open: the shoe trays   # the side table by the dressing corner
+    "wd_open": ((7000, 4950, 1500), (7000, 3300, 1250), {"lens": 15, "fstop": 6.3}),   # L2 and L3 open, square on from the aisle: shirts, the lit perfume niche
+    "wd_shoes": ((7300, 3800, 1450), (7300, 5450, 800), {"lens": 15, "fstop": 6.3}),   # R3 open, square on: the shoe trays
     "c_gloss": ((2337, 4700, 1350), (2700, 600, 2500), {"lens": 20, "fstop": 8.0}),    # up at the gloss ceiling, toward the window
     "b_rug": ((3900, 3050, 1750), (2337, 4350, 100), {"lens": 22, "fstop": 8.0}),    # the bed's foot and the rug under it (bed side of the glass)
     "t_front": ((2337, 3560, 980), (2337, 2780, 360), {"lens": 22, "fstop": 8}),
@@ -923,9 +923,15 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
     "d2head": ((3300, 4650, 1700), (4547, 4650, 2450)),
     "window": ((3000, 1900, 1550), (3950, 0, 1450)),
 }
+EV_BASE = None
+EVX = {"wd_open": 1.0, "wd_shoes": 1.0, "h_wardrobe": 0.9, "dress": 0.8, "h_dress": 0.8, "vault": 0.8, "mirror": 0.8,      # exposure lifts by view:
+       "bath_van": 0.5, "bath_van2": 0.5, "bath_wc": 0.5, "bath_tub": 0.5, "bath_up": 0.5, "d2close": 0.3}               # interiors with less light
 def shoot(name):
+    global EV_BASE
     cp, tp = VIEWS[name][:2]
     op = VIEWS[name][2] if len(VIEWS[name]) > 2 else {}
+    if EV_BASE is None: EV_BASE = sc.view_settings.exposure
+    sc.view_settings.exposure = EV_BASE + op.get("ev", EVX.get(name, 0.0))
     cz = cp[2] if len(cp) > 2 else EYE_R
     c_ = cam("r_" + name, op.get("lens", LENS_R)); c_.location = P(cp[0], cp[1], cz)
     if "fstop" in op:

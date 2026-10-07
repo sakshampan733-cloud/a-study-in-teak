@@ -22,7 +22,7 @@ for o in sc.objects:
 
 for o in sc.objects:                                                          # the dressing mirror's frame: hammered brass (owner)
     if o.type == "MESH" and o.name.startswith("mirror_c") and o.name != "mirror_cg": setmat(o, M_HBRASS)
-M_LITBACK = glow("wardrobe_litback", (1.0, 0.86, 0.68), float(os.environ.get("WD_GLOW", 2.2)))
+M_LITBACK = glow("wardrobe_litback", (1.0, 0.6, 0.3), float(os.environ.get("WD_GLOW", 1.8)))
 M_GLASSB = None
 _mg, _ntg, _bg = node_mat("perfume_glass"); _bg.inputs["Transmission Weight"].default_value = 1.0; _bg.inputs["Roughness"].default_value = 0.02; _bg.inputs["IOR"].default_value = 1.5
 M_GLASSB = _mg
@@ -71,14 +71,40 @@ def rail(name, xa, xb, s_mid, z):
     bpy.ops.mesh.primitive_cylinder_add(vertices=20, radius=0.011, depth=(xb - xa) / 1000, location=P((xa + xb) / 2, s_mid, z))
     r_ = bpy.context.active_object; r_.name = name; r_.rotation_euler = (0, math.pi / 2, 0); setmat(r_, M_HBRASS)
 
+M_HANGER, _nth, _hb = node_mat("wd_hanger")
+_hb.inputs["Base Color"].default_value = (0.16, 0.08, 0.04, 1); _hb.inputs["Roughness"].default_value = 0.35
+def garment(name, x_, s_mid, z_top, length, depth, thick, m, seed):
+    """A shirt or jacket on its hanger, edge-on to the room: sloped shoulders off a collar, sides falling slightly in to
+    the hem, soft and creased (subdivided, displaced by noise), a little thicker at the shoulders."""
+    hw = depth / 2
+    outline = [(-34, 0), (34, 0), (hw - 30, 34), (hw, 70), (hw - 8, length * 0.55), (hw - 18, length), (0, length + 12),
+               (-(hw - 18), length), (-(hw - 8), length * 0.55), (-hw, 70), (-(hw - 30), 34)]
+    bm = bmesh.new()
+    vs = [bm.verts.new((x_ / 1000, -(s_mid + u) / 1000, (z_top - v) / 1000)) for u, v in outline]
+    f_ = bm.faces.new(vs); bmesh.ops.triangulate(bm, faces=[f_])
+    for _ in range(3): bmesh.ops.subdivide_edges(bm, edges=bm.edges[:], cuts=1, use_grid_fill=True)
+    me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
+    o = bpy.data.objects.new(name, me); bpy.context.scene.collection.objects.link(o); setmat(o, m)
+    so = o.modifiers.new("t", "SOLIDIFY"); so.thickness = thick / 1000; so.offset = 0
+    tx = bpy.data.textures.new(name + "_crease", "CLOUDS"); tx.noise_scale = 0.09; tx.noise_depth = 2
+    dp = o.modifiers.new("crease", "DISPLACE"); dp.texture = tx; dp.strength = 0.012; dp.direction = "X"; dp.texture_coords = "GLOBAL"
+    ss = o.modifiers.new("soft", "SUBSURF"); ss.levels = 1; ss.render_levels = 2
+    for p_ in me.polygons: p_.use_smooth = True
+    o.rotation_mode = "XYZ"
+    return o
+
 def hang(name, xa, xb, s_mid, z_rail, length, n, thick=26, depth=440):
-    """Garments on hangers: soft slabs edge-on to the room, shoulders rounded, colours as a real rail."""
+    """Garments on wooden hangers along the brass rail, not quite evenly spaced, as a real rail is."""
     pitch = (xb - xa - 40) / n
     for i in range(n):
-        x_ = xa + 20 + pitch * (i + 0.5) + rw.uniform(-6, 6)
-        g = dbox(f"{name}{i}", x_ - thick / 2, s_mid - depth / 2, z_rail - 40 - length, x_ + thick / 2, s_mid + depth / 2, z_rail - 40, CLOTH_M[rw.randrange(len(CLOTH_M))])
-        bevel(g, 0.012, 3)
-        bpy.ops.mesh.primitive_torus_add(major_radius=0.012, minor_radius=0.002, location=P(x_, s_mid, z_rail + 4)); setmat(bpy.context.active_object, M_HBRASS)
+        x_ = xa + 20 + pitch * (i + 0.5) + rw.uniform(-8, 8)
+        L_ = length * rw.uniform(0.9, 1.04)
+        garment(f"{name}{i}", x_, s_mid, z_rail - 52, L_, depth * rw.uniform(0.94, 1.02), thick * rw.uniform(0.8, 1.3), CLOTH_M[rw.randrange(len(CLOTH_M))], i)
+        bpy.ops.mesh.primitive_torus_add(major_radius=0.014, minor_radius=0.002, location=P(x_, s_mid, z_rail + 2)); setmat(bpy.context.active_object, M_HBRASS)
+        bpy.ops.mesh.primitive_cylinder_add(vertices=6, radius=0.002, depth=0.04, location=P(x_, s_mid, z_rail - 22)); setmat(bpy.context.active_object, M_HBRASS)
+        for sg in (1, -1):                                                    # the hanger's two arms, sloping down from the hook
+            bpy.ops.mesh.primitive_cylinder_add(vertices=10, radius=0.007, depth=depth * 0.5 / 1000, location=P(x_, s_mid + sg * depth * 0.24, z_rail - 58))
+            h_ = bpy.context.active_object; h_.rotation_euler = (math.pi / 2 + sg * 0.22, 0, 0); setmat(h_, M_HANGER)
 
 def loft(name, xa, xb, sa, sb_):
     shelf(f"{name}_loft", xa, xb, sa, sb_, 2183)
