@@ -21,8 +21,10 @@ for o in sc.objects:
     if o.type == "MESH" and o.name.startswith(("wdN", "wdS")) and ("_h0" in o.name or "_h1" in o.name): setmat(o, M_HBRASS)
 
 for o in sc.objects:                                                          # the dressing mirror's frame: hammered brass (owner)
-    if o.type == "MESH" and o.name.startswith("mirror_c") and o.name != "mirror_cg": setmat(o, M_HBRASS)
-M_LITBACK = glow("wardrobe_litback", (1.0, 0.6, 0.3), float(os.environ.get("WD_GLOW", 1.8)))
+    if o.type == "MESH" and (o.name.startswith(("mirror_c", "van_mirror_fr")) and o.name != "mirror_cg"): setmat(o, M_HBRASS)   # + the bathroom's mini tri-fold
+M_LITBACK = glow("wardrobe_litback", (1.0, 1.0, 1.0), float(os.environ.get("WD_GLOW", 1.6)))   # warm white, 3000 K like the coves (owner: warm, not yellow)
+_lt = M_LITBACK.node_tree; _lbb = _lt.nodes.new("ShaderNodeBlackbody"); _lbb.inputs["Temperature"].default_value = 3000
+_lp = _lt.nodes["Principled BSDF"]; _lt.links.new(_lbb.outputs["Color"], _lp.inputs["Emission Color"]); _lp.inputs["Base Color"].default_value = (0.9, 0.88, 0.85, 1)
 M_GLASSB = None
 _mg, _ntg, _bg = node_mat("perfume_glass"); _bg.inputs["Transmission Weight"].default_value = 1.0; _bg.inputs["Roughness"].default_value = 0.02; _bg.inputs["IOR"].default_value = 1.5
 M_GLASSB = _mg
@@ -176,7 +178,8 @@ def fit_R3(name):
                     for p_ in sh_.data.polygons: p_.use_smooth = True
 
 FITS = {"wdN1": fit_L2, "wdN2": fit_L3, "wdS2": fit_R3}
+if os.environ.get("WD_OPEN", "0") != "1": FITS = {}                     # owner, 8 Oct: no cupboard insides in the renders — drawings only
 for nm, fn in FITS.items():
     if sc.objects.get(nm + "_c"):
         geo_ = bay_geo(nm); fn(nm); open_bay(nm, geo_)
-print(f"wardrobes: {', '.join(FITS)} open and fitted (AST-DR-048), lit backs, hammered brass handles", flush=True)
+print(f"wardrobes: {', '.join(FITS) or 'all shut'} (AST-DR-048), hammered brass handles", flush=True)

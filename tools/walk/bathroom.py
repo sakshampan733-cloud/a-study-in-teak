@@ -25,8 +25,8 @@ def bbox(name, x0, y0, z0, x1, y1, z1, m, bev=0.0):
 
 # ── marble on the walls, floor to ceiling (the owner's photo), a 10 mm skin on each inside face ──
 W_, D_ = BA["x1"] - BA["x0"], BA["s1"] - BA["s0"]
-WX0, WX1, WS, WH = 380.0, 990.0, 1829.0, 305.0                 # the window, 2 ft × 1 ft (owner, 8 Oct), its centre and sill as before
-for nm, (a, b, c, d) in {"n1": (0, WX0, 0, H), "n2": (WX1, W_, 0, H), "n3": (WX0, WX1, 0, WS), "n4": (WX0, WX1, WS + WH, H)}.items():
+BWX0, BWX1, BWS, BWH = 380.0, 990.0, 1829.0, 305.0                 # the window, 2 ft × 1 ft (owner, 8 Oct), its centre and sill as before
+for nm, (a, b, c, d) in {"n1": (0, BWX0, 0, H), "n2": (BWX1, W_, 0, H), "n3": (BWX0, BWX1, 0, BWS), "n4": (BWX0, BWX1, BWS + BWH, H)}.items():
     bbox(f"bath_wall_{nm}", a, 0, c, b, 10, d, M_BEIGE)
 DOOR_X1, DOOR_H = 762.0, 2311.0 + 51.0                            # D3, 2 ft 6 in frame to frame in the west corner: left open in the marble
 bbox("bath_wall_s", DOOR_X1, D_ - 10, 0, W_, D_, H, M_BEIGE); bbox("bath_wall_s_head", 0, D_ - 10, DOOR_H, DOOR_X1, D_, H, M_BEIGE)
@@ -42,10 +42,35 @@ for i, (y0, w, z0, z1) in enumerate(NICHES):
         bbox(f"bath_niche{i}_{nm}", CHASE_D, a, c, CHASE_D + 12, b, d, M_BEIGE, 0.003)      # the marble frame moulding, ½ in proud
 # the wall-hung WC on the chase's face, facing the shower: bowl, seat, the flush plate above
 wc_y = DEEP / 2
-bpy.ops.mesh.primitive_uv_sphere_add(segments=48, ring_count=24, radius=0.5, location=P(BX(CHASE_D + 270), BY(wc_y), 330))
-wc = bpy.context.active_object; wc.name = "bath_wc"; wc.scale = (0.54, 0.36, 0.17); setmat(wc, M_CERAMIC)
-for p_ in wc.data.polygons: p_.use_smooth = True
-bbox("bath_wc_seat", CHASE_D, wc_y - 175, 400, CHASE_D + 520, wc_y + 175, 418, M_CERAMIC, 0.008)
+# a real wall-hung pan: egg-shaped in plan, straight-sided at the wall, its underside sweeping up toward the front; a
+# closed soft-close lid and seat in the same white, two chrome hinge posts
+WCL, WCW, WCT = 540.0, 360.0, 400.0
+wc_hw = lambda u: (WCW / 2) * (1.0 if u <= 0.35 else math.sqrt(max(0.0, 1 - ((u - 0.35) / 0.66) ** 2)))
+wc_zb = lambda u: 300 + 75 * u ** 1.5
+def wc_ring(u, n=40, sh=1.0, z0=None, z1=None):
+    x = WCL * u; hw = wc_hw(u) * sh; zb = wc_zb(u) if z0 is None else z0; zt = WCT if z1 is None else z1
+    zc, hh, e = (zt + zb) / 2, (zt - zb) / 2, 2 / 2.6
+    return [(x, hw * math.copysign(abs(math.cos(t)) ** e, math.cos(t)), zc + hh * math.copysign(abs(math.sin(t)) ** e, math.sin(t))) for t in [2 * math.pi * k / n for k in range(n)]]
+def wc_solid(name, us, m, **kw):
+    bm = bmesh.new(); rings = [[bm.verts.new(P(BX(CHASE_D + x), BY(wc_y + y), z)) for x, y, z in wc_ring(u, **kw)] for u in us]
+    n = len(rings[0])
+    for a_, b_ in zip(rings, rings[1:]):
+        for k in range(n): bm.faces.new((a_[k], a_[(k + 1) % n], b_[(k + 1) % n], b_[k]))
+    bm.faces.new(rings[0][::-1])
+    tip = bm.verts.new(sum((v.co for v in rings[-1]), Vector()) / n + Vector((0.004, 0, 0)))
+    for k in range(n): bm.faces.new((rings[-1][k], rings[-1][(k + 1) % n], tip))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
+    for p_ in me.polygons: p_.use_smooth = True
+    o = bpy.data.objects.new(name, me); bpy.context.scene.collection.objects.link(o); setmat(o, m)
+    sd = o.modifiers.new("s", "SUBSURF"); sd.levels = 1; sd.render_levels = 2
+    return o
+wc_solid("bath_wc", [i / 36 * 0.985 for i in range(37)], M_CERAMIC)
+wc_solid("bath_wc_seat", [0.07 + i / 30 * 0.915 for i in range(31)], M_CERAMIC, sh=1.01, z0=WCT + 2, z1=WCT + 20)
+wc_solid("bath_wc_lid", [0.08 + i / 30 * 0.9 for i in range(31)], M_CERAMIC, sh=0.99, z0=WCT + 21, z1=WCT + 38)
+for sy in (-1, 1):
+    bpy.ops.mesh.primitive_cylinder_add(vertices=20, radius=0.009, depth=0.03, location=P(BX(CHASE_D + 45), BY(wc_y + sy * 110), WCT + 12))
+    setmat(bpy.context.active_object, M_CHROME)
 bbox("bath_flush", CHASE_D, wc_y - 115, 920, CHASE_D + 8, wc_y + 115, 1080, M_CHROME, 0.002)
 
 # ── the glass: fronts in one line, the divider, the shower's east side; 10 mm clear, 2000 high, chrome hinges ──
@@ -95,11 +120,11 @@ bbox("bath_filler_spout", TCX - 14, 130, 1010, TCX + 14, 330, 1040, M_CHROME, 0.
 
 # ── the window over the WC (size still to measure): frosted glass in a bronze frame ──
 mf_, ntf_, bf_ = node_mat("frosted"); bf_.inputs["Transmission Weight"].default_value = 1.0; bf_.inputs["Roughness"].default_value = 0.45
-bbox("bath_win_glass", WX0, -T / 2 - 6, WS, WX1, -T / 2 + 6, WS + WH, mf_)
-for nm, (a, b, c, d) in {"l": (WX0, WX0 + 40, WS, WS + WH), "r": (WX1 - 40, WX1, WS, WS + WH), "b": (WX0, WX1, WS, WS + 40), "t": (WX0, WX1, WS + WH - 40, WS + WH)}.items():
+bbox("bath_win_glass", BWX0, -T / 2 - 6, BWS, BWX1, -T / 2 + 6, BWS + BWH, mf_)
+for nm, (a, b, c, d) in {"l": (BWX0, BWX0 + 40, BWS, BWS + BWH), "r": (BWX1 - 40, BWX1, BWS, BWS + BWH), "b": (BWX0, BWX1, BWS, BWS + 40), "t": (BWX0, BWX1, BWS + BWH - 40, BWS + BWH)}.items():
     bbox(f"bath_win_{nm}", a, -70, c, b, -40, d, M_BRONZE)
-ld = bpy.data.lights.new("bath_daylight", "AREA"); ld.size, ld.size_y = (WX1 - WX0) / 1000, WH / 1000; ld.energy = 10; warm(ld, 5200)
-lo = bpy.data.objects.new("bath_daylight", ld); sc.collection.objects.link(lo); lo.location = P(BX((WX0 + WX1) / 2), BY(25), WS + WH / 2)
+ld = bpy.data.lights.new("bath_daylight", "AREA"); ld.size, ld.size_y = (BWX1 - BWX0) / 1000, BWH / 1000; ld.energy = 10; warm(ld, 5200)
+lo = bpy.data.objects.new("bath_daylight", ld); sc.collection.objects.link(lo); lo.location = P(BX((BWX0 + BWX1) / 2), BY(25), BWS + BWH / 2)
 lo.rotation_euler = (math.radians(-90), 0, 0); lo.visible_camera = False; lo.visible_glossy = False   # into the room
 
 # ── the owner's ten spots (his light plan, 7 Oct), recessed in the ceiling, 3000 K ──

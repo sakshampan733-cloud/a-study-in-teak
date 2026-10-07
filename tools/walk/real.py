@@ -128,7 +128,7 @@ def sheer():
     tl = nt.nodes.new("ShaderNodeBsdfTranslucent"); tl.inputs["Color"].default_value = (0.95, 0.90, 0.82, 1)
     tp = nt.nodes.new("ShaderNodeBsdfTransparent")
     m1 = nt.nodes.new("ShaderNodeMixShader"); m1.inputs["Fac"].default_value = 0.45
-    m2 = nt.nodes.new("ShaderNodeMixShader"); m2.inputs["Fac"].default_value = 0.38     # a sheer: the window shows through
+    m2 = nt.nodes.new("ShaderNodeMixShader"); m2.inputs["Fac"].default_value = 0.55     # a sheer: the window shows through
     nt.links.new(b.outputs["BSDF"], m1.inputs[1]); nt.links.new(tl.outputs["BSDF"], m1.inputs[2])
     nt.links.new(m1.outputs["Shader"], m2.inputs[1]); nt.links.new(tp.outputs["BSDF"], m2.inputs[2])
     nt.links.new(m2.outputs["Shader"], out.inputs["Surface"])
@@ -307,30 +307,70 @@ def pleated_shade(name, centre, h=0.15, r0=0.092, r1=0.060, npl=48):
         bpy.ops.mesh.primitive_torus_add(major_radius=r0 if z_ < 0 else r1, minor_radius=0.0018, location=centre + Vector((0, 0, z_)))
         setmat(bpy.context.active_object, M_SHADE)
     return o
-def lamp(name, x, s, z, face, arms=2, span=150):
-    """A twin-arm wall lamp: brass back plate, arms, and a fabric shade over a warm bulb on each."""
-    ux = face                                                      # direction out of the wall, in x (±1) or s (±2)
-    def P3(dn, ds, dz):                                            # dn: out of the wall, ds: along it
-        if abs(face) == 1: return P(x + ux * dn, s + ds, z + dz)
+M_LAMPRIM = flat("lamp_rim", (0.55, 0.55, 0.57), 0.22, 1.0)                 # the shades' thin silver rims
+M_PORCELAIN = flat("lamp_porcelain", (0.86, 0.83, 0.77), 0.12, 0.0, 0.0, 0.6)
+def tube(name, pts, r, m):
+    cv = bpy.data.curves.new(name, "CURVE"); cv.dimensions = "3D"; cv.bevel_depth = r; cv.bevel_resolution = 3; cv.use_fill_caps = True
+    spl = cv.splines.new("POLY"); spl.points.add(len(pts) - 1)
+    for i, q in enumerate(pts): spl.points[i].co = (*q, 1)
+    o = bpy.data.objects.new(name, cv); sc.collection.objects.link(o); o.data.materials.append(m); return o
+def bez(p0, p1, p2, p3, n=24):
+    return [tuple((1 - t) ** 3 * a + 3 * (1 - t) ** 2 * t * b + 3 * (1 - t) * t * t * c + t ** 3 * d for a, b, c, d in zip(p0, p1, p2, p3)) for t in [i / n for i in range(n + 1)]]
+def drum_shade(name, centre, h=0.12, r0=0.070, r1=0.052):
+    """A tapered drum of white fabric, open top and bottom, a thin silver rim round each edge (the owner's lamp)."""
+    bm = bmesh.new(); ring = []
+    for j in range(7):
+        t = j / 6; r = r0 + (r1 - r0) * t; z = -h / 2 + h * t
+        ring.append([bm.verts.new((math.cos(2 * math.pi * i / 72) * r, math.sin(2 * math.pi * i / 72) * r, z)) for i in range(72)])
+    for a_, b_ in zip(ring, ring[1:]):
+        for i in range(72): bm.faces.new((a_[i], a_[(i + 1) % 72], b_[(i + 1) % 72], b_[i]))
+    me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
+    for p_ in me.polygons: p_.use_smooth = True
+    o = bpy.data.objects.new(name, me); sc.collection.objects.link(o); o.location = centre; setmat(o, M_SHADE)
+    so = o.modifiers.new("t", "SOLIDIFY"); so.thickness = 0.0015
+    for z_, r_ in ((-h / 2, r0), (h / 2, r1)):
+        bpy.ops.mesh.primitive_torus_add(major_radius=r_ + 0.0008, minor_radius=0.0022, major_segments=72, location=centre + Vector((0, 0, z_)))
+        setmat(bpy.context.active_object, M_LAMPRIM)
+    return o
+def lamp(name, x, s, z, face, arms=2, span=130):
+    """The owner's wall lamp (assets/refs/wall-lamp-ref-owner.jpg): an elongated octagonal brass back plate with a boss and a
+    small drop; two brass arms that dip below the plate and sweep up to a brass cup and a white porcelain urn; tapered white
+    drum shades rimmed in silver; fine brass scroll tendrils with little flowers rising between the arms. 2700 K."""
+    def P3(dn, ds, dz):                                            # dn: out of the wall, ds: along it, dz: up — in mm
+        if abs(face) == 1: return P(x + face * dn, s + ds, z + dz)
         return P(x + ds, s + (face / 2) * dn, z + dz)
-    bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=0.045, depth=0.012, location=P3(6, 0, 0))
-    bp = bpy.context.active_object; bp.name = name + "_plate"
-    bp.rotation_euler = (0, math.pi / 2, 0) if abs(face) == 1 else (math.pi / 2, 0, 0); setmat(bp, M_BRASS)
+    # the back plate: an elongated octagon, 70 × 120, 12 thick
+    oc = [(-20, -60), (20, -60), (35, -38), (35, 38), (20, 60), (-20, 60), (-35, 38), (-35, -38)]
+    bm = bmesh.new(); fr = [bm.verts.new(P3(0, a, b)) for a, b in oc]; bk = [bm.verts.new(P3(12, a * 0.9, b * 0.9)) for a, b in oc]
+    bm.faces.new(fr[::-1]); bm.faces.new(bk)
+    for i in range(8): bm.faces.new((fr[i], fr[(i + 1) % 8], bk[(i + 1) % 8], bk[i]))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    me = bpy.data.meshes.new(name + "_plate"); bm.to_mesh(me); bm.free()
+    pl = bpy.data.objects.new(name + "_plate", me); sc.collection.objects.link(pl); setmat(pl, M_BRASS); bevel(pl, 0.002, 2)
+    rot = (0, math.pi / 2, 0) if abs(face) == 1 else (math.pi / 2, 0, 0)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=0.017, depth=0.016, location=P3(18, 0, 0))
+    bo = bpy.context.active_object; bo.name = name + "_boss"; bo.rotation_euler = rot; setmat(bo, M_BRASS); bevel(bo, 0.003, 3)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=16, ring_count=8, radius=0.008, location=P3(14, 0, -68)); setmat(bpy.context.active_object, M_BRASS)
     for k in range(arms):
         off = (k - (arms - 1) / 2) * 2 * span / max(arms - 1, 1) if arms > 1 else 0
-        a0, a1 = Vector(P3(10, 0, 0)), Vector(P3(150, off, 60))
-        mid = (a0 + a1) / 2; d = a1 - a0
-        bpy.ops.mesh.primitive_cylinder_add(vertices=12, radius=0.007, depth=d.length, location=mid)
-        arm = bpy.context.active_object; arm.name = f"{name}_arm{k}"; arm.rotation_euler = d.to_track_quat("Z", "Y").to_euler(); setmat(arm, M_BRASS)
-        c = Vector(P3(150, off, 150))
-        bpy.ops.mesh.primitive_cylinder_add(vertices=12, radius=0.012, depth=0.09, location=c - Vector((0, 0, 0.05)))
-        cup = bpy.context.active_object; setmat(cup, M_BRASS)
-        sh = pleated_shade(f"{name}_shade{k}", c + Vector((0, 0, 0.035)))
-        bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=12, radius=0.016, location=c + Vector((0, 0, 0.012)))
+        sg = 1 if off >= 0 else -1
+        # the arm: out of the boss, down and outward, then sweeping up to the cup
+        tube(f"{name}_arm{k}", [P3(*q) for q in bez((24, 0, -4), (70, off * 0.25, -95), (120, off * 1.05, -100), (125, off, -8))], 0.0055, M_BRASS)
+        tube(f"{name}_scroll{k}", [P3(*q) for q in bez((16, sg * 10, 30), (22, sg * 30, 90), (26, sg * 6, 150), (30, sg * 40, 170), 20)], 0.0022, M_BRASS)
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=6, radius=0.007, location=P3(22, sg * 24, 98)); fl = bpy.context.active_object
+        fl.scale = (1, 1, 0.5) if abs(face) != 1 else (0.5, 1, 1); setmat(fl, M_BRASS)
+        c = Vector(P3(125, off, 0))
+        bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=0.022, depth=0.006, location=c + Vector((0, 0, -0.005))); setmat(bpy.context.active_object, M_BRASS)
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=32, ring_count=16, radius=0.021, location=c + Vector((0, 0, 0.024)))
+        urn = bpy.context.active_object; urn.scale = (1, 1, 1.15); setmat(urn, M_PORCELAIN)
+        for p_ in urn.data.polygons: p_.use_smooth = True
+        bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.011, depth=0.012, location=c + Vector((0, 0, 0.052))); setmat(bpy.context.active_object, M_BRASS)
+        drum_shade(f"{name}_shade{k}", c + Vector((0, 0, 0.118)))
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=12, radius=0.016, location=c + Vector((0, 0, 0.098)))
         bulb = bpy.context.active_object; setmat(bulb, M_BULB)
         ld = bpy.data.lights.new(f"{name}_bulb{k}", "POINT"); ld.shadow_soft_size = 0.02; ld.energy = 14
         warm(ld, 2700)                                          # the lamps: 2700 K, warmer than the coves and spots (owner, 7 Oct)
-        lo = bpy.data.objects.new(f"{name}_bulb{k}", ld); sc.collection.objects.link(lo); lo.location = c + Vector((0, 0, 0.02))
+        lo = bpy.data.objects.new(f"{name}_bulb{k}", ld); sc.collection.objects.link(lo); lo.location = c + Vector((0, 0, 0.10))
 
 def warm(ld, K):
     """Colour a light by its temperature (blackbody), Cycles node."""
@@ -432,11 +472,9 @@ bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=0.03, depth=0.008, locat
 pl = bpy.context.active_object; pl.rotation_euler = (math.pi / 2, 0, 0); setmat(pl, M_CHROME)
 bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=0.025, depth=0.03, location=P(AXx + 130, VS1 - 15, 1161))
 hd_ = bpy.context.active_object; hd_.rotation_euler = (math.pi / 2, 0, 0); setmat(hd_, M_CHROME)            # the mixer
-# the mirror (owner, 8 Oct: "give a tri-fold a try", above the tap): three panels in polished teak frames with a small
-# beaded edge, bevelled glass — the centre flat on the wall on a hidden cleat, the two wings hinged off it and turned
-# 25 degrees forward so you see yourself from the side. Centred on the tap line.
-MCW, MWW, MH, MZ0, MFR, WANG = 560.0, 280.0, 900.0, 1240.0, 32.0, math.radians(25)
-M_MFRAME = M_DESK
+# the mirror (owner, 8 Oct): a mini version of the dressing room's tri-fold (AST-DR-027) — the same thin hammered-brass
+# frames, plain glass, the wings at 45° — small: 2 ft 6 in tall, 1 ft 4½ in across the centre, hung over the tap.
+MCW, MWW, MH, MZ0, MFR, MT, WANG = 420.0, 160.0, 760.0, 1250.0, 15.0, 20.0, math.radians(45)   # smaller, thinner frames (owner, 8 Oct)
 def lbox(name, x0_, x1_, y0_, y1_, z0_, z1_, m, par, bev=0.0):
     me = bpy.data.meshes.new(name); bm = bmesh.new(); bmesh.ops.create_cube(bm, size=1.0); bm.to_mesh(me); bm.free()
     o = bpy.data.objects.new(name, me); sc.collection.objects.link(o); setmat(o, m)
@@ -444,21 +482,20 @@ def lbox(name, x0_, x1_, y0_, y1_, z0_, z1_, m, par, bev=0.0):
     o.parent = par
     if bev: bv = o.modifiers.new("ease", "BEVEL"); bv.width = bev; bv.segments = 3; bv.limit_method = "ANGLE"
     return o
-def mpanel(tag, x0_, x1_, par):
-    lbox(f"{tag}_back", x0_, x1_, 0, 6, 0, MH, M_MFRAME, par)
-    lbox(f"{tag}_glass", x0_ + MFR - 8, x1_ - MFR + 8, 6, 12, 8, MH - 8, M_MIRROR, par)
-    for nm, (a_, b_, c_, d_) in {"l": (x0_, x0_ + MFR, 0, MH), "r": (x1_ - MFR, x1_, 0, MH), "b": (x0_, x1_, 0, MFR), "t": (x0_, x1_, MH - MFR, MH)}.items():
-        lbox(f"{tag}_fr{nm}", a_, b_, 0, 24, c_, d_, M_MFRAME, par, 0.004)
-    for nm, (a_, b_, c_, d_) in {"l": (x0_ + MFR - 5, x0_ + MFR, MFR, MH - MFR), "r": (x1_ - MFR, x1_ - MFR + 5, MFR, MH - MFR), "b": (x0_ + MFR, x1_ - MFR, MFR - 5, MFR), "t": (x0_ + MFR, x1_ - MFR, MH - MFR, MH - MFR + 5)}.items():
-        lbox(f"{tag}_bead{nm}", a_, b_, 12, 20, c_, d_, M_MFRAME, par, 0.002)          # the small bead round the glass
-mc = bpy.data.objects.new("van_mirror", None); sc.collection.objects.link(mc); mc.location = P(AXx, VS1 - 22, MZ0)
-mpanel("van_mirror_c", -MCW / 2, MCW / 2, mc)
+def mpanel(tag, x0_, x1_, par):                      # frame pieces are named van_mirror_fr*: wardrobe2.py dresses them in hammered brass
+    lbox(f"{tag}_glass", x0_ + MFR - 6, x1_ - MFR + 6, 4, 10, MFR - 6, MH - MFR + 6, M_MIRROR, par)
+    lbox(f"{tag}_back", x0_ + 2, x1_ - 2, 0, 4, 2, MH - 2, M_DARK, par)
+    for nm, (a_, b_, c_, d_) in {"l": (x0_, x0_ + MFR, 0, MH), "r": (x1_ - MFR, x1_, 0, MH), "b": (x0_ + MFR, x1_ - MFR, 0, MFR), "t": (x0_ + MFR, x1_ - MFR, MH - MFR, MH)}.items():
+        lbox(f"van_mirror_fr_{tag}{nm}", a_, b_, 0, MT, c_, d_, M_BRASS, par, 0.003)
+mc = bpy.data.objects.new("van_mirror", None); sc.collection.objects.link(mc); mc.location = P(AXx, VS1 - 18, MZ0)
+mpanel("c", -MCW / 2, MCW / 2, mc)
 for sx in (1, -1):
     hw = bpy.data.objects.new(f"van_mirror_hinge{sx}", None); sc.collection.objects.link(hw); hw.parent = mc
-    hw.location = (sx * MCW / 2000, 0.024, 0); hw.rotation_euler = (0, 0, sx * WANG)
-    mpanel(f"van_mirror_w{sx}", 0 if sx > 0 else -MWW, MWW if sx > 0 else 0, hw)
-    for zh in (120, MH - 120):                                                                   # two small hinges each side
-        lbox(f"van_mirror_h{sx}{zh:.0f}", -4, 4, -4, 4, zh - 30, zh + 30, M_CHROME, hw)
+    hw.location = (sx * MCW / 2000, MT / 1000, 0); hw.rotation_euler = (0, 0, sx * WANG)
+    mpanel(f"w{sx}", 0 if sx > 0 else -MWW, MWW if sx > 0 else 0, hw)
+    for zh in (110, MH / 2, MH - 110):                                                          # the hinges: small brass knuckles
+        bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=0.005, depth=0.05, location=(0, 0, 0)); kn = bpy.context.active_object
+        kn.parent = hw; kn.location = (0, -0.003, zh / 1000); setmat(kn, M_BRASS); kn.name = f"van_mirror_fr_knuckle{sx}{zh:.0f}"
 # the bathroom's marble on the pier as well (the owner): a skin on its three faces
 pz0, pz1 = VS1 - PIER["out"], VS1
 dbox("bath_pier_w", pxl - 10, pz0, 0, pxl, pz1, H, M_BEIGE); dbox("bath_pier_n", pxl - 10, pz0 - 10, 0, pxr + 10, pz0, H, M_BEIGE)
@@ -756,51 +793,112 @@ for o_ in [o for o in sc.objects if o.name.startswith("curtain") or o.name == "t
 # ── the curtains, approved (owner, 7 Oct): a white linen sheer on a slim rod inside the window, falling to the sill; heavy
 #    red velvet on a brass rod under the crown, 13 in off the wall, two panels tied back with gold rope and tassels at 1250,
 #    falling to the counter just in front of its edge (AST-DR-040). Shaped, not simulated: pleats set by hand. ──
-M_VELVET = fabric("red_velvet", (0.17, 0.008, 0.013), 1.0, 0.82, 1500)
-def pleated(name, rows, m, thick=0.003):
+def velvet_mat():
+    """Real velvet: a deep crimson pile, nearly black in the folds' hollows, a pale rosy sheen where the light grazes the
+    pile; a fine noise in the nap — no wave texture (that read as wood grain)."""
+    m, nt, b = node_mat("red_velvet"); N = nt.nodes; Lk = nt.links.new
+    lw = N.new("ShaderNodeLayerWeight"); lw.inputs["Blend"].default_value = 0.42
+    cr = N.new("ShaderNodeValToRGB"); cr.color_ramp.elements[0].color = (0.055, 0.002, 0.007, 1); cr.color_ramp.elements[1].color = (0.30, 0.03, 0.045, 1)
+    cr.color_ramp.elements[0].position = 0.15; cr.color_ramp.elements[1].position = 0.95
+    Lk(lw.outputs["Facing"], cr.inputs["Fac"]); Lk(cr.outputs["Color"], b.inputs["Base Color"])
+    b.inputs["Roughness"].default_value = 0.85; b.inputs["Specular IOR Level"].default_value = 0.25
+    b.inputs["Sheen Weight"].default_value = 1.0; b.inputs["Sheen Roughness"].default_value = 0.32
+    b.inputs["Sheen Tint"].default_value = (1.0, 0.45, 0.48, 1)
+    nz = N.new("ShaderNodeTexNoise"); nz.inputs["Scale"].default_value = 420.0; nz.inputs["Detail"].default_value = 3
+    bp = N.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = 0.05; bp.inputs["Distance"].default_value = 0.0003
+    Lk(nz.outputs["Fac"], bp.inputs["Height"]); Lk(bp.outputs["Normal"], b.inputs["Normal"])
+    return m
+M_VELVET = velvet_mat()
+M_SILK_GOLD = flat("gold_silk_rope", (0.55, 0.36, 0.12), 0.38, 0.6)
+def pleated(name, rows, m, thick=0.003, crumple=0.0):
     bm = bmesh.new(); vr = [[bm.verts.new(P(*q)) for q in row] for row in rows]
     for ra, rb in zip(vr, vr[1:]):
         for i in range(len(ra) - 1): bm.faces.new((ra[i], ra[i + 1], rb[i + 1], rb[i]))
     me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
     o = bpy.data.objects.new(name, me); DET.objects.link(o); setmat(o, m)
+    if crumple:
+        tx = bpy.data.textures.new(name + "_c", "CLOUDS"); tx.noise_scale = 0.16; tx.noise_depth = 2
+        dp = o.modifiers.new("crumple", "DISPLACE"); dp.texture = tx; dp.strength = crumple; dp.texture_coords = "GLOBAL"
     so = o.modifiers.new("t", "SOLIDIFY"); so.thickness = thick
     sd = o.modifiers.new("s", "SUBSURF"); sd.levels = 1; sd.render_levels = 2
     for p_ in me.polygons: p_.use_smooth = True
     return o
-# the sheer: fine pleats, the width of the window, from just under the arch's springing to the sill
-SH_Z0, SH_Z1, SH_S = WIN["sill"] + 20, gW["ys"] - 12, GLASS_S + 28
-rows = []
-for j in range(41):
-    z = SH_Z0 + (SH_Z1 - SH_Z0) * j / 40
-    rows.append([(WX0 + 15 + (WX1 - WX0 - 30) * i / 160, SH_S + 14 * math.sin(2 * math.pi * i / 160 * 24) + 3 * math.sin(z / 300 + i), z) for i in range(161)])
+# the sheer: fine soft pleats across the window zone, hung from its own rod just under the velvet's, down to the counter
+SH_Z0, SH_Z1, SH_S = CTOP + 16.0, 2420.0, FACE + 22.0                       # the sheer all the way up (owner, 8 Oct): rod to counter
+rv = random.Random(7); rows = []
+SNF = 15; sw_ = [rv.uniform(0.7, 1.4) for _ in range(SNF)]; st_ = sum(sw_); sed = [0.0]
+for w_ in sw_: sed.append(sed[-1] + w_ / st_)
+sam = [rv.uniform(0.6, 1.25) for _ in range(SNF)]; sph = [rv.uniform(0, 6.28) for _ in range(SNF)]
+def sfold(t, z):                                                            # soft, uneven folds that wander as they fall
+    for f in range(SNF):
+        if sed[f] <= t <= sed[f + 1]:
+            q = (t - sed[f]) / (sed[f + 1] - sed[f]); q = min(1, max(0, q + 0.15 * math.sin(z / 600 + sph[f]) * q * (1 - q)))
+            return sam[f] * math.sin(math.pi * q)
+    return 0.0
+for j in range(61):
+    z = SH_Z0 + (SH_Z1 - SH_Z0) * j / 60
+    rows.append([(ZX0 + 60 + (WX1 - ZX0 - 90) * i / 240, SH_S + 22 * (sfold(i / 240, z) - 0.5) * 2 + 4 * math.sin(z / 350 + i * 0.05), z) for i in range(241)])
 pleated("curtain_sheer", rows, M_SHEER, 0.0008)
-rr_ = dbox("curtain_sheer_rod", WX0 + 5, SH_S - 6, SH_Z1 + 2, WX1 - 5, SH_S + 6, SH_Z1 + 14, M_BRONZE); bevel(rr_, 0.005, 3)
-# the velvet: two panels, full at the rod, swept to the tie-back, flaring to the counter
+rr_ = dbox("curtain_sheer_rod", ZX0 + 40, SH_S - 6, SH_Z1 + 2, WX1 - 20, SH_S + 6, SH_Z1 + 14, M_BRASS); bevel(rr_, 0.005, 3)
+# the velvet: two panels either side of the window — full at the rod, swept to the tie-back, flaring and breaking on the
+# counter. Folds of uneven width and depth, the way heavy cloth really hangs.
 VR_Z, VR_S, VTIE, VBOT = 2440.0, FACE + 50.0, 1250.0, CTOP + 14.0
 VX0 = ZX0 + 14.0
 def vel_width(z):
-    if z >= VTIE: u = (z - VTIE) / (VR_Z - VTIE); return 170 + 160 * (u * u * (3 - 2 * u))
-    u = (VTIE - z) / (VTIE - VBOT); return 170 + 130 * math.sin(min(1.0, u * 1.6) * math.pi / 2)
+    if z >= VTIE: u = (z - VTIE) / (VR_Z - VTIE); return 175 + 175 * (u * u * (3 - 2 * u))
+    u = (VTIE - z) / (VTIE - VBOT); return 175 + 150 * math.sin(min(1.0, u * 1.5) * math.pi / 2)
 for k_, (xo, d) in enumerate(((VX0, 1), (WX1 - 6, -1))):
+    rv = random.Random(31 + k_)
+    NF = 9; wts = [rv.uniform(0.7, 1.35) for _ in range(NF)]; tot = sum(wts)
+    edges = [0.0]
+    for w_ in wts: edges.append(edges[-1] + w_ / tot)
+    amps = [rv.uniform(0.75, 1.3) for _ in range(NF)]; ph_s = [rv.uniform(-0.25, 0.25) for _ in range(NF)]
+    def fold(t, z):                                                             # depth of the cloth at fraction t across
+        for f in range(NF):
+            if edges[f] <= t <= edges[f + 1]:
+                q = (t - edges[f]) / (edges[f + 1] - edges[f])
+                tw = 0.18 * math.sin(z / 520 + ph_s[f] * 9)                          # each fold wanders a little as it falls
+                return amps[f] * math.sin(math.pi * min(1, max(0, q + tw * q * (1 - q))))
+        return 0.0
     rows = []
-    for j in range(61):
-        z = VBOT + (VR_Z - 25 - VBOT) * j / 60; w_ = vel_width(z)
-        amp = 34 + 14 * math.exp(-((z - VTIE) / 260) ** 2) + 10 * (1 - (z - VBOT) / (VR_Z - VBOT))
-        belly = 26 * math.exp(-((z - (VTIE - 260)) / 220) ** 2)
-        rows.append([(xo + d * w_ * i / 48, VR_S + amp * math.sin(2 * math.pi * i / 48 * 6) + belly, z) for i in range(49)])
-    pleated(f"curtain_velvet{k_}", rows, M_VELVET, 0.004)
-    xt = xo + d * 150
-    bpy.ops.mesh.primitive_torus_add(major_radius=0.10, minor_radius=0.009, location=P(xo + d * 85, VR_S + 10, VTIE))
-    tb_ = bpy.context.active_object; tb_.name = f"curtain_tie{k_}"; tb_.scale = (1.0, 0.55, 0.35); setmat(tb_, M_BRASS)
-    bpy.ops.mesh.primitive_cone_add(vertices=24, radius1=0.022, radius2=0.008, depth=0.13, location=P(xt, VR_S + 60, VTIE - 90))
-    ts_ = bpy.context.active_object; ts_.name = f"curtain_tassel{k_}"; setmat(ts_, M_BRASS)
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.016, location=P(xt, VR_S + 60, VTIE - 18)); setmat(bpy.context.active_object, M_BRASS)
-bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.015, depth=(xR - VX0 + 10) / 1000, location=P((VX0 + xR) / 2, VR_S, VR_Z))
+    for j in range(81):
+        z = VBOT + (VR_Z - 25 - VBOT) * j / 80; w_ = vel_width(z)
+        amp = 30 + 22 * math.exp(-((z - VTIE) / 240) ** 2) + 20 * (1 - (z - VBOT) / (VR_Z - VBOT)) ** 2
+        belly = 34 * math.exp(-((z - (VTIE + 330)) / 260) ** 2) + 22 * math.exp(-((z - (VTIE - 230)) / 200) ** 2)
+        brk = 26 * max(0.0, 1 - (z - VBOT) / 110) ** 2                              # the break where it meets the counter
+        row = []
+        for i in range(97):
+            t = i / 96
+            row.append((xo + d * (w_ + brk * 1.2) * t, VR_S + amp * (fold(t, z) - 0.5) * 2 + belly * math.sin(math.pi * t) + brk * math.sin(t * 7), z + (brk * 0.6 * math.sin(t * 11) if z < VBOT + 40 else 0)))
+        rows.append(row)
+    pleated(f"curtain_velvet{k_}", rows, M_VELVET, 0.006, 0.006)
+    # the tie-back: a twisted gold silk rope round the gathered waist, a tassel hanging from it
+    cx_ = xo + d * 88
+    cv = bpy.data.curves.new(f"curtain_tie{k_}", "CURVE"); cv.dimensions = "3D"; cv.bevel_depth = 0.0075; cv.bevel_resolution = 3
+    for strand in range(2):
+        spl = cv.splines.new("POLY"); n = 96; spl.points.add(n - 1)
+        for i in range(n):
+            a = 2 * math.pi * i / n; tw = 0.004 * math.cos(a * 9 + strand * math.pi)
+            spl.points[i].co = (*P(cx_ + (110 + tw * 1000) * math.cos(a), VR_S + 8 + (62 + tw * 1000) * math.sin(a), VTIE + 6 * math.sin(a * 9 + strand * math.pi)), 1)
+        spl.use_cyclic_u = True
+    tie = bpy.data.objects.new(f"curtain_tie{k_}", cv); DET.objects.link(tie); tie.data.materials.append(M_SILK_GOLD)
+    xt, st_ = cx_ + d * 80, VR_S + 70
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=12, radius=0.02, location=P(xt, st_, VTIE - 40)); tsh_ = bpy.context.active_object; tsh_.scale = (1, 1, 1.25)
+    setmat(tsh_, M_SILK_GOLD); tsh_.name = f"curtain_tassel_head{k_}"     # (not `hd`: that is the hidden door, from furnish.py)
+    for q in range(56):                                                         # the fringe: fine silk strands
+        a = 2 * math.pi * q / 56 + rv.uniform(-0.05, 0.05); rr = 0.012 + rv.uniform(0, 0.006); L_ = 0.13 + rv.uniform(-0.01, 0.01)
+        bpy.ops.mesh.primitive_cylinder_add(vertices=5, radius=0.0012, depth=L_, location=(0, 0, 0))
+        fs = bpy.context.active_object; fs.name = f"curtain_fringe{k_}_{q}"
+        top_ = Vector(P(xt + rr * 800 * math.cos(a), st_ + rr * 800 * math.sin(a), VTIE - 62))
+        bot_ = Vector(P(xt + (rr + 0.006) * 1000 * math.cos(a), st_ + (rr + 0.006) * 1000 * math.sin(a), VTIE - 62 - L_ * 1000))
+        fs.location = (top_ + bot_) / 2; fs.rotation_euler = (bot_ - top_).to_track_quat("Z", "Y").to_euler(); setmat(fs, M_SILK_GOLD)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.016, depth=0.03, location=P(xt, st_, VTIE - 66)); setmat(bpy.context.active_object, M_SILK_GOLD)
+bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.015, depth=(WX1 - VX0 + 10) / 1000, location=P((VX0 + WX1) / 2, VR_S, VR_Z))
 vrod = bpy.context.active_object; vrod.name = "curtain_velvet_rod"; vrod.rotation_euler = (0, math.pi / 2, 0); setmat(vrod, M_BRASS)
 bpy.ops.mesh.primitive_uv_sphere_add(radius=0.03, location=P(VX0 - 20, VR_S, VR_Z)); setmat(bpy.context.active_object, M_BRASS)
-for x_ in (VX0 + 40, xR - 60):
+for x_ in (VX0 + 40, WX1 - 60):
     dbox(f"curtain_bracket{x_:.0f}", x_ - 8, FACE, VR_Z - 8, x_ + 8, VR_S, VR_Z + 8, M_BRASS)
-print("curtains: sheer + red velvet pair, tied back", flush=True)
+print(f"curtains: sheer + red velvet pair, tied back, window {WX0:.0f}-{WX1:.0f}", flush=True)
 
 # ── the corridor outside the front door, wider and longer than the stub furnish.py left ──
 for o_ in [o for o in sc.objects if o.name.startswith("cor_")]: bpy.data.objects.remove(o_, do_unlink=True)
@@ -879,7 +977,7 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
     # stage-4 test views: (camera, target, {lens, fstop}) — a real lens, not the 18 mm walk lens
     "r_room": ((350, 5300, 1450), (2700, 2600, 1100), {"lens": 22, "fstop": 5.6}),
     "r_bed": ((3700, 3250, 1350), (2200, 5500, 750), {"lens": 30, "fstop": 4.0}),
-    "r_desk": ((3000, 2750, 1250), (2000, 1250, 820), {"lens": 40, "fstop": 2.8}),
+    "r_desk": ((3350, 2250, 1350), (2150, 1350, 800), {"lens": 28, "fstop": 4.0}),
     "r_study": ((2337, 3700, 1500), (2337, 0, 1300), {"lens": 22, "fstop": 8.0}),
     # the glass-block partition (1 Oct): from the bed, from the desk, and from straight above to show the curve
     "r_pbed": ((3950, 4850, 1300), (2337, 2413, 1150), {"lens": 24, "fstop": 5.6}),
@@ -891,11 +989,12 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
     # the bed wall and the bed (3 Oct): straight on, three-quarter from the door side, the cove, the headboard
     "b_front": ((2337, 2500, 1250), (2337, 5766, 1150), {"lens": 22, "fstop": 8.0}),
     "b_three": ((300, 3500, 1350), (2700, 5650, 900), {"lens": 26, "fstop": 5.6}),
-    "b_cove": ((4380, 5080, 1650), (3150, 5740, 1700), {"lens": 26, "fstop": 5.6}),   # along the wall from the dressing corner: the cove in profile
-    "b_head": ((3150, 4150, 1050), (3200, 5700, 850), {"lens": 38, "fstop": 2.8}),
-    "st_close": ((2950, 4650, 950), (3560, 5560, 430), {"lens": 40, "fstop": 4.0}),
+    "b_cove": ((4100, 4950, 1650), (3150, 5740, 1700), {"lens": 24, "fstop": 5.6}),
+    "b_head": ((3350, 4250, 1450), (3000, 5700, 1000), {"lens": 30, "fstop": 4.0})      # over the pillows at the rose headboard and its frame,
+    "st_close": ((4150, 4950, 1000), (3560, 5560, 450), {"lens": 35, "fstop": 4.0})      # the cabriole side table, from the room side,
     "st_wall": ((2337, 2250, 1550), (2337, 0, 1450), {"lens": 15, "fstop": 8.0}),      # the whole study wall, from over the desk
     "st_arch": ((1250, 1350, 1350), (744, 200, 2250), {"lens": 22, "fstop": 5.6}),     # up into the bookcase arch and its niches
+    "st_chairf": ((2560, 1900, 1250), (2337, 1002, 760), {"lens": 32, "fstop": 4.0}),   # the chair's face, over the desk
     "st_chair": ((3600, 2250, 1300), (2337, 1050, 650), {"lens": 26, "fstop": 5.6}),   # the green chair at the desk
     "hide_close": ((3350, 3150, 520), (2700, 3700, 0), {"lens": 32, "fstop": 4.0}),     # low over the hide's fur
     "wd_open": ((7000, 4950, 1500), (7000, 3300, 1250), {"lens": 15, "fstop": 6.3}),   # L2 and L3 open, square on from the aisle: shirts, the lit perfume niche

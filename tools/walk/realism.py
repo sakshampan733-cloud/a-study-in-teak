@@ -481,74 +481,223 @@ if SPt:
     print(f"study painting {pw_:.0f} x {ph_:.0f} at {cx_:.0f}, {cz_:.0f}", flush=True)
 
 # ═══════════════════════════ 2d · THE DESK CHAIR (owner: Tommy Shelby's chair, in royal green) ═════════
-# A tall button-tufted leather office chair, as in the owner's two Peaky Blinders stills: the back a deep curved shell that
-# wraps round the seat and rolls down into the arms, deep-buttoned in diamonds; a loose seat cushion; a swivel column on a
-# five-star base with brass castors. Royal green leather (owner). It stands at the desk's drawer side, facing the desk.
+# Rebuilt 8 Oct (owner: "make it look ridiculously realistic"). After the two Peaky Blinders stills: a Chesterfield
+# captain's tub chair. A horseshoe back with a fat rolled top that sweeps down into scrolled arms; deep diamond
+# buttoning on the inside with the creases running button to button and the vertical pleats up into the roll; a smooth
+# outside back with a row of brass nailheads at its foot; a domed, piped seat cushion; a turned mahogany swivel column
+# on four splayed legs with brass castors. Royal green leather, darker in the creases and worn lighter on the edges.
 dtop_ = sc.objects.get("dk2_top")
 if dtop_:
     qx0, qs0, qz0, qx1, qs1, qz1 = bb(dtop_)
-    CHX, CHS = (qx0 + qx1) / 2, qs0 - 330                                  # in the kneehole's line, pulled up to the desk
-    M_GREEN_LEATHER = flat("royal_green_leather", (0.010, 0.075, 0.035), 0.36, coat=0.35)
-    rough_var(M_GREEN_LEATHER.node_tree, M_GREEN_LEATHER.node_tree.nodes["Principled BSDF"], 0.08, 14.0)
-    noise_bump(M_GREEN_LEATHER.node_tree, M_GREEN_LEATHER.node_tree.nodes["Principled BSDF"], 160, 0.08, 0.0006)
-    SEAT_Z, BACK_TOP, ARM_TOP, RI, RO = 470.0, 1180.0, 700.0, 300.0, 410.0
-    PH0 = math.radians(105)                                                # the shell wraps 105° either side of the back's centre
-    def h_back(ph):                                                       # the top falls from the back to the rolled arm fronts
-        u = abs(ph) / PH0; return ARM_TOP + (BACK_TOP - ARM_TOP) * (1 - u ** 2.2)
-    def shell_pt(ph, r, z):                                               # ph = 0 at the back (away from the desk), +s is the desk
-        return P(CHX + r * math.sin(ph), CHS - r * math.cos(ph), z)
+    CHX, CHS = (qx0 + qx1) / 2, qs0 - 380                                  # in the kneehole's line, pulled up to the desk
+    def chair_leather(name, deep, mid, worn):
+        m, nt, b = node_mat(name); N = nt.nodes; Lk = nt.links.new
+        geo = N.new("ShaderNodeNewGeometry")
+        wr = N.new("ShaderNodeValToRGB"); wr.color_ramp.elements[0].position = 0.5; wr.color_ramp.elements[1].position = 0.58
+        Lk(geo.outputs["Pointiness"], wr.inputs["Fac"])
+        ao = N.new("ShaderNodeAmbientOcclusion"); ao.inputs["Distance"].default_value = 0.035
+        nz = N.new("ShaderNodeTexNoise"); nz.inputs["Scale"].default_value = 9.0; nz.inputs["Detail"].default_value = 4
+        c1 = N.new("ShaderNodeMixRGB"); c1.inputs["Color1"].default_value = (*mid, 1); c1.inputs["Color2"].default_value = (*worn, 1)
+        fm = N.new("ShaderNodeMath"); fm.operation = "MULTIPLY"; Lk(wr.outputs["Color"], fm.inputs[0]); Lk(nz.outputs["Fac"], fm.inputs[1])
+        Lk(fm.outputs["Value"], c1.inputs["Fac"])
+        c2 = N.new("ShaderNodeMixRGB"); c2.inputs["Color1"].default_value = (*deep, 1)
+        Lk(ao.outputs["AO"], c2.inputs["Fac"]); Lk(c1.outputs["Color"], c2.inputs["Color2"]); Lk(c2.outputs["Color"], b.inputs["Base Color"])
+        rmap = N.new("ShaderNodeMapRange"); rmap.inputs["To Min"].default_value = 0.5; rmap.inputs["To Max"].default_value = 0.3
+        Lk(fm.outputs["Value"], rmap.inputs["Value"]); Lk(rmap.outputs["Result"], b.inputs["Roughness"])     # worn = glossier
+        b.inputs["Coat Weight"].default_value = 0.14; b.inputs["Coat Roughness"].default_value = 0.3
+        grain = N.new("ShaderNodeTexVoronoi"); grain.inputs["Scale"].default_value = 650.0
+        wr2 = N.new("ShaderNodeTexNoise"); wr2.inputs["Scale"].default_value = 38.0; wr2.inputs["Detail"].default_value = 6
+        b1 = N.new("ShaderNodeBump"); b1.inputs["Strength"].default_value = 0.16; b1.inputs["Distance"].default_value = 0.0004
+        b2 = N.new("ShaderNodeBump"); b2.inputs["Strength"].default_value = 0.14; b2.inputs["Distance"].default_value = 0.0015
+        Lk(grain.outputs["Distance"], b1.inputs["Height"]); Lk(wr2.outputs["Fac"], b2.inputs["Height"]); Lk(b1.outputs["Normal"], b2.inputs["Normal"])
+        Lk(b2.outputs["Normal"], b.inputs["Normal"])
+        return m
+    M_GREEN_LEATHER = chair_leather("royal_green_leather", (0.0012, 0.0055, 0.0035), (0.0055, 0.022, 0.013), (0.020, 0.048, 0.032))   # darker: a deep bottle green (owner, 8 Oct)
+    M_BTN = chair_leather("chair_button", (0.001, 0.005, 0.003), (0.004, 0.018, 0.011), (0.015, 0.04, 0.026))
+    parts = []
+    def keep(o): parts.append(o); return o
+    def link(name, bm_, m, smooth=True):
+        me = bpy.data.meshes.new(name); bm_.to_mesh(me); bm_.free()
+        if smooth:
+            for p_ in me.polygons: p_.use_smooth = True
+        o = bpy.data.objects.new(name, me); STY.objects.link(o); setmat(o, m); return keep(o)
+    # ── the back and arms: a cross-section (d out from the inside face, z) swept round the horseshoe ──
+    SEAT_Z, TOP_B, TOP_A, RI, TH, RR = 470.0, 1040.0, 700.0, 285.0, 120.0, 50.0
+    PH0 = math.radians(114)
+    top_at = lambda ph: TOP_A + (TOP_B - TOP_A) * (1 - min(1.0, abs(ph) / PH0) ** 2.3)
+    ri_at = lambda ph: RI + 22 * (abs(ph) / PH0) ** 2
+    W2 = lambda ph, d, z: P(CHX + (ri_at(ph) + d) * math.sin(ph), CHS - (ri_at(ph) + d) * math.cos(ph), z)
+    ZB_IN, ZB_OUT = SEAT_Z - 40, SEAT_Z - 175
+    # the buttons: a diamond lattice in (arc length u, z) on the inside face
     buttons = []
-    for row, z_ in enumerate(range(int(SEAT_Z + 140), int(BACK_TOP - 90), 115)):
-        step = 118.0 / RI; off = 0.5 * step if row % 2 else 0.0
-        ph_ = -PH0 * 0.82 + off
-        while ph_ <= PH0 * 0.82:
-            if z_ < h_back(ph_) - 80: buttons.append((ph_, float(z_)))
-            ph_ += step
-    def tuft(ph, z):                                                      # how far the inner face is pulled in at (ph, z)
-        d = 0.0
-        for bp, bz in buttons:
-            dd = ((ph - bp) * RI) ** 2 + (z - bz) ** 2
-            if dd < 140 ** 2: d = max(d, 26 * math.exp(-dd / (2 * 34 ** 2)))
-        return d
-    bm = bmesh.new(); NPH, NZ = 110, 56
-    grid_in, grid_out = [], []
+    for row in range(8):
+        z_ = SEAT_Z + 95 + row * 100
+        off = 0.5 if row % 2 else 0.0
+        for col in range(-12, 13):
+            u_ = (col + off) * 112.0; ph_ = u_ / RI
+            if abs(ph_) <= PH0 - 0.16 and z_ <= top_at(ph_) - RR - 55: buttons.append((u_, z_, row, col + off))
+    bset = {(r_, c_): (u_, z_) for u_, z_, r_, c_ in buttons}
+    segs = []
+    for (r_, c_), (u_, z_) in bset.items():
+        for dc in (-0.5, 0.5):
+            q = bset.get((r_ + 1, c_ + dc))
+            if q: segs.append((u_, z_, q[0], q[1]))
+        if (r_ + 1, c_ + 0.5) not in bset and (r_ + 1, c_ - 0.5) not in bset:     # the top row: pleats up into the roll
+            segs.append((u_, z_, u_, top_at(u_ / RI) - RR * 0.6))
+    def seg_d(u, z, a):
+        ux, uz, vx, vz = a; dx, dz = vx - ux, vz - uz; L2 = dx * dx + dz * dz
+        t = max(0.0, min(1.0, ((u - ux) * dx + (z - uz) * dz) / L2)); return math.hypot(u - ux - t * dx, z - uz - t * dz)
+    zlo, zhi = SEAT_Z + 35, max(b_[1] for b_ in buttons) + 70
+    def tuft(ph, z):
+        u = ph * RI
+        if z < zlo - 40 or z > zhi + 60 or abs(ph) > PH0 - 0.05: return 0.0
+        zone = min(1.0, (z - (zlo - 40)) / 60, (zhi + 60 - z) / 60, (PH0 - 0.05 - abs(ph)) * 4)
+        d = -24.0 * zone                                                        # the padding puffs out between buttons
+        for (bu, bz, _, _) in buttons:
+            dd = (u - bu) ** 2 + (z - bz) ** 2
+            if dd < 110 ** 2: d += 34 * math.exp(-dd / (2 * 11 ** 2)) + 22 * math.exp(-dd / (2 * 30 ** 2))
+        for a in segs:
+            if abs(z - (a[1] + a[3]) / 2) > abs(a[3] - a[1]) / 2 + 20: continue
+            s_ = seg_d(u, z, a)
+            if s_ < 26: d += 15 * math.exp(-s_ * s_ / (2 * 5.5 ** 2))
+        return d * zone if d > 0 else d
+    # the section: up the inside face, over the roll, down the outside, back under
+    def section(ph):
+        tz = top_at(ph); zc = tz - RR; dc = RR * 0.62
+        sec = [(0.0, ZB_IN + (zc - 40 - ZB_IN) * j / 46, True) for j in range(47)]
+        for k in range(1, 31):
+            a = math.radians(205 - 245 * k / 30)                                 # from the inside, over the top, down the outside
+            sec.append((dc + RR * math.cos(a), zc + RR * math.sin(a), False))
+        dlast, zlast = sec[-1][0], sec[-1][1]
+        for j in range(1, 13):
+            t = j / 12; sec.append((dlast + (TH - dlast) * (1 - (1 - t) ** 2), zlast - (zlast - (zc - 2.2 * RR)) * t, False))
+        for j in range(1, 21):
+            z_ = (zc - 2.2 * RR) - ((zc - 2.2 * RR) - ZB_OUT) * j / 20
+            sec.append((TH + 9 * math.sin(math.pi * j / 20), z_, False))           # the outside back, a little full
+        for j in range(1, 8): sec.append((TH - TH * j / 8, ZB_OUT + (ZB_IN - ZB_OUT) * (j / 8) ** 2, False))
+        return sec
+    NPH = 170
+    bm = bmesh.new(); rings = []
     for i in range(NPH + 1):
-        ph = -PH0 + 2 * PH0 * i / NPH; top = h_back(ph); col_i, col_o = [], []
-        for j in range(NZ + 1):
-            z = SEAT_Z - 60 + (top - SEAT_Z + 60) * j / NZ
-            col_i.append(bm.verts.new(shell_pt(ph, RI + tuft(ph, z), z)))
-            col_o.append(bm.verts.new(shell_pt(ph, RO, z)))
-        grid_in.append(col_i); grid_out.append(col_o)
+        ph = -PH0 + 2 * PH0 * i / NPH
+        rings.append([bm.verts.new(W2(ph, d_ + (tuft(ph, z_) if tf else 0.0), z_)) for d_, z_, tf in section(ph)])
+    n_ = len(rings[0])
     for i in range(NPH):
-        for j in range(NZ):
-            bm.faces.new((grid_in[i][j], grid_in[i][j + 1], grid_in[i + 1][j + 1], grid_in[i + 1][j])).smooth = True
-            bm.faces.new((grid_out[i][j], grid_out[i + 1][j], grid_out[i + 1][j + 1], grid_out[i][j + 1])).smooth = True
-    for i in range(NPH):                                                  # the rolled top and the foot of the shell
-        bm.faces.new((grid_in[i][NZ], grid_out[i][NZ], grid_out[i + 1][NZ], grid_in[i + 1][NZ])).smooth = True
-        bm.faces.new((grid_in[i][0], grid_in[i + 1][0], grid_out[i + 1][0], grid_out[i][0]))
-    for i in (0, NPH):                                                    # the arm fronts
-        for j in range(NZ): bm.faces.new((grid_in[i][j], grid_out[i][j], grid_out[i][j + 1], grid_in[i][j + 1])).smooth = True
+        for j in range(n_):
+            j2 = (j + 1) % n_
+            bm.faces.new((rings[i][j], rings[i + 1][j], rings[i + 1][j2], rings[i][j2]))
+    for i, sgn in ((0, 1), (NPH, -1)):                                          # the scrolled arm fronts
+        c_ = bm.verts.new(sum((v.co for v in rings[i]), Vector()) / n_)
+        ph = -PH0 if i == 0 else PH0; c_.co += Vector(W2(ph * 1.012, TH / 2, 0)) - Vector(W2(ph, TH / 2, 0))
+        for j in range(n_):
+            q_ = (rings[i][j], rings[i][(j + 1) % n_], c_)
+            bm.faces.new(q_ if sgn > 0 else q_[::-1])
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
-    me = bpy.data.meshes.new("deskchair_back"); bm.to_mesh(me); bm.free()
-    ch = bpy.data.objects.new("deskchair_back", me); STY.objects.link(ch); setmat(ch, M_GREEN_LEATHER)
-    bv = ch.modifiers.new("roll", "BEVEL"); bv.width = 0.03; bv.segments = 5; bv.limit_method = "ANGLE"
-    sd = ch.modifiers.new("s", "SUBSURF"); sd.levels = 1; sd.render_levels = 1
-    M_BTN = flat("chair_button", (0.008, 0.06, 0.028), 0.3, coat=0.4)
-    for k, (bp, bz) in enumerate(buttons):
-        bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=6, radius=0.007, location=shell_pt(bp, RI + 20, bz)); solid(f"deskchair_btn{k}", STY, M_BTN, 0)
-    # the seat: a loose cushion on a sprung base, both in the leather
-    bpy.ops.mesh.primitive_cylinder_add(vertices=64, radius=0.31, depth=0.07, location=P(CHX, CHS, SEAT_Z - 35)); solid("deskchair_seatbase", STY, M_GREEN_LEATHER, 0.02, 4)
-    bpy.ops.mesh.primitive_cylinder_add(vertices=64, radius=0.29, depth=0.09, location=P(CHX, CHS + 10, SEAT_Z + 45)); cu_ = solid("deskchair_cushion", STY, M_GREEN_LEATHER, 0.035, 6)
-    cu_.scale = (1.0, 1.0, 1.0); [setattr(p_, "use_smooth", True) for p_ in cu_.data.polygons]
-    # the swivel: a column and a five-star base in dark bronze, brass castors
-    M_CBRZ = flat("chair_bronze", (0.04, 0.03, 0.022), 0.35, 1.0)
-    bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=0.03, depth=0.30, location=P(CHX, CHS, 250)); solid("deskchair_column", STY, M_CBRZ, 0.003, 2)
-    for k in range(5):
-        a_ = 2 * math.pi * k / 5
-        bpy.ops.mesh.primitive_cube_add(size=1, location=P(CHX + 170 * math.sin(a_), CHS - 170 * math.cos(a_), 95))
-        lg_ = bpy.context.active_object; lg_.scale = (0.04, 0.34, 0.03); lg_.rotation_euler = (0, 0, -a_); solid(f"deskchair_leg{k}", STY, M_CBRZ, 0.008, 3)
-        bpy.ops.mesh.primitive_uv_sphere_add(segments=16, ring_count=8, radius=0.028, location=P(CHX + 330 * math.sin(a_), CHS - 330 * math.cos(a_), 30)); solid(f"deskchair_castor{k}", STY, M_BRASS, 0)
-    print(f"desk chair: royal green, tufted, {len(buttons)} buttons, at {CHX:.0f}, {CHS:.0f}", flush=True)
+    sh = link("deskchair_back", bm, M_GREEN_LEATHER)
+    sd = sh.modifiers.new("s", "SUBSURF"); sd.levels = 1; sd.render_levels = 2
+    for k, (bu, bz, _, _) in enumerate(buttons):                                # the buttons, sunk in their dimples
+        ph = bu / RI; dep = tuft(ph, bz)
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=16, ring_count=8, radius=0.0085, location=W2(ph, dep - 2.5, bz))
+        bt = bpy.context.active_object; bt.scale = (1, 1, 1); bt.name = f"deskchair_btn{k}"
+        bt.rotation_euler = (0, 0, -ph); bt.scale = (1.0, 0.55, 1.0)
+        for c in list(bt.users_collection): c.objects.unlink(bt)
+        STY.objects.link(bt); setmat(bt, M_BTN); [setattr(p_, "use_smooth", True) for p_ in bt.data.polygons]; keep(bt)
+    M_NAIL = M_BRASS
+    nails = 0
+    for i in range(0, 300):                                                     # brass nailheads round the foot of the outside back
+        ph = -PH0 + 0.05 + (2 * PH0 - 0.1) * i / 299
+        if (i % 1) == 0:
+            bpy.ops.mesh.primitive_uv_sphere_add(segments=10, ring_count=5, radius=0.0055, location=W2(ph, TH + 1, ZB_OUT + 22))
+            nl = bpy.context.active_object; nl.name = f"deskchair_nail{i}"
+            for c in list(nl.users_collection): c.objects.unlink(nl)
+            STY.objects.link(nl); setmat(nl, M_NAIL); keep(nl); nails += 1
+    # ── the seat: a domed cushion, piped top and bottom, on a leather-covered base ──
+    SCX, SCS, SA, SBk, SFr = CHX, CHS + 25, RI - 14, RI - 10, 300.0
+    def seat_R(phi, shrink=0.0):                                                # plan outline: round at the back, squarer at the front
+        fr = max(0.0, math.sin(phi)); n = 2.0 + 1.4 * fr
+        bq = SBk if math.sin(phi) < 0 else (SFr - 25)
+        return (abs(math.cos(phi) / (SA - shrink)) ** n + abs(math.sin(phi) / (bq - shrink)) ** n) ** (-1 / n)
+    def pillow(name, z0, h, dome, prof_r=30.0, nphi=128):
+        prof = [(0.0, z0 + h + dome)] + [(f, z0 + h + dome * (1 - f * f)) for f in (0.15, 0.3, 0.45, 0.6, 0.72, 0.82, 0.9)]
+        for k in range(1, 7):                                                   # the rounded edge
+            a = math.pi / 2 * k / 6
+            prof.append((0.9 + 0.1 * math.sin(a), z0 + h - prof_r * (1 - math.cos(a)) + dome * 0.19 * (1 - k / 6)))
+        prof += [(1.0, z0 + prof_r * 0.6), (0.97, z0 + 4), (0.85, z0), (0.0, z0)]
+        bm_ = bmesh.new(); grid = []
+        for i in range(nphi):
+            phi = 2 * math.pi * i / nphi; R_ = seat_R(phi)
+            grid.append([bm_.verts.new(P(SCX + f * R_ * math.cos(phi), SCS + f * R_ * math.sin(phi), z)) for f, z in prof[1:-1]])
+        top = bm_.verts.new(P(SCX, SCS, prof[0][1])); bot = bm_.verts.new(P(SCX, SCS, prof[-1][1]))
+        m_ = len(grid[0])
+        for i in range(nphi):
+            a_, b_ = grid[i], grid[(i + 1) % nphi]
+            bm_.faces.new((top, a_[0], b_[0]))
+            for j in range(m_ - 1): bm_.faces.new((a_[j], a_[j + 1], b_[j + 1], b_[j]))
+            bm_.faces.new((a_[-1], bot, b_[-1]))
+        bmesh.ops.recalc_face_normals(bm_, faces=bm_.faces[:])
+        o = link(name, bm_, M_GREEN_LEATHER); s2 = o.modifiers.new("s", "SUBSURF"); s2.levels = 1; s2.render_levels = 2
+        return o, prof
+    pillow("deskchair_seatbase", SEAT_Z - 150, 110, 0, 18)
+    cu_, prof_ = pillow("deskchair_cushion", SEAT_Z - 40, 85, 22, 34)
+    def piping(name, f, z, r=0.0055):
+        cv = bpy.data.curves.new(name, "CURVE"); cv.dimensions = "3D"; cv.bevel_depth = r; cv.bevel_resolution = 3
+        spl = cv.splines.new("POLY"); n = 128; spl.points.add(n - 1)
+        for i in range(n):
+            phi = 2 * math.pi * i / n; R_ = seat_R(phi) * f
+            spl.points[i].co = (*P(SCX + R_ * math.cos(phi), SCS + R_ * math.sin(phi), z), 1)
+        spl.use_cyclic_u = True
+        o = bpy.data.objects.new(name, cv); STY.objects.link(o); o.data.materials.append(M_BTN); return keep(o)
+    piping("deskchair_pipe_top", 0.985, SEAT_Z - 40 + 85 - 6)
+    piping("deskchair_pipe_bot", 0.99, SEAT_Z - 40 + 18)
+    for i in range(0, 120):                                                     # nailheads round the seat base's front
+        phi = math.radians(8 + 164 * i / 119); R_ = seat_R(phi) + 1
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=10, ring_count=5, radius=0.0055, location=P(SCX + R_ * math.cos(phi), SCS + R_ * math.sin(phi), SEAT_Z - 128))
+        nl = bpy.context.active_object; nl.name = f"deskchair_snail{i}"
+        for c in list(nl.users_collection): c.objects.unlink(nl)
+        STY.objects.link(nl); setmat(nl, M_NAIL); keep(nl)
+    # ── the swivel: an iron tilt block, a turned mahogany column, four splayed legs, brass castors ──
+    M_IRONC = flat("chair_iron", (0.025, 0.022, 0.02), 0.45, 1.0)
+    keep(dbox("deskchair_tilt", CHX - 110, CHS - 110, SEAT_Z - 200, CHX + 110, CHS + 110, SEAT_Z - 150, M_IRONC))
+    colp = [(0, 110), (62, 110), (64, 128), (50, 140), (44, 170), (38, 200), (34, 232), (42, 246), (44, 256), (36, 266), (30, SEAT_Z - 205), (40, SEAT_Z - 200), (0, SEAT_Z - 200)]
+    bmc = bmesh.new(); rr_ = []
+    for i in range(48):
+        a = 2 * math.pi * i / 48; rr_.append([bmc.verts.new(P(CHX + r * math.cos(a), CHS + r * math.sin(a), z)) for r, z in colp])
+    for i in range(48):
+        a_, b_ = rr_[i], rr_[(i + 1) % 48]
+        for j in range(len(colp) - 1): bmc.faces.new((a_[j], b_[j], b_[j + 1], a_[j + 1]))
+    bmesh.ops.remove_doubles(bmc, verts=bmc.verts[:], dist=0.0001); bmesh.ops.recalc_face_normals(bmc, faces=bmc.faces[:])
+    link("deskchair_column", bmc, M_DESK)
+    for k in range(4):
+        a = math.radians(45 + 90 * k); ca, sa = math.cos(a), math.sin(a)
+        bml = bmesh.new(); prev = None
+        for i in range(17):
+            t = i / 16; r = 40 + 300 * t; z = 128 - 20 * t - 70 * t * t       # a gentle sweep down and out
+            w = 26 - 9 * t; h = 24 - 8 * t
+            c = Vector(P(CHX + r * ca, CHS + r * sa, z)); side = Vector((-sa, -ca, 0)).normalized() if False else Vector((-sa, -ca, 0))
+            nx, ny = -sa, ca                                                      # across the leg, in the room's x/s
+            ring = [bml.verts.new(P(CHX + r * ca + ox * nx * w / 2, CHS + r * sa + ox * ny * w / 2, z + oz * h / 2)) for ox, oz in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+            if prev:
+                for q in range(4): bml.faces.new((prev[q], prev[(q + 1) % 4], ring[(q + 1) % 4], ring[q]))
+            else: bml.faces.new(ring[::-1])
+            prev = ring
+        bml.faces.new(prev)
+        bmesh.ops.recalc_face_normals(bml, faces=bml.faces[:])
+        lg = link(f"deskchair_leg{k}", bml, M_DESK, smooth=False); bevel(lg, 0.004, 3)
+        ex, es = CHX + 340 * ca, CHS + 340 * sa
+        bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.017, depth=0.03, location=P(ex, es, 42)); cup = bpy.context.active_object
+        for c in list(cup.users_collection): c.objects.unlink(cup)
+        STY.objects.link(cup); setmat(cup, M_BRASS); keep(cup); bevel(cup, 0.002, 2)
+        bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=0.021, depth=0.016, location=P(ex + 8 * ca, es + 8 * sa, 22)); wh = bpy.context.active_object
+        wh.rotation_euler = (math.pi / 2, 0, -a + math.pi / 2)
+        for c in list(wh.users_collection): c.objects.unlink(wh)
+        STY.objects.link(wh); setmat(wh, M_BRASS); keep(wh); bevel(wh, 0.003, 3)
+    # turn the whole chair a little, as if just pushed back from the desk
+    piv = bpy.data.objects.new("deskchair", None); STY.objects.link(piv); piv.location = P(CHX, CHS, 0)
+    bpy.context.view_layer.update()
+    for o in parts:
+        o.parent = piv; o.matrix_parent_inverse = piv.matrix_world.inverted()
+    piv.rotation_euler = (0, 0, math.radians(-32))
+    print(f"desk chair: Chesterfield tub, royal green, {len(buttons)} buttons, {nails} nailheads, at {CHX:.0f}, {CHS:.0f}", flush=True)
 
 # ═══════════════════════════ 3 · MATERIALS WITH DEPTH ════════════════════════
 def depth(m, bump=0.06, bevel_r=0.0015, coat_flat=True):

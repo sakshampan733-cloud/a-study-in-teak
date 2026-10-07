@@ -33,9 +33,11 @@ SHOTS = [
         {"ev": 0.5}),
     ("s11_bath", 132, ((4777 + 1150, 2050, 1500), (4777 + 3300, 950, 900)), ((4777 + 1450, 1900, 1500), (4777 + 3300, 700, 900)), 18, 6.3,
         {"ev": 0.5}),
-    # the dressing room's wardrobes, open: shirts on the rail, the lit niche, the shoe trays
-    ("s12_wardrobe", 132, ((6500, 4950, 1500), (7300, 3300, 1300)), ((7300, 4950, 1500), (8000, 3300, 1300)), 16, 6.3,
-        {"open": ("door_d2",), "ev": 1.0}),
+    # the dressing room's hidden door: the wardrobe pair turns and slides, the door swings, and on into the tunnel
+    ("s12_mech", 168, ((6900, 3950, 1450), (8100, 5550, 1250)), ((7050, 4150, 1450), (8100, 5550, 1250)), 20, 5.6,
+        {"open": ("door_d2",), "ev": 1.0, "mech": 8}),
+    ("s12b_tunnel", 132, ((7700, 4700, 1450), (8100, 7800, 1300)), ((7850, 5350, 1450), (8100, 7800, 1300)), 18, 5.6,
+        {"open": ("door_d2",), "ev": 1.0, "mech": "open"}),
     # low over the fur hide at the foot of the bed, and up into the study wall's arch
     ("s13_hide", 132, ((3900, 3100, 1050), (2500, 4300, 100)), ((3350, 2950, 950), (2337, 4350, 100)), 26, 4.0, {"tilt": True}),
     ("s14_arch", 132, ((1450, 1450, 1350), (744, 200, 2250)), ((1150, 1300, 1350), (744, 200, 2350)), 22, 5.6, {"tilt": True}),
@@ -74,6 +76,27 @@ def film_shot(sh):
         o = sc.objects[d]
         if o.animation_data: o.animation_data_clear()
         o.rotation_euler.z = o["open"] if d in ex.get("open", ()) else 0.0
+    # the hidden door (furnish.py's pose_pair / hd): shut unless the shot opens it
+    for o in (LA, LB, hd):
+        if o.animation_data: o.animation_data_clear()
+    if ex.get("mech") == "open":
+        pose_pair(math.radians(90), SLIDE); hd.rotation_euler.z = math.radians(90)
+    elif "mech" in ex:
+        a = ex["mech"]; seg = [10, 38, 30, 14, 50]; cm = [a]
+        for x in seg: cm.append(cm[-1] + x)
+        ez = lambda u: u * u * (3 - 2 * u)
+        for fr in range(1, n + 1):
+            if fr < cm[1]: al, sl, sw = 0, 0, 0
+            elif fr < cm[2]: al, sl, sw = ez((fr - cm[1]) / seg[1]), 0, 0
+            elif fr < cm[3]: al, sl, sw = 1, ez((fr - cm[2]) / seg[2]), 0
+            elif fr < cm[4]: al, sl, sw = 1, 1, 0
+            elif fr < cm[5]: al, sl, sw = 1, 1, ez((fr - cm[4]) / seg[4])
+            else: al, sl, sw = 1, 1, 1
+            pose_pair(math.radians(90) * al, SLIDE * sl); hd.rotation_euler.z = math.radians(90) * sw
+            for o in (LA, LB): o.keyframe_insert("location", frame=fr); o.keyframe_insert("rotation_euler", frame=fr)
+            hd.keyframe_insert("rotation_euler", index=2, frame=fr)
+    else:
+        pose_pair(0.0, 0.0); hd.rotation_euler.z = 0.0
     if "swing" in ex:
         d, a, b = ex["swing"]; o = sc.objects[d]
         o.rotation_euler.z = 0; o.keyframe_insert("rotation_euler", index=2, frame=1); o.keyframe_insert("rotation_euler", index=2, frame=a)
@@ -95,7 +118,9 @@ if MODER == "film":
     sc.render.use_motion_blur = os.environ.get("MBLUR") == "1"; sc.render.motion_blur_shutter = 0.5   # slow moves: blur is invisible, and costly
     sc.render.fps = 24
     sc.render.resolution_x, sc.render.resolution_y = int(os.environ.get("RX", 1920)), int(os.environ.get("RY", 1080))
-    ims = sc.render.image_settings; ims.file_format = "PNG"; ims.color_mode = "RGB"; ims.color_depth = "8"
+    ims = sc.render.image_settings; ims.color_mode = "RGB"
+    if os.environ.get("FMT", "PNG") == "JPEG": ims.file_format = "JPEG"; ims.quality = 95      # a quarter of the disk, no visible loss
+    else: ims.file_format = "PNG"; ims.color_depth = "8"
     sc.render.use_overwrite = False; sc.render.use_placeholder = True                # resumable
     cy.samples = SPP; cy.adaptive_threshold = float(os.environ.get("ATHRESH", 0.02))
     EV0 = sc.view_settings.exposure
