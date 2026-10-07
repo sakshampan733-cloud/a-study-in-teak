@@ -57,10 +57,10 @@ def rough_var(nt, b, amount=0.12, scale=5.0, detail=8.0):
     mr.inputs["To Min"].default_value = max(0.0, base - amount); mr.inputs["To Max"].default_value = min(1.0, base + amount)
     nt.links.new(n.outputs["Fac"], mr.inputs["Value"]); nt.links.new(mr.outputs["Result"], b.inputs["Roughness"])
 
-def veneer(name="teak_veneer", gloss=0.32, coat=0.35, val=0.78, sat=0.72, tex="veneer.jpg", scale=0.9):
+def veneer(name="teak_veneer", gloss=0.32, coat=0.35, val=0.78, sat=0.72, tex="veneer.jpg", scale=0.9, hue=0.5):
     m, nt, b = node_mat(name)
     t = img(nt, tex, scale, blend=0.15)
-    nt.links.new(tone(nt, t.outputs["Color"], 0.5, sat, val), b.inputs["Base Color"])
+    nt.links.new(tone(nt, t.outputs["Color"], hue, sat, val), b.inputs["Base Color"])
     b.inputs["Roughness"].default_value = gloss; b.inputs["Coat Weight"].default_value = coat
     b.inputs["Coat Roughness"].default_value = 0.12
     rough_var(nt, b, 0.07, 9.0)
@@ -387,33 +387,37 @@ for o_ in [o for o in sc.objects if o.name in ("L_study", "L_bedz")]: pass
 # ── the bathroom, as far as it is known: its stone, and the vanity (scheme C, AST-DR-021) on the door wall,
 # between the door and the pier, facing into the room ─────────────────────────
 M_CHROME = flat("chrome", (0.9, 0.9, 0.92), 0.06, 1.0)
-M_BURL_DARK = veneer("burl_dark", 0.08, 1.0, 0.12, 0.7, "burl_diva.jpg", 0.75)                  # the 9292 burl, polished as dark as the owner's vanity photo (8 Oct)
+M_BURL_DARK = veneer("burl_dark", 0.07, 1.0, 0.2, 1.45, "burl_diva.jpg", 0.75, hue=0.475)      # the 9292 burl, polished dark and RED, as the owner's vanity photo (8 Oct)
 for o_ in list(sc.objects):
     if o_.type == "MESH" and o_.name == "floor": pass
 bfl = dbox("bath_floor", BA["x0"], BA["s0"], 0.2, BA["x1"], BA["s1"], 1.2, M_BEIGE)
 pxr = BA["x1"] - PIER["east"]; pxl = pxr - PIER["w"]
 VX1 = pxl; VX0 = VX1 - 1524; VS1 = BA["s1"]; VS0 = VS1 - 610                            # 5 ft × 2 ft, against the pier
 TOPZ, SLAB = 838, 38
-# scheme C rev 4 (AST-DR-021, owner 8 Oct): the marble is the TOP only (a 76 band with its mitred front strip, over the
-# bank); the 3 ft bank and the two end cabinets are the dark burl on ONE level, 152 off the floor, over a recessed dark support.
+# scheme C rev 5 (AST-DR-021, owner 8 Oct): the 3 ft bank is the marble again — top, mitred strip, face frame and every
+# drawer front, read as one stone block with fine joints — but it stops 152 off the floor, level with the two dark red
+# burl pull-outs: a floor drain is under it. The whole row hangs on the wall; nothing stands on the floor.
 bx0, bx1 = VX1 - 457 - 914, VX1 - 457; AXx = bx0 + 457; BF = VS0 - 25                    # the bank's front, 25 proud of the ends
-BANK0, BANKT = 152, 762
-bk = dbox("van_bank", bx0, BF, BANK0, bx1, VS1, BANKT, M_BURL_DARK); bevel(bk, 0.002, 2)
-blk = dbox("van_block", bx0, BF, BANKT, bx1, VS1, TOPZ, M_BEIGE); bevel(blk, 0.0025, 2)   # the marble top and its front strip
+BANK0 = 152
+blk = dbox("van_block", bx0, BF, BANK0, bx1, VS1, TOPZ, M_BEIGE); bevel(blk, 0.0025, 2)
 def joint(name, x0_, z0_, x1_, z1_):
     dbox(name, x0_, BF - 0.6, z0_, x1_, BF + 2, z1_, M_DARK)
 joint("van_j_h0", bx0 + 18, 190, bx1 - 18, 192.5)                                          # under the big drawer
 joint("van_j_h1", bx0 + 18, 566, bx1 - 18, 568.5)                                          # over the big drawer
 joint("van_j_h2", bx0 + 18, 591, bx1 - 18, 593.5)                                          # under the top pair
-joint("van_j_v", AXx - 1.2, 593.5, AXx + 1.2, BANKT)                                       # the top pair splits on the tap line
-for xx in (bx0 + 18, bx1 - 20.5): joint(f"van_j_s{xx:.0f}", xx, 190, xx + 2.5, BANKT)
+joint("van_j_h3", bx0 + 18, 760, bx1 - 18, 762.5)                                          # under the mitred strip
+joint("van_j_v", AXx - 1.2, 593.5, AXx + 1.2, 760)                                         # the top pair splits on the tap line
+for xx in (bx0 + 18, bx1 - 20.5): joint(f"van_j_s{xx:.0f}", xx, 190, xx + 2.5, 762.5)
 ETOP = 800
 for (x0_, x1_, nm) in ((bx1, VX1, "L"), (VX0, bx0, "R")):                                  # 1 ft 6 at the pier end, 6 in at the door end
     e = dbox(f"van_end{nm}", x0_ + 2, VS0, BANK0, x1_ - 2, VS1, ETOP - 22, M_BURL_DARK); bevel(e, 0.002, 2)
     t_ = dbox(f"van_etop{nm}", x0_ + 2, VS0 - 4, ETOP - 22, x1_ - 2, VS1, ETOP, M_BURL_DARK); bevel(t_, 0.006, 4)
+    for xg in (x0_ + 2, x1_ - 4):                                                          # the pull-out's front, its joints
+        dbox(f"van_ej{nm}{xg:.0f}", xg, VS0 - 0.6, BANK0 + 3, xg + 2, VS0 + 2, ETOP - 25, M_DARK)
     bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=0.018, depth=0.01, location=P((x0_ + x1_) / 2, VS0 - 3, ETOP - 110))
     cp = bpy.context.active_object; cp.rotation_euler = (math.pi / 2, 0, 0); setmat(cp, M_CHROME)            # cup pull
-dbox("van_support", VX0 + 38, VS0 + 76, 0, VX1 - 38, VS1, BANK0, M_DARK)                  # the one recessed support, set back 3 in
+bpy.ops.mesh.primitive_cylinder_add(vertices=48, radius=0.06, depth=0.004, location=P(AXx, VS0 + 260, 1.6))
+setmat(bpy.context.active_object, M_CHROME); bpy.context.active_object.name = "van_drain"      # the floor drain the bank stops short of
 # the vessel bowl on the block, on the tap line; the wall spout over it
 bpy.ops.mesh.primitive_uv_sphere_add(segments=64, ring_count=32, radius=0.203, location=P(AXx, VS1 - 320, TOPZ + 126))
 bowl = bpy.context.active_object; bowl.name = "van_bowl"; bowl.scale = (1, 1, 0.62)
@@ -428,15 +432,67 @@ bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=0.03, depth=0.008, locat
 pl = bpy.context.active_object; pl.rotation_euler = (math.pi / 2, 0, 0); setmat(pl, M_CHROME)
 bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=0.025, depth=0.03, location=P(AXx + 130, VS1 - 15, 1161))
 hd_ = bpy.context.active_object; hd_.rotation_euler = (math.pi / 2, 0, 0); setmat(hd_, M_CHROME)            # the mixer
-# the mirror (still to brief): the block's width, floating off the wall, a warm light behind it
-mz0, mz1 = 1260, 2060
-dbox("van_mirror", bx0, VS1 - 30, mz0, bx1, VS1 - 24, mz1, M_MIRROR)
-ld = bpy.data.lights.new("van_halo", "AREA"); ld.size, ld.size_y = (bx1 - bx0 - 80) / 1000, 0.6; ld.shape = "RECTANGLE"; ld.energy = 30; warm(ld, 3000)
-lo = bpy.data.objects.new("van_halo", ld); sc.collection.objects.link(lo); lo.location = P(AXx, VS1 - 34, (mz0 + mz1) / 2); lo.rotation_euler = (math.radians(-90), 0, 0)
-lo.visible_camera = False; lo.visible_glossy = False
-ld = bpy.data.lights.new("van_under", "AREA"); ld.size, ld.size_y = (bx1 - bx0 - 40) / 1000, 0.02; ld.shape = "RECTANGLE"; ld.energy = 18; warm(ld, 3000)
-lo = bpy.data.objects.new("van_under", ld); sc.collection.objects.link(lo); lo.location = P(AXx, VS1 - 40, mz0 - 8)
-lo.visible_camera = False
+# the mirror (the owner's reference, assets/refs/vanity-mirror-ref-owner.png): a tall elongated octagon in a nickel frame
+# with a beaded inner edge, bevelled glass, tilting a few degrees on two pivots — a rod from the marble pier on one side,
+# a cranked wall arm on the other — hung 220 off the wall, centred on the tap line.
+MW, MH, MSH, MFR, MOFF, MZ0, TILT = 760.0, 1000.0, 240.0, 42.0, 220.0, 1240.0, math.radians(4)
+def oct_pts(w, h, sh, inset=0.0):
+    hw, top = w / 2 - inset, h - inset
+    k = inset * math.tan(math.radians(22.5))
+    q = w / 4
+    return [(-q + k, inset), (q - k, inset), (hw, sh + inset * 0.4), (hw, top - sh - inset * 0.4), (q - k, top), (-q + k, top), (-hw, top - sh - inset * 0.4), (-hw, sh + inset * 0.4)]
+def oct_obj(name, outer, inner, depth, m):
+    bm = bmesh.new(); n = len(outer)
+    if inner is None:
+        f0 = [bm.verts.new((x / 1000, 0, z / 1000)) for x, z in outer]; bm.faces.new(f0)
+    else:
+        vo = [bm.verts.new((x / 1000, 0, z / 1000)) for x, z in outer]; vi = [bm.verts.new((x / 1000, 0, z / 1000)) for x, z in inner]
+        for i in range(n):
+            j = (i + 1) % n; bm.faces.new((vo[i], vo[j], vi[j], vi[i]))
+    me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
+    o = bpy.data.objects.new(name, me); sc.collection.objects.link(o); setmat(o, m)
+    so = o.modifiers.new("t", "SOLIDIFY"); so.thickness = depth / 1000; so.offset = 0
+    bv = o.modifiers.new("ease", "BEVEL"); bv.width = 0.0015; bv.segments = 2; bv.limit_method = "ANGLE"
+    return o
+M_NICKEL = flat("nickel", (0.78, 0.77, 0.74), 0.22, 1.0)
+mpiv = bpy.data.objects.new("van_mirror_pivot", None); sc.collection.objects.link(mpiv)
+mpiv.location = P(AXx, VS1 - MOFF, MZ0 + MH / 2)
+O = oct_pts(MW, MH, MSH); I1 = oct_pts(MW, MH, MSH, MFR); I2 = oct_pts(MW, MH, MSH, MFR - 10)
+parts = [oct_obj("van_mirror_frame", O, I1, 26, M_NICKEL), oct_obj("van_mirror", I1, None, 6, M_MIRROR),
+         oct_obj("van_mirror_lip", oct_pts(MW, MH, MSH, 6), oct_pts(MW, MH, MSH, 12), 30, M_NICKEL)]
+# the beads: one small sphere repeated round the frame's inner edge
+bpy.ops.mesh.primitive_uv_sphere_add(segments=10, ring_count=6, radius=0.0042, location=(0, 0, 0)); bead = bpy.context.active_object; setmat(bead, M_NICKEL)
+bead.data.name = "van_bead"; bpy.data.objects.remove(bead, do_unlink=True)
+bd = bpy.data.meshes["van_bead"]; nb = 0
+for i in range(len(I2)):
+    (x0_, z0_), (x1_, z1_) = I2[i], I2[(i + 1) % len(I2)]
+    seg = math.hypot(x1_ - x0_, z1_ - z0_); k_ = max(1, int(seg // 10.5))
+    for q_ in range(k_):
+        t_ = (q_ + 0.5) / k_; ob = bpy.data.objects.new(f"van_bead{nb}", bd); sc.collection.objects.link(ob); nb += 1
+        ob.location = ((x0_ + (x1_ - x0_) * t_) / 1000, 0.014, (z0_ + (z1_ - z0_) * t_) / 1000); parts.append(ob)
+for o_ in parts:
+    o_.parent = mpiv; o_.location.z -= MH / 2000
+mpiv.rotation_euler = (-TILT, 0, 0)                                                               # its top tipped out a little
+# the pivots, rods and roses
+def rod(name, a, b, r=9.0, m=None):
+    (x0_, s0_, z0_), (x1_, s1_, z1_) = a, b
+    L_ = math.dist(a, b); mid = P((x0_ + x1_) / 2, (s0_ + s1_) / 2, (z0_ + z1_) / 2)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=r / 1000, depth=L_ / 1000, location=mid); o = bpy.context.active_object; o.name = name
+    d = Vector(P(x1_, s1_, z1_)) - Vector(P(x0_, s0_, z0_)); o.rotation_euler = d.to_track_quat("Z", "Y").to_euler(); setmat(o, m or M_NICKEL)
+    for o_ in o.data.polygons: o_.use_smooth = True
+    return o
+zp, sp_ = MZ0 + MH / 2, VS1 - MOFF
+rod("van_rod_pier", (AXx + MW / 2 + 6, sp_, zp), (VX1, sp_, zp))                                   # to the marble pier
+rod("van_rose_pier", (VX1 - 8, sp_, zp), (VX1, sp_, zp), 30)
+rod("van_arm_x", (AXx - MW / 2 - 6, sp_, zp), (AXx - MW / 2 - 150, sp_, zp))                      # the cranked wall arm
+rod("van_arm_s", (AXx - MW / 2 - 150, sp_ - 9, zp), (AXx - MW / 2 - 150, VS1, zp))
+rod("van_rose_wall", (AXx - MW / 2 - 150, VS1 - 8, zp), (AXx - MW / 2 - 150, VS1, zp), 30)
+for sx in (1, -1):
+    rod(f"van_pivot{sx}", (AXx + sx * (MW / 2 - 4), sp_, zp), (AXx + sx * (MW / 2 + 22), sp_, zp), 15)
+# the bathroom's marble on the pier as well (the owner): a skin on its three faces
+pz0, pz1 = VS1 - PIER["out"], VS1
+dbox("bath_pier_w", pxl - 10, pz0, 0, pxl, pz1, H, M_BEIGE); dbox("bath_pier_n", pxl - 10, pz0 - 10, 0, pxr + 10, pz0, H, M_BEIGE)
+dbox("bath_pier_e", pxr, pz0, 0, pxr + 10, pz1, H, M_BEIGE)
 # the rest of the bathroom — WC wall and niches, glass, the shower and its dropped ceiling, the tub, the owner's lights
 exec(compile(open(os.path.join(HERE, "bathroom.py")).read(), "bathroom.py", "exec"))
 
@@ -882,7 +938,8 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
     "vanity": ((6250, 1150, 1400), (6600, 2718, 950)),
     "bath_wc": ((4777 + 2300, 2300, 1550), (4777 + 900, 450, 1250), {"lens": 20, "fstop": 8}),       # the WC wall, its niches, the WC and shower in glass
     "bath_tub": ((4777 + 1150, 2050, 1500), (4777 + 3300, 950, 550), {"lens": 22, "fstop": 8}),      # the tub east of the pier
-    "bath_van": ((4777 + 1780, 800, 1250), (4777 + 1780, 2718, 1000), {"lens": 24, "fstop": 8}),     # the vanity: marble top, dark-burl bank and ends on one level
+    "bath_van": ((4777 + 1780, 1130, 1420), (4777 + 1780, 2718, 1180), {"lens": 14, "fstop": 8}),       # the vanity square on, from just outside the glass
+    "bath_van2": ((4777 + 420, 1150, 1500), (4777 + 2000, 2500, 1050), {"lens": 16, "fstop": 8}),       # the vanity and the pier, from by the door     # the vanity: marble top, dark-burl bank and ends on one level
     "bath_up": ((4777 + 1300, 2100, 1300), (4777 + 1950, 400, 2600), {"lens": 18, "fstop": 8}),      # the dropped shower ceiling and its cove
     "door": ((2600, 3500), (-177, 5200, 1250)),
     "dress": ((4900, 4450), (8400, 4356, 1500)),

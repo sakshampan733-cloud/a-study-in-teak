@@ -25,7 +25,7 @@ def bbox(name, x0, y0, z0, x1, y1, z1, m, bev=0.0):
 
 # ── marble on the walls, floor to ceiling (the owner's photo), a 10 mm skin on each inside face ──
 W_, D_ = BA["x1"] - BA["x0"], BA["s1"] - BA["s0"]
-WX0, WX1, WS, WH = 228.0, 1142.0, 1829.0, 610.0                # the window (size still to measure), left open in the marble
+WX0, WX1, WS, WH = 380.0, 990.0, 1829.0, 305.0                 # the window, 2 ft × 1 ft (owner, 8 Oct), its centre and sill as before
 for nm, (a, b, c, d) in {"n1": (0, WX0, 0, H), "n2": (WX1, W_, 0, H), "n3": (WX0, WX1, 0, WS), "n4": (WX0, WX1, WS + WH, H)}.items():
     bbox(f"bath_wall_{nm}", a, 0, c, b, 10, d, M_BEIGE)
 bbox("bath_wall_s", 0, D_ - 10, 0, W_, D_, H, M_BEIGE)

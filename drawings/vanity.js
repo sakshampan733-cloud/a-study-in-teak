@@ -40,10 +40,11 @@ function innerOutline(open, AX, D = VANITY.D) {
   return { x0, x1, d0, d1, arm: "", path: `M ${x0} ${d0} L ${n0} ${d0} L ${n0} ${nd} L ${n1} ${nd} L ${n1} ${d0} L ${x1} ${d0} L ${x1} ${d1} L ${x0} ${d1} Z` };
 }
 
-// Scheme C, as chosen (30.09), revised 8 Oct (owner): the marble no longer comes down — it is the top only, with its one
-// mitred corner. The middle bank is now veneer like the ends, its drawers on the SAME level as the ends' (6 in off the
-// floor), the whole row standing on one recessed support, so the drawers have less height than when the stone ran to the
-// floor. The veneer is the 9292 burl, polished as dark as the owner's first vanity photo.
+// Scheme C, as chosen (30.09), revised 8 Oct (owner): the marble bank keeps its marble face frame and drawer fronts, but
+// no longer runs to the floor — there is a floor drain under it. The whole row now hangs 6 in off the floor, the bank
+// level with the two end pull-outs (which stay veneer), on the wall cleat and concealed steel brackets: no support under
+// it. So the bank's drawers have less height than when it stood on the floor. The veneer is the 9292 burl, polished dark
+// and red, as the owner's first vanity photo.
 // Owner, 2 Oct: the top and the front meet as ONE mitred marble corner — no lip, no step. The fronts come forward
 // the 1 in the marble used to oversail, so every drawer front is flush with the edge of the top (2 ft 1 in deep).
 // The top mitres into a fixed marble strip across the top of the bank; the drawers start under it, push-to-open.
@@ -62,8 +63,9 @@ function buildVanity(V) {
   const bank = V.bank, mid = (bank[0] + bank[1]) / 2;
   const SP = Math.abs(mid - AX) < 3 ? AX : mid;                        // the drawers split on the bank's centre
   const open = [bank[0] + K.stile, bank[1] - K.stile];
-  const MARBLE = "#efede7", VEN = "#a39485", id = V.key.replace(/\W/g, "");
-  const FF = FLOOR ? MARBLE : VEN;                                      // the bank's face frame and fronts
+  const MARBLE = "#efede7", VEN = "#9a7266", id = V.key.replace(/\W/g, "");
+  const MF = FLOOR || !!V.marbleFront;                                  // the bank faced in marble
+  const FF = MF ? MARBLE : VEN;                                         // the bank's face frame and fronts
 
   const TOPH = 1130, E = (h) => TOPH - h;                                  // elevation and section: y down from 1130
   const LN = (a, b, c, d, w, x = "") => `<line x1="${f(a)}" y1="${f(b)}" x2="${f(c)}" y2="${f(d)}" stroke-width="${f(w)}" ${x}/>`;
@@ -98,7 +100,7 @@ function buildVanity(V) {
     if (FLOOR) {                                                                          // veneer ends, marble bank to the floor
       o += RE(0, K.clear, bank[0], K.top, t * 1.3, VEN) + RE(bank[1], K.clear, L, K.top, t * 1.3, VEN);
       o += RE(bank[0], 0, bank[1], K.top, t * 1.3, MARBLE);
-    } else o += RE(0, K.clear, L, K.top, t * 1.3, VEN);                                    // the carcass
+    } else o += RE(0, K.clear, L, K.top, t * 1.3, VEN) + (MF ? RE(bank[0], K.clear, bank[1], K.top, t * 1.3, MARBLE) : "");   // the carcass; the bank faced in marble, 6 in off the floor
     o += RE(V.marble[0], K.mitre ? K.top2[1] : K.top, V.marble[1], K.counter, t * 1.3, MARBLE);   // the marble over the bank (mitred: the top and its strip read as one)
     FRONTS.forEach((F) => {
       o += RE(F.x0 + gap, F.h0 + gap, F.x1 - gap, F.h1 - gap, t * 1.1, F.kind === "door" || F.kind === "pullout" ? VEN : FF);
@@ -290,7 +292,7 @@ function buildVanity(V) {
   s += heading(RX, 90, "FRONTS", "SIZES ARE THE FRONT ITSELF · 3 MM GAP ALL ROUND", 108);
   s += text(RX, 102, "No.", { size: 1.4, fill: THIN }) + text(RX + 8, 102, "WHAT", { size: 1.4, fill: THIN }) + text(RX + 60, 102, "W × H", { size: 1.4, fill: THIN }) + text(RX + 108, 102, "FT-IN", { size: 1.4, fill: THIN, anchor: "end" });
   FRONTS.forEach((F, i) => {
-    const y = 106.5 + i * 4.1, what = F.kind === "door" ? "Door, cup pull" : F.kind === "pullout" ? "Pull-out cabinet, cup pull" : (F.kind === "top" ? "Top drawer, push-open" : "Big drawer, U-box, push-open") + (FLOOR ? " · marble" : "");
+    const y = 106.5 + i * 4.1, what = F.kind === "door" ? "Door, cup pull" : F.kind === "pullout" ? "Pull-out cabinet, cup pull" : (F.kind === "top" ? "Top drawer, push-open" : "Big drawer, U-box, push-open") + (MF ? " · marble" : "");
     s += text(RX, y, String(i + 1), { size: 1.55, weight: 700 }) + text(RX + 8, y, what, { size: 1.55 });
     s += text(RX + 60, y, `${Math.round(F.w)} × ${Math.round(F.h)}`, { size: 1.55 });
     s += text(RX + 108, y, `${mmToFt(F.w)} × ${mmToFt(F.h)}`, { size: 1.45, fill: THIN, anchor: "end" });
@@ -329,30 +331,30 @@ function buildVanity(V) {
 }
 
 buildVanity({
-  key: "vanity-c", dwg: "AST-DR-021", name: "Vanity — scheme C (final)", date: "08.10.2026", rev: "4 — marble the top only; bank and ends in dark burl, one level, on a support",
-  title: "VANITY — SCHEME C", sub: "Final · marble top · dark-burl bank and pull-outs, one level on a support",
-  headline: "FINAL · 1 FT 6 LEFT, 6 IN RIGHT · 3 FT BANK ON THE FAUCET · MARBLE THE TOP ONLY, THE ROW 6 IN OFF THE FLOOR",
-  bank: [457, 1371], marble: [457, 1371], support: [38, 1486], ledges: "two", pullouts: true, dims: VANITY_C,
+  key: "vanity-c", dwg: "AST-DR-021", name: "Vanity — scheme C (final)", date: "08.10.2026", rev: "5 — marble bank 6 in off the floor (a drain below), wall-hung; ends in dark red burl",
+  title: "VANITY — SCHEME C", sub: "Final · marble bank and top · dark red burl pull-outs · wall-hung, 6 in clear",
+  headline: "FINAL · 1 FT 6 LEFT, 6 IN RIGHT · 3 FT MARBLE BANK ON THE FAUCET · THE ROW WALL-HUNG 6 IN OFF THE FLOOR, A DRAIN BELOW",
+  bank: [457, 1371], marble: [457, 1371], support: null, marbleFront: true, ledges: "two", pullouts: true, dims: VANITY_C,
   doors: [[0, 457], [1371, 1524, 19]],
-  stations: [0, 457, 1371, 1524], spans: [457, "914 BANK", 153],
+  stations: [0, 457, 1371, 1524], spans: [457, "914 MARBLE", 153],
   materials: [
     ["Top", "Beige-gold marble, the bathroom stone. 18 slab"], ["", "on a 20 BWP sub-top, mitred at the front edge into"],
     ["", "a fixed 18 marble strip: one corner, fronts flush."],
-    ["Bank", "9292 burl veneer, polished very dark (the owner's"], ["", "first vanity photo), high gloss. Face frame and"],
-    ["", "every drawer front, level with the ends."],
-    ["Ends", "Two pull-out cabinets, the same dark burl, gloss,"], ["", "18 BWP, edges sealed. 6 in off the floor."],
-    ["Support", "One recessed support under the row, set back 3 in,"], ["", "BWP, dark: the marble carries nothing."],
+    ["Bank", "The same beige marble on the face frame and on"], ["", "every drawer front, bonded to BWP boxes. It stops"],
+    ["", "6 in off the floor, level with the ends: a drain below."],
+    ["Ends", "Two pull-out cabinets, 9292 burl veneer, polished"], ["", "dark and red (the owner's photo), gloss, edges sealed."],
+    ["Hanging", "18 ply cleat 700–760 and concealed steel brackets"], ["", "into the wall: the stone is heavy. Nothing on the floor."],
     ["Ledges", "The two veneer tops: solid nosing, sealed."],
     ["Runners", "Drawers: undermount, push-to-open. Pull-outs:"], ["", "heavy full-extension runners, cup pull."],
     ["Fittings", "Chrome — already bought."]],
   notes: [
-    "Rev 4: the marble stays on the top only. The bank is veneer,",
-    "6 in off the floor like the ends, on one recessed support.",
-    "Top drawers: 6½ in fronts. Drawer within: a 4 in front on a",
-    "5½ in box. The big drawer: 14½ in front, 6 in clear below.",
+    "Rev 5: the marble bank is back — face frame and fronts —",
+    "but stops 6 in off the floor, level with the ends: a drain",
+    "is on the floor below. The row hangs on the wall; no support.",
+    "Top drawers 6½ in; the big drawer 14½ in, a 4 in inner one.",
     "OPEN — bowl Ø406 × 127 and the spout are assumed.",
-    "OPEN — the support's design: set back 3 in, dark; to confirm.",
+    "OPEN — marble front thickness and its bond to the drawer",
+    "   boxes, and the brackets' size: stone supplier to confirm.",
     "Rev 3: top and front meet in one mitred corner, flush.",
-    "Veneer: as dark as the first photo, glossy; brass-free.",
   ],
 });

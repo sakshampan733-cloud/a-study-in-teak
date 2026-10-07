@@ -14,7 +14,7 @@ const BATH = {
   W: 3734, D: 2718, H: 2769, T: 230,                 // 12 ft 3 in × 8 ft 11 in, 9 ft 1 in ceiling, 9 in walls
   chase: { d: 178, l: 1092 },                        // the 7 in WC wall, 3 ft 7 in from the window wall
   pier: { x0: 2540, x1: 2794, out: 914 },            // 10 in thick, 3 ft out from the door wall, 3 ft 1 in off the east wall
-  win: { x0: 228, x1: 1142, sill: 1829, h: 610 },    // the bathroom window — size and height NOT measured
+  win: { x0: 380, x1: 990, sill: 1829, h: 305 },     // the bathroom window, 2 ft × 1 ft (owner, 8 Oct) — sill NOT measured
   door: { x0: 0, x1: 762, lin: 38, leaf: 686 },      // D3, from the dressing room, hinged on the left going in
   bay: 1219, deep: 1041,                             // WC and shower: 4 ft wide, 3 ft 5 in from the wall (owner)
   glass: { t: 10, h: 2000, door: 600 },              // clear toughened, frameless, 6 ft 6¾ in — ASSUMED
