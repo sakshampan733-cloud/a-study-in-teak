@@ -28,8 +28,17 @@ SHOTS = [
         {"open": ("door_d2",), "ev": 1.3}),
     ("s09_vault", 132, ((5700, 4356, 1400), (7700, 4356, 1900)), ((6000, 4356, 1400), (7700, 4356, 3050)), 20, 5.6,
         {"open": ("door_d2",), "ev": 1.3, "tilt": True}),
-    ("s10_vanity", 132, ((6100, 1000, 1350), (6403, 2718, 1000)), ((6250, 1350, 1330), (6403, 2718, 990)), 26, 4.0,
-        {"open": ("door_d2", "door_d3"), "ev": 0.7}),
+    # the bathroom (8 Oct): the vanity square on — marble bank, red-burl ends, the tri-fold, the door beside it — then the tub
+    ("s10_vanity", 132, ((4777 + 1500, 1150, 1450), (4777 + 1250, 2718, 1150)), ((4777 + 1300, 1380, 1430), (4777 + 1250, 2718, 1150)), 15, 6.3,
+        {"ev": 0.5}),
+    ("s11_bath", 132, ((4777 + 1150, 2050, 1500), (4777 + 3300, 950, 900)), ((4777 + 1450, 1900, 1500), (4777 + 3300, 700, 900)), 18, 6.3,
+        {"ev": 0.5}),
+    # the dressing room's wardrobes, open: shirts on the rail, the lit niche, the shoe trays
+    ("s12_wardrobe", 132, ((6500, 4950, 1500), (7300, 3300, 1300)), ((7300, 4950, 1500), (8000, 3300, 1300)), 16, 6.3,
+        {"open": ("door_d2",), "ev": 1.0}),
+    # low over the fur hide at the foot of the bed, and up into the study wall's arch
+    ("s13_hide", 132, ((3900, 3100, 1050), (2500, 4300, 100)), ((3350, 2950, 950), (2337, 4350, 100)), 26, 4.0, {"tilt": True}),
+    ("s14_arch", 132, ((1450, 1450, 1350), (744, 200, 2250)), ((1150, 1300, 1350), (744, 200, 2350)), 22, 5.6, {"tilt": True}),
 ]
 FLOAT = float(os.environ.get("FLOAT", 1.0))
 PREVIEW = os.environ.get("PREVIEW") == "1"                     # how much the camera floats in the hand (1 = a gimbal)
