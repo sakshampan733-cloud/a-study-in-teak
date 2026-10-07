@@ -329,7 +329,7 @@ def lamp(name, x, s, z, face, arms=2, span=150):
         bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=12, radius=0.016, location=c + Vector((0, 0, 0.012)))
         bulb = bpy.context.active_object; setmat(bulb, M_BULB)
         ld = bpy.data.lights.new(f"{name}_bulb{k}", "POINT"); ld.shadow_soft_size = 0.02; ld.energy = 14
-        warm(ld, 2600)
+        warm(ld, 2700)                                          # the lamps: 2700 K, warmer than the coves and spots (owner, 7 Oct)
         lo = bpy.data.objects.new(f"{name}_bulb{k}", ld); sc.collection.objects.link(lo); lo.location = c + Vector((0, 0, 0.02))
 
 def warm(ld, K):
@@ -370,6 +370,8 @@ def dress_leaf(dname, w):
         setmat(kn, M_BRASS)
     d.data.materials.clear(); d.data.materials.append(M_VEN); bevel(d, 0.003)
 exec(compile(open(os.path.join(HERE, "joinery.py")).read(), "joinery.py", "exec"))    # the joinery at drawing depth
+# the wardrobes: three bays open and fitted out to AST-DR-048, lit backs, hammered brass handles (owner, 7 Oct)
+exec(compile(open(os.path.join(HERE, "wardrobe2.py")).read(), "wardrobe2.py", "exec"))
 
 # ── the bed wall: parchment plaster, seamless, over the whole 15 ft 6 in wall, skirting to ceiling ──
 pw_ = dbox("parchment_wall", xLb + 16, Lb - 21, SK, xR - 1, Lb - 15, H - 1, M_PARCH)
@@ -428,15 +430,14 @@ hd_ = bpy.context.active_object; hd_.rotation_euler = (math.pi / 2, 0, 0); setma
 # the mirror (still to brief): the block's width, floating off the wall, a warm light behind it
 mz0, mz1 = 1260, 2060
 dbox("van_mirror", bx0, VS1 - 30, mz0, bx1, VS1 - 24, mz1, M_MIRROR)
-ld = bpy.data.lights.new("van_halo", "AREA"); ld.size, ld.size_y = (bx1 - bx0 - 80) / 1000, 0.6; ld.shape = "RECTANGLE"; ld.energy = 30; warm(ld, 2700)
+ld = bpy.data.lights.new("van_halo", "AREA"); ld.size, ld.size_y = (bx1 - bx0 - 80) / 1000, 0.6; ld.shape = "RECTANGLE"; ld.energy = 30; warm(ld, 3000)
 lo = bpy.data.objects.new("van_halo", ld); sc.collection.objects.link(lo); lo.location = P(AXx, VS1 - 34, (mz0 + mz1) / 2); lo.rotation_euler = (math.radians(-90), 0, 0)
 lo.visible_camera = False; lo.visible_glossy = False
-ld = bpy.data.lights.new("van_under", "AREA"); ld.size, ld.size_y = (bx1 - bx0 - 40) / 1000, 0.02; ld.shape = "RECTANGLE"; ld.energy = 18; warm(ld, 2700)
+ld = bpy.data.lights.new("van_under", "AREA"); ld.size, ld.size_y = (bx1 - bx0 - 40) / 1000, 0.02; ld.shape = "RECTANGLE"; ld.energy = 18; warm(ld, 3000)
 lo = bpy.data.objects.new("van_under", ld); sc.collection.objects.link(lo); lo.location = P(AXx, VS1 - 40, mz0 - 8)
 lo.visible_camera = False
-# the bathroom's light: soft, from the ceiling
-ld = bpy.data.lights.new("bath_ceiling", "AREA"); ld.size, ld.size_y = 1.2, 0.8; ld.shape = "RECTANGLE"; ld.energy = 120; warm(ld, 2900)
-lo = bpy.data.objects.new("bath_ceiling", ld); sc.collection.objects.link(lo); lo.location = P((BA["x0"] + BA["x1"]) / 2, (BA["s0"] + BA["s1"]) / 2, H - 20)
+# the rest of the bathroom — WC wall and niches, glass, the shower and its dropped ceiling, the tub, the owner's lights
+exec(compile(open(os.path.join(HERE, "bathroom.py")).read(), "bathroom.py", "exec"))
 
 # ── left wall: the air conditioner, measured 3 ft 10 × 1 ft, on the painting's centre line ──
 acs = 2299
@@ -572,7 +573,7 @@ for z in (686, 890 + 25, 1160 + 25, 1430 + 25, 1700 + 25):
         else: x += w_ + rng.uniform(0.3, 2.0)
         nb += 1
 # the bookcase strip light, under the head rail
-ld = bpy.data.lights.new("book_strip", "AREA"); ld.shape = "RECTANGLE"; ld.size, ld.size_y = (book - 120) / 1000, 0.03; ld.energy = 35; warm(ld, 2700)
+ld = bpy.data.lights.new("book_strip", "AREA"); ld.shape = "RECTANGLE"; ld.size, ld.size_y = (book - 120) / 1000, 0.03; ld.energy = 35; warm(ld, 3000)
 lo = bpy.data.objects.new("book_strip", ld); sc.collection.objects.link(lo); lo.location = P(book / 2, 120, 2025)
 
 # ── the dressing room's coffered vault (the owner's photo): three coffers across, five along ──
@@ -613,15 +614,29 @@ for sgn in (-1, 1):                                                   # the spri
     s_edge = vs + sgn * cvw / 2
     dbox(f"v_spring{sgn}", vx0, min(s_edge, s_edge + sgn * 120), H - 60, vx1, max(s_edge, s_edge + sgn * 120), H, M_CEIL)
     # the vault's cove: a warm strip along each springing, washing up into the coffers
-    ld = bpy.data.lights.new(f"v_cove{sgn}", "AREA"); ld.shape = "RECTANGLE"; ld.size, ld.size_y = (vx1 - vx0) / 1000, 0.03; ld.energy = float(os.environ.get("VCOVE", 70)); warm(ld, 2700)
+    ld = bpy.data.lights.new(f"v_cove{sgn}", "AREA"); ld.shape = "RECTANGLE"; ld.size, ld.size_y = (vx1 - vx0) / 1000, 0.03; ld.energy = float(os.environ.get("VCOVE", 70)); warm(ld, 3000)
     lo = bpy.data.objects.new(f"v_cove{sgn}", ld); sc.collection.objects.link(lo); lo.location = P((vx0 + vx1) / 2, s_edge - sgn * 170, H - 150)
     lo.rotation_euler = (math.radians(180 + sgn * 35), 0, 0)
 
 # the light the vault throws back down: a soft fill under the crown, seen by nothing but the room
 ld = bpy.data.lights.new("v_fill", "AREA"); ld.shape = "RECTANGLE"; ld.size, ld.size_y = (vx1 - vx0 - 300) / 1000, 1.0
-ld.energy = float(os.environ.get("VFILL", 140)); warm(ld, 2800)
+ld.energy = float(os.environ.get("VFILL", 140)); warm(ld, 3000)
 lo = bpy.data.objects.new("v_fill", ld); sc.collection.objects.link(lo); lo.location = P((vx0 + vx1) / 2, vs, H + 120)
 lo.visible_camera = False; lo.visible_glossy = False
+
+# the owner's dressing lights (7 Oct): a FOCUS light (a recessed spot, 3000 K) in every coffer of the middle column down the
+# vault, and in all three coffers of the row over the mirror — seven in all; the coves along the springings stay, and a
+# cove over the bathroom door (where the left run's fourth cupboard would be) is added with the bedroom's coves below
+spots_dr = [(k, 1) for k in range(NX)] + [(NX - 1, 0), (NX - 1, 2)]
+for k, j in spots_dr:
+    x_, th_ = vx0 + (k + 0.5) * bay, -th0 + 2 * th0 * (j + 0.5) / NA
+    bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.032, depth=0.004, location=arc_pt(x_, th_, 8))
+    tr_ = bpy.context.active_object; tr_.name = f"dr_spot_trim{k}{j}"; tr_.rotation_euler = (th_, 0, 0); setmat(tr_, M_TRIM)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.022, depth=0.003, location=arc_pt(x_, th_, 10))
+    ds_ = bpy.context.active_object; ds_.name = f"dr_spot_disc{k}{j}"; ds_.rotation_euler = (th_, 0, 0); setmat(ds_, M_DISC)
+    ld = bpy.data.lights.new(f"dr_spot{k}{j}", "SPOT"); ld.spot_size = math.radians(50); ld.spot_blend = 0.7; ld.shadow_soft_size = 0.015
+    ld.energy = float(os.environ.get("DRSPOT", 11)); warm(ld, 3000)
+    so = bpy.data.objects.new(f"dr_spot{k}{j}", ld); sc.collection.objects.link(so); so.location = arc_pt(x_, th_, 22)   # pointing straight down, just under the shell's face
 
 # ── the bedroom's ceiling: a cove line 6 in off three walls, and the spots already cut ──
 def cove(name, x0, s0, x1, s1, power_per_m=28):
@@ -629,23 +644,24 @@ def cove(name, x0, s0, x1, s1, power_per_m=28):
     dbox(name + "_strip", min(x0, x1) - (0 if x0 != x1 else 12), min(s0, s1) - (0 if s0 != s1 else 12), H - 4,
          max(x0, x1) + (0 if x0 != x1 else 12), max(s0, s1) + (0 if s0 != s1 else 12), H, M_STRIP)
     ld = bpy.data.lights.new(name, "AREA"); ld.shape = "RECTANGLE"
-    ld.size, ld.size_y = (L_, 0.024) if s0 == s1 else (0.024, L_); ld.energy = power_per_m * L_; warm(ld, 2700)
+    ld.size, ld.size_y = (L_, 0.024) if s0 == s1 else (0.024, L_); ld.energy = power_per_m * L_; warm(ld, 3000)   # coves 3000 K (owner, 7 Oct)
     lo = bpy.data.objects.new(name, ld); sc.collection.objects.link(lo); lo.location = P((x0 + x1) / 2, (s0 + s1) / 2, H - 8)
 OFF = 152
 cove("cove_left_a", xLs + OFF, STUDY + 200, xLs + OFF, yS - 50)
 cove("cove_left_b", xLb + OFF, yS + 50, xLb + OFF, Lb - OFF)
 cove("cove_bed", xLb + OFF, Lb - OFF, xR - OFF, Lb - OFF)
 cove("cove_right", xR - OFF, STUDY + 200, xR - OFF, Lb - OFF)
+cove("dr_cove_door", BA["x0"] + 30, DR["s0"] + OFF, BA["x0"] + D3["open"] - 30, DR["s0"] + OFF)   # dressing: over the bathroom door (owner, 7 Oct)
 for o in [o for o in sc.objects if o.parent and o.parent.name == "ceiling" and o.type == "MESH" and o.name.startswith("Cylinder")]:
     setmat(o, M_TRIM)
     loc = o.matrix_world.translation.copy()
     bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.022, depth=0.003, location=loc - Vector((0, 0, 0.003)))
     setmat(bpy.context.active_object, M_DISC)
-    ld = bpy.data.lights.new("spot", "SPOT"); ld.spot_size = math.radians(55); ld.spot_blend = 0.7; ld.shadow_soft_size = 0.015; ld.energy = 9; warm(ld, 2700)
+    ld = bpy.data.lights.new("spot", "SPOT"); ld.spot_size = math.radians(55); ld.spot_blend = 0.7; ld.shadow_soft_size = 0.015; ld.energy = 9; warm(ld, 3000)                 # focus lights 3000 K
     so = bpy.data.objects.new("spot", ld); sc.collection.objects.link(so); so.location = loc - Vector((0, 0, 0.01))
 
 # the dressing room also gets its wardrobes' warm glow where the tunnel bay opens, and the tunnel a light
-ld = bpy.data.lights.new("tunnel", "AREA"); ld.size = 0.6; ld.energy = 25; warm(ld, 2700)
+ld = bpy.data.lights.new("tunnel", "AREA"); ld.size = 0.6; ld.energy = 25; warm(ld, 3000)
 lo = bpy.data.objects.new("tunnel", ld); sc.collection.objects.link(lo); lo.location = P((tun["x0"] + tun["x1"]) / 2, (tun["s0"] + tun["s1"]) / 2, TUN["h"] - 40)
 for o in sc.objects:
     if o.type == "MESH" and o.name.startswith(("tb_side", "tb_top")): setmat(o, M_LINING)
@@ -709,6 +725,55 @@ def curtain():
     if tb: tb.location = (0, 0, 0)
 # 1 Oct: the owner wants the curtain out for now (it hid the window and panelling); keep curtain() for when it returns
 for o_ in [o for o in sc.objects if o.name.startswith("curtain") or o.name == "tieback"]: bpy.data.objects.remove(o_, do_unlink=True)
+
+# ── the curtains, approved (owner, 7 Oct): a white linen sheer on a slim rod inside the window, falling to the sill; heavy
+#    red velvet on a brass rod under the crown, 13 in off the wall, two panels tied back with gold rope and tassels at 1250,
+#    falling to the counter just in front of its edge (AST-DR-040). Shaped, not simulated: pleats set by hand. ──
+M_VELVET = fabric("red_velvet", (0.17, 0.008, 0.013), 1.0, 0.82, 1500)
+def pleated(name, rows, m, thick=0.003):
+    bm = bmesh.new(); vr = [[bm.verts.new(P(*q)) for q in row] for row in rows]
+    for ra, rb in zip(vr, vr[1:]):
+        for i in range(len(ra) - 1): bm.faces.new((ra[i], ra[i + 1], rb[i + 1], rb[i]))
+    me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
+    o = bpy.data.objects.new(name, me); DET.objects.link(o); setmat(o, m)
+    so = o.modifiers.new("t", "SOLIDIFY"); so.thickness = thick
+    sd = o.modifiers.new("s", "SUBSURF"); sd.levels = 1; sd.render_levels = 2
+    for p_ in me.polygons: p_.use_smooth = True
+    return o
+# the sheer: fine pleats, the width of the window, from just under the arch's springing to the sill
+SH_Z0, SH_Z1, SH_S = WIN["sill"] + 20, gW["ys"] - 12, GLASS_S + 28
+rows = []
+for j in range(41):
+    z = SH_Z0 + (SH_Z1 - SH_Z0) * j / 40
+    rows.append([(WX0 + 15 + (WX1 - WX0 - 30) * i / 160, SH_S + 14 * math.sin(2 * math.pi * i / 160 * 24) + 3 * math.sin(z / 300 + i), z) for i in range(161)])
+pleated("curtain_sheer", rows, M_SHEER, 0.0008)
+rr_ = dbox("curtain_sheer_rod", WX0 + 5, SH_S - 6, SH_Z1 + 2, WX1 - 5, SH_S + 6, SH_Z1 + 14, M_BRONZE); bevel(rr_, 0.005, 3)
+# the velvet: two panels, full at the rod, swept to the tie-back, flaring to the counter
+VR_Z, VR_S, VTIE, VBOT = 2440.0, FACE + 50.0, 1250.0, CTOP + 14.0
+VX0 = ZX0 + 14.0
+def vel_width(z):
+    if z >= VTIE: u = (z - VTIE) / (VR_Z - VTIE); return 170 + 160 * (u * u * (3 - 2 * u))
+    u = (VTIE - z) / (VTIE - VBOT); return 170 + 130 * math.sin(min(1.0, u * 1.6) * math.pi / 2)
+for k_, (xo, d) in enumerate(((VX0, 1), (WX1 - 6, -1))):
+    rows = []
+    for j in range(61):
+        z = VBOT + (VR_Z - 25 - VBOT) * j / 60; w_ = vel_width(z)
+        amp = 34 + 14 * math.exp(-((z - VTIE) / 260) ** 2) + 10 * (1 - (z - VBOT) / (VR_Z - VBOT))
+        belly = 26 * math.exp(-((z - (VTIE - 260)) / 220) ** 2)
+        rows.append([(xo + d * w_ * i / 48, VR_S + amp * math.sin(2 * math.pi * i / 48 * 6) + belly, z) for i in range(49)])
+    pleated(f"curtain_velvet{k_}", rows, M_VELVET, 0.004)
+    xt = xo + d * 150
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.10, minor_radius=0.009, location=P(xo + d * 85, VR_S + 10, VTIE))
+    tb_ = bpy.context.active_object; tb_.name = f"curtain_tie{k_}"; tb_.scale = (1.0, 0.55, 0.35); setmat(tb_, M_BRASS)
+    bpy.ops.mesh.primitive_cone_add(vertices=24, radius1=0.022, radius2=0.008, depth=0.13, location=P(xt, VR_S + 60, VTIE - 90))
+    ts_ = bpy.context.active_object; ts_.name = f"curtain_tassel{k_}"; setmat(ts_, M_BRASS)
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.016, location=P(xt, VR_S + 60, VTIE - 18)); setmat(bpy.context.active_object, M_BRASS)
+bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.015, depth=(xR - VX0 + 10) / 1000, location=P((VX0 + xR) / 2, VR_S, VR_Z))
+vrod = bpy.context.active_object; vrod.name = "curtain_velvet_rod"; vrod.rotation_euler = (0, math.pi / 2, 0); setmat(vrod, M_BRASS)
+bpy.ops.mesh.primitive_uv_sphere_add(radius=0.03, location=P(VX0 - 20, VR_S, VR_Z)); setmat(bpy.context.active_object, M_BRASS)
+for x_ in (VX0 + 40, xR - 60):
+    dbox(f"curtain_bracket{x_:.0f}", x_ - 8, FACE, VR_Z - 8, x_ + 8, VR_S, VR_Z + 8, M_BRASS)
+print("curtains: sheer + red velvet pair, tied back", flush=True)
 
 # ── the corridor outside the front door, wider and longer than the stub furnish.py left ──
 for o_ in [o for o in sc.objects if o.name.startswith("cor_")]: bpy.data.objects.remove(o_, do_unlink=True)
@@ -801,13 +866,20 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
     "b_three": ((300, 3500, 1350), (2700, 5650, 900), {"lens": 26, "fstop": 5.6}),
     "b_cove": ((4380, 5080, 1650), (3150, 5740, 1700), {"lens": 26, "fstop": 5.6}),   # along the wall from the dressing corner: the cove in profile
     "b_head": ((3150, 4150, 1050), (3200, 5700, 850), {"lens": 38, "fstop": 2.8}),
-    "st_close": ((2950, 4650, 950), (3560, 5560, 430), {"lens": 40, "fstop": 4.0}),   # the side table by the dressing corner
+    "st_close": ((2950, 4650, 950), (3560, 5560, 430), {"lens": 40, "fstop": 4.0}),
+    "st_wall": ((2337, 2250, 1550), (2337, 0, 1450), {"lens": 15, "fstop": 8.0}),      # the whole study wall, from over the desk
+    "st_arch": ((1250, 1350, 1350), (744, 200, 2250), {"lens": 22, "fstop": 5.6}),     # up into the bookcase arch and its niches
+    "st_chair": ((3600, 2250, 1300), (2337, 1050, 650), {"lens": 26, "fstop": 5.6}),   # the green chair at the desk
+    "hide_close": ((3350, 3150, 520), (2700, 3700, 0), {"lens": 32, "fstop": 4.0}),     # low over the hide's fur   # the side table by the dressing corner
     "c_gloss": ((2337, 4700, 1350), (2700, 600, 2500), {"lens": 20, "fstop": 8.0}),    # up at the gloss ceiling, toward the window
     "b_rug": ((3900, 3050, 1750), (2337, 4350, 100), {"lens": 22, "fstop": 8.0}),    # the bed's foot and the rug under it (bed side of the glass)
     "t_front": ((2337, 3560, 980), (2337, 2780, 360), {"lens": 22, "fstop": 8}),
     "t_three": ((3550, 3700, 950), (2600, 2780, 260), {"lens": 28, "fstop": 5.6}),
     "t_end": ((3900, 3150, 700), (3300, 2650, 250), {"lens": 30, "fstop": 4}),
     "vanity": ((6250, 1150, 1400), (6600, 2718, 950)),
+    "bath_wc": ((4777 + 2300, 2300, 1550), (4777 + 900, 450, 1250), {"lens": 20, "fstop": 8}),       # the WC wall, its niches, the WC and shower in glass
+    "bath_tub": ((4777 + 1150, 2050, 1500), (4777 + 3300, 950, 550), {"lens": 22, "fstop": 8}),      # the tub east of the pier
+    "bath_up": ((4777 + 1300, 2100, 1300), (4777 + 1950, 400, 2600), {"lens": 18, "fstop": 8}),      # the dropped shower ceiling and its cove
     "door": ((2600, 3500), (-177, 5200, 1250)),
     "dress": ((4900, 4450), (8400, 4356, 1500)),
     "vault": ((5100, 4356, 1450), (7600, 4356, 3000)),

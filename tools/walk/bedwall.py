@@ -100,6 +100,21 @@ for i in range(5):
         z0_, z1_ = SKH + j * ph + G_ / 2, SKH + (j + 1) * ph - G_ / 2
         o_ = dbox(f"bw_panel{i}{j}", XU(u1_), SV(PL), z0_, XU(u0_), SV(1), z1_, M_PARCH); bevel(o_, 0.0015, 2)
 dbox("bw_panel_bed", XU(U1), SV(1), SKH, XU(U0), SV(0), NH, M_DARK)          # the joints read dark
+# the parchment blocks vary, darker and lighter, as the owner's photo (7 Oct): each panel takes its own tone from its object's
+# random number, on its own copy of the parchment so nothing else in the room changes
+def _vary_tone(m, lo=0.74, hi=1.10):
+    nt = m.node_tree; b = nt.nodes.get("Principled BSDF")
+    lk = next((l for l in nt.links if l.to_node == b and l.to_socket.name == "Base Color"), None)
+    if not lk: return m
+    src = lk.from_socket; nt.links.remove(lk)
+    oi = nt.nodes.new("ShaderNodeObjectInfo"); mr = nt.nodes.new("ShaderNodeMapRange"); mr.inputs["To Min"].default_value = lo; mr.inputs["To Max"].default_value = hi
+    nt.links.new(oi.outputs["Random"], mr.inputs["Value"])
+    mx = nt.nodes.new("ShaderNodeMixRGB"); mx.blend_type = "MULTIPLY"; mx.inputs["Fac"].default_value = 1.0
+    nt.links.new(src, mx.inputs["Color1"]); nt.links.new(mr.outputs["Result"], mx.inputs["Color2"]); nt.links.new(mx.outputs["Color"], b.inputs["Base Color"])
+    return m
+M_PARCH_V = _vary_tone(M_PARCH.copy())
+for o_ in sc.objects:
+    if o_.name.startswith("bw_panel") and o_.name != "bw_panel_bed": setmat(o_, M_PARCH_V)
 
 # ── the bed: a storage base to the floor, the headboard behind (owner, 7 Oct) ─────────────────────────────────────
 # The headboard stays the photo's dusty-rose suede (owner, 7 Oct: "keep the headboard same"); the base is GLOSS BLACK

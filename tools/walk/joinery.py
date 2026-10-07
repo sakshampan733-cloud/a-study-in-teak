@@ -87,6 +87,17 @@ def P_cyma(h, a0, a1):                       # cyma recta crown: from a0 out at 
         u = i / 12; pts.append((a0 + (a1 - a0) * (0.5 - 0.5 * math.cos(math.pi * u)), h * 0.85 * u))
     return pts + [(a1, h * 0.85), (a1, h), (0, h)]
 
+def P_panel():                               # the owner's panel moulding (8 Oct, his third photo): a deep layered French
+    pts = [(0, 0), (0, 8)]                   # profile — a rounded outer roll, a flat, a step into a cove, a small bead,
+    pts += [(10 * (1 - math.cos(t)), 8 + 18 * math.sin(t)) for t in [i * math.pi / 2 / 6 for i in range(1, 7)]]   # and a last cove into
+    pts += [(22, 26), (22, 20)]                                                                                     # the panel: 72 wide,
+    pts += [(22 + 20 * math.sin(t), 20 - 8 * (1 - math.cos(t))) for t in [i * math.pi / 2 / 6 for i in range(1, 7)]]   # 26 proud
+    pts += [(48, 12)] + [(48 + 6 - 6 * math.cos(t), 12 + 4 * math.sin(t)) for t in [i * math.pi / 6 for i in range(1, 6)]] + [(60, 12), (60, 6)]
+    pts += [(60 + 12 * math.sin(t), 6 * math.cos(t)) for t in [i * math.pi / 2 / 5 for i in range(1, 6)]]
+    return pts
+def P_rail():                                # the rail under the panels in the same spirit: a stepped band of fine lines, 90 high
+    return P_steps([(0, 8, 10), (8, 20, 16), (20, 26, 20), (26, 64, 24), (64, 70, 20), (70, 82, 16), (82, 90, 10)])
+
 X, Y, Z = (1, 0, 0), (0, -1, 0), (0, 0, 1)          # Blender axes: +s is −Y
 
 # ── a mitred frame on a wall ────────────────────────────────────────────────────
@@ -228,15 +239,17 @@ for o in J.objects:
     if o.type == "MESH" and o.name.startswith(("st_cor", "st_cyma")):
         for p_ in o.data.polygons: p_.use_smooth = False
 # the study sconces sit on the pilaster faces
+# the second scheme with the arches (AST-DR-040, owner-approved 7 Oct) replaces the head, centre bay and cornice
+exec(compile(open(os.path.join(HERE, "studywall2.py")).read(), "studywall2.py", "exec"))
 
 # ═══════════════════════════ THE RIGHT WALL: profiled panelling ═════════════════
 for o in list(sc.objects):
     if o.name.startswith(("rw_tall", "rw_short", "rw_rail")): bpy.data.objects.remove(o, do_unlink=True)
-for k, (a, b) in enumerate(panels + [nar]):
-    frame_on(f"rwp_t{k}", "x", xR, a, b, 797, 2629, P_ogee(55, 24), -1, M_PAINT)
-    frame_on(f"rwp_s{k}", "x", xR, a, b, 213, 549, P_ogee(55, 24), -1, M_PAINT)
+for k, (a, b) in enumerate(panels + [nar]):                       # the owner's layered panel moulding (8 Oct)
+    frame_on(f"rwp_t{k}", "x", xR, a, b, 797, 2629, P_panel(), -1, M_PAINT)
+    frame_on(f"rwp_s{k}", "x", xR, a, b, 213, 549, P_panel(), -1, M_PAINT)
 for (a, b) in ((STUDY, d2s0 - 102), (d2s1 + 102, Lb - 15)):
-    run(f"rwp_rail{a}", [(b_, a_) for a_, b_ in P_reeds(38, 28, 4, 4)], xR, b, xR, a, 648, M_PAINT)
+    run(f"rwp_rail{a}", [(b_, a_) for a_, b_ in P_rail()], xR, b, xR, a, 610, M_PAINT)
 
 # ═══════════════════════════ DOORS: planted mouldings to AST-DR-015 ═════════════
 for o in list(sc.objects):
@@ -363,96 +376,8 @@ def casing(tag, xwall, s0, s1, face, carved, jambs=(True, True)):
 # the main door has no casing (the owner, 30.09) — only its frame, inside the opening
 casing("jc_d2", xR, d2s0, d2s1, -1, True)
 
-# ═══════════════════════════ THE DESK: AST-DR-028 / -029, square corners ═══════════════
+# ═══════════════════════════ THE DESK ═══════════════════════════════════════════
 for o in list(sc.objects):
     if o.name.startswith(("desk_", "ped0", "ped1", "plinth0", "plinth1", "modesty")): bpy.data.objects.remove(o, do_unlink=True)
-OV = 32                                                   # the top oversails the carcase 1¼ in
-ZPL, ZPED, ZRAIL, ZFR, ZTOP = 89, 629, 644, 718, 750       # plinth · pedestal drawers · reeded rail · frieze · top
-cx0, cx1, cs0, cs1 = dx0 + OV, dx1 - OV, dFront + OV, dBack - OV          # carcase; the FRONT (drawers) faces the study (s = cs0)
-PW = 559                                                   # each pedestal 1 ft 10
-peds = [(cx0, cx0 + PW), (cx1 - PW, cx1)]
-FRONT = (0, 1, 0)                                          # Blender: the front face looks toward −s = +Y
-def tube(name, pts, r=3.0, face=FRONT, m=None):
-    ring = [(r * math.cos(t), r * math.sin(t)) for t in [i * 2 * math.pi / 10 for i in range(10)]]
-    return sweep(name, ring, pts, face, False, m or M_BRASS, smooth=True)
-# plinth under each pedestal, 3½ in, ogee top mould projecting 15, mitred
-for i, (a, b) in enumerate(peds):
-    dbox(f"dk_pl{i}", a - 15, cs0 - 15, 0, b + 15, cs1 + 15, ZPL - 22, M_DESK)
-    corners = [(a - 15, cs0 - 15, ZPL - 22), (b + 15, cs0 - 15, ZPL - 22), (b + 15, cs1 + 15, ZPL - 22), (a - 15, cs1 + 15, ZPL - 22)]
-    og = [(0, 0), (0, 8), (4, 14), (10, 18), (15, 22), (15, 22.01)][::1]
-    sweep(f"dk_plog{i}", [(-x_, z_) for x_, z_ in [(0, 0), (15, 0), (15, 6), (11, 12), (6, 16), (2, 20), (0, 22)]], corners[::-1], (0, 0, 1), True, M_DESK)
-    # the pedestal carcase and its end / back fielded panels
-    dbox(f"dk_ped{i}", a, cs0 + 20, ZPL, b, cs1, ZPED, M_DESK)
-    xe = a if i == 0 else b; out = -1 if i == 0 else 1
-    frame_on(f"dk_endfr{i}", "x", xe, cs0 + 90, cs1 - 90, ZPL + 70, ZPED - 60, P_ogee(30, 12), out, M_DESK)
-    ef = dbox(f"dk_endf{i}", min(xe, xe + out * 8), cs0 + 132, ZPL + 112, max(xe, xe + out * 8), cs1 - 132, ZPED - 102, M_DESK); bevel(ef, 0.012, 3)
-    frame_on(f"dk_bkfr{i}", "s", cs1, a + 70, b - 70, ZPL + 70, ZPED - 60, P_ogee(30, 12), 1, M_DESK)
-    # three drawers, graduated (7⅛ · 6¼ · 5½ in from the bottom), cockbeaded, swan-neck bail + keyhole
-    z = ZPL + 14
-    for k, hgt in enumerate((181, 159, 140)):
-        x0_, x1_ = a + 22, b - 22
-        dbox(f"dk_df{i}{k}", x0_, cs0, z, x1_, cs0 + 20, z + hgt, M_DESK)
-        frame_on(f"dk_cb{i}{k}", "s", cs0, x0_, x1_, z, z + hgt, P_half(3, 3), -1, M_DESK)
-        hx, hz = (x0_ + x1_) / 2, z + hgt / 2 - 6
-        for sx in (-44.5, 44.5):
-            bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.008, depth=0.008, location=P(hx + sx, cs0 - 4, hz + 12))
-            ro = bpy.context.active_object; ro.rotation_euler = (math.pi / 2, 0, 0); setmat(ro, M_BRASS)
-        bail = [(hx - 44.5, cs0 - 9, hz + 12), (hx - 42, cs0 - 9, hz + 2), (hx - 34, cs0 - 9, hz - 10), (hx - 22, cs0 - 9, hz - 16),
-                (hx, cs0 - 9, hz - 17), (hx + 22, cs0 - 9, hz - 16), (hx + 34, cs0 - 9, hz - 10), (hx + 42, cs0 - 9, hz + 2), (hx + 44.5, cs0 - 9, hz + 12)]
-        tube(f"dk_bail{i}{k}", bail, 2.6, (0, 0, 1))
-        dbox(f"dk_kh{i}{k}", hx - 5, cs0 - 2, hz + 30, hx + 5, cs0 + 1, hz + 44, M_BRASS)
-        z += hgt + 18
-    # the corner moulding (fillet + bead + fillet) on each face just in from the outer corner, collars, plinth block
-    cxm = a + 22 if i == 0 else b - 22
-    for (px, face_) in ((cxm, "front"),):
-        bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=0.007, depth=(ZPED - ZPL) / 1000, location=P(px, cs0 - 3, (ZPL + ZPED) / 2))
-        bd = bpy.context.active_object; setmat(bd, M_DESK)
-        for zc in (ZPL + 120, ZPED - 140):
-            bpy.ops.mesh.primitive_torus_add(major_radius=0.009, minor_radius=0.004, location=P(px, cs0 - 3, zc))
-            setmat(bpy.context.active_object, M_DESK)
-# the kneehole: reeded rail across the full width, the modesty panel (two fielded panels), the carved drops
-run("dk_rail", [(b_, a_) for a_, b_ in P_reeds(15, 12, 3, 3)], cx1, cs0 - 4, cx0, cs0 - 4, ZPED)
-dbox("dk_railb", cx0, cs0 - 4, ZPED, cx1, cs1, ZRAIL, M_DESK)
-mz0 = 150
-dbox("dk_mod", peds[0][1], cs1 - 40, mz0, peds[1][0], cs1 - 22, ZPED, M_DESK)
-mw_ = (peds[1][0] - peds[0][1]) / 2
-for k in range(2):
-    a_ = peds[0][1] + k * mw_
-    frame_on(f"dk_modfr{k}", "s", cs1 - 40, a_ + 60, a_ + mw_ - 60, mz0 + 60, ZPED - 60, P_ogee(30, 12), -1, M_DESK)
-    frame_on(f"dk_modbk{k}", "s", cs1 - 22, a_ + 60, a_ + mw_ - 60, mz0 + 60, ZPED - 60, P_ogee(30, 12), 1, M_DESK)
-for i, xs_ in enumerate((peds[0][1] + 33, peds[1][0] - 33)):                  # kneehole stiles carry the carved drops
-    dbox(f"dk_stile{i}", xs_ - 33, cs0 - 2, ZPL, xs_ + 33, cs0 + 20, ZPED, M_DESK)
-    zc = ZPED - 60
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=16, ring_count=8, radius=0.012, location=P(xs_, cs0 - 8, zc + 16))
-    rb = bpy.context.active_object; rb.scale = (1.9, 0.6, 0.8); setmat(rb, M_DESK)               # ribbon bow
-    size = 16.0
-    while zc > ZPL + 90 and size > 5:
-        bpy.ops.mesh.primitive_uv_sphere_add(segments=16, ring_count=8, radius=size / 1000, location=P(xs_, cs0 - 7, zc - size))
-        hk = bpy.context.active_object; hk.scale = (0.7, 0.55, 1.35); setmat(hk, M_DESK)          # a husk
-        zc -= size * 2.7
-        bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=6, radius=0.0035, location=P(xs_, cs0 - 6, zc + 3))
-        setmat(bpy.context.active_object, M_DESK)                                                   # the bead between
-        zc -= 8; size *= 0.9
-# frieze: three push-to-open drawers with cockbeads, under a 12 × 12 cove
-fx = [cx0, peds[0][1], peds[1][0], cx1]
-for k in range(3):
-    dbox(f"dk_fr{k}", fx[k] + 3, cs0, ZRAIL, fx[k + 1] - 3, cs0 + 22, ZFR - 2, M_DESK)
-    frame_on(f"dk_frcb{k}", "s", cs0, fx[k] + 3, fx[k + 1] - 3, ZRAIL, ZFR - 2, P_half(3, 3), -1, M_DESK)
-dbox("dk_frbox", cx0, cs0 + 22, ZRAIL, cx1, cs1, ZFR, M_DESK)
-cv = [(0, 0), (12, 0)] + [(12 - 12 * math.sin(t), 12 - 12 * math.cos(t)) for t in [i * math.pi / 2 / 8 for i in range(1, 9)]]
-sweep("dk_cove", [(a_, -b_ + 12) for a_, b_ in [(0, 12), (12, 12)] + [(12 - 12 * math.sin(t), 12 - 12 * math.cos(t) * 0 - 12 * (1 - math.cos(t)) + 0) for t in [i * math.pi / 2 / 8 for i in range(1, 9)]]],
-      [(cx1, cs0, ZFR - 12), (cx0, cs0, ZFR - 12), (cx0, cs1, ZFR - 12), (cx1, cs1, ZFR - 12)][::-1], (0, 0, 1), True, M_DESK) if False else None
-# the top: plain teak, the reeded edge (8 reeds) mitred all round
-dbox("dk_top", dx0 + 9, dFront + 9, ZTOP - 32, dx1 - 9, dBack - 9, ZTOP, M_DESK)
-sweep("dk_edge", [(b_, a_) for a_, b_ in P_reeds(32, 9, 8, 2.5)],
-      [(dx0 + 9, dFront + 9, ZTOP - 32), (dx0 + 9, dBack - 9, ZTOP - 32), (dx1 - 9, dBack - 9, ZTOP - 32), (dx1 - 9, dFront + 9, ZTOP - 32)], (0, 0, -1), True, M_DESK)
-# console brackets: reeded, under the top at the outer corners (34 wide) and the kneehole stiles (50 wide)
-for (xb, wb) in ((cx0 + 17, 34), (cx1 - 17, 34), (peds[0][1] + 33, 50), (peds[1][0] - 33, 50)):
-    dbox(f"dk_cons{xb:.0f}", xb - wb / 2, cs0 - 38, ZFR - 190, xb + wb / 2, cs0, ZFR, M_DESK)
-    for r in range(4):
-        rx = xb - wb / 2 + wb * (r + 0.5) / 4
-        bpy.ops.mesh.primitive_cylinder_add(vertices=10, radius=0.0035, depth=0.15, location=P(rx, cs0 - 38, ZFR - 105))
-        setmat(bpy.context.active_object, M_DESK)
-    bpy.ops.mesh.primitive_cylinder_add(vertices=20, radius=0.017, depth=wb / 1000, location=P(xb, cs0 - 30, ZFR - 190))
-    sf = bpy.context.active_object; sf.rotation_euler = (0, math.pi / 2, 0); setmat(sf, M_DESK)          # the scroll foot
-    dbox(f"dk_cabac{xb:.0f}", xb - wb / 2 - 4, cs0 - 44, ZFR - 14, xb + wb / 2 + 4, cs0, ZFR, M_DESK)     # abacus
+# the desk as approved (AST-DR-045/046/047, owner 7 Oct): the plain moulded desk with its four hollow corners
+exec(compile(open(os.path.join(HERE, "desk2.py")).read(), "desk2.py", "exec"))

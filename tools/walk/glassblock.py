@@ -223,11 +223,22 @@ def tv_pull(nm, xc, zc, upright):
         dbox(f"{nm}_post{k_}", PX + xc + dx_ - 4, PS + YF, zc + dz_ - 4, PX + xc + dx_ + 4, PS + YF + 18, zc + dz_ + 4, M_BRASS)
 for i in range(4):
     a_ = tv_bayX[i] + (GAP if i == 0 else GAP / 2); b_ = tv_bayX[i + 1] - (GAP if i == 3 else GAP / 2)
-    if i in (0, 3):                                                              # a cabinet: one flat door, two drawers tall
+    if i == 0:                                                                   # the left cabinet stands open, no door (owner): the subwoofer
+        cut_ = dbox("gb_subcut", PX + a_, PS + W0 + 20, PL + 18, PX + b_, PS + YF + 5, CHT - TOP - 18, M_BURL_DD)
+        bo_ = CON_B.modifiers.new("subbay", "BOOLEAN"); bo_.object = cut_; bo_.operation = "DIFFERENCE"; cut_.hide_render = True; cut_.hide_viewport = True
+        # Sony's Bar 6 subwoofer, 210 × 388 × 388 — 388 tall will not stand in the 364 clear, so it lies on its side (to check with Sony)
+        M_SUB = fabric("sub_cloth", (0.018, 0.018, 0.02), 0.3, 0.95, 1400)
+        sx_ = (a_ + b_) / 2
+        sb_ = dbox("gb_subwoofer", PX + sx_ - 194, PS + YF - 6 - 388, PL + 20, PX + sx_ + 194, PS + YF - 6, PL + 20 + 210, M_SUB); bevel(sb_, 0.01, 3)
+    elif i == 3:                                                                 # a cabinet: one flat door, two drawers tall
         fo = dbox(f"gb_door{i}", PX + a_, PS + YF - FR, tv_zD[0], PX + b_, PS + YF, tv_zD[1] + tv_fh, M_BURL_DD); bevel(fo, 0.005, 4)
         tv_pull(f"gb_pull{i}", (a_ + 50) if i == 0 else (b_ - 50), tv_zmid, True)
     else:                                                                        # a stack of two drawers
         for j, z0 in enumerate(tv_zD):
             fo = dbox(f"gb_drawer{i}{j}", PX + a_, PS + YF - FR, z0, PX + b_, PS + YF, z0 + tv_fh, M_BURL_DD); bevel(fo, 0.005, 4)
             tv_pull(f"gb_pull{i}{j}", (a_ + b_) / 2, z0 + tv_fh / 2, False)
+# the soundbar on the top, centred under the TV (owner): Sony BRAVIA Theatre Bar 6, 950 × 64 × 110, set 30 back from the edge
+M_SBAR = fabric("soundbar_cloth", (0.02, 0.02, 0.022), 0.3, 0.95, 1600)
+sbr = dbox("gb_soundbar", PX - 475, PS + YF - 30 - 110, CHT, PX + 475, PS + YF - 30, CHT + 64, M_SBAR); bevel(sbr, 0.012, 4)
+dbox("gb_soundbar_top", PX - 470, PS + YF - 30 - 108, CHT + 63, PX + 470, PS + YF - 32, CHT + 64.5, M_DARK)
 print(f"TV unit: pill, front {2 * X1:.0f} straight, round ends R {RR:.0f}, {CHT:.0f} high, {CDP:.0f} deep", flush=True)

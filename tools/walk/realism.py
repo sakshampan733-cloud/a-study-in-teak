@@ -29,6 +29,7 @@ DESK_GAP = 50.0
 def _in_desk(o):
     if o.type != "MESH": return False
     if o.name.startswith("dk_"): return True
+    if o.name.startswith(("dk2_", "dk_")): return True                    # the whole desk: brass pulls and the clamp-bay cutter too
     if o.data.materials and o.data.materials[0] and o.data.materials[0].name.startswith("teak_desk"):
         x0_, s0_, z0_, x1_, s1_, z1_ = bb(o); return 1100 < x0_ and x1_ < 3600 and 1150 < s0_ and s1_ < 2300 and z1_ < 800
     return False
@@ -197,52 +198,85 @@ for n_ in ("mattress", "bed_frame", "bed_base", "bed_rail_l", "bed_rail_r", "hea
     o_ = sc.objects.get(n_)
     if o_ and "col" in o_.modifiers: o_.modifiers.remove(o_.modifiers["col"])
 
-# ═══════════════════════════ 1b · THE RUG (owner, 1 Oct: "put a carpet under my bed, your choice") ═════════
-# A hand-knotted wool rug, about 10 × 8 ft (3050 × 2440): warm oatmeal with a tobacco border and a pin line, the
-# colour drifting a little along its length the way hand-dyed wool does. Under the lower two-thirds of the bed,
-# 600 mm proud of its foot and of each side.
-def rug_mat():
-    m, nt, b = node_mat("wool_rug")
-    b.inputs["Roughness"].default_value = 1.0; b.inputs["Sheen Weight"].default_value = 0.25; b.inputs["Sheen Roughness"].default_value = 0.6
-    tc = nt.nodes.new("ShaderNodeTexCoord"); sp = nt.nodes.new("ShaderNodeSeparateXYZ"); nt.links.new(tc.outputs["Object"], sp.inputs["Vector"])
-    def op(o, a_, b_=None, v=None):
-        n = nt.nodes.new("ShaderNodeMath"); n.operation = o; nt.links.new(a_, n.inputs[0])
-        if b_ is not None: nt.links.new(b_, n.inputs[1])
-        if v is not None: n.inputs[1].default_value = v
-        return n.outputs[0]
-    dx = op("SUBTRACT", nt.nodes.new("ShaderNodeValue").outputs[0], op("ABSOLUTE", sp.outputs["X"]))
-    dy = op("SUBTRACT", nt.nodes.new("ShaderNodeValue").outputs[0], op("ABSOLUTE", sp.outputs["Y"]))
-    vx, vy = [n for n in nt.nodes if n.bl_idname == "ShaderNodeValue"]
-    vx.outputs[0].default_value = RUG_W / 2000; vy.outputs[0].default_value = RUG_L / 2000
-    d = op("MINIMUM", dx, dy)                                            # metres in from the nearest edge
-    band = op("MULTIPLY", op("GREATER_THAN", d, v=0.10), op("LESS_THAN", d, v=0.21))
-    pin = op("MULTIPLY", op("GREATER_THAN", d, v=0.27), op("LESS_THAN", d, v=0.283))
-    edge = op("LESS_THAN", d, v=0.018)                                   # the overcast edge, a shade darker
-    ab = nt.nodes.new("ShaderNodeTexNoise"); ab.inputs["Scale"].default_value = 2.2; ab.inputs["Detail"].default_value = 3
-    mp = nt.nodes.new("ShaderNodeMapping"); mp.inputs["Scale"].default_value = (6.0, 0.6, 1.0)   # streaks along the warp
-    nt.links.new(tc.outputs["Object"], mp.inputs["Vector"]); nt.links.new(mp.outputs["Vector"], ab.inputs["Vector"])
-    field = nt.nodes.new("ShaderNodeValToRGB"); field.color_ramp.elements[0].color = (0.24, 0.19, 0.135, 1); field.color_ramp.elements[1].color = (0.32, 0.26, 0.185, 1)
-    nt.links.new(ab.outputs["Fac"], field.inputs["Fac"])
-    c1 = nt.nodes.new("ShaderNodeMixRGB"); c1.inputs["Color2"].default_value = (0.07, 0.042, 0.026, 1)
-    nt.links.new(field.outputs["Color"], c1.inputs["Color1"]); nt.links.new(op("MAXIMUM", band, pin), c1.inputs["Fac"])
-    c2 = nt.nodes.new("ShaderNodeMixRGB"); c2.inputs["Color2"].default_value = (0.14, 0.10, 0.07, 1)
-    nt.links.new(c1.outputs["Color"], c2.inputs["Color1"]); nt.links.new(edge, c2.inputs["Fac"])
-    nt.links.new(c2.outputs["Color"], b.inputs["Base Color"])
-    pile = nt.nodes.new("ShaderNodeTexNoise"); pile.inputs["Scale"].default_value = 900; pile.inputs["Detail"].default_value = 6
-    knot = nt.nodes.new("ShaderNodeTexVoronoi"); knot.inputs["Scale"].default_value = 260
-    mx_ = nt.nodes.new("ShaderNodeMath"); mx_.operation = "MULTIPLY_ADD"; mx_.inputs[1].default_value = 0.4
-    nt.links.new(knot.outputs["Distance"], mx_.inputs[0]); nt.links.new(pile.outputs["Fac"], mx_.inputs[2])
-    bp = nt.nodes.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = 0.85; bp.inputs["Distance"].default_value = 0.003
-    nt.links.new(mx_.outputs["Value"], bp.inputs["Height"]); nt.links.new(bp.outputs["Normal"], b.inputs["Normal"])
-    return m
-RUG_W, RUG_L, RUG_T = 3050.0, 2440.0, 12.0
-rs0 = ms0 - 600
-bpy.ops.mesh.primitive_cube_add(size=1, location=P(bcx, rs0 + RUG_L / 2, RUG_T / 2))
-rug_ = bpy.context.active_object; rug_.name = "rug"
-rug_.data.transform(Matrix.Diagonal((RUG_W / 1000, RUG_L / 1000, RUG_T / 1000, 1.0)))
-for c in list(rug_.users_collection): c.objects.unlink(rug_)
-sc.collection.objects.link(rug_); setmat(rug_, rug_mat()); bevel(rug_, 0.005, 3)
-print(f"rug {RUG_W:.0f} x {RUG_L:.0f} from s {rs0:.0f}", flush=True)
+# ═══════════════════════════ 1b · THE HIDE (owner, 7 Oct: a big hair-on hide, "like the fur of the animal", real depth) ═════════
+# A large brindle cowhide, hair on: about 2.6 × 2.4 m in its natural outline (the neck, four leg lobes, the tail end),
+# lying across the foot of the bed 15° off square — its legs reaching well past both sides, a third of it under the
+# gloss-black base — and stopping short of the TV unit. Real fur: short strands (⅝ in) lying down along the hide,
+# dark chocolate with caramel stripes; a thin leather underside.
+def hide_outline():
+    half = [(1150, 0), (1125, 110), (1040, 190), (930, 300), (880, 470), (860, 640), (800, 840), (720, 990), (630, 1020), (590, 930),
+            (520, 760), (300, 790), (0, 820), (-300, 790), (-520, 760), (-600, 930), (-670, 1030), (-770, 1010), (-850, 840), (-910, 620),
+            (-1000, 400), (-1080, 260), (-1125, 120), (-1150, 0)]
+    pts = half + [(x, -y) for x, y in reversed(half[1:-1])]
+    for _ in range(3):
+        nw = []
+        for i in range(len(pts)):
+            (x0, y0), (x1, y1) = pts[i], pts[(i + 1) % len(pts)]
+            nw += [(0.75 * x0 + 0.25 * x1, 0.75 * y0 + 0.25 * y1), (0.25 * x0 + 0.75 * x1, 0.25 * y0 + 0.75 * y1)]
+        pts = nw
+    return [(x * (1 + 0.03 * noise.noise(Vector((x / 420, y / 420, 0.3)))), y * (1 + 0.035 * noise.noise(Vector((x / 380, y / 380, 1.7))))) for x, y in pts]
+HIDE_A, HIDE_K = math.radians(75), 1.13
+hc_x, hc_s = bcx + 40, ms0 + 560
+bmh = bmesh.new()
+ring_ = [bmh.verts.new(P(hc_x + HIDE_K * (x * math.sin(HIDE_A) - y * math.cos(HIDE_A)), hc_s + HIDE_K * (x * math.cos(HIDE_A) + y * math.sin(HIDE_A)), 2)) for x, y in hide_outline()]
+fh_ = bmh.faces.new(ring_); bmesh.ops.triangulate(bmh, faces=[fh_], quad_method="BEAUTY", ngon_method="BEAUTY")
+for _ in range(3): bmesh.ops.subdivide_edges(bmh, edges=bmh.edges[:], cuts=1, use_grid_fill=True)
+for v_ in bmh.verts:                                                    # a hide never lies quite flat
+    v_.co.z = (2 + 4 * max(0.0, noise.noise(Vector((v_.co.x * 1000 / 520, -v_.co.y * 1000 / 520, 4.1))))) / 1000
+bmesh.ops.recalc_face_normals(bmh, faces=bmh.faces[:])
+for f_ in bmh.faces: f_.smooth = True
+meh = bpy.data.meshes.new("hide"); bmh.to_mesh(meh); bmh.free()
+if sum(p_.normal.z for p_ in meh.polygons) < 0: meh.flip_normals()
+hide_ = bpy.data.objects.new("hide", meh); sc.collection.objects.link(hide_)
+sol = hide_.modifiers.new("thick", "SOLIDIFY"); sol.thickness = 0.003; sol.offset = -1.0
+# the brindle: a dark chocolate ground with caramel stripes running across the body, broken up the way a coat is
+def brindle_ramp(nt):
+    tc = nt.nodes.new("ShaderNodeTexCoord")
+    wv = nt.nodes.new("ShaderNodeTexWave"); wv.wave_type = "BANDS"; wv.inputs["Scale"].default_value = 2.6; wv.inputs["Distortion"].default_value = 14.0
+    wv.inputs["Detail"].default_value = 8; wv.inputs["Detail Scale"].default_value = 2.2
+    nz = nt.nodes.new("ShaderNodeTexNoise"); nz.inputs["Scale"].default_value = 6.0; nz.inputs["Detail"].default_value = 6
+    for t_ in (wv, nz): nt.links.new(tc.outputs["Object"], t_.inputs["Vector"])
+    mx = nt.nodes.new("ShaderNodeMix"); mx.data_type = "FLOAT"; mx.inputs["Factor"].default_value = 0.4
+    nt.links.new(wv.outputs["Fac"], mx.inputs["A"]); nt.links.new(nz.outputs["Fac"], mx.inputs["B"])
+    cr = nt.nodes.new("ShaderNodeValToRGB"); cr.color_ramp.elements[0].position = 0.50; cr.color_ramp.elements[1].position = 0.86
+    cr.color_ramp.elements[0].color = (0.011, 0.0055, 0.003, 1); cr.color_ramp.elements[1].color = (0.075, 0.036, 0.016, 1)
+    nt.links.new(mx.outputs["Result"], cr.inputs["Fac"]); return cr
+m_skin, nts, bs_ = node_mat("hide_skin"); bs_.inputs["Roughness"].default_value = 0.8
+nt_c = brindle_ramp(nts); nts.links.new(nt_c.outputs["Color"], bs_.inputs["Base Color"])
+m_fur = bpy.data.materials.new("hide_fur"); m_fur.use_nodes = True; ntf = m_fur.node_tree
+for n_ in list(ntf.nodes):
+    if n_.bl_idname != "ShaderNodeOutputMaterial": ntf.nodes.remove(n_)
+hb = ntf.nodes.new("ShaderNodeBsdfHairPrincipled"); hb.parametrization = "COLOR"
+for k_, v_ in (("Roughness", 0.32), ("Radial Roughness", 0.45), ("Coat", 0.08), ("Random Roughness", 0.2)):
+    if k_ in hb.inputs: hb.inputs[k_].default_value = v_
+hi_ = ntf.nodes.new("ShaderNodeHairInfo"); tipm = ntf.nodes.new("ShaderNodeMath"); tipm.operation = "MULTIPLY_ADD"
+tipm.inputs[1].default_value = 0.7; tipm.inputs[2].default_value = 0.8                         # lighter toward the tips
+ntf.links.new(hi_.outputs["Intercept"], tipm.inputs[0])
+tmix = ntf.nodes.new("ShaderNodeMixRGB"); tmix.blend_type = "MULTIPLY"; tmix.inputs["Fac"].default_value = 1.0
+ntf.links.new(brindle_ramp(ntf).outputs["Color"], tmix.inputs["Color1"]); ntf.links.new(tipm.outputs["Value"], tmix.inputs["Color2"])
+ntf.links.new(tmix.outputs["Color"], hb.inputs["Color"])
+ntf.links.new(hb.outputs[0], [n_ for n_ in ntf.nodes if n_.bl_idname == "ShaderNodeOutputMaterial"][0].inputs["Surface"])
+hide_.data.materials.append(m_skin); hide_.data.materials.append(m_fur)
+fur = hide_.modifiers.new("fur", "PARTICLE_SYSTEM"); st = fur.particle_system.settings
+st.type = "HAIR"
+lie = Vector((-math.sin(HIDE_A), math.cos(HIDE_A), 0.0))                  # the hair lies down toward the tail
+def _set(k, v):
+    if hasattr(st, k):
+        try: setattr(st, k, v)
+        except Exception as e: print("fur setting skipped:", k, e, flush=True)
+    else: print("fur setting missing:", k, flush=True)
+for k, v in (("count", int(os.environ.get("FUR_N", 90000))), ("hair_length", 0.022), ("use_advanced_hair", True), ("emit_from", "FACE"),
+             ("use_emit_random", True), ("use_even_distribution", True), ("normal_factor", 0.5), ("object_align_factor", (0.7 * lie.x, 0.7 * lie.y, 0.0)),
+             ("factor_random", 0.08), ("child_type", "INTERPOLATED"), ("child_percent", 3), ("child_nbr", 3),
+             ("rendered_child_count", int(os.environ.get("FUR_KIDS", 10))), ("child_radius", 0.004), ("roughness_1", 0.0015), ("roughness_1_size", 1.0),
+             ("roughness_endpoint", 0.004), ("length_random", 0.35), ("clump_factor", 0.25), ("root_radius", 1.0), ("tip_radius", 0.25), ("radius_scale", 0.0004)):
+    if k == "child_nbr" and hasattr(st, "child_percent"): continue
+    _set(k, v)
+st.material_slot = "hide_fur"
+fur.particle_system.seed = 11
+try: sc.cycles_curves.shape = "THICK"
+except Exception: pass
+print(f"hide {2300 * HIDE_K:.0f} x {2040 * HIDE_K:.0f} at {hc_x:.0f}, {hc_s:.0f}, 15° off square, fur {st.count} x {st.rendered_child_count}", flush=True)
 
 # ═══════════════════════════ 2 · ON THE DESK ═════════════════════════════════
 def solid(name, coll, m, w_=0.0015, seg=2):
@@ -291,33 +325,30 @@ if STYLE and sc.objects.get("dk_top"):
             o.location = Vector(P(cx_, cs_, 0)) + Vector((rel.x * math.cos(a) - rel.y * math.sin(a), rel.x * math.sin(a) + rel.y * math.cos(a), o.location.z))
             o.rotation_euler.z += a
         z += t
-    # a banker's lamp at the left-hand end: brass foot and stem, a cased green glass shade, lit
-    lx, ls = tx0 + 230, (ts0 + ts1) / 2 + 60
-    M_GREEN = None
-    mg, ntg, bgl = node_mat("banker_glass")
-    bgl.inputs["Base Color"].default_value = (0.02, 0.22, 0.07, 1); bgl.inputs["Roughness"].default_value = 0.06
-    bgl.inputs["Transmission Weight"].default_value = 0.35; bgl.inputs["Coat Weight"].default_value = 1.0
-    bgl.inputs["Subsurface Weight"].default_value = 0.0
-    M_OPAL = glow("opal_glass", (1.0, 0.82, 0.55), 0.6)
-    bpy.ops.mesh.primitive_cylinder_add(vertices=48, radius=0.085, depth=0.022, location=P(lx, ls, TZ + 11)); solid("lamp_foot", STY, M_BRASS, 0.004, 3)
-    bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.009, depth=0.25, location=P(lx, ls, TZ + 22 + 125)); solid("lamp_stem", STY, M_BRASS, 0.001, 1)
-    bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.006, depth=0.12, location=P(lx, ls, TZ + 280)); a_ = solid("lamp_yoke", STY, M_BRASS, 0)
-    a_.rotation_euler = (0, math.pi / 2, 0)
-    # the shade: half a cylinder, 230 long, lying across, open underneath
-    me = bpy.data.meshes.new("lamp_shade_g"); bm = bmesh.new(); R_, L_ = 0.072, 0.23; seg = 32
-    rings = []
-    for j, xx in enumerate((-L_ / 2, L_ / 2)):
-        rings.append([bm.verts.new((xx, R_ * math.cos(math.pi * i / seg), R_ * math.sin(math.pi * i / seg))) for i in range(seg + 1)])
-    for i in range(seg): bm.faces.new((rings[0][i], rings[0][i + 1], rings[1][i + 1], rings[1][i]))
-    bm.faces.new(rings[0][::-1]); bm.faces.new(rings[1])                    # the glass is closed at both ends
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    bm.to_mesh(me); bm.free()
-    sh = bpy.data.objects.new("lamp_shade", me); STY.objects.link(sh); sh.location = Vector(P(lx, ls, TZ + 288)); sh.rotation_euler = (0, 0, 0)
-    sh.data.materials.append(mg); sh.data.materials.append(M_OPAL)
-    for p_ in me.polygons: p_.use_smooth = True
-    so = sh.modifiers.new("t", "SOLIDIFY"); so.thickness = 0.003; so.material_offset = 1; so.offset = -1
-    ld = bpy.data.lights.new("lamp_bulb", "POINT"); ld.energy = 6; ld.shadow_soft_size = 0.03; warm(ld, 2500)
-    lo = bpy.data.objects.new("lamp_bulb", ld); STY.objects.link(lo); lo.location = Vector(P(lx, ls, TZ + 272))
+    # the desk lamp from the owner's Peaky Blinders still (Tommy Shelby's desk): a tall turned column in dark bronze on a
+    # stepped square foot, brass collars, a brass gallery, and a white opal glass shade, lit — at the left-hand end
+    lx, ls = tx0 + 210, (ts0 + ts1) / 2 + 70
+    M_OPAL = glow("opal_glass", (1.0, 0.86, 0.66), 0.9)
+    def lathe(name, prof, m, cx, cs, z0, seg=48, smooth=True):
+        bm = bmesh.new(); rings = [[bm.verts.new(P(cx + r * math.cos(2 * math.pi * k / seg), cs + r * math.sin(2 * math.pi * k / seg), z0 + z)) for k in range(seg)] for r, z in prof]
+        for ra, rb in zip(rings, rings[1:]):
+            for k in range(seg):
+                f_ = bm.faces.new((ra[k], ra[(k + 1) % seg], rb[(k + 1) % seg], rb[k])); f_.smooth = smooth
+        bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+        me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
+        o = bpy.data.objects.new(name, me); STY.objects.link(o); setmat(o, m); return o
+    M_DBRONZE = flat("lamp_bronze", (0.035, 0.028, 0.022), 0.32, 1.0)
+    for nm, (w, z0, z1) in {"foot0": (150, 0, 26), "foot1": (118, 26, 44), "foot2": (90, 44, 58)}.items():
+        bpy.ops.mesh.primitive_cube_add(size=1, location=P(lx, ls, TZ + (z0 + z1) / 2)); o_ = bpy.context.active_object
+        o_.scale = (w / 1000, w / 1000, (z1 - z0) / 1000); solid(f"lamp_{nm}", STY, M_DBRONZE, 0.003, 3)
+    lathe("lamp_column", [(0, 58), (20, 58), (24, 70), (17, 96), (15, 200), (16, 330), (14, 470), (18, 520), (12, 540), (0, 540)], M_DBRONZE, lx, ls, TZ)
+    for zc in (70, 330, 520):
+        lathe(f"lamp_collar{zc}", [(0, zc - 7), (22, zc - 7), (25, zc), (22, zc + 7), (0, zc + 7)], M_BRASS, lx, ls, TZ)
+    lathe("lamp_gallery", [(0, 540), (48, 540), (52, 548), (46, 556), (40, 556), (0, 556)], M_BRASS, lx, ls, TZ)
+    lathe("lamp_shade", [(36, 556), (62, 572), (86, 610), (92, 650), (80, 700), (52, 735), (24, 752), (0, 756)], M_OPAL, lx, ls, TZ)
+    lathe("lamp_finial", [(0, 752), (8, 754), (10, 766), (4, 780), (0, 784)], M_BRASS, lx, ls, TZ)
+    ld = bpy.data.lights.new("lamp_bulb", "POINT"); ld.energy = 6; ld.shadow_soft_size = 0.03; warm(ld, 2700)   # lamps 2700 K (owner, 7 Oct)
+    lo = bpy.data.objects.new("lamp_bulb", ld); STY.objects.link(lo); lo.location = Vector(P(lx, ls, TZ + 640))
     # a small ceramic vase on the study counter, by the window
     vs_ = [o for o in sc.objects if o.name == "glass_win"]
     if vs_:
@@ -424,6 +455,98 @@ if ac_:
                                      "l": (pc_s - PW_ / 2 - FW, pc_s - PW_ / 2, pz0, ptop), "r": (pc_s + PW_ / 2, pc_s + PW_ / 2 + FW, pz0, ptop)}.items():
         pbox(f"painting_frame_{nm}", wall_x + 5, s0_, z0_, wall_x + FD, s1_, z1_, M_GILT, 0.012)
     print(f"painting {PW_:.0f} x {PH_:.0f} on the left wall, centre s {pc_s:.0f}, {pz0:.0f}-{ptop:.0f} up", flush=True)
+
+# the study wall's centre panel (AST-DR-040): a stand-in oil landscape, 860 × 640, in a slim gilt frame, hung on the
+# pushed-back panel inside the beaded frame, a brass picture light over it
+SPt = globals().get("STUDY_PAINT")
+if SPt:
+    if "M_GILT" not in globals():
+        M_GILT = flat("antique_gilt", (0.55, 0.40, 0.17), 0.38, 1.0)
+    def sbox(name, x0, s0, z0, x1, s1, z1, m, bv=0.002):
+        bpy.ops.mesh.primitive_cube_add(size=1, location=P((x0 + x1) / 2, (s0 + s1) / 2, (z0 + z1) / 2))
+        o = bpy.context.active_object; o.scale = ((x1 - x0) / 1000, (s1 - s0) / 1000, (z1 - z0) / 1000)
+        return solid(name, STY, m, bv, 3)
+    cx_, cz_, pw_, ph_, ws_ = SPt["cx"], SPt["cz"], SPt["w"], SPt["h"], SPt["s"]
+    sbox("study_painting_canvas", cx_ - pw_ / 2 + 50, ws_ + 6, cz_ - ph_ / 2 + 50, cx_ + pw_ / 2 - 50, ws_ + 30, cz_ + ph_ / 2 - 50, oil_landscape(), 0.001)
+    for nm, (x0_, x1_, z0_, z1_) in {"t": (cx_ - pw_ / 2, cx_ + pw_ / 2, cz_ + ph_ / 2 - 50, cz_ + ph_ / 2), "b": (cx_ - pw_ / 2, cx_ + pw_ / 2, cz_ - ph_ / 2, cz_ - ph_ / 2 + 50),
+                                     "l": (cx_ - pw_ / 2, cx_ - pw_ / 2 + 50, cz_ - ph_ / 2 + 50, cz_ + ph_ / 2 - 50), "r": (cx_ + pw_ / 2 - 50, cx_ + pw_ / 2, cz_ - ph_ / 2 + 50, cz_ + ph_ / 2 - 50)}.items():
+        sbox(f"study_painting_frame_{nm}", x0_, ws_, z0_, x1_, ws_ + 42, z1_, M_GILT, 0.008)
+    sbox("study_picture_light", cx_ - 230, ws_ + 70, cz_ + ph_ / 2 + 70, cx_ + 230, ws_ + 100, cz_ + ph_ / 2 + 92, M_BRASS, 0.006)
+    sbox("study_picture_arm", cx_ - 8, ws_, cz_ + ph_ / 2 + 92, cx_ + 8, ws_ + 90, cz_ + ph_ / 2 + 106, M_BRASS, 0.003)
+    ld = bpy.data.lights.new("study_picture_light", "AREA"); ld.shape = "RECTANGLE"; ld.size, ld.size_y = 0.42, 0.02; ld.energy = 6; warm(ld, 2700)
+    lo = bpy.data.objects.new("study_picture_light", ld); sc.collection.objects.link(lo); lo.location = P(cx_, ws_ + 85, cz_ + ph_ / 2 + 66)
+    lo.rotation_euler = (math.radians(-25), 0, 0)
+    print(f"study painting {pw_:.0f} x {ph_:.0f} at {cx_:.0f}, {cz_:.0f}", flush=True)
+
+# ═══════════════════════════ 2d · THE DESK CHAIR (owner: Tommy Shelby's chair, in royal green) ═════════
+# A tall button-tufted leather office chair, as in the owner's two Peaky Blinders stills: the back a deep curved shell that
+# wraps round the seat and rolls down into the arms, deep-buttoned in diamonds; a loose seat cushion; a swivel column on a
+# five-star base with brass castors. Royal green leather (owner). It stands at the desk's drawer side, facing the desk.
+dtop_ = sc.objects.get("dk2_top")
+if dtop_:
+    qx0, qs0, qz0, qx1, qs1, qz1 = bb(dtop_)
+    CHX, CHS = (qx0 + qx1) / 2, qs0 - 330                                  # in the kneehole's line, pulled up to the desk
+    M_GREEN_LEATHER = flat("royal_green_leather", (0.010, 0.075, 0.035), 0.36, coat=0.35)
+    rough_var(M_GREEN_LEATHER.node_tree, M_GREEN_LEATHER.node_tree.nodes["Principled BSDF"], 0.08, 14.0)
+    noise_bump(M_GREEN_LEATHER.node_tree, M_GREEN_LEATHER.node_tree.nodes["Principled BSDF"], 160, 0.08, 0.0006)
+    SEAT_Z, BACK_TOP, ARM_TOP, RI, RO = 470.0, 1180.0, 700.0, 300.0, 410.0
+    PH0 = math.radians(105)                                                # the shell wraps 105° either side of the back's centre
+    def h_back(ph):                                                       # the top falls from the back to the rolled arm fronts
+        u = abs(ph) / PH0; return ARM_TOP + (BACK_TOP - ARM_TOP) * (1 - u ** 2.2)
+    def shell_pt(ph, r, z):                                               # ph = 0 at the back (away from the desk), +s is the desk
+        return P(CHX + r * math.sin(ph), CHS - r * math.cos(ph), z)
+    buttons = []
+    for row, z_ in enumerate(range(int(SEAT_Z + 140), int(BACK_TOP - 90), 115)):
+        step = 118.0 / RI; off = 0.5 * step if row % 2 else 0.0
+        ph_ = -PH0 * 0.82 + off
+        while ph_ <= PH0 * 0.82:
+            if z_ < h_back(ph_) - 80: buttons.append((ph_, float(z_)))
+            ph_ += step
+    def tuft(ph, z):                                                      # how far the inner face is pulled in at (ph, z)
+        d = 0.0
+        for bp, bz in buttons:
+            dd = ((ph - bp) * RI) ** 2 + (z - bz) ** 2
+            if dd < 140 ** 2: d = max(d, 26 * math.exp(-dd / (2 * 34 ** 2)))
+        return d
+    bm = bmesh.new(); NPH, NZ = 110, 56
+    grid_in, grid_out = [], []
+    for i in range(NPH + 1):
+        ph = -PH0 + 2 * PH0 * i / NPH; top = h_back(ph); col_i, col_o = [], []
+        for j in range(NZ + 1):
+            z = SEAT_Z - 60 + (top - SEAT_Z + 60) * j / NZ
+            col_i.append(bm.verts.new(shell_pt(ph, RI + tuft(ph, z), z)))
+            col_o.append(bm.verts.new(shell_pt(ph, RO, z)))
+        grid_in.append(col_i); grid_out.append(col_o)
+    for i in range(NPH):
+        for j in range(NZ):
+            bm.faces.new((grid_in[i][j], grid_in[i][j + 1], grid_in[i + 1][j + 1], grid_in[i + 1][j])).smooth = True
+            bm.faces.new((grid_out[i][j], grid_out[i + 1][j], grid_out[i + 1][j + 1], grid_out[i][j + 1])).smooth = True
+    for i in range(NPH):                                                  # the rolled top and the foot of the shell
+        bm.faces.new((grid_in[i][NZ], grid_out[i][NZ], grid_out[i + 1][NZ], grid_in[i + 1][NZ])).smooth = True
+        bm.faces.new((grid_in[i][0], grid_in[i + 1][0], grid_out[i + 1][0], grid_out[i][0]))
+    for i in (0, NPH):                                                    # the arm fronts
+        for j in range(NZ): bm.faces.new((grid_in[i][j], grid_out[i][j], grid_out[i][j + 1], grid_in[i][j + 1])).smooth = True
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    me = bpy.data.meshes.new("deskchair_back"); bm.to_mesh(me); bm.free()
+    ch = bpy.data.objects.new("deskchair_back", me); STY.objects.link(ch); setmat(ch, M_GREEN_LEATHER)
+    bv = ch.modifiers.new("roll", "BEVEL"); bv.width = 0.03; bv.segments = 5; bv.limit_method = "ANGLE"
+    sd = ch.modifiers.new("s", "SUBSURF"); sd.levels = 1; sd.render_levels = 1
+    M_BTN = flat("chair_button", (0.008, 0.06, 0.028), 0.3, coat=0.4)
+    for k, (bp, bz) in enumerate(buttons):
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=6, radius=0.007, location=shell_pt(bp, RI + 20, bz)); solid(f"deskchair_btn{k}", STY, M_BTN, 0)
+    # the seat: a loose cushion on a sprung base, both in the leather
+    bpy.ops.mesh.primitive_cylinder_add(vertices=64, radius=0.31, depth=0.07, location=P(CHX, CHS, SEAT_Z - 35)); solid("deskchair_seatbase", STY, M_GREEN_LEATHER, 0.02, 4)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=64, radius=0.29, depth=0.09, location=P(CHX, CHS + 10, SEAT_Z + 45)); cu_ = solid("deskchair_cushion", STY, M_GREEN_LEATHER, 0.035, 6)
+    cu_.scale = (1.0, 1.0, 1.0); [setattr(p_, "use_smooth", True) for p_ in cu_.data.polygons]
+    # the swivel: a column and a five-star base in dark bronze, brass castors
+    M_CBRZ = flat("chair_bronze", (0.04, 0.03, 0.022), 0.35, 1.0)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=0.03, depth=0.30, location=P(CHX, CHS, 250)); solid("deskchair_column", STY, M_CBRZ, 0.003, 2)
+    for k in range(5):
+        a_ = 2 * math.pi * k / 5
+        bpy.ops.mesh.primitive_cube_add(size=1, location=P(CHX + 170 * math.sin(a_), CHS - 170 * math.cos(a_), 95))
+        lg_ = bpy.context.active_object; lg_.scale = (0.04, 0.34, 0.03); lg_.rotation_euler = (0, 0, -a_); solid(f"deskchair_leg{k}", STY, M_CBRZ, 0.008, 3)
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=16, ring_count=8, radius=0.028, location=P(CHX + 330 * math.sin(a_), CHS - 330 * math.cos(a_), 30)); solid(f"deskchair_castor{k}", STY, M_BRASS, 0)
+    print(f"desk chair: royal green, tufted, {len(buttons)} buttons, at {CHX:.0f}, {CHS:.0f}", flush=True)
 
 # ═══════════════════════════ 3 · MATERIALS WITH DEPTH ════════════════════════
 def depth(m, bump=0.06, bevel_r=0.0015, coat_flat=True):
