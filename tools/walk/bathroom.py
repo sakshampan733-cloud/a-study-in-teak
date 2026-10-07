@@ -28,7 +28,8 @@ W_, D_ = BA["x1"] - BA["x0"], BA["s1"] - BA["s0"]
 WX0, WX1, WS, WH = 380.0, 990.0, 1829.0, 305.0                 # the window, 2 ft × 1 ft (owner, 8 Oct), its centre and sill as before
 for nm, (a, b, c, d) in {"n1": (0, WX0, 0, H), "n2": (WX1, W_, 0, H), "n3": (WX0, WX1, 0, WS), "n4": (WX0, WX1, WS + WH, H)}.items():
     bbox(f"bath_wall_{nm}", a, 0, c, b, 10, d, M_BEIGE)
-bbox("bath_wall_s", 0, D_ - 10, 0, W_, D_, H, M_BEIGE)
+DOOR_X1, DOOR_H = 762.0, 2311.0 + 51.0                            # D3, 2 ft 6 in frame to frame in the west corner: left open in the marble
+bbox("bath_wall_s", DOOR_X1, D_ - 10, 0, W_, D_, H, M_BEIGE); bbox("bath_wall_s_head", 0, D_ - 10, DOOR_H, DOOR_X1, D_, H, M_BEIGE)
 bbox("bath_wall_w", 0, 0, 0, 10, D_, H, M_BEIGE); bbox("bath_wall_e", W_ - 10, 0, 0, W_, D_, H, M_BEIGE)
 
 # ── the 7 in WC wall, its two framed niches cut 4 in into its face (sizes read off the owner's photo) ──
