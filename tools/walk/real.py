@@ -7,7 +7,7 @@
 #
 #   blender -b --python tools/walk/real.py -- <out_dir> [still <name>|stills|frames|blend] [samples]
 import bpy, bmesh, math, os, sys, json, random
-from mathutils import Vector
+from mathutils import Vector, Matrix
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 _a = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
@@ -487,10 +487,21 @@ def mpanel(tag, x0_, x1_, par):                      # frame pieces are named va
     lbox(f"{tag}_back", x0_ + 2, x1_ - 2, 0, 4, 2, MH - 2, M_DARK, par)
     for nm, (a_, b_, c_, d_) in {"l": (x0_, x0_ + MFR, 0, MH), "r": (x1_ - MFR, x1_, 0, MH), "b": (x0_ + MFR, x1_ - MFR, 0, MFR), "t": (x0_ + MFR, x1_ - MFR, MH - MFR, MH)}.items():
         lbox(f"van_mirror_fr_{tag}{nm}", a_, b_, 0, MT, c_, d_, M_BRASS, par, 0.003)
-mc = bpy.data.objects.new("van_mirror", None); sc.collection.objects.link(mc); mc.location = P(AXx, VS1 - 18, MZ0)
-mpanel("c", -MCW / 2, MCW / 2, mc)
+    # the ribbed inner strip of the dressing mirror's frame, in miniature: short ribs across the frame by the glass
+    bm_ = bmesh.new(); rect = [(x0_ + MFR - 3, MFR - 3), (x1_ - MFR + 3, MFR - 3), (x1_ - MFR + 3, MH - MFR + 3), (x0_ + MFR - 3, MH - MFR + 3)]
+    for i in range(4):
+        (ua, za), (ub, zb) = rect[i], rect[(i + 1) % 4]; L = math.hypot(ub - ua, zb - za); n = int(L // 3.6)
+        horiz = abs(zb - za) < 1
+        for q in range(n):
+            t = (q + 0.5) / n; cu, cz = ua + (ub - ua) * t, za + (zb - za) * t
+            Mx = Matrix.Translation((cu / 1000, (MT + 0.8) / 1000, cz / 1000)) @ (Matrix.Identity(4) if horiz else Matrix.Rotation(math.pi / 2, 4, "Y")) @ Matrix.Diagonal((0.0012, 0.0012, 0.006, 1))
+            bmesh.ops.create_cone(bm_, cap_ends=True, segments=6, radius1=1.0, radius2=1.0, depth=1.0, matrix=Mx)
+    me_ = bpy.data.meshes.new(f"van_mirror_fr_rib{tag}"); bm_.to_mesh(me_); bm_.free()
+    rb_ = bpy.data.objects.new(f"van_mirror_fr_rib{tag}", me_); sc.collection.objects.link(rb_); rb_.parent = par; setmat(rb_, M_BRASS)
+vmc = bpy.data.objects.new("van_mirror", None); sc.collection.objects.link(vmc); vmc.location = P(AXx, VS1 - 18, MZ0)
+mpanel("c", -MCW / 2, MCW / 2, vmc)
 for sx in (1, -1):
-    hw = bpy.data.objects.new(f"van_mirror_hinge{sx}", None); sc.collection.objects.link(hw); hw.parent = mc
+    hw = bpy.data.objects.new(f"van_mirror_hinge{sx}", None); sc.collection.objects.link(hw); hw.parent = vmc
     hw.location = (sx * MCW / 2000, MT / 1000, 0); hw.rotation_euler = (0, 0, sx * WANG)
     mpanel(f"w{sx}", 0 if sx > 0 else -MWW, MWW if sx > 0 else 0, hw)
     for zh in (110, MH / 2, MH - 110):                                                          # the hinges: small brass knuckles
@@ -995,6 +1006,9 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
     "st_wall": ((2337, 2250, 1550), (2337, 0, 1450), {"lens": 15, "fstop": 8.0}),      # the whole study wall, from over the desk
     "st_arch": ((1250, 1350, 1350), (744, 200, 2250), {"lens": 22, "fstop": 5.6}),     # up into the bookcase arch and its niches
     "st_chairf": ((2560, 1900, 1250), (2337, 1002, 760), {"lens": 32, "fstop": 4.0}),   # the chair's face, over the desk
+    "st_lamp": ((2300, 2330, 1400), (1430, 1880, 1180), {"lens": 26, "fstop": 4.0}),   # the Tommy Shelby lamp at the desk's left end
+    "mould_c": ((2600, 1100, 1500), (2337, 0, 1450), {"lens": 26, "fstop": 5.6}),       # the counter frame's carving, close
+    "mould_r": ((3300, 3600, 1500), (4547, 3700, 1500), {"lens": 35, "fstop": 5.6}),   # the right wall's layered frames and pearls
     "st_chair": ((3600, 2250, 1300), (2337, 1050, 650), {"lens": 26, "fstop": 5.6}),   # the green chair at the desk
     "hide_close": ((3350, 3150, 520), (2700, 3700, 0), {"lens": 32, "fstop": 4.0}),     # low over the hide's fur
     "wd_open": ((7000, 4950, 1500), (7000, 3300, 1250), {"lens": 15, "fstop": 6.3}),   # L2 and L3 open, square on from the aisle: shirts, the lit perfume niche

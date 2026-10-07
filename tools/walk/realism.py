@@ -299,12 +299,13 @@ def ceramic(name, col, rough=0.25):
     m, nt, b = node_mat(name); b.inputs["Base Color"].default_value = (*col, 1); b.inputs["Roughness"].default_value = rough
     b.inputs["Coat Weight"].default_value = 0.5; rough_var(nt, b, 0.05, 8.0); return m
 
-if STYLE and sc.objects.get("dk_top"):
-    tx0, ts0, tz0, tx1, ts1, TZ = bb(sc.objects["dk_top"])
+DESK_TOP = sc.objects.get("dk2_top") or sc.objects.get("dk_top")      # the desk was rebuilt as dk2_ (desk2.py): everything on it keys off its top
+if STYLE and DESK_TOP:
+    tx0, ts0, tz0, tx1, ts1, TZ = bb(DESK_TOP)
     tcx = (tx0 + tx1) / 2
     seat = ts0 + 40                                                    # the sitter's edge: the drawer side, toward the study wall
     # the blotter: oxblood leather in a darker leather frame
-    M_LEA = leather("leather_oxblood", (0.16, 0.035, 0.025)); M_LEA2 = leather("leather_dark", (0.045, 0.02, 0.012), 0.38)
+    M_LEA = leather("leather_oxblood", (0.065, 0.010, 0.008)); M_LEA2 = leather("leather_dark", (0.022, 0.009, 0.006), 0.38)   # a deep oxblood, not pink
     bw, bd = 600, 420; bs0 = seat + 40
     bpy.ops.mesh.primitive_cube_add(size=1, location=P(tcx, bs0 + bd / 2, TZ + 3)); bl = bpy.context.active_object
     bl.scale = (bw / 1000, bd / 1000, 0.006); solid("blotter", STY, M_LEA2, 0.002, 3)
@@ -330,7 +331,7 @@ if STYLE and sc.objects.get("dk_top"):
     # the desk lamp from the owner's Peaky Blinders still (Tommy Shelby's desk): a tall turned column in dark bronze on a
     # stepped square foot, brass collars, a brass gallery, and a white opal glass shade, lit — at the left-hand end
     lx, ls = tx0 + 210, (ts0 + ts1) / 2 + 70
-    M_OPAL = glow("opal_glass", (1.0, 0.86, 0.66), 0.9)
+    M_OPAL = glow("opal_glass", (1.0, 0.64, 0.36), 0.55)                   # milky opaline glass, glowing warm from the bulb inside (2700 K)
     def lathe(name, prof, m, cx, cs, z0, seg=48, smooth=True):
         bm = bmesh.new(); rings = [[bm.verts.new(P(cx + r * math.cos(2 * math.pi * k / seg), cs + r * math.sin(2 * math.pi * k / seg), z0 + z)) for k in range(seg)] for r, z in prof]
         for ra, rb in zip(rings, rings[1:]):
@@ -348,6 +349,10 @@ if STYLE and sc.objects.get("dk_top"):
         lathe(f"lamp_collar{zc}", [(0, zc - 7), (22, zc - 7), (25, zc), (22, zc + 7), (0, zc + 7)], M_BRASS, lx, ls, TZ)
     lathe("lamp_gallery", [(0, 540), (48, 540), (52, 548), (46, 556), (40, 556), (0, 556)], M_BRASS, lx, ls, TZ)
     lathe("lamp_shade", [(36, 556), (62, 572), (86, 610), (92, 650), (80, 700), (52, 735), (24, 752), (0, 756)], M_OPAL, lx, ls, TZ)
+    _sh = sc.objects.get("lamp_shade")
+    if _sh:
+        _ss = _sh.modifiers.new("smooth", "SUBSURF"); _ss.levels = 2; _ss.render_levels = 3
+        for p_ in _sh.data.polygons: p_.use_smooth = True
     lathe("lamp_finial", [(0, 752), (8, 754), (10, 766), (4, 780), (0, 784)], M_BRASS, lx, ls, TZ)
     ld = bpy.data.lights.new("lamp_bulb", "POINT"); ld.energy = 6; ld.shadow_soft_size = 0.03; warm(ld, 2700)   # lamps 2700 K (owner, 7 Oct)
     lo = bpy.data.objects.new("lamp_bulb", ld); STY.objects.link(lo); lo.location = Vector(P(lx, ls, TZ + 640))
@@ -374,8 +379,8 @@ if STYLE and sc.objects.get("dk_top"):
 # ═══════════════════════════ 2b · THE MONITOR (owner, 1 Oct: "a nice Samsung OLED monitor") ════════════
 # A 32 in 16:9 flat OLED (the Odyssey OLED G8 class: about 714 × 414 mm, a few mm thin at the edge), on a single arm
 # clamped to the desk's back edge in the 2 in gap, facing the chair. Centred on the desk, its middle 1.12 m up.
-if sc.objects.get("dk_top"):
-    tx0, ts0, tz0, tx1, ts1, TZ = bb(sc.objects["dk_top"]); mcx = (tx0 + tx1) / 2
+if DESK_TOP:
+    tx0, ts0, tz0, tx1, ts1, TZ = bb(DESK_TOP); mcx = (tx0 + tx1) / 2
     M_PANEL = flat("monitor_body", (0.018, 0.018, 0.02), 0.35, 0.6); M_SCR = None
     ms_, nt_, bs_ = node_mat("monitor_screen"); bs_.inputs["Base Color"].default_value = (0.004, 0.004, 0.005, 1)
     bs_.inputs["Roughness"].default_value = 0.3; bs_.inputs["Specular IOR Level"].default_value = 0.25

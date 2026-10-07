@@ -172,13 +172,12 @@ sk = dbox("st2_c_skirt", CX0 + 20, 25, CTOP, CX1 - 20, 45, CTOP + 120, M_VEN); b
 run("st2_c_skirtcap", [(0, 0), (6, 0), (6, 8), (3, 12), (0, 12)], CX1 - 20, 45, CX0 + 20, 45, CTOP + 120)
 FA0, FA1, FB0, FB1 = CX0 + 80, CX1 - 80, CTOP + 180, YOPEN - 60
 frame_on("st2_c_frame", "s", 25, FA0, FA1, FB0, FB1, [(0, 0), (0, 25), (14, 25), (14, 18), (30, 18), (30, 10), (70, 10), (70, 0)], 1)
-bmb = bmesh.new(); bi = 42 + 4
-for (ax, az, bx, bz) in ((FA0 + bi, FB0 + bi, FA1 - bi, FB0 + bi), (FA0 + bi, FB1 - bi, FA1 - bi, FB1 - bi), (FA0 + bi, FB0 + bi, FA0 + bi, FB1 - bi), (FA1 - bi, FB0 + bi, FA1 - bi, FB1 - bi)):
-    L_ = math.hypot(bx - ax, bz - az); nb = int(L_ // 14)
-    for q in range(1, nb):
-        u = q / nb
-        bmesh.ops.create_icosphere(bmb, subdivisions=1, radius=0.004, matrix=Matrix.Translation(Vector(P(ax + (bx - ax) * u, 25 + 12, az + (bz - az) * u))))
-bm_obj("st2_c_beads", bmb, M_VEN, True)
+# the counter frame's carving (owner's ref, counterframe-moulding-ref-owner.webp): an egg-and-dart run on the frame's flat,
+# fine fillets either side of it, and a string of pearls just inside, on the panel
+enrich("st2_c_egg", "s", 25, FA0, FA1, FB0, FB1, 1, 50, "egg", 10, M_VEN, pitch=25.0, size=1.5)
+for k_, ins in enumerate((38, 62)):
+    frame_on(f"st2_c_fillet{k_}", "s", 25, FA0 + ins, FA1 - ins, FB0 + ins, FB1 - ins, P_lift([(0, 0), (0, 2), (1.5, 3.5), (3.5, 3.5), (5, 2), (5, 0)], 10), 1, M_VEN)
+enrich("st2_c_pearl", "s", 25, FA0, FA1, FB0, FB1, 1, 80, "pearl", 0, M_VEN, pitch=12.0, size=1.3)
 dbox("st2_c_soffit", CX0, 0, YOPEN, CX1, FACE, YBAND, M_VEN)                                  # the rail under the band
 dbox("st2_c_band", CX0, 0, YBAND, CX1, FACE, YENT, M_VEN)
 frame_on("st2_c_bandfr", "s", FACE, CX0 + 60, CX1 - 60, YBAND + 45, YENT - 45, P_ogee(32, 14), 1)

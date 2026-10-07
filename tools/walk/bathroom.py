@@ -78,13 +78,37 @@ for nm, (x0, y0, x1, y1) in {"front": (CHASE_D, DEEP, X2S, DEEP + 10), "div": (X
     bbox(f"bath_glass_{nm}", x0, y0, 0, x1, y1, GL_H, M_GLASS)
 for x_ in (X1W - 640, X1W + 20, X1W + 600):                       # door joints and hinges
     bbox(f"bath_hinge{x_:.0f}a", x_, DEEP - 6, 300, x_ + 40, DEEP + 16, 360, M_CHROME); bbox(f"bath_hinge{x_:.0f}b", x_, DEEP - 6, 1640, x_ + 40, DEEP + 16, 1700, M_CHROME)
-# the shower: level floor to a linear drain at the back, the mixer, a rain head on an arm from the window wall
+# the shower (owner, 7 Oct): the Oyster "Brook" — a square ceiling rain panel set flush in the dropped ceiling, mist
+# rainfall over its face and a waterfall slot along its front edge; on the window wall a 3-way thermostatic diverter
+# (rain · waterfall · hand shower) and a hand shower on its bracket. Level floor to a linear drain at the back.
 SC = (X1W + X2S) / 2
 bbox("bath_drain", X1W + 60, 70, 0, X2S - 60, 130, 3, M_CHROME)
-bbox("bath_mixer", SC - 70, 10, 1010, SC + 70, 40, 1150, M_CHROME, 0.004)
-bbox("bath_arm", SC - 10, 10, 2190, SC + 10, 380, 2210, M_CHROME)
-bpy.ops.mesh.primitive_cylinder_add(vertices=48, radius=0.125, depth=0.012, location=P(BX(SC), BY(380), 2180))
-setmat(bpy.context.active_object, M_CHROME); bpy.context.active_object.name = "bath_rainhead"
+M_STEEL, _nts, _bst = node_mat("brushed_steel"); _bst.inputs["Base Color"].default_value = (0.62, 0.62, 0.62, 1)
+_bst.inputs["Metallic"].default_value = 1.0; _bst.inputs["Roughness"].default_value = 0.28
+_vn = _nts.nodes.new("ShaderNodeTexVoronoi"); _vn.inputs["Scale"].default_value = 55.0
+_vn.feature = "F1"; _vn.distance = "CHEBYCHEV"
+_cr = _nts.nodes.new("ShaderNodeValToRGB"); _cr.color_ramp.elements[0].position = 0.08; _cr.color_ramp.elements[1].position = 0.1
+_cr.color_ramp.elements[0].color = (0.05, 0.05, 0.05, 1); _cr.color_ramp.elements[1].color = (0.62, 0.62, 0.62, 1)
+_nts.links.new(_vn.outputs["Distance"], _cr.inputs["Fac"]); _nts.links.new(_cr.outputs["Color"], _bst.inputs["Base Color"])
+RP, RPY = 500.0, DEEP / 2                                                  # the panel: 500 square, centred in the bay
+bbox("bath_rainpanel_trim", SC - RP / 2 - 12, RPY - RP / 2 - 12, DROP - 4, SC + RP / 2 + 12, RPY + RP / 2 + 12, DROP - 1, M_CHROME, 0.002)
+bbox("bath_rainhead", SC - RP / 2, RPY - RP / 2, DROP - 9, SC + RP / 2, RPY + RP / 2, DROP - 3, M_STEEL, 0.001)
+bbox("bath_waterfall", SC - RP / 2 + 30, RPY + RP / 2 - 26, DROP - 10, SC + RP / 2 - 30, RPY + RP / 2 - 18, DROP - 8, M_DARK)
+bpy.ops.mesh.primitive_cylinder_add(vertices=64, radius=0.095, depth=0.01, location=P(BX(SC), BY(5), 1100))
+dv = bpy.context.active_object; dv.name = "bath_diverter"; dv.rotation_euler = (math.pi / 2, 0, 0); setmat(dv, M_CHROME)
+for nm, (dx, r, dep) in {"thermo": (-40, 0.022, 0.05), "divert": (40, 0.02, 0.04)}.items():
+    bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=r, depth=dep, location=P(BX(SC + dx), BY(5 + dep * 500), 1100))
+    k_ = bpy.context.active_object; k_.name = f"bath_{nm}"; k_.rotation_euler = (math.pi / 2, 0, 0); setmat(k_, M_CHROME)
+    bv_ = k_.modifiers.new("b", "BEVEL"); bv_.width = 0.004; bv_.segments = 3
+bbox("bath_hs_bracket", SC + 260, 0, 1180, SC + 300, 40, 1230, M_CHROME, 0.003)               # the hand shower in its holder
+bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.016, depth=0.24, location=P(BX(SC + 280), BY(48), 1290))
+hs_ = bpy.context.active_object; hs_.name = "bath_handshower"; hs_.rotation_euler = (math.radians(-12), 0, 0); setmat(hs_, M_CHROME)
+cvh = bpy.data.curves.new("bath_hose", "CURVE"); cvh.dimensions = "3D"; cvh.bevel_depth = 0.006; cvh.bevel_resolution = 2
+spl = cvh.splines.new("POLY"); hp = [(SC + 280, 45, 1170), (SC + 300, 80, 900), (SC + 220, 70, 700), (SC + 100, 30, 820), (SC + 60, 12, 1040)]
+spl.points.add(len(hp) - 1)
+for i, q in enumerate(hp): spl.points[i].co = (*P(BX(q[0]), BY(q[1]), q[2]), 1)
+spl.type = "NURBS"; spl.order_u = 4; spl.use_endpoint_u = True
+hob = bpy.data.objects.new("bath_hose", cvh); bpy.context.scene.collection.objects.link(hob); hob.data.materials.append(M_CHROME)
 # the dropped ceiling over the shower bay only — 1 ft down, from the window wall to the glass line
 bbox("bath_drop", X1W, 0, DROP, X2S, DEEP + 10, H, M_CEIL)
 # its cove (the owner's 11–14): a lit line round the drop's underside, just inside its edge

@@ -11,7 +11,7 @@
 #               plinth blocks; the dressing door's head: scallop course, two small mouldings, crown to 8 ft 8
 #   right wall  AST-DR-008 — ogee panel moulding 55×24, rail 40×28 with 4 reeds
 import bmesh, math
-from mathutils import Vector
+from mathutils import Vector, Matrix
 
 J = bpy.data.collections.new("joinery"); sc.collection.children.link(J)
 
@@ -116,6 +116,52 @@ def frame_on(name, wall, pos, u0, u1, z0, z1, prof, out, m=None):
     ctr = sum(c, Vector()) / 4
     if nrm.dot(ctr - c[0]) < 0: corners = corners[::-1]
     return sweep(name, prof, corners, U, True, m)
+
+# ── carved enrichment run round a rectangle (owner's refs, 8 Oct: the counter-frame's carved band, the panels' pearls) ──
+def _basis(T, N, U):
+    return Matrix(((T.x, N.x, U.x, 0), (T.y, N.y, U.y, 0), (T.z, N.z, U.z, 0), (0, 0, 0, 1)))
+def enrich(name, wall, pos, u0, u1, z0, z1, out, inset, kind, d0, m, pitch=None, size=1.0):
+    """Repeat a small carved motif round the rectangle inset `inset` mm inside (u0..u1, z0..z1) on a wall plane, standing
+    on a surface d0 mm out of the wall. kind: 'pearl' (a string of beads), 'egg' (egg-and-dart, a rosette at each corner),
+    'rib' (short ribs across the run, like a reeded/roped strip)."""
+    pitch = pitch or {"pearl": 9.0, "egg": 17.0, "rib": 4.5}[kind]
+    def W(u, z, d):
+        return Vector(P(pos + out * d, u, z)) if wall == "x" else Vector(P(u, pos + out * d, z))
+    rect = [(u0 + inset, z0 + inset), (u1 - inset, z0 + inset), (u1 - inset, z1 - inset), (u0 + inset, z1 - inset)]
+    cen = W((u0 + u1) / 2, (z0 + z1) / 2, d0)
+    bm = bmesh.new(); s_ = size / 1000.0
+    for i in range(4):
+        (ua, za), (ub, zb) = rect[i], rect[(i + 1) % 4]
+        L = math.hypot(ub - ua, zb - za); n = max(1, int(L // pitch))
+        A, B = W(ua, za, d0), W(ub, zb, d0)
+        T = (B - A).normalized(); Uo = (W(ua, za, d0 + 10) - A).normalized(); N = Uo.cross(T)
+        if N.dot(cen - A) < 0: N = -N
+        for q in range(n):
+            t = (q + 0.5) / n
+            if kind == "egg" and (t * L < 16 or (1 - t) * L < 16): continue
+            c = A + (B - A) * t
+            if kind == "pearl":
+                Mx = Matrix.Translation(c + Uo * 2.6 * s_) @ _basis(T, N, Uo) @ Matrix.Diagonal((3.2 * s_, 3.2 * s_, 2.8 * s_, 1))
+                bmesh.ops.create_uvsphere(bm, u_segments=10, v_segments=6, radius=1.0, matrix=Mx)
+            elif kind == "rib":
+                Mx = Matrix.Translation(c + Uo * 1.2 * s_) @ _basis(T, Uo, N) @ Matrix.Diagonal((1.7 * s_, 1.7 * s_, 10.0 * s_, 1))
+                bmesh.ops.create_cone(bm, cap_ends=True, cap_tris=False, segments=8, radius1=1.0, radius2=1.0, depth=1.0, matrix=Mx)
+            else:
+                Mx = Matrix.Translation(c + Uo * 2.2 * s_) @ _basis(T, N, Uo) @ Matrix.Diagonal((5.2 * s_, 7.0 * s_, 3.6 * s_, 1))
+                bmesh.ops.create_uvsphere(bm, u_segments=12, v_segments=8, radius=1.0, matrix=Mx)            # the egg
+                Mx = Matrix.Translation(c + T * pitch / 2 * s_ + Uo * 1.4 * s_) @ _basis(T, Uo, N) @ Matrix.Diagonal((1.3 * s_, 1.3 * s_, 13.0 * s_, 1))
+                bmesh.ops.create_cone(bm, cap_ends=True, cap_tris=False, segments=6, radius1=1.0, radius2=0.05, depth=1.0, matrix=Mx)   # the dart
+                for sgn in (1, -1):                                                                          # the egg's shell, two ridges
+                    Mx = Matrix.Translation(c + N * sgn * 8.6 * s_ + Uo * 1.2 * s_) @ _basis(T, N, Uo) @ Matrix.Diagonal((7.5 * s_, 1.2 * s_, 1.6 * s_, 1))
+                    bmesh.ops.create_uvsphere(bm, u_segments=10, v_segments=5, radius=1.0, matrix=Mx)
+        if kind == "egg":                                                                                   # a small rosette at the corner
+            Mx = Matrix.Translation(A + Uo * 2.5 * s_) @ _basis(T, N, Uo) @ Matrix.Diagonal((8 * s_, 8 * s_, 3.5 * s_, 1))
+            bmesh.ops.create_uvsphere(bm, u_segments=16, v_segments=8, radius=1.0, matrix=Mx)
+    me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
+    for p_ in me.polygons: p_.use_smooth = True
+    o = bpy.data.objects.new(name, me); sc.collection.objects.link(o); setmat(o, m); return o
+def P_lift(prof, d0):                       # a profile raised d0 off the wall (to sit a fillet on a frame's flat)
+    return [(a, b + d0) for a, b in prof]
 
 # ═══════════════════════════ THE STUDY WALL ═════════════════════════════════════
 for o in list(sc.objects):
@@ -245,9 +291,15 @@ exec(compile(open(os.path.join(HERE, "studywall2.py")).read(), "studywall2.py", 
 # ═══════════════════════════ THE RIGHT WALL: profiled panelling ═════════════════
 for o in list(sc.objects):
     if o.name.startswith(("rw_tall", "rw_short", "rw_rail")): bpy.data.objects.remove(o, do_unlink=True)
-for k, (a, b) in enumerate(panels + [nar]):                       # the owner's layered panel moulding (8 Oct)
-    frame_on(f"rwp_t{k}", "x", xR, a, b, 797, 2629, P_panel(), -1, M_PAINT)
+P_INNER = [(0, 0), (0, 7), (3, 11), (9, 12), (14, 9), (22, 6), (24, 0)]       # the inner frame: a small bead and cove
+for k, (a, b) in enumerate(panels + [nar]):                       # the owner's layered panel moulding (8 Oct, his third photo):
+    frame_on(f"rwp_t{k}", "x", xR, a, b, 797, 2629, P_panel(), -1, M_PAINT)   # the deep layered outer frame,
     frame_on(f"rwp_s{k}", "x", xR, a, b, 213, 549, P_panel(), -1, M_PAINT)
+    gi = 100 if (b - a) > 300 else 92                                     # a second, slimmer frame set inside it,
+    frame_on(f"rwp_ti{k}", "x", xR, a + gi, b - gi, 797 + gi, 2629 - gi, P_INNER, -1, M_PAINT)
+    enrich(f"rwp_tp{k}", "x", xR, a + gi, b - gi, 797 + gi, 2629 - gi, -1, 24 + 8, "pearl", 0, M_PAINT)   # and a string of pearls inside that
+    frame_on(f"rwp_si{k}", "x", xR, a + 62, b - 62, 213 + 62, 549 - 62, P_INNER, -1, M_PAINT)
+    enrich(f"rwp_sp{k}", "x", xR, a + 62, b - 62, 213 + 62, 549 - 62, -1, 24 + 7, "pearl", 0, M_PAINT)
 for (a, b) in ((STUDY, d2s0 - 102), (d2s1 + 102, Lb - 15)):
     run(f"rwp_rail{a}", [(b_, a_) for a_, b_ in P_reeds(38, 28, 4, 4)], xR, b, xR, a, 648, M_PAINT)   # the counter's reeded band, carried round (kept)
 
