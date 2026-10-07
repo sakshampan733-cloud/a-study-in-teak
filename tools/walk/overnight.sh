@@ -19,4 +19,9 @@ for sh in $SHOTS; do
   RX=${FILM_RX:-1920} RY=${FILM_RY:-1080} EXPOSURE=-1.8 DEVICES=gpu FMT=JPEG SHOTS=$sh $B -b --python tools/walk/real.py -- $OUT/film film ${FILM_SPP:-48} > $OUT/film/log_$sh.txt 2>&1
   log "  $sh: $(ls $OUT/film/$sh 2>/dev/null | wc -l | tr -d ' ') frames, $(free_gb) GB free"
 done
+if [ -n "$CUT" ]; then
+  guard; log "cutting the film"
+  $B -b --factory-startup --python tools/walk/cut.py -- $OUT/film $OUT/a-study-in-teak-film.mp4 $CUT 12 ${FILM_RX:-1920}x${FILM_RY:-1080} > $OUT/cut.log 2>&1
+  log "film: $(ls -la $OUT/a-study-in-teak-film.mp4 2>/dev/null | awk '{print $5}') bytes"
+fi
 log "ALL DONE"
