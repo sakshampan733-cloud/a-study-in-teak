@@ -390,7 +390,13 @@ function buildDesk(VAR) {
     // ── cove under the top
     // plain desk: frieze and cove stop at the monitor clamp bay (back centre), the rail behind it set in 4 in
     const bay = (off) => { if (!PLAIN) return full(off); const C = K.clamp, a = L / 2 - C.w / 2, b = L / 2 + C.w / 2, yN = DD - C.back, yo = DD - off;
-      return { ring: [[off, off], [L - off, off], [L - off, yo], [b, yo], [b, yN], [a, yN], [a, yo], [off, yo]], curved: Array(8).fill(false) }; };
+      if (SQUARE) return { ring: [[off, off], [L - off, off], [L - off, yo], [b, yo], [b, yN], [a, yN], [a, yo], [off, yo]], curved: Array(8).fill(false) };
+      // hollow corners (the plain desk with its curves back): the full outline, with the clamp notch let into its back edge
+      const r = full(off), n = r.ring.length;
+      const i = r.ring.findIndex((p, k) => { const q = r.ring[(k + 1) % n]; return Math.abs(p[1] - yo) < 0.5 && Math.abs(q[1] - yo) < 0.5 && p[0] > b && q[0] < a; });
+      if (i < 0) return r;
+      return { ring: [...r.ring.slice(0, i + 1), [b, yo], [b, yN], [a, yN], [a, yo], ...r.ring.slice(i + 1)],
+               curved: [...r.curved.slice(0, i), false, false, false, false, false, ...r.curved.slice(i + 1)] }; };
     [[K.H - K.top, K.H - K.top - 4, 12], [K.H - K.top - 4, K.H - K.top - 8, 18], [K.H - K.top - 8, K.H - K.top - 12, 24]].forEach(([z1, z0, off]) => add(bay(off), z0, z1, { capOcc: false, hatch: false }));
 
     // ── frieze band with drawers
