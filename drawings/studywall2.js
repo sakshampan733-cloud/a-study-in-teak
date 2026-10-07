@@ -21,12 +21,12 @@ const SW2 = {
   // the centre: panel 25 off the wall (approved), a slim 3-step frame 25 proud with a bead row, plain skirting
   centre: { back: 25, skirt: 120, skirtT: 20, frameW: 70, frameP: 25, inset: 80, bead: 8, beadPitch: 14,
             painting: [860, 640], gilt: 50, band: 360, rail: 40 },
-  win: { w: 1219, sill: 686, head: 2337, arch: 70, wall: 230, set: 200, glass: -115, frameD: 70 },
+  win: { w: 1219, sill: 686, head: 2337, arch: 70, wall: 230, set: 280, glass: -115, frameD: 70 },   // window bay to 280 like the rest: the crown runs on one plane, the reveal is 14 in
   // the smaller crown (owner's photo): stepped architrave, plain frieze, bed mould, fine dentils, cove, cyma, fillet
   ent: { arch: 40, frieze: 120, bed: 25, dentil: 22, cove: 35, crown: 50, fillet: 15, proj: 120, dW: 12, dPitch: 20 },
   bkArch: { spring: 1999, rise: 320, mould: 46 },   // archivolt 46 so it lands on the bookcase's outer edge
   winArch: { rise: 300, mould: 56 },                // springs 1 ft below the head; archivolt lands on the architrave
-  niche: { n: 3, len: 380, wid: 180, depth: 90 },   // three deep rectangular niches in each soffit — no lights
+  niche: { n: 3, len: 380, wid: 180, depth: 90, cB: 149, cW: 140 },   // three deep rectangular niches in each soffit — no lights; centred across the soffit (the window's kept clear of the brick lintel)
   lamp: { y: 1290, span: 160 },
   curtain: { rod: 2440, sheer: 2030, tie: 1250 },
 };
@@ -280,8 +280,8 @@ const SW2 = {
     o += `<rect x="0" y="${BK.back}" width="${BK.stile}" height="${BK.d - BK.back}" ${hatch}/><rect x="${BK.w - BK.stile}" y="${BK.back}" width="${BK.stile}" height="${BK.d - BK.back}" ${hatch}/>`;
     o += `<rect x="${BK.stile}" y="${BK.back}" width="${BK.w - 2 * BK.stile}" height="${BK.d - BK.back - 6}" ${W(th * 0.7)}/>`;
     // the soffit niches overhead (dashed), projected down
-    const nicheP = (g, yA, yB) => niches(g).map(([a0, a1]) => { const xa = apt(g, g.R, a0)[0], xb = apt(g, g.R, a1)[0], yc = (yA + yB) / 2; return `<rect x="${f(xa)}" y="${f(yc - N.wid / 2)}" width="${f(xb - xa)}" height="${N.wid}" stroke-dasharray="${dash}" ${W(th)}/>`; }).join("");
-    if (arched) o += nicheP(gB, BK.back, BK.d);
+    const nicheP = (g, yc) => niches(g).map(([a0, a1]) => { const xa = apt(g, g.R, a0)[0], xb = apt(g, g.R, a1)[0]; return `<rect x="${f(xa)}" y="${f(yc - N.wid / 2)}" width="${f(xb - xa)}" height="${N.wid}" stroke-dasharray="${dash}" ${W(th)}/>`; }).join("");
+    if (arched) o += nicheP(gB, N.cB);
     // pilasters, fluted faces; pedestals below (dashed)
     [xP1, xP2].forEach(([a, b]) => {
       o += `<rect x="${a}" y="0" width="${PL.w}" height="${PL.d}" ${hatch}/><rect x="${a}" y="0" width="${PL.w}" height="${PL.d}" fill="none"/>`;
@@ -298,7 +298,7 @@ const SW2 = {
     // window bay: panelling to 200, the reveal lining back to the frame
     o += `<rect x="${xZone[0]}" y="0" width="${WN.arch}" height="${WN.set}" ${hatch}/><rect x="${xZone[0]}" y="0" width="${WN.arch}" height="${WN.set}" fill="none"/>`;
     o += `<path d="M ${xWin[0]} ${WN.set} L ${xWin[0]} ${WN.glass + 35}" ${W(th * 1.2)}/><path d="M ${xZone[0]} ${WN.set} L ${xWin[0]} ${WN.set}" ${W(th)}/>`;
-    if (arched) o += nicheP(gW, WN.glass + 35, WN.set) + `<line x1="${xWin[0]}" y1="${WN.glass + 40}" x2="${K.W}" y2="${WN.glass + 40}" stroke-dasharray="${dash}" ${W(th)}/>`;
+    if (arched) o += nicheP(gW, N.cW) + `<line x1="${xWin[0]}" y1="${WN.glass + 40}" x2="${K.W}" y2="${WN.glass + 40}" stroke-dasharray="${dash}" ${W(th)}/>`;
     // curtains overhead (dashed): the sheer rod in the reveal, the red rod in front; the tied-back stacks
     o += `<line x1="${xWin[0]}" y1="${-30}" x2="${K.W}" y2="${-30}" stroke-dasharray="${dash}" ${W(th * 1.4)}/><line x1="${xZone[0] + 14}" y1="${WN.set + 60}" x2="${K.W}" y2="${WN.set + 60}" stroke-dasharray="${dash}" ${W(th * 2)}/>`;
     o += `<path d="M ${xZone[0] + 14} ${WN.set + 60} c 0 70 160 90 250 40 M ${K.W} ${WN.set + 60} c 0 70 -160 90 -250 40" stroke-dasharray="${dash}" ${W(th)} fill="none"/>`;
@@ -361,6 +361,12 @@ const SW2 = {
     const scP = 20, vP = view(64, 213, scP, `Study wall plan${arched ? " with arches" : ""}`), tP = vP.w(0.09);
     s += heading(18, 186, "PLAN", `CUT AT 1200 · SCALE 1:${scP} · WALL AT THE TOP · OVERHEAD AND BELOW DASHED`, 150);
     s += vP.g(plan(tP, `${vP.w(0.9)} ${vP.w(0.6)}`, arched), 0.25);
+    // where the three sections are cut (AST-DR-042/044), all looking along the wall to the right
+    [[gB.cx, "A"], [pcx, "B"], [gW.cx, "C"]].forEach(([x, l]) => {
+      const X = vP.X(x), y0 = vP.Y(-WN.wall) - 3, y1 = vP.Y(PL.d + PL.proj) + 3;
+      s += `<line x1="${X}" y1="${f(y0)}" x2="${X}" y2="${f(y1)}" stroke="${INK}" stroke-width="0.3" stroke-dasharray="3 1 0.6 1"/>`;
+      [y0, y1].forEach((y) => (s += `<path d="M ${X} ${f(y)} l 4 0 m -1.2 -1 l 1.2 1 l -1.2 1" stroke="${INK}" stroke-width="0.35" fill="none"/>` + text(X + 5, y + 0.9, l, { size: 2.4, weight: 700 })));
+    });
     s += chainV([vP.Y(0), vP.Y(C.back), vP.Y(BK.d), vP.Y(PL.d + PL.proj)], vP.X(-150) - 3, [C.back, BK.d - C.back, PL.proj], { from: vP.X(0) - 1, size: 1.1 });
     s += chainH([vP.X(xPanel[0]), vP.X(fa0), vP.X(fa1), vP.X(xPanel[1])], vP.Y(PL.d + PL.proj) + 6, [C.inset, fa1 - fa0, C.inset], { from: vP.Y(PL.d) , size: 1.05 });
     const PLb = labels(vP.X(K.W) + 16, "right", 196, 238);
@@ -387,7 +393,206 @@ const SW2 = {
     window.DRAWINGS[key] = { title: `Study wall — ${arched ? "with arches" : "without arches"} · ${dwg}`, svg: mono(sheet(s)), params: SW2 };
   }
 
+  // ═════════════ SECTIONS — all looking along the wall to the right; wall on the left, the room to the right ═════════════
+  // local units: x = depth from the wall face (+ into the room), y UP from the floor (drawn with ey)
+  const hatchCut = `fill="url(#hatchW2)"`, hatchWall = `fill="url(#hatchW)"`;
+  const RS = (x0, y0, x1, y1, a = "") => R(x0, y0, x1, y1, a);
+  // the crown in section, from the frieze plane `fx` (owner's photo: architrave, frieze, bed mould, dentils, cove, cyma)
+  function crownSection(fx, th) {
+    const pts = [[fx, yEnt], [fx + 12, yEnt], [fx + 12, yEnt + 14], [fx + 20, yEnt + 14], [fx + 20, yFr], [fx + 10, yFr], [fx + 10, yBed]];
+    let d = `M ${pts.map(([x, y]) => `${f(x)} ${f(ey(y))}`).join(" L ")}`;
+    d += ` C ${f(fx + 22)} ${f(ey(yBed + 4))} ${f(fx + 18)} ${f(ey(yDen - 6))} ${f(fx + 30)} ${f(ey(yDen))}`;          // bed mould, an ogee
+    d += ` L ${f(fx + 42)} ${f(ey(yDen))} L ${f(fx + 42)} ${f(ey(yCove))}`;                                               // the dentil band
+    d += ` C ${f(fx + 46)} ${f(ey(yCove + 26))} ${f(fx + 66)} ${f(ey(yCrn))} ${f(fx + 80)} ${f(ey(yCrn))}`;               // the cove
+    d += ` C ${f(fx + 98)} ${f(ey(yCrn + 6))} ${f(fx + 96)} ${f(ey(yCrn + 40))} ${f(fx + E.proj - 4)} ${f(ey(yCrn + E.crown))}`;   // the cyma
+    d += ` L ${f(fx + E.proj)} ${f(ey(yCrn + E.crown))} L ${f(fx + E.proj)} ${f(ey(K.H))} L 0 ${f(ey(K.H))} L 0 ${f(ey(yEnt))} Z`;
+    let o = `<path d="${d}" ${hatchCut}/><path d="${d}" fill="none" ${W(th * 1.6)}/>`;
+    o += `<line x1="${f(fx + 30)}" y1="${f(ey(yDen + 4))}" x2="${f(fx + 42)}" y2="${f(ey(yDen + 4))}" ${W(th * 0.6)}/>`;
+    return o;
+  }
+  // the cupboard and counter, common to all three; with the false back (hidden store A) in the centre
+  function baseSection(th, falseBack) {
+    let o = RS(18, 0, B.d - 30, B.plinth, `${hatchCut} ${W(th)}`) + RS(0, B.plinth, B.d, B.plinth + 18, `${hatchCut} ${W(th)}`);
+    o += RS(0, B.plinth + 18, 9, B.h, `${hatchCut} ${W(th)}`) + RS(B.d - B.door, B.plinth + 20, B.d, B.h - 20, `${hatchCut} ${W(th * 1.2)}`);
+    o += RS(18, 360, B.d - B.door - 6, 378, `${hatchCut} ${W(th)}`);
+    // the counter: 40 thick, 280 deep, four reeds on its edge (as the desk)
+    o += RS(0, B.h, B.d + B.over - 6, yTop, `${hatchCut} ${W(th * 1.4)}`);
+    for (let i = 0; i < 4; i++) o += `<path d="M ${f(B.d + B.over - 6)} ${f(ey(B.h + 4 + i * 8))} a 4 4 0 0 0 0 ${f(-8)}" ${W(th)} fill="none"/>`;
+    if (falseBack) {
+      o += RS(100, B.plinth + 18, 109, B.h - 6, `${hatchCut} ${W(th * 1.2)}`);
+      o += RS(110, B.plinth + 30, 150, B.plinth + 70, `${W(th)}`) + RS(40, B.h - 12, 100, B.h, `${W(th)}`);                 // solenoid · reed switch
+      o += `<path d="M 70 ${f(ey(B.h - 12))} L 70 ${f(ey(B.plinth + 50))} L 110 ${f(ey(B.plinth + 50))}" stroke-dasharray="20 12" ${W(th * 0.8)} fill="none"/>`;
+      o += RS(45, yTop, 75, yTop + 240, `fill="#fff" ${W(th)}`) + RS(75, yTop, 230, yTop + 236, `${W(th * 0.6)}`);              // the key book on the counter
+    }
+    return o;
+  }
+  // a pilaster seen beyond (its side, the flutes' depth, capital and pedestal), behind whatever is cut
+  function pilasterBeyond(th, from) {
+    const t = th * 0.6;
+    let o = RS(from, 0, PL.d + PL.ped + 25, B.h, `${W(t)}`) + RS(from, yTop, PL.d + PL.proj, yCap, `${W(t)}`) + RS(from, yCap, PL.d + PL.proj + 22, yEnt, `${W(t)}`);
+    o += Ln(PL.d, yTop + 60, PL.d, yCap - 40, W(t)) + Ln(PL.d + PL.proj, yTop + 60, PL.d + PL.proj, yCap - 40, W(t));
+    return o;
+  }
+  function floorCeil(xr) { return `<line x1="-330" y1="${ey(0)}" x2="${xr}" y2="${ey(0)}" stroke-width="12"/><line x1="-330" y1="${ey(K.H)}" x2="${xr}" y2="${ey(K.H)}" stroke-width="8"/>`; }
+
+  // A–A, through the bookcase at the crown of its arch
+  function secA(th, arched) {
+    let o = RS(-230, 0, 0, K.H, `${hatchWall} ${W(th * 1.6)}`) + pilasterBeyond(th, 0) + baseSection(th, false);
+    const headY = arched ? gB.ys + gB.rise : yOpen;
+    o += RS(0, yTop, BK.back, headY, `${hatchCut} ${W(th)}`);
+    BK.shelves.forEach((y) => (o += RS(BK.back, y - BK.st, BK.d - 5, y, `${hatchCut} ${W(th * 1.2)}`)));
+    // a book on each shelf, seen from its end
+    [yTop, ...BK.shelves].forEach((y, i) => { const h = i === BK.shelves.length ? 300 : (BK.shelves[i] - BK.st - y) * 0.8; o += RS(BK.back + 6, y, BK.back + 6 + 205, y + h, `fill="#fff" ${W(th * 0.6)}`); });
+    o += Ln(BK.d, yTop, BK.d, arched ? gB.ys : yOpen, W(th * 0.6));                                                         // the stile beyond
+    if (arched) {
+      // the springing beyond, then the head at the crown, cut: ply soffit, the middle niche, the archivolt on the face
+      o += RS(BK.d - 3, gB.ys - 34, BK.d + 6, gB.ys, `${W(th * 0.6)}`) + Ln(BK.back, gB.ys, BK.d, gB.ys, `${W(th * 0.6)} stroke-dasharray="30 18"`);
+      const n0 = N.cB - N.wid / 2, n1 = N.cB + N.wid / 2;
+      o += `<path d="M ${BK.back} ${f(ey(headY))} L ${f(n0)} ${f(ey(headY))} L ${f(n0)} ${f(ey(headY + N.depth))} L ${f(n1)} ${f(ey(headY + N.depth))} L ${f(n1)} ${f(ey(headY))} L ${BK.d} ${f(ey(headY))} L ${BK.d} ${f(ey(yEnt))} L 0 ${f(ey(yEnt))} L 0 ${f(ey(headY))} Z" ${hatchCut} ${W(th * 1.4)}/>`;
+      o += `<path d="M ${f(n0 + 12)} ${f(ey(headY))} L ${f(n0 + 12)} ${f(ey(headY + N.depth - 12))} L ${f(n1 - 12)} ${f(ey(headY + N.depth - 12))} L ${f(n1 - 12)} ${f(ey(headY))}" ${W(th * 0.6)} fill="none"/>`;
+      o += RS(BK.d, headY, BK.d + 18, headY + K.bkArch.mould, `${hatchCut} ${W(th * 1.2)}`) + Ln(BK.d + 18, headY + 16, BK.d + 10, headY + 16, W(th * 0.6));
+    } else {
+      o += RS(BK.back, yOpen, BK.d, yOpen + 22, `${hatchCut} ${W(th * 1.2)}`) + RS(BK.d - 18, yOpen, BK.d, yEnt, `${hatchCut} ${W(th * 1.2)}`) + RS(BK.d, yBand + 45, BK.d + 16, yEnt - 45, `${W(th)}`);
+      o += RS(BK.back + 30, yOpen - 18, BK.d - 40, yOpen - 6, `${W(th * 0.8)}`);                                            // strip light
+    }
+    return o + crownSection(BK.d, th) + floorCeil(BK.d + 360);
+  }
+  // B–B, through the centre bay at the painting
+  function secB(th) {
+    let o = RS(-230, 0, 0, K.H, `${hatchWall} ${W(th * 1.6)}`) + pilasterBeyond(th, C.back) + baseSection(th, true);
+    // the panel: 18 ply on 7 packers, up behind the header to the cornice; plain skirting on the counter
+    o += RS(7, yTop, C.back, yEnt, `${hatchCut} ${W(th)}`);
+    [900, 1450, 2000].forEach((y) => (o += RS(0, y, 7, y + 45, `${W(th * 0.6)}`)));
+    o += `<path d="M ${C.back} ${f(ey(yTop))} L ${C.back + C.skirtT} ${f(ey(yTop))} L ${C.back + C.skirtT} ${f(ey(yTop + C.skirt - 8))} L ${C.back + C.skirtT - 8} ${f(ey(yTop + C.skirt))} L ${C.back} ${f(ey(yTop + C.skirt))} Z" ${hatchCut} ${W(th * 1.2)}/>`;
+    // the frame's bottom and top rails, cut: three steps and the bead row
+    const rail = (yo, s) => {   // yo = the rail's outer edge, s = +1 for the bottom rail (inner edge above), -1 for the top
+      const u = (v) => yo + s * v, b = C.back;
+      const pts = [[b, 0], [b + 10, 0], [b + 10, 8], [b + 17, 8], [b + 17, 16], [b + 25, 16], [b + 25, 30], [b + 19, 36], [b + 19, 52], [b + 12, 52], [b + 12, 62], [b, 70]];
+      let q = `<path d="M ${pts.map(([x, v]) => `${f(x)} ${f(ey(u(v)))}`).join(" L ")} Z" ${hatchCut} ${W(th * 1.1)}/>`;
+      q += `<circle cx="${f(b + 21)}" cy="${f(ey(u(44)))}" r="4" fill="#fff" ${W(th * 0.8)}/>`;
+      return q;
+    };
+    o += rail(fb0, 1) + rail(fb1, -1);
+    // the painting: gilt frame 50 deep standing off the panel, the canvas, the hanging cleat; the picture light
+    const pf = (y0, y1) => RS(C.back + 5, y0, C.back + 5 + C.gilt, y1, `${hatchCut} ${W(th * 1.1)}`);
+    const py0 = pcy - ph / 2, py1 = pcy + ph / 2;
+    o += pf(py0, py0 + C.gilt) + pf(py1 - C.gilt, py1) + Ln(C.back + 35, py0 + C.gilt, C.back + 35, py1 - C.gilt, W(th * 0.8)) + RS(C.back, py1 - 120, C.back + 5, py1 - 60, `${W(th)}`);
+    o += RS(C.back, py1 + 60, C.back + 12, py1 + 100, `${W(th)}`) + Ln(C.back + 12, py1 + 80, C.back + 120, py1 + 80, W(th * 1.4)) + RS(C.back + 100, py1 + 70, C.back + 180, py1 + 92, `fill="#fff" ${W(th)}`);
+    // the header at the cornice plane: soffit and front board, the band panel on its face
+    o += RS(C.back, yOpen, BK.d, yOpen + 18, `${hatchCut} ${W(th * 1.2)}`) + RS(BK.d - 18, yOpen, BK.d, yEnt, `${hatchCut} ${W(th * 1.2)}`);
+    o += `<path d="M ${BK.d} ${f(ey(yBand + 45))} L ${BK.d + 10} ${f(ey(yBand + 55))} L ${BK.d + 16} ${f(ey(yBand + 85))} L ${BK.d + 16} ${f(ey(yEnt - 85))} L ${BK.d + 10} ${f(ey(yEnt - 55))} L ${BK.d} ${f(ey(yEnt - 45))}" ${W(th)} fill="none"/>`;
+    return o + crownSection(BK.d, th) + floorCeil(BK.d + 360);
+  }
+  // C–C, through the window at the crown of its arch
+  function secC(th, arched) {
+    const fi = WN.glass + WN.frameD / 2, fo = WN.glass - WN.frameD / 2;    // the frame's inside and outside faces
+    let o = RS(-230, 0, 0, WN.sill, `${hatchWall} ${W(th * 1.6)}`) + RS(-230, WN.head, 0, K.H, `${hatchWall} ${W(th * 1.6)}`);
+    o += baseSection(th, false);
+    // the window frame: sill and head members cut, the meeting stiles beyond, the glass
+    o += RS(fo, WN.sill, fi, WN.sill + 45, `${hatchCut} ${W(th * 1.2)}`) + RS(fo, WN.head - 45, fi, WN.head, `${hatchCut} ${W(th * 1.2)}`);
+    o += RS(fo + 10, WN.sill + 45, fi - 10, WN.head - 45, `${W(th * 0.5)}`) + Ln(WN.glass, WN.sill + 45, WN.glass, WN.head - 45, W(th * 1.4));
+    o += RS(fi, WN.sill - 16, 0, WN.sill, `${hatchCut} ${W(th)}`);                                                        // the reveal sill, on to the counter
+    o += Ln(fi, WN.sill, fi, arched ? gW.ys : WN.head, W(th * 0.6)) + Ln(WN.set, yTop, WN.set, arched ? gW.ys : WN.head, W(th * 0.6));   // the reveal lining beyond
+    if (arched) {
+      // the veneered panel under the arch, set flush with the frame's inside face; the head, cut at the crown; the middle niche
+      o += RS(fi, gW.ys, fi + 18, WN.head, `${hatchCut} ${W(th * 1.2)}`) + Ln(fi, gW.ys, WN.set, gW.ys, `${W(th * 0.6)} stroke-dasharray="30 18"`);
+      o += RS(fi, WN.head, 0, WN.head + 18, `${hatchCut} ${W(th)}`);                                                       // soffit lining under the brick lintel
+      const n0 = N.cW - N.wid / 2, n1 = N.cW + N.wid / 2, hy = WN.head;
+      o += `<path d="M 0 ${f(ey(hy))} L ${f(n0)} ${f(ey(hy))} L ${f(n0)} ${f(ey(hy + N.depth))} L ${f(n1)} ${f(ey(hy + N.depth))} L ${f(n1)} ${f(ey(hy))} L ${WN.set} ${f(ey(hy))} L ${WN.set} ${f(ey(yEnt))} L 0 ${f(ey(yEnt))} Z" ${hatchCut} ${W(th * 1.4)}/>`;
+      o += `<path d="M ${f(n0 + 12)} ${f(ey(hy))} L ${f(n0 + 12)} ${f(ey(hy + N.depth - 12))} L ${f(n1 - 12)} ${f(ey(hy + N.depth - 12))} L ${f(n1 - 12)} ${f(ey(hy))}" ${W(th * 0.6)} fill="none"/>`;
+      o += RS(WN.set, hy, WN.set + 18, hy + K.winArch.mould, `${hatchCut} ${W(th * 1.2)}`);
+    } else {
+      o += RS(fi, WN.head, WN.set, WN.head + 18, `${hatchCut} ${W(th)}`) + RS(0, WN.head + 18, WN.set, yEnt, `${hatchCut} ${W(th * 1.2)}`) + RS(WN.set, WN.head, WN.set + 18, WN.head + WN.arch, `${hatchCut} ${W(th)}`);
+    }
+    // curtains: the sheer on its rod in the reveal; the red rod in front on a bracket, the red tied back beyond
+    const sy = arched ? gW.ys - 10 : WN.head - 20;
+    o += `<circle cx="-30" cy="${f(ey(sy))}" r="9" fill="#fff" ${W(th)}/><path d="M -30 ${f(ey(sy))} C -10 ${f(ey(1700))} -50 ${f(ey(1200))} -28 ${f(ey(WN.sill + 20))}" ${W(th * 0.6)} fill="none"/>`;
+    const rx = WN.set + 60, ry = K.curtain.rod;
+    o += Ln(WN.set + 18, ry, rx, ry, W(th * 1.6)) + `<circle cx="${rx}" cy="${f(ey(ry))}" r="16" fill="#fff" ${W(th * 1.2)}/>`;
+    o += `<path d="M ${rx - 20} ${f(ey(ry - 20))} C ${rx - 30} ${f(ey(1700))} ${rx + 30} ${f(ey(1400))} ${rx} ${f(ey(K.curtain.tie))} C ${rx - 20} ${f(ey(1000))} ${rx + 20} ${f(ey(800))} ${rx} ${f(ey(yTop + 15))}" ${W(th * 0.6)} stroke-dasharray="40 20" fill="none"/>`;
+    return o + crownSection(WN.set, th) + floorCeil(WN.set + 400);
+  }
+
+  function sectionSheet(key, arched, dwg) {
+    window.DK.begin(key);
+    let s = frame() + defs;
+    const sc = 15, top = 34, T = (v) => v.w(0.09);
+    const vA = view(52, top, sc, `Section A-A${arched ? " arch" : ""}`), vB = view(178, top, sc, "Section B-B"), vC = view(306, top, sc, `Section C-C${arched ? " arch" : ""}`);
+    s += heading(18, 17, "SECTION A–A", `THROUGH THE BOOKCASE${arched ? " AT THE ARCH'S CROWN" : ""} · 1:${sc}`, 100);
+    s += heading(144, 17, "SECTION B–B", `THROUGH THE CENTRE BAY AND PAINTING · 1:${sc}`, 100);
+    s += heading(272, 17, "SECTION C–C", `THROUGH THE WINDOW${arched ? " AT THE ARCH'S CROWN" : ""} · 1:${sc}`, 100);
+    s += vA.g(secA(T(vA), arched), 0.25) + vB.g(secB(T(vB)), 0.25) + vC.g(secC(T(vC), arched), 0.25);
+    const Y = (v, y) => v.Y(ey(y));
+    // A — heights and depths
+    const hA = arched ? [0, B.h, yTop, gB.ys, gB.ys + gB.rise, gB.ys + gB.rise + N.depth, yEnt, K.H] : [0, B.h, yTop, yOpen, yEnt, K.H];
+    const lA = arched ? [B.h, B.top, gB.ys - yTop, gB.rise, N.depth, yEnt - gB.ys - gB.rise - N.depth, entH] : [B.h, B.top, yOpen - yTop, yEnt - yOpen, entH];
+    s += chainV(hA.map((y) => Y(vA, y)), vA.X(-230) - 3, lA, { from: vA.X(-230), size: 1.0 });
+    s += chainH([vA.X(0), vA.X(BK.d), vA.X(BK.d + E.proj)], Y(vA, 0) + 5, [BK.d, E.proj], { from: Y(vA, 0) + 1, size: 1.05 });
+    if (arched) s += chainH([vA.X(N.cB - N.wid / 2), vA.X(N.cB + N.wid / 2)], Y(vA, gB.ys + gB.rise) + 4, [`${N.wid} NICHE`], { from: Y(vA, gB.ys + gB.rise) + 0.5, size: 1.0 });
+    const LA = labels(vA.X(BK.d + E.proj) + 12, "right", 26, 214);
+    LA.add(vA.X(BK.d + 60), Y(vA, yCrn + 20), "SMALLER DENTIL CROWN", "120 PROUD");
+    if (arched) {
+      LA.add(vA.X(N.cB), Y(vA, gB.ys + gB.rise + N.depth - 30), "NICHE IN THE SOFFIT", `${N.len} × ${N.wid}, ${N.depth} DEEP`);
+      LA.add(vA.X(BK.d + 10), Y(vA, gB.ys + gB.rise + 20), "ARCHIVOLT ON THE FACE", "");
+      LA.add(vA.X(BK.d), Y(vA, gB.ys - 17), "SPRINGING (BEYOND)", "IMPOST BLOCK");
+    } else LA.add(vA.X(BK.d - 9), Y(vA, yBand), "FLAT HEAD + BAND PANEL", "");
+    LA.add(vA.X(150), Y(vA, BK.shelves[1] - 12), "SHELVES 25, 262 CLEAR", "BACK 18");
+    LA.add(vA.X(BK.d + 30), Y(vA, 1500), "PILASTER BEYOND", "");
+    LA.add(vA.X(B.d + 10), Y(vA, B.h + 20), "COUNTER, 40, REEDED EDGE", "");
+    LA.add(vA.X(B.d - 11), Y(vA, 450), "CUPBOARD DOOR 22", "PLINTH SET BACK 30");
+    s += LA.draw();
+    // B
+    s += chainV([0, B.h, yTop, yTop + C.skirt, fb0, fb1, yOpen, yEnt, K.H].map((y) => Y(vB, y)), vB.X(-230) - 3, [B.h, B.top, C.skirt, fb0 - yTop - C.skirt, fb1 - fb0, yOpen - fb1, yEnt - yOpen, entH], { from: vB.X(-230), size: 1.0 });
+    s += chainH([vB.X(0), vB.X(100), vB.X(B.d + B.over)], Y(vB, 0) + 5, [100, B.d + B.over - 100], { from: Y(vB, 0) + 1, size: 1.05 });
+    s += chainH([vB.X(C.back + C.frameP), vB.X(B.d + B.over)], Y(vB, yTop) - 3, [`${B.d + B.over - C.back - C.frameP} CLEAR`], { from: Y(vB, yTop), size: 0.95 });
+    const LB = labels(vB.X(BK.d + E.proj) + 12, "right", 26, 214);
+    LB.add(vB.X(BK.d - 9), Y(vB, yBand + 150), "HEADER AT THE CORNICE PLANE", "BAND PANEL ON ITS FACE");
+    LB.add(vB.X(C.back + 140), Y(vB, pcy + ph / 2 + 81), "PICTURE LIGHT", "");
+    LB.add(vB.X(C.back + 30), Y(vB, fb1 - 40), "FRAME RAIL: 3 STEPS + BEAD", "25 PROUD · DETAIL 043");
+    LB.add(vB.X(C.back + 30), Y(vB, pcy + 200), "PAINTING, GILT FRAME 50", "ON A CLEAT");
+    LB.add(vB.X(16), Y(vB, 1300), "PANEL 18 ON 7 PACKERS", "25 OFF THE WALL");
+    LB.add(vB.X(C.back + 10), Y(vB, yTop + 60), "PLAIN SKIRTING 120 × 20", "");
+    LB.add(vB.X(150), Y(vB, yTop + 200), "THE KEY BOOK", "LIFT IT TO OPEN STORE A");
+    LB.add(vB.X(70), Y(vB, B.h - 6), "REED SWITCH UNDER THE TOP", "");
+    LB.add(vB.X(104), Y(vB, 400), "FALSE BACK, 100 OFF THE WALL", "SLIDES ASIDE — HIDDEN STORE A");
+    LB.add(vB.X(130), Y(vB, B.plinth + 50), "SOLENOID CATCH", "KEY OVERRIDE");
+    s += LB.draw();
+    // C
+    const fi = WN.glass + WN.frameD / 2;
+    const hC = arched ? [0, WN.sill, gW.ys, WN.head, WN.head + N.depth, yEnt, K.H] : [0, WN.sill, WN.head, yEnt, K.H];
+    const lC = arched ? [WN.sill, gW.ys - WN.sill, K.winArch.rise, N.depth, yEnt - WN.head - N.depth, entH] : [WN.sill, WN.head - WN.sill, yEnt - WN.head, entH];
+    s += chainV(hC.map((y) => Y(vC, y)), vC.X(-230) - 3, lC, { from: vC.X(-230), size: 1.0 });
+    s += chainH([vC.X(WN.glass), vC.X(fi), vC.X(0), vC.X(WN.set)], Y(vC, 0) + 5, ["", "", WN.set], { from: Y(vC, 0) + 1, size: 1.0 });
+    s += chainH([vC.X(fi), vC.X(WN.set)], Y(vC, 0) + 10, [`${WN.set - fi} REVEAL`], { from: Y(vC, 0) + 1, size: 1.0 });
+    const LC = labels(vC.X(WN.set + 400) + 8, "right", 26, 214);
+    LC.add(vC.X(WN.set + 70), Y(vC, yCrn + 20), "CROWN", "");
+    if (arched) {
+      LC.add(vC.X(N.cW), Y(vC, WN.head + N.depth - 30), "NICHE IN THE SOFFIT", "CLEAR OF THE BRICK LINTEL");
+      LC.add(vC.X(fi + 9), Y(vC, gW.ys + 150), "VENEERED PANEL UNDER THE ARCH", "FLUSH WITH THE FRAME — NO GLASS");
+      LC.add(vC.X(WN.set + 9), Y(vC, WN.head + 30), "ARCHIVOLT", "");
+    }
+    LC.add(vC.X(WN.set + 60), Y(vC, K.curtain.rod), "RED VELVET ON A BRASS ROD", "TIED BACK, BEYOND");
+    LC.add(vC.X(-30), Y(vC, (arched ? gW.ys : WN.head) - 10), "LINEN SHEER ROD", "IN THE REVEAL");
+    LC.add(vC.X(WN.glass), Y(vC, 1400), "WINDOW, GLASS UNCHANGED", "");
+    LC.add(vC.X(-40), Y(vC, WN.sill - 8), "REVEAL SILL ON TO THE COUNTER", "");
+    s += LC.draw();
+    s += heading(18, 238, "NOTES", `REVISION ${K.rev.split(" ")[0]}`, 120);
+    [arched ? "All three cut looking along the wall to the right (cut lines on AST-DR-040's plan). Each arch's head is a ply former, veneered;"
+            : "All three cut looking along the wall to the right (cut lines on AST-DR-041's plan).",
+     arched ? "its three niches are boxes let into it, 90 deep, lined in the same veneer — no lights. The window's niches stay in the timber,"
+            : "The flat bookcase head carries a strip light under it and the band panel above.",
+     arched ? "in front of the brick lintel. The window bay's panelling now runs at 280 like the rest, so the crown is one plane and the reveal 14 in."
+            : "The window bay's panelling runs at 280 like the rest, so the crown is one plane and the reveal is 14 in.",
+     "Centre: panel at the wall plane, header at the cornice plane — the counter becomes a 9 in shelf under it. Hidden store A: lift the",
+     "key book; a reed switch under the counter fires a solenoid and the false back slides aside (key override). Details: AST-DR-043."]
+      .forEach((n, i) => (s += text(18, 248 + i * 4.3, n, { size: 1.42 })));
+    s += titleBlock({ title: `STUDY WALL — SECTIONS${arched ? "" : " (NO ARCHES)"}`, sub: "A–A bookcase · B–B centre · C–C window", date: K.date, rev: K.rev, dwg, scale: "1:15 @ A3" });
+    window.DRAWINGS[key] = { title: `Study wall — sections${arched ? "" : " (no arches)"} · ${dwg}`, svg: mono(sheet(s)), params: SW2 };
+  }
+
   gaSheet("studywall-arch", true, "AST-DR-040");
   gaSheet("studywall-flat", false, "AST-DR-041");
+  sectionSheet("studywall-arch-sections", true, "AST-DR-042");
+  sectionSheet("studywall-flat-sections", false, "AST-DR-044");
   window.SW2GEOM = { gB, gW, niches, K, yEnt, entH, xPanel, xZone, xWin, fa0, fa1, fb0, fb1 };
 })();
