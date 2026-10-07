@@ -540,7 +540,7 @@ window.PROJECT = {
             { label: "Bays", value: "Four equal bays, 17¾ in (450) each, on the glass joints. The middle two are stacks of two drawers on 350 mm full-extension soft-close runners. The far-left and far-right ones are each one cabinet, two drawers tall, behind a flat door (owner) — hinged on the drawer side so it swings clear of the round end, one adjustable shelf inside." },
             { label: "Round ends", value: "Fixed, not doors: 18 mm bent ply on a 10½ in radius, veneered both faces, scribed to the partition's end channel. Nothing that moves is curved." },
             { label: "Size", value: "1 ft 5¾ in (450) high — kept low, as asked — on a dark plinth set back 2 in; 400 deep off the glass. The top is a full bullnose and oversails 10 mm round the front and ends. The foot of the bed stays 2 ft 5⅜ in away (with the headboard back, 7 Oct); about 1 ft 3⅝ in with a drawer out." },
-            { label: "Veneer", value: "The 9292 burl's figure, re-tinted to the Dark Diva colour, in the same satin polish, the grain running on across all four bays. The back panel is veneered both faces: it reads through the glass from the desk." },
+            { label: "Veneer", value: "The 9292 burl's figure, re-tinted to the Dark Diva colour and polished well darker than the rest of the room (owner, 7 Oct), satin, the grain running on across all four bays. The back panel is veneered both faces: it reads through the glass from the desk." },
             { label: "Handles", value: "The slim brass bar on each drawer; an upright one by each door's free edge." },
             { label: "TV", value: "The 55 in TV floats on the partition above — see Partition." },
           ],

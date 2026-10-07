@@ -11,8 +11,8 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const TVUNIT = {
-  rev: "1 — a pill in plan: two drawer stacks, two cabinets",
-  date: "03.10.2026",
+  rev: "2 — the veneer polished darker (owner)",
+  date: "07.10.2026",
   // the partition as built in the 3D (glassblock.py): Mano cast-glass blocks, 140 face + 10 joint, 95 deep, 16 across;
   // the middle 8 straight, the last 4 at each end turning towards the bed on a 1.3 m radius; a bronze channel at each end
   glass: { mod: 150, blk: 140, dep: 95, cols: 16, rad: 1300, straight: 600, chan: 14, track: 4, z0: 10 },
@@ -291,8 +291,8 @@ const TVUNIT = {
     .forEach((n, i) => (s += text(18, 251.5 + i * 4.2, n, { size: 1.45 })));
   s += heading(112, 241, "ASSUMED", "TELL ME IF ANY OF THESE IS WRONG", 88);
   ["Height 1 ft 5¾ in and depth 1 ft 3¾ in, as the last run.",
-   "The same veneer as before: the 9292 burl in the Dark Diva",
-   "   colour, the grain running on across all four bays.",
+   "The 9292 burl, polished darker than the room (owner, 7 Oct),",
+   "   the grain running on across all four bays.",
    "The slim brass bar kept; an upright one on each door.",
    "Every edge eased 5 mm; the top a full bullnose.",
    "Concealed soft-close hinges; one shelf in each cabinet."]

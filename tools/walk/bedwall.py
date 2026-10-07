@@ -1,20 +1,21 @@
-# The bed wall and the bed (AST-DR-034 / -035, owner 3 Oct): exec'd by realism.py just before it makes the bed, in its
-# namespace (real.py's helpers and materials, the skeleton's P / box / prism).
-#   · the whole wall built out 3 in in Dark Diva veneer, polished DARKER than the rest of the room, sweeping forward in a
-#     concave cove — up both sides and across the top — to 16 in at the edge of a niche that holds the bed and both
-#     side tables; the coves meet in a mitre at the two top corners
-#   · the niche: 16 in deep, 6 ft 6 in high, its back in parchment-plaster panels five across and three up, its sides and
+# The bed wall and the bed (AST-DR-034 rev 5 / -035 rev 4, owner 7 Oct): exec'd by realism.py just before it makes the
+# bed, in its namespace (real.py's helpers and materials, the skeleton's P / box / prism).
+#   · the whole wall built out 2 in in Dark Diva veneer, polished DARKER than the rest of the room, sweeping forward in
+#     one smooth concave cove — up both sides and across the top — to 15 in at the edge of a niche that holds the bed and
+#     both side tables; the coves meet in a mitre at the two top corners. 2 in is D1's lining: the door opens along it
+#   · the niche: 15 in deep, 6 ft 6 in high, its back in parchment-plaster panels five across and three up, its sides and
 #     soffit plain parchment plaster
-#   · the bed from the owner's photo: a low teak platform (the room's tone) on turned bun feet; no headboard — a long
-#     white cushion along the back, resting on the mattress and leaning on the parchment (owner's second photo);
-#     a wooden side table and a brass twin-arm wall lamp either side
+#   · the bed: a storage base straight down to the floor (no legs) and the slim upholstered headboard behind it — the
+#     finish of both still the owner's to choose, so they carry their own materials (bed_base_finish, headboard_finish)
+#   · a side table each side, 16 × 14 in, a white marble slab set flush in its teak rim; a brass twin-arm lamp over each
+#   · a Sony rear speaker high on each plain face, the right one 2 in over the open door
 # Plan: x east, s south from the study wall; the bed wall's face is s = Lb. Along the wall u runs from the dressing
 # (right-wall) corner, v comes out from the wall: x = xR − u, s = Lb − v.
 import bpy, bmesh, math
 from mathutils import Vector, Matrix
 
 W_ = xR - xLb                              # 15 ft 6 in
-EDGE, DEEP = 76.0, 406.0                   # 3 in everywhere, 16 in at the niche — as deep as the side tables (owner)
+EDGE, DEEP = 51.0, 381.0                   # 2 in everywhere, 15 in at the niche (owner, 7 Oct)
 U0, U1, NH = 787.0, 3632.0, 1981.0         # the niche: the old bed-back span, 6 ft 6 in high
 CA, CF = 152.0, 25.0                       # cove: 6 in along the wall (7 in out), then a 1 in flat edge
 CW, CB = CA + CF, DEEP - EDGE
@@ -22,13 +23,13 @@ PL = 20.0                                  # parchment plaster on board, on the 
 XU = lambda u: xR - u
 SV = lambda v: Lb - v
 
-for n_ in ("parchment_wall", "sk_bed", "bed_base", "bed_frame", "mattress", "duvet", "duvet_fold", "throw",
+for n_ in ("parchment_wall", "sk_bed", "bed_base", "bed_frame", "headboard", "back_cushion", "mattress", "duvet", "duvet_fold", "throw",
            "pillow_b0", "pillow_b1", "pillow_f0", "pillow_f1", "pillow0", "pillow1"):
     o_ = sc.objects.get(n_)
     if o_: bpy.data.objects.remove(o_, do_unlink=True)
 
 M_VEN_DK = veneer("dark_diva_bedwall", 0.30, 0.42, 0.80, 1.0, "dark_diva_crown.jpg", (0.9, 0.9, 1.1))   # the same Dark Diva, polished darker
-M_WEAVE = fabric("weave_cream", (0.80, 0.77, 0.70), 0.55, 0.92, 420)                                   # the back cushion: a cream textured weave
+M_SPK = fabric("speaker_cloth", (0.025, 0.025, 0.028), 0.3, 0.95, 1400)                               # the speakers' black grille cloth
 BW_ = bpy.data.collections.new("bedwall"); sc.collection.children.link(BW_)
 
 def mesh_obj(name, bm, mat, coll=BW_):
@@ -76,8 +77,9 @@ quad([P(XU(U1), SV(v), z) for v, z in ((0, 0), (DEEP, 0), (DEEP, NH), (0, NH))],
 quad([P(XU(u), SV(v), NH) for u, v in ((U0, 0), (U1, 0), (U1, DEEP), (U0, DEEP))], (0, 0, -1))   # soffit: down
 mesh_obj("bw_niche_returns", rt, M_PARCH)
 
-# marble skirting, 4 in, standing ½ in proud of the build-out and following it round the coves, and along the niche back
-SKH, SKP = 102.0, 12.0
+# marble skirting, 4 in, flush with the build-out's veneer (so the open door's heel clears it) and following it round the
+# coves; along the niche back it stands ½ in proud of the plaster
+SKH, SKP = 102.0, 1.0
 sk = bmesh.new()
 row_lo = [sk.verts.new(P(XU(u), SV(prof(dist(u, 0)) + SKP), 0)) for u in us]
 row_hi = [sk.verts.new(P(XU(u), SV(prof(dist(u, 0)) + SKP), SKH)) for u in us]
@@ -87,7 +89,7 @@ for i in range(len(us) - 1):
     if U0 < uc < U1: continue
     sk.faces.new((row_lo[i], row_lo[i + 1], row_hi[i + 1], row_hi[i])); sk.faces.new((row_hi[i], row_hi[i + 1], row_in[i + 1], row_in[i]))
 mesh_obj("bw_skirting", sk, M_WHITE)
-o_ = dbox("bw_skirt_niche", XU(U1) + 1, SV(PL + SKP), 0, XU(U0) - 1, SV(0), SKH, M_WHITE); bevel(o_, 0.002)
+o_ = dbox("bw_skirt_niche", XU(U1) + 1, SV(PL + 12), 0, XU(U0) - 1, SV(0), SKH, M_WHITE); bevel(o_, 0.002)
 
 # ── the niche back: parchment plaster panels, five across and three up, hairline joints ─────────────────────────────
 G_ = 3.0
@@ -99,66 +101,55 @@ for i in range(5):
         o_ = dbox(f"bw_panel{i}{j}", XU(u1_), SV(PL), z0_, XU(u0_), SV(1), z1_, M_PARCH); bevel(o_, 0.0015, 2)
 dbox("bw_panel_bed", XU(U1), SV(1), SKH, XU(U0), SV(0), NH, M_DARK)          # the joints read dark
 
-# ── the bed, from the owner's photo ─────────────────────────────────────────────────────────────────────────────────
+# ── the bed: a storage base to the floor, the headboard behind (owner, 7 Oct) ─────────────────────────────────────
+# The finish is the owner's to choose (wood, leather or something shiny) before the film: the base and the headboard
+# each carry their own material, so the choice is a swap here. Until then the room's Dark Diva on the base and the
+# photo's dusty-rose suede on the headboard.
 BC = (U0 + U1) / 2                                      # centred in the niche, on the TV's line
-FW, ML, MW, OV = 1929.0, 1981.0, 1829.0, 51.0          # frame 6 ft 4 in; mattress 6 ft × 6 ft 6 in; 2 in past it
-HB_B = HB_F = PL + 25.0                                 # no headboard: the frame's head 1 in off the plaster
-LEG, RAIL, MATT = 178.0, 102.0, 254.0
-vF0, vF1 = HB_F, HB_F + ML + 2 * OV                     # the frame 2 in past the mattress all round
+FW, ML, MW, OV = 1929.0, 1981.0, 1829.0, 51.0          # base 6 ft 4 in; mattress 6 ft × 6 ft 6 in; 2 in past it at sides and foot
+HB_B, HB_T, HB_H = PL + 25.0, 76.0, 1016.0              # the headboard 1 in off the plaster, 3 in thick, 3 ft 4 in high
+HB_F = HB_B + HB_T
+BASE, MATT = 280.0, 254.0                              # 11 in to the mattress; a 10 in mattress
+vF0, vF1 = HB_F, HB_F + ML + OV
 xa, xb = XU(BC + FW / 2), XU(BC - FW / 2)
-# the frame: a 4 in rail with a 1 in lip round a slatted deck
-rl = 45.0
-for nm, (x0_, s0_, x1_, s1_) in {"bed_frame": (xa, SV(vF1), xb, SV(vF1) + rl), "bed_rail_l": (xa, SV(vF1), xa + rl, SV(vF0)),
-                                  "bed_rail_r": (xb - rl, SV(vF1), xb, SV(vF0)), "bed_rail_h": (xa, SV(vF0) - rl, xb, SV(vF0))}.items():
-    o_ = dbox(nm, x0_, s0_, LEG, x1_, s1_, LEG + RAIL - 25, M_VEN); bevel(o_, 0.004, 3)
-    o_ = dbox(nm + "_lip", x0_ - (6 if nm != "bed_rail_r" else 0), s0_ - 6, LEG + RAIL - 25, x1_ + (6 if nm != "bed_rail_l" else 0), s1_ + 6, LEG + RAIL, M_VEN); bevel(o_, 0.006, 3)
-o_ = dbox("bed_deck", xa + rl, SV(vF1) + rl, LEG + RAIL - 30, xb - rl, SV(vF0) - rl, LEG + RAIL - 12, M_VEN)
-# five turned bun feet: collar, a swelling body, tapering to the floor
-def bun(name, x, s):
-    prof_ = [(0, 0), (30, 0), (33, 12), (40, 40), (47, 80), (46, 112), (40, 140), (35, 156), (35, 162), (32, 162), (32, 178), (0, 178)]
-    bmb = bmesh.new(); n = 32
-    rings = [[bmb.verts.new(P(x + r * math.cos(2 * math.pi * k / n), s - r * math.sin(2 * math.pi * k / n), z)) for k in range(n)] for r, z in prof_]
-    for a, b in zip(rings, rings[1:]):
-        for k in range(n):
-            f_ = bmb.faces.new((a[k], a[(k + 1) % n], b[(k + 1) % n], b[k])); f_.smooth = True
-    bmb.normal_update(); o = mesh_obj(name, bmb, M_VEN, FUR); return o
-for k, (u_, v_) in enumerate(((BC - FW / 2 + 150, vF0 + 150), (BC + FW / 2 - 150, vF0 + 150), (BC - FW / 2 + 150, vF1 - 150), (BC + FW / 2 - 150, vF1 - 150), (BC, (vF0 + vF1) / 2))):
-    bun(f"bed_foot{k}", XU(u_), SV(v_))
+M_BED = veneer("bed_base_finish", 0.32, 0.4, 1.12, 1.0, "dark_diva_crown.jpg", (0.9, 0.9, 1.1))
+M_HEAD = fabric("headboard_finish", (0.50, 0.33, 0.30), 0.75, 0.9, 700)
+o_ = dbox("bed_base", xa, SV(vF1), 0, xb, SV(vF0), BASE, M_BED); bevel(o_, 0.005, 3)
+o_ = dbox("headboard", xa, SV(HB_F), 0, xb, SV(HB_B), HB_H, M_HEAD); bevel(o_, 0.018, 5)
+for p_ in o_.data.polygons: p_.use_smooth = True
 # the mattress (the bedding is made on it next, in realism.py)
-o_ = box("mattress", XU(BC + MW / 2), SV(vF0 + OV + ML), LEG + RAIL - 12, XU(BC - MW / 2), SV(vF0 + OV), LEG + RAIL - 12 + MATT, WALL, FUR)
+o_ = box("mattress", XU(BC + MW / 2), SV(vF0 + ML), BASE, XU(BC - MW / 2), SV(vF0), BASE + MATT, WALL, FUR)
 setmat(o_, M_LINEN_WHITE); bevel(o_, 0.035, 5)
 for p_ in o_.data.polygons: p_.use_smooth = True
-# the long white cushion along the back: the mattress's width, 17 in × 8 in, eased and piped, sitting on the mattress at its
-# head and leaning back 10° until it rests on the parchment
-CUH, CUD, CUL = 430.0, 200.0, math.radians(10)
-zm = LEG + RAIL - 12 + MATT; vm = vF0 + OV
-o_ = box("back_cushion", XU(BC + MW / 2), SV(vm + CUD), zm, XU(BC - MW / 2), SV(vm), zm + CUH, WALL, FUR); setmat(o_, M_WEAVE); bevel(o_, 0.05, 8)
-for p_ in o_.data.polygons: p_.use_smooth = True
-piv = Vector(P(0, SV(vm), zm))
-o_.data.transform(Matrix.Translation(-piv))                              # pivot on its bottom-back edge, then tip it back to the wall
-o_.location = piv; o_.rotation_euler.x = CUL
-ssub = o_.modifiers.new("soft", "SUBSURF"); ssub.levels = 1; ssub.render_levels = 2
-tx_c = bpy.data.textures.new("cushion_slump", "CLOUDS"); tx_c.noise_scale = 0.35
-dpc = o_.modifiers.new("slump", "DISPLACE"); dpc.texture = tx_c; dpc.strength = 0.006; dpc.mid_level = 0.5
 
-# ── side tables, all wood (owner: no marble): top, one drawer with a brass keyhole, four slim splayed legs ────────────────────────────────
-TW, TD, THt = 406.0, 381.0, 610.0                     # 16 in wide, 15 in deep — inside the niche
+# ── side tables: a white marble slab set flush in a teak rim (owner, 7 Oct), one drawer with a brass keyhole, four
+#    slim splayed legs ─────────────────────────────────────────────────────────────────────────────────────────────
+TW, TD, THt, TT, RIM = 406.0, 356.0, 610.0, 32.0, 45.0   # 16 in wide, 14 in deep, 24 in high; 1¼ in top, 1¾ in rim
 def side_table(k, uc):
     x0_, x1_ = XU(uc + TW / 2), XU(uc - TW / 2); s0_, s1_ = SV(PL + TD), SV(PL)
-    o_ = dbox(f"st{k}_top", x0_ - 8, s0_ - 8, THt - 25, x1_ + 8, s1_ + 4, THt, M_VEN); bevel(o_, 0.004, 3)
-    o_ = dbox(f"st{k}_box", x0_, s0_, THt - 150, x1_, s1_, THt - 25, M_VEN); bevel(o_, 0.003, 2)
-    o_ = dbox(f"st{k}_drawer", x0_ + 18, s0_ - 3, THt - 138, x1_ - 18, s0_ + 2, THt - 37, M_VEN); bevel(o_, 0.002, 2)
-    bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.008, depth=0.004, location=P((x0_ + x1_) / 2, s0_ - 4, THt - 88))
+    for nm, (a0_, b0_, a1_, b1_) in {"l": (x0_, s0_, x0_ + RIM, s1_), "r": (x1_ - RIM, s0_, x1_, s1_),
+                                     "f": (x0_ + RIM, s0_, x1_ - RIM, s0_ + RIM), "b": (x0_ + RIM, s1_ - RIM, x1_ - RIM, s1_)}.items():
+        o_ = dbox(f"st{k}_rim_{nm}", a0_, b0_, THt - TT, a1_, b1_, THt, M_VEN); bevel(o_, 0.0025, 2)
+    o_ = dbox(f"st{k}_marble", x0_ + RIM + 1, s0_ + RIM + 1, THt - 20, x1_ - RIM - 1, s1_ - RIM - 1, THt, M_WHITE); bevel(o_, 0.0008, 1)
+    o_ = dbox(f"st{k}_box", x0_ + 10, s0_ + 10, THt - 150, x1_ - 10, s1_ - 4, THt - TT, M_VEN); bevel(o_, 0.003, 2)
+    o_ = dbox(f"st{k}_drawer", x0_ + 28, s0_ + 7, THt - 140, x1_ - 28, s0_ + 12, THt - TT - 10, M_VEN); bevel(o_, 0.002, 2)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.008, depth=0.004, location=P((x0_ + x1_) / 2, s0_ + 6, THt - 91))
     kh = bpy.context.active_object; kh.name = f"st{k}_key"; kh.rotation_euler = (math.pi / 2, 0, 0); setmat(kh, M_BRASS)
-    for i_, (lx, ls) in enumerate(((x0_ + 22, s0_ + 22), (x1_ - 22, s0_ + 22), (x0_ + 22, s1_ - 22), (x1_ - 22, s1_ - 22))):
-        dx_, ds_ = (-28 if lx < (x0_ + x1_) / 2 else 28), (-28 if ls < (s0_ + s1_) / 2 else 28)
+    for i_, (lx, ls) in enumerate(((x0_ + 32, s0_ + 32), (x1_ - 32, s0_ + 32), (x0_ + 32, s1_ - 26), (x1_ - 32, s1_ - 26))):
+        dx_, ds_ = (-28 if lx < (x0_ + x1_) / 2 else 28), (-28 if ls < (s0_ + s1_) / 2 else 18)
         top, bot = Vector(P(lx, ls, THt - 150)), Vector(P(lx + dx_, ls + ds_, 0))
         bpy.ops.mesh.primitive_cone_add(vertices=4, radius1=0.011, radius2=0.017, depth=(top - bot).length, location=(top + bot) / 2)
         lg = bpy.context.active_object; lg.name = f"st{k}_leg{i_}"; lg.rotation_euler = (top - bot).to_track_quat("Z", "Y").to_euler(); setmat(lg, M_VEN)
 tables_ = (U0 + (BC - FW / 2 - U0) / 2, U1 - (U1 - BC - FW / 2) / 2)
 for k, uc in enumerate(tables_): side_table(k, uc)
 
+# ── the rear speakers: 106 × 216 × 98 (Sony), on a short bracket 6 mm off the 2 in face, 7 ft 9 in up — square on the
+#    bed, each in the middle of a plain face; the right one clears the open door's top by 2 in ───────────────────────
+for k, u_ in enumerate((305.0, 2 * BC - 305.0)):
+    o_ = dbox(f"bw_speaker{k}", XU(u_ + 53), SV(EDGE + 6 + 98), 2362, XU(u_ - 53), SV(EDGE + 6), 2578, M_SPK); bevel(o_, 0.012, 4)
+    dbox(f"bw_speaker{k}_bracket", XU(u_ + 16), SV(EDGE + 6), 2440, XU(u_ - 16), SV(EDGE), 2500, M_IRON)
+
 # ── a brass twin-arm wall lamp over each table, the right wall's lamp ───────────────────────────────────────────────
 for k, uc in enumerate(tables_): lamp(f"bw_lamp{k}", XU(uc), SV(PL), 1290, -2, 2, 130)
 
-print(f"bed wall: niche {U1 - U0:.0f} × {NH:.0f}, cove {CW:.0f}; bed {FW:.0f} × {ML + OV + 76:.0f}; tables at u {tables_[0]:.0f}, {tables_[1]:.0f}", flush=True)
+print(f"bed wall: niche {U1 - U0:.0f} × {NH:.0f} × {DEEP:.0f}, cove {CW:.0f}; bed {FW:.0f} × {ML + OV + HB_T:.0f} on a base to the floor; tables at u {tables_[0]:.0f}, {tables_[1]:.0f}", flush=True)

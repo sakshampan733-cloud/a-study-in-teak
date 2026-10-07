@@ -180,7 +180,7 @@ cy.volume_bounces = max(getattr(cy, "volume_bounces", 0), 2)
 #    cabinet two drawers tall behind a flat door, hinged on the drawer side. The round ends are fixed; nothing that
 #    moves is curved. The 9292 burl re-tinted to the Dark Diva colour (tex/burl_darkdiva.jpg), in the Dark Diva's satin
 #    polish; a bullnose top oversailing 10; a dark plinth set back 50; the slim brass bars. Low (450) and 400 deep.
-M_BURL_DD = veneer("burl_darkdiva", 0.32, 0.4, 1.12, 1.0, "burl_darkdiva.jpg", 0.6)   # the same satin polish as the Dark Diva
+M_BURL_DD = veneer("burl_darkdiva", 0.32, 0.4, 0.62, 1.0, "burl_darkdiva.jpg", 0.6)   # satin, polished well darker than the room (owner, 7 Oct)
 depth(M_BURL_DD, 0.03, 0.0)
 CDP, CHT, PL, TOP, FR, GAP, OVER, BAY = 400.0, 450.0, 60.0, 26.0, 20.0, 3.0, 10.0, 450.0
 W0 = DEP / 2 + 5; YF = W0 + CDP; X1 = 2 * BAY; UE = L / 2 + 14                 # back 5 off the glass; the tip of the end channel
