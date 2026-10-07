@@ -126,7 +126,12 @@ def lacquer(name, col):
 M_BED = lacquer("bed_base_finish", (0.010, 0.010, 0.011))                 # gloss black lacquer
 M_HEAD = fabric("headboard_finish", (0.50, 0.33, 0.30), 0.75, 0.9, 700)      # dusty-rose suede
 o_ = dbox("bed_base", xa, SV(vF1), 0, xb, SV(vF0), BASE, M_BED); bevel(o_, 0.005, 3)
-o_ = dbox("headboard", xa, SV(HB_F), 0, xb, SV(HB_B), HB_H, M_HEAD); bevel(o_, 0.018, 5)
+# the headboard: a rose suede panel in a thin gloss-black frame round its top and sides — 1¼ in face, as thin as the
+# dressing mirror's frame, 2¾ in deep — the panel ¼ in proud of it (owner, 7 Oct)
+HBF, HBD = 32.0, 70.0
+for nm_, (x0_, x1_, z0_, z1_) in {"top": (xa, xb, HB_H - HBF, HB_H), "l": (xa, xa + HBF, 0, HB_H - HBF), "r": (xb - HBF, xb, 0, HB_H - HBF)}.items():
+    o_ = dbox(f"headboard_frame_{nm_}", x0_, SV(HB_B + HBD), z0_, x1_, SV(HB_B), z1_, M_BED); bevel(o_, 0.003, 3)
+o_ = dbox("headboard", xa + HBF, SV(HB_F), 0, xb - HBF, SV(HB_B + 2), HB_H - HBF, M_HEAD); bevel(o_, 0.006, 4)
 for p_ in o_.data.polygons: p_.use_smooth = True
 # the mattress (the bedding is made on it next, in realism.py)
 o_ = box("mattress", XU(BC + MW / 2), SV(vF0 + ML), BASE, XU(BC - MW / 2), SV(vF0), BASE + MATT, WALL, FUR)

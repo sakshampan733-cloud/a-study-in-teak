@@ -103,9 +103,10 @@ def finish(o, thick, levels=2, wrinkle=0.0, mat=None):
         dp = o.modifiers.new("w", "DISPLACE"); dp.texture = tx; dp.strength = wrinkle; dp.mid_level = 0.5; dp.texture_coords = "GLOBAL"
 
 # the duvet: an ivory cover, laid square on the mattress and let fall over the sides and the foot
-DW, DD = (mx1 - mx0) + 2 * 330, (ms1 - ms0) - 470 + 300          # 330 over each side, 300 over the foot, 470 short of the head
+DW, DD = (mx1 - mx0) + 2 * 200, (ms1 - ms0) - 470 + 150          # 8 in over each side, 6 in over the foot (owner, 7 Oct: so the gloss-
+                                                                  # black base shows below the bedding), 470 short of the head
 dv = grid("duvet", DW, DD, 16, SOFT)
-dv.location = Vector(P(bcx, ms0 - 300 + DD / 2, mz1 + 60))
+dv.location = Vector(P(bcx, ms0 - 150 + DD / 2, mz1 + 60))
 ruffle(dv, 0.03, 4.5, 1)
 FLOOR_ = sc.objects.get("floor")
 if FLOOR_: FLOOR_.modifiers.new("col", "COLLISION"); FLOOR_.collision.thickness_outer = 0.004
@@ -117,7 +118,7 @@ dv.modifiers.new("col", "COLLISION"); dv.collision.thickness_outer = 0.005; dv.c
 
 # a white top sheet folded back over the duvet's head edge
 fs = grid("sheet_fold", DW - 40, 360, 14, SOFT)
-fs.location = Vector(P(bcx, ms0 - 300 + DD - 120, mz1 + 90))
+fs.location = Vector(P(bcx, ms0 - 150 + DD - 120, mz1 + 90))
 ruffle(fs, 0.015, 7, 2)
 simulate(fs, 45, mass=0.05, tension=10, bending=0.08, air=2.0, quality=8)
 finish(fs, 0.004, 2, 0.0, M_LINEN_WHITE)
