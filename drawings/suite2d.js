@@ -28,11 +28,11 @@
   // ── the furniture, where the owner wants it (bed wall best case, 27.09) ──
   const doorEnd = xLb + D1.leaf;
   const bx0 = doorEnd + 178, bx1 = xR - 787, Wb = bx1 - bx0, cx = (bx0 + bx1) / 2;
-  // the bed wall (AST-DR-034): built out 3 in, sweeping in a 6 in cove to 16 in round a niche on the old bed-back span;
-  // the bed (AST-DR-035) stands in it — no headboard: its frame 1 in off the plaster, 2 in past the mattress all round,
-  // and a long white cushion along the back on the mattress
-  const BW = { edge: 76, deep: 406, cove: 152, flat: 25, plaster: 20 };   // 16 in at the niche: the side tables sit inside it
-  const bedW = 1929, bedL = 1981, hbBack = L - 45, hbFront = L - 96, bedFoot = hbBack - 2 * 51 - bedL, BT = 96;
+  // the bed wall (AST-DR-034 rev 5): built out 2 in, sweeping in one 6 in cove to 15 in round a niche on the old bed-back
+  // span; the bed (AST-DR-035 rev 4) stands in it — a 3 in headboard 1 in off the plaster, then a storage base down to the
+  // floor, 2 in past the mattress at the sides and foot
+  const BW = { edge: 51, deep: 381, cove: 152, flat: 25, plaster: 20 };   // 15 in at the niche: the 14 in side tables sit inside it
+  const bedW = 1929, bedL = 1981, hbBack = L - 45, hbFront = L - 121, bedFoot = hbFront - bedL - 51, BT = 121;
   // partition (owner, 1 Oct): Mano cast-glass blocks, 95 deep, 16 blocks of 150 = 2400 along its run, on the old
   // centre line 11 ft off the bed wall. A straight middle of 8 blocks; each end turns TOWARDS THE BED only, on a 1.3 m
   // radius over 4 blocks (26°, 136 out) — about as tight as the blocks go. One foot-wide wood column up the middle;
@@ -111,22 +111,22 @@
     bed() {
       let o = R(cx - rug.w / 2, rug.y0, cx + rug.w / 2, rug.y0 + rug.l, "hid");
       o += Tx(cx - rug.w / 2 + 420, rug.y0 + 170, "RUG 10'×8'", "tx2", { size: 70 });
-      // the bed wall's build-out in plan: 3 in, the cove out to 16 in, the niche between (its plaster back a thin line)
+      // the bed wall's build-out in plan: 2 in, the cove out to 15 in, the niche between (its plaster back a thin line)
       const cw = BW.cove + BW.flat, cv = (xe, dir) => Array.from({ length: 13 }, (_, i) => { const t = (i / 12) * Math.PI / 2;
         return [xe + dir * (cw - BW.cove * Math.sin(t)), L - (BW.deep - (BW.deep - BW.edge) * Math.cos(t))]; });
       const poly = (pts) => `<path class="fu3" d="M ${pts.map(([x, y]) => `${f(x)} ${f(y)}`).join(" L ")} Z"/>`;
       o += poly([[xLb, L], [xLb, L - BW.edge], ...cv(bx0, -1), [bx0, L - BW.deep], [bx0, L]]);
       o += poly([[bx1, L], [bx1, L - BW.deep], ...cv(bx1, 1).reverse(), [xR, L - BW.edge], [xR, L]]);
       o += R(bx0, L - BW.plaster, bx1, L, "fu2");
-      // frame, mattress, the long white cushion at the back, pillows; side tables either side
+      // headboard, the storage base, mattress, pillows; side tables either side
       o += R(cx - bedW / 2, bedFoot, cx + bedW / 2, hbBack, "fu");
+      o += R(cx - bedW / 2, hbFront, cx + bedW / 2, hbBack, "fu2");
       o += R(cx - bedW / 2 + 50, bedFoot + 51, cx + bedW / 2 - 50, hbFront, "fu2");
-      o += R(cx - bedW / 2 + 50, hbFront - 200, cx + bedW / 2 - 50, L - 21, "fu2");
-      o += R(cx - bedW / 2 + 110, hbFront - 520, cx + bedW / 2 - 110, hbFront - 220, "fu2");
-      [bx0 + (cx - bedW / 2 - bx0) / 2, bx1 - (bx1 - cx - bedW / 2) / 2].forEach((t) => (o += R(t - 203, L - BW.plaster - 381, t + 203, L - BW.plaster, "fu")));
+      o += R(cx - bedW / 2 + 90, hbFront - 330, cx + bedW / 2 - 90, hbFront - 30, "fu2");
+      [bx0 + (cx - bedW / 2 - bx0) / 2, bx1 - (bx1 - cx - bedW / 2) / 2].forEach((t) => (o += R(t - 203, L - BW.plaster - 356, t + 203, L - BW.plaster, "fu")));
       o += `<line class="thin" x1="${f(cx - bedW / 2)}" y1="${f(bedFoot + 520)}" x2="${f(cx + bedW / 2)}" y2="${f(bedFoot + 520)}"/>`;
       o += Tx(cx, bedFoot + 1000, "BED", "lb", { size: 120 });
-      o += Tx(cx, L + 150, "BED WALL — 16 IN NICHE, 6 IN COVE, 3 IN ELSEWHERE · AST-DR-034", "tx2", { size: 60 });
+      o += Tx(cx, L + 150, "BED WALL — 15 IN NICHE, 6 IN COVE, 2 IN ELSEWHERE · AST-DR-034", "tx2", { size: 60 });
       o += `<g class="fdim">` + dimH(cx - bedW / 2, cx + bedW / 2, bedFoot + 330, null, `${ftin(bedW)} BED`, { size: 90 }) +
         dimV(bedFoot, hbFront, cx + bedW / 2 - 170, null, ftin(hbFront - bedFoot), { size: 90 }) +
         dimH(bx0, bx1, L + T + 260, L, `${ftin(bx1 - bx0)} NICHE`, { size: 95 }) + `</g>`;

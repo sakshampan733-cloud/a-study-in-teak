@@ -32,7 +32,7 @@ window.MODEL3D = (function () {
       return [cx + sg * (straight + pR * Math.sin(th)) - sg * w * Math.sin(th), yP + pR * (1 - Math.cos(th)) + w * Math.cos(th)];
     };
     // the bed in the bed-wall niche (AST-DR-034/035): no headboard — the frame 1 in off the plaster, 2 in past the mattress
-    const drF = pT / 2 + 5 + 400, bed = { w: 1929, l: 2083 }, bedHead = L - 45, bedFoot = bedHead - bed.l;
+    const drF = pT / 2 + 5 + 400, bed = { w: 1929, l: 2108 }, bedHead = L - 45, bedFoot = bedHead - bed.l;   // headboard + base (AST-DR-035 rev 4)
     const desk = { L: 2286, D: 914, H: 750 }; desk.back = yP - pT / 2 - 50; desk.front = desk.back - desk.D;
     return { cx, yP, pT, RUN, pAt, drF, bed, bedFoot, bedHead, desk };
   }
@@ -115,9 +115,9 @@ window.MODEL3D = (function () {
         run(ol.slice(n - 29).concat(ol.slice(0, 29)).map(([x, y]) => [cx + x, Y.yP + y]), 450, 0, "solid");
         slab(cx - TG.X1, Y.yP + TG.W0, 2 * TG.X1, TG.YF - TG.W0, 450); }       // and its top across the straight front
       slab(cx - Y.desk.L / 2, Y.desk.front, Y.desk.L, Y.desk.D, Y.desk.H);   // the desk, square corners, 2 in off the glass
-      slab(cx - Y.bed.w / 2, Y.bedFoot, Y.bed.w, Y.bed.l, 533);              // the bed, frame and mattress
-      slab(cx - 914, Y.bedHead - 296, 1829, 230, 957);                       // the long white cushion along the back
-      [cx - Y.bed.w / 2 - 254, cx + Y.bed.w / 2 + 254].forEach((t) => slab(t - 203, L - 401, 406, 381, 610));   // side tables, inside the 16 in niche
+      slab(cx - Y.bed.w / 2, Y.bedFoot, Y.bed.w, Y.bed.l - 76, 534);         // the bed: storage base to the floor, and the mattress
+      slab(cx - Y.bed.w / 2, Y.bedHead - 76, Y.bed.w, 76, 1016);             // the headboard, 3 ft 4 in
+      [cx - Y.bed.w / 2 - 254, cx + Y.bed.w / 2 + 254].forEach((t) => slab(t - 203, L - 376, 406, 356, 610));   // side tables, inside the 15 in niche
     }
     return { P, Wd, H, L };
   }
