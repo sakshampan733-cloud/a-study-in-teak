@@ -249,7 +249,7 @@ for k, (a, b) in enumerate(panels + [nar]):                       # the owner's 
     frame_on(f"rwp_t{k}", "x", xR, a, b, 797, 2629, P_panel(), -1, M_PAINT)
     frame_on(f"rwp_s{k}", "x", xR, a, b, 213, 549, P_panel(), -1, M_PAINT)
 for (a, b) in ((STUDY, d2s0 - 102), (d2s1 + 102, Lb - 15)):
-    run(f"rwp_rail{a}", [(b_, a_) for a_, b_ in P_rail()], xR, b, xR, a, 610, M_PAINT)
+    run(f"rwp_rail{a}", [(b_, a_) for a_, b_ in P_reeds(38, 28, 4, 4)], xR, b, xR, a, 648, M_PAINT)   # the counter's reeded band, carried round (kept)
 
 # ═══════════════════════════ DOORS: planted mouldings to AST-DR-015 ═════════════
 for o in list(sc.objects):

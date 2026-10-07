@@ -387,32 +387,33 @@ for o_ in [o for o in sc.objects if o.name in ("L_study", "L_bedz")]: pass
 # ── the bathroom, as far as it is known: its stone, and the vanity (scheme C, AST-DR-021) on the door wall,
 # between the door and the pier, facing into the room ─────────────────────────
 M_CHROME = flat("chrome", (0.9, 0.9, 0.92), 0.06, 1.0)
-M_BURL_DARK = veneer("burl_dark", 0.12, 1.0, 0.22, 0.75, "burl_diva.jpg", 0.75)                 # the 9292 burl, darkened
+M_BURL_DARK = veneer("burl_dark", 0.08, 1.0, 0.12, 0.7, "burl_diva.jpg", 0.75)                  # the 9292 burl, polished as dark as the owner's vanity photo (8 Oct)
 for o_ in list(sc.objects):
     if o_.type == "MESH" and o_.name == "floor": pass
 bfl = dbox("bath_floor", BA["x0"], BA["s0"], 0.2, BA["x1"], BA["s1"], 1.2, M_BEIGE)
 pxr = BA["x1"] - PIER["east"]; pxl = pxr - PIER["w"]
 VX1 = pxl; VX0 = VX1 - 1524; VS1 = BA["s1"]; VS0 = VS1 - 610                            # 5 ft × 2 ft, against the pier
 TOPZ, SLAB = 838, 38
-# scheme C as the owner wants it read (their reference): the 3 ft marble bank is ONE stone block, floor to the
-# 33 in top, standing 20 proud of the ends; its drawers show only as fine joints. Marble nowhere else: the two ends
-# are the dark burl, 3 in lower, with their own veneer tops, floating over a shadow-gap kick.
-bx0, bx1 = VX1 - 457 - 914, VX1 - 457; AXx = bx0 + 457; BF = VS0 - 20                    # the block's front, proud
-blk = dbox("van_block", bx0, BF, 0, bx1, VS1, TOPZ, M_BEIGE); bevel(blk, 0.0025, 2)
+# scheme C rev 4 (AST-DR-021, owner 8 Oct): the marble is the TOP only (a 76 band with its mitred front strip, over the
+# bank); the 3 ft bank and the two end cabinets are the dark burl on ONE level, 152 off the floor, over a recessed dark support.
+bx0, bx1 = VX1 - 457 - 914, VX1 - 457; AXx = bx0 + 457; BF = VS0 - 25                    # the bank's front, 25 proud of the ends
+BANK0, BANKT = 152, 762
+bk = dbox("van_bank", bx0, BF, BANK0, bx1, VS1, BANKT, M_BURL_DARK); bevel(bk, 0.002, 2)
+blk = dbox("van_block", bx0, BF, BANKT, bx1, VS1, TOPZ, M_BEIGE); bevel(blk, 0.0025, 2)   # the marble top and its front strip
 def joint(name, x0_, z0_, x1_, z1_):
     dbox(name, x0_, BF - 0.6, z0_, x1_, BF + 2, z1_, M_DARK)
-joint("van_j_h1", bx0 + 18, 576, bx1 - 18, 578.5)                                          # over the big drawer
-joint("van_j_h2", bx0 + 18, 762, bx1 - 18, 764.5)                                          # under the top apron
-joint("van_j_h0", bx0 + 18, 38, bx1 - 18, 40.5)
-joint("van_j_v", AXx - 1.2, 578.5, AXx + 1.2, 762)                                         # the top pair splits on the tap line
-for xx in (bx0 + 18, bx1 - 20.5): joint(f"van_j_s{xx:.0f}", xx, 38, xx + 2.5, 764.5)
-ETOP = TOPZ - 76
+joint("van_j_h0", bx0 + 18, 190, bx1 - 18, 192.5)                                          # under the big drawer
+joint("van_j_h1", bx0 + 18, 566, bx1 - 18, 568.5)                                          # over the big drawer
+joint("van_j_h2", bx0 + 18, 591, bx1 - 18, 593.5)                                          # under the top pair
+joint("van_j_v", AXx - 1.2, 593.5, AXx + 1.2, BANKT)                                       # the top pair splits on the tap line
+for xx in (bx0 + 18, bx1 - 20.5): joint(f"van_j_s{xx:.0f}", xx, 190, xx + 2.5, BANKT)
+ETOP = 800
 for (x0_, x1_, nm) in ((bx1, VX1, "L"), (VX0, bx0, "R")):                                  # 1 ft 6 at the pier end, 6 in at the door end
-    e = dbox(f"van_end{nm}", x0_ + 2, VS0, 150, x1_ - 2, VS1, ETOP - 22, M_BURL_DARK); bevel(e, 0.002, 2)
+    e = dbox(f"van_end{nm}", x0_ + 2, VS0, BANK0, x1_ - 2, VS1, ETOP - 22, M_BURL_DARK); bevel(e, 0.002, 2)
     t_ = dbox(f"van_etop{nm}", x0_ + 2, VS0 - 4, ETOP - 22, x1_ - 2, VS1, ETOP, M_BURL_DARK); bevel(t_, 0.006, 4)
-    dbox(f"van_kick{nm}", x0_ + 2, VS0 + 90, 0, x1_ - 2, VS1, 150, M_DARK)
     bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=0.018, depth=0.01, location=P((x0_ + x1_) / 2, VS0 - 3, ETOP - 110))
     cp = bpy.context.active_object; cp.rotation_euler = (math.pi / 2, 0, 0); setmat(cp, M_CHROME)            # cup pull
+dbox("van_support", VX0 + 38, VS0 + 76, 0, VX1 - 38, VS1, BANK0, M_DARK)                  # the one recessed support, set back 3 in
 # the vessel bowl on the block, on the tap line; the wall spout over it
 bpy.ops.mesh.primitive_uv_sphere_add(segments=64, ring_count=32, radius=0.203, location=P(AXx, VS1 - 320, TOPZ + 126))
 bowl = bpy.context.active_object; bowl.name = "van_bowl"; bowl.scale = (1, 1, 0.62)
@@ -870,7 +871,9 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
     "st_wall": ((2337, 2250, 1550), (2337, 0, 1450), {"lens": 15, "fstop": 8.0}),      # the whole study wall, from over the desk
     "st_arch": ((1250, 1350, 1350), (744, 200, 2250), {"lens": 22, "fstop": 5.6}),     # up into the bookcase arch and its niches
     "st_chair": ((3600, 2250, 1300), (2337, 1050, 650), {"lens": 26, "fstop": 5.6}),   # the green chair at the desk
-    "hide_close": ((3350, 3150, 520), (2700, 3700, 0), {"lens": 32, "fstop": 4.0}),     # low over the hide's fur   # the side table by the dressing corner
+    "hide_close": ((3350, 3150, 520), (2700, 3700, 0), {"lens": 32, "fstop": 4.0}),     # low over the hide's fur
+    "wd_open": ((6250, 4900, 1550), (7650, 3350, 1350), {"lens": 20, "fstop": 6.3}),   # L2 and L3 open: shirts, the lit perfume niche
+    "wd_shoes": ((7700, 3800, 1350), (7150, 5400, 900), {"lens": 22, "fstop": 6.3}),   # R3 open: the shoe trays   # the side table by the dressing corner
     "c_gloss": ((2337, 4700, 1350), (2700, 600, 2500), {"lens": 20, "fstop": 8.0}),    # up at the gloss ceiling, toward the window
     "b_rug": ((3900, 3050, 1750), (2337, 4350, 100), {"lens": 22, "fstop": 8.0}),    # the bed's foot and the rug under it (bed side of the glass)
     "t_front": ((2337, 3560, 980), (2337, 2780, 360), {"lens": 22, "fstop": 8}),
@@ -879,6 +882,7 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
     "vanity": ((6250, 1150, 1400), (6600, 2718, 950)),
     "bath_wc": ((4777 + 2300, 2300, 1550), (4777 + 900, 450, 1250), {"lens": 20, "fstop": 8}),       # the WC wall, its niches, the WC and shower in glass
     "bath_tub": ((4777 + 1150, 2050, 1500), (4777 + 3300, 950, 550), {"lens": 22, "fstop": 8}),      # the tub east of the pier
+    "bath_van": ((4777 + 1780, 800, 1250), (4777 + 1780, 2718, 1000), {"lens": 24, "fstop": 8}),     # the vanity: marble top, dark-burl bank and ends on one level
     "bath_up": ((4777 + 1300, 2100, 1300), (4777 + 1950, 400, 2600), {"lens": 18, "fstop": 8}),      # the dropped shower ceiling and its cove
     "door": ((2600, 3500), (-177, 5200, 1250)),
     "dress": ((4900, 4450), (8400, 4356, 1500)),

@@ -38,8 +38,8 @@ def bay_geo(name):
     front, back = (s1, s0) if north else (s0, s1)
     return o, x0, x1, front, back, north
 
-def open_bay(name, ang=96.0):
-    o, x0, x1, front, back, north = bay_geo(name)
+def open_bay(name, geo, ang=96.0):
+    o, x0, x1, front, back, north = geo
     for k in (0, 1):
         d = sc.objects.get(f"{name}_d{k}"); h = sc.objects.get(f"{name}_h{k}")
         hx = x0 + 6 if k == 0 else x1 - 6
@@ -152,5 +152,5 @@ def fit_R3(name):
 FITS = {"wdN1": fit_L2, "wdN2": fit_L3, "wdS2": fit_R3}
 for nm, fn in FITS.items():
     if sc.objects.get(nm + "_c"):
-        fn(nm); open_bay(nm)
+        geo_ = bay_geo(nm); fn(nm); open_bay(nm, geo_)
 print(f"wardrobes: {', '.join(FITS)} open and fitted (AST-DR-048), lit backs, hammered brass handles", flush=True)
