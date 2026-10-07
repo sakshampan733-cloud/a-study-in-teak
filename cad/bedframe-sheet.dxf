@@ -489,7 +489,7 @@ $SKPOLY
   9
 $TDCREATE
  40
-2461321.8288194444
+2461321.885451389
   9
 $TDUCREATE
  40
@@ -497,7 +497,7 @@ $TDUCREATE
   9
 $TDUPDATE
  40
-2461321.8288194444
+2461321.885451389
   9
 $TDUUPDATE
  40
@@ -929,11 +929,11 @@ $PSTYLEMODE
   9
 $FINGERPRINTGUID
   2
-{DDAF7519-CAB5-4966-9500-85A9921F5D1F}
+{671B8780-857D-46F1-B92F-AAB329535101}
   9
 $VERSIONGUID
   2
-{91E65374-A8BE-48D5-B655-5DCD933CB883}
+{4AF80D12-626A-4B58-83E6-9C2CA5F6DC7C}
   9
 $EXTNAMES
 290
@@ -1323,9 +1323,9 @@ ISM
   0
 CLASS
   1
-ACDBPLACEHOLDER
+LAYOUT
   2
-AcDbPlaceHolder
+AcDbLayout
   3
 ObjectDBX Classes
  90
@@ -1339,9 +1339,9 @@ ObjectDBX Classes
   0
 CLASS
   1
-LAYOUT
+ACDBPLACEHOLDER
   2
-AcDbLayout
+AcDbPlaceHolder
   3
 ObjectDBX Classes
  90
@@ -6633,7 +6633,7 @@ AcDbText
  40
 0.048188976377952754
   1
-HEADBOARD — FINISH TO CHOOSE
+HEADBOARD, DUSTY-ROSE SUEDE
  11
 6.651574803149606
  21
@@ -7945,7 +7945,7 @@ AcDbText
  40
 0.04110236220472441
   1
-A PLAIN BOX, NO LEGS · STORAGE INSIDE NOT DRAWN · FINISH TO CHOOSE
+A PLAIN BOX, NO LEGS, GLOSS BLACK LACQUER · STORAGE NOT DRAWN
  72
 2
  11
@@ -9959,7 +9959,7 @@ AcDbText
  40
 0.051023622047244095
   1
-UPHOLSTERY — FINISH TO CHOOSE
+DUSTY-ROSE SUEDE
  11
 7.433070866141732
  21
@@ -10423,7 +10423,7 @@ AcDbText
  40
 0.048188976377952754
   1
-REVISION 4
+REVISION 5
  11
 11.811023622047244
  21
@@ -10573,7 +10573,7 @@ AcDbText
  40
 0.04110236220472441
   1
-high, plain, also to the floor. FINISH TO CHOOSE (owner) — wood,
+high, plain, also to the floor, in dusty-rose suede as the photo.
  11
 11.811023622047244
  21
@@ -10603,7 +10603,7 @@ AcDbText
  40
 0.04110236220472441
   1
-leather or something shiny; it is settled before the Blender model.
+The base in GLOSS BLACK lacquer (owner, 7 Oct) — the room's black
  11
 11.811023622047244
  21
@@ -10633,7 +10633,7 @@ AcDbText
  40
 0.04110236220472441
   1
-Drawn as the suede headboard until then. Mattress 10 in, ASSUMED.
+accent, Deco with the rose. Lacquer polishes back; mattress 10 in, ASSUMED.
  11
 11.811023622047244
  21
@@ -11063,9 +11063,9 @@ AcDbText
  30
 0.0
  40
-0.04535433070866141
+0.04264660947232342
   1
-4 — a storage base down to the floor, no legs; finish to choose
+5 — the base in gloss black lacquer; the headboard dusty-rose suede
  11
 11.929133858267717
  21
@@ -12237,7 +12237,7 @@ DictionaryVariables
 280
 0
   1
-1.4.2 @ 2026-10-07T14:23:30.509390+00:00
+1.4.2 @ 2026-10-07T15:45:03.381705+00:00
   0
 VISUALSTYLE
   5
@@ -12949,7 +12949,7 @@ DictionaryVariables
 280
 0
   1
-1.4.2 @ 2026-10-07T14:23:30.523707+00:00
+1.4.2 @ 2026-10-07T15:45:03.404883+00:00
   0
 ENDSEC
   0

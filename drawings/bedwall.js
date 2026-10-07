@@ -36,12 +36,12 @@ const BEDWALL = {
 
 // The bed in the owner's photo, sized to the 6 ft × 6 ft 6 in mattress on the plan. Proportions read off the photo.
 const BEDFRAME = {
-  rev: "4 — a storage base down to the floor, no legs; finish to choose",
+  rev: "5 — the base in gloss black lacquer; the headboard dusty-rose suede",
   date: "07.10.2026",
   mat: { w: 1829, l: 1981, h: 254 },        // 6 ft × 6 ft 6 in, 10 in thick — mattress to be chosen
   over: 51,                                 // the frame runs 2 in past the mattress at the sides and the foot
   base: { h: 280 },                         // a storage base, a plain box straight down to the floor — no legs (owner, 7 Oct);
-                                            // 11 in to the mattress, the storage inside not drawn; finish TO CHOOSE (owner)
+                                            // 11 in to the mattress, the storage inside not drawn; GLOSS BLACK lacquer (owner, 7 Oct)
   head: { h: 1016, t: 76, gap: 25, ply: 18, ease: 18 }, // headboard top 3 ft 4 in off the floor, 3 in thick, 1 in off the plaster (owner, 7 Oct)
 };
 
@@ -299,7 +299,7 @@ const BEDFRAME = {
     s += note(ve.X(N.u0 - CW - 300), ve.Y(H - 1500), ve.X(N.u0 + 700), ve.Y(330), "DARK DIVA VENEER — WHOLE WALL, DARKER POLISH", "2 IN BUILD-OUT ON A PLY CARCASE · SATIN");
     s += note(ve.X(N.u0 + 300), ve.Y(H - hTop + 90), ve.X(N.u0 + 700), ve.Y(480), "ONE SMOOTH 6 IN COVE + 1 IN EDGE — 2 IN OUT TO 15 IN", "VENEER WRAPPED OVER BENT PLY, NO JOIN, NO STEP");
     s += note(ve.X(N.u0 + (N.u1 - N.u0) * 0.1), ve.Y(H - 1700), ve.X(N.u0 + 40), ve.Y(-110), "PARCHMENT PLASTER — BACK IN 5 × 3 PANELS", "THE NICHE'S SIDES AND SOFFIT PLAIN PARCHMENT TOO");
-    s += note(ve.X(bc + fw / 2 - 150), ve.Y(H - HB.h + 150), ve.X(bc + fw / 2 + 120), ve.Y(H - 1150), "HEADBOARD ON A STORAGE BASE", "BOTH TO THE FLOOR · FINISH TO CHOOSE — AST-DR-035");
+    s += note(ve.X(bc + fw / 2 - 150), ve.Y(H - HB.h + 150), ve.X(bc + fw / 2 + 120), ve.Y(H - 1150), "ROSE SUEDE HEADBOARD", "ON A GLOSS-BLACK STORAGE BASE — AST-DR-035");
     s += note(ve.X(W - 150), ve.Y(H - 1500), ve.X(leafTip - 120), ve.Y(-110), "D1 OPEN ON ITS FLOOR STOP (DASHED)", "ALONG THE 2 IN FACE — DETAIL 2", "end");
     s += note(ve.X(tables[0] - 60), ve.Y(H - 560), ve.X(N.u0 - CW) - 2, ve.Y(H - 420), "SIDE TABLE", "AFTER THE PHOTO — DETAIL 3", "end");
     s += note(ve.X(tables[1] + K.lamp.span), ve.Y(H - K.lamp.y - 140), ve.X(tables[1] + 260), ve.Y(H - 1700), "WALL LAMP, EACH SIDE", "BRASS TWIN-ARM, AS THE RIGHT WALL");
@@ -335,7 +335,7 @@ const BEDFRAME = {
   s += note(vs.X(K.deep - 50), vs.Y(H - N.h - C.flat - 60), vs.X(K.deep) + 14, vs.Y(330), "COVE OVER THE NICHE, 6 IN", "BENT PLY ON FORMERS, VENEER WRAPPED ROUND");
   s += note(vs.X(K.edge + 50), vs.Y(H - spkY1 + 60), vs.X(K.deep) + 14, vs.Y(120), "REAR SPEAKER BEYOND", "ON ITS BRACKET ON THE 2 IN FACE");
   s += note(vs.X(K.plaster / 2), vs.Y(1400), vs.X(K.deep) + 14, vs.Y(720), "PARCHMENT PLASTER", "BACK, SIDES AND SOFFIT, ON 12 MM BOARD");
-  s += note(vs.X(vHb + 50), vs.Y(H - HB.h + 120), vs.X(K.deep) + 14, vs.Y(1180), "HEADBOARD", "¾ IN PLY BACK · BOLTED TO THE BASE · FINISH TO CHOOSE");
+  s += note(vs.X(vHb + 50), vs.Y(H - HB.h + 120), vs.X(K.deep) + 14, vs.Y(1180), "HEADBOARD, DUSTY-ROSE SUEDE", "¾ IN PLY BACK · BOLTED TO THE BASE");
 
   // detail 2 — the entrance corner, plan 1:20, in the right-hand column; marks keyed underneath
   const scD = 20, d0 = N.u1 - 250, vd = view(323 - d0 / scD, 89, scD, "Entrance corner"), td = vd.w(0.12), dd = `${vd.w(1)} ${vd.w(0.7)}`;
@@ -395,10 +395,10 @@ const BEDFRAME = {
   s += heading(322, 17, "DECIDED · STILL OPEN", "OWNER, 7 OCT", 88);
   ["DECIDED: 2 in face all along — D1 lies along it on a floor stop (detail 2).",
    "DECIDED: one smooth cove (option A); niche 15 in; tables 16 × 14 in.",
-   "DECIDED: the headboard back — the long cushion goes; finish with the bed's.",
+   "DECIDED: the headboard back in dusty-rose suede — the long cushion goes.",
    "DECIDED: side tables after the owner's photo, no stone (detail 3, AST-DR-049).",
    "DECIDED: two rear speakers high on the plain faces, either side, clear of D1.",
-   "DECIDED: the bed on a storage base down to the floor, no legs — finish to come.",
+   "DECIDED: the bed on a storage base to the floor, no legs, in gloss black.",
    "1 · The bed stands 2 ft 5⅜ in clear of the TV drawers (was 2 ft 9¾ in).",
    "2 · Fix the lamp and speaker sockets (list B2) before the panels are made."]
     .forEach((n, i) => (s += text(322, 28 + i * 4.4, n, { size: 1.35, fill: /^\d/.test(n) ? "#b3261e" : INK })));
@@ -459,7 +459,7 @@ const BEDFRAME = {
   s2 += chainH([vf.X(0), vf.X(fwB)], vf.Y(topB) + 11, [`${fwB} OVERALL — THE HEADBOARD THE SAME`], { from: vf.Y(topB) + 1, size: 1.4 });
   s2 += chainV([vf.Y(topB), vf.Y(topB - yBase), vf.Y(topB - yMat), vf.Y(0)], vf.X(fwB) + 6, [`${yBase} BASE`, `${B.mat.h} MATTRESS`, HB.h - yMat], { from: vf.X(fwB) + 1, size: 1.15 });
   s2 += chainV([vf.Y(topB), vf.Y(0)], vf.X(fwB) + 13, [`${HB.h} TO THE TOP`], { from: vf.X(fwB) + 1, size: 1.25 });
-  s2 += note(vf.X(fwB * 0.82), vf.Y(120), vf.X(fwB * 0.82) + 8, vf.Y(-60), "HEADBOARD — FINISH TO CHOOSE", "PLAIN, NO BUTTONS OR PIPING · EASED TOP");
+  s2 += note(vf.X(fwB * 0.82), vf.Y(120), vf.X(fwB * 0.82) + 8, vf.Y(-60), "HEADBOARD, DUSTY-ROSE SUEDE", "PLAIN, NO BUTTONS OR PIPING · EASED TOP");
 
   const vsd = view(212, 34, scB, "Bed side"), tsd = vsd.w(0.12), dsd = `${vsd.w(1)} ${vsd.w(0.7)}`;
   s2 += heading(206, 17, "SIDE", `SCALE 1:${scB} · HEADBOARD LEFT, THE PLASTER BEHIND IT DASHED`, 110);
@@ -467,7 +467,7 @@ const BEDFRAME = {
   s2 += chainH([vsd.X(-HB.gap), vsd.X(0), vsd.X(HB.t), vsd.X(HB.t + B.mat.l), vsd.X(lenB)], vsd.Y(topB) + 5, [HB.gap, HB.t, `${B.mat.l} MATTRESS`, B.over], { from: vsd.Y(topB) + 1, size: 1.15 });
   s2 += chainH([vsd.X(0), vsd.X(lenB)], vsd.Y(topB) + 11, [`${lenB} OVERALL`], { from: vsd.Y(topB) + 1, size: 1.4 });
   s2 += note(vsd.X(HB.t / 2), vsd.Y(380), vsd.X(HB.t) + 12, vsd.Y(-60), "HEADBOARD, 3 IN", "BOLTED TO THE BASE — DETAIL 2 · 1 IN OFF THE PLASTER");
-  s2 += note(vsd.X(lenB - 300), vsd.Y(topB - 140), vsd.X(lenB) - 10, vsd.Y(topB + 120), "STORAGE BASE, TO THE FLOOR", "A PLAIN BOX, NO LEGS · STORAGE INSIDE NOT DRAWN · FINISH TO CHOOSE", "end");
+  s2 += note(vsd.X(lenB - 300), vsd.Y(topB - 140), vsd.X(lenB) - 10, vsd.Y(topB + 120), "STORAGE BASE, TO THE FLOOR", "A PLAIN BOX, NO LEGS, GLOSS BLACK LACQUER · STORAGE NOT DRAWN", "end");
 
   const scP2 = 20, vpl = view(28, 152, scP2, "Bed plan"), tpl = vpl.w(0.1), dpl = `${vpl.w(1)} ${vpl.w(0.7)}`;
   s2 += heading(18, 142, "PLAN", `SCALE 1:${scP2} · HEADBOARD AT THE TOP`, 80);
@@ -483,7 +483,7 @@ const BEDFRAME = {
   { const L2 = labels(vh.X(HB.t) + 14, "right", 156, 220);
     L2.add(vh.X(HB.ply / 2), vh.Y(150), "¾ IN PLY BACK", "THE SUEDE TURNED OVER AND STAPLED BEHIND");
     L2.add(vh.X(HB.ply + 25), vh.Y(220), "2 IN FOAM, WADDING OVER", "");
-    L2.add(vh.X(HB.t - 4), vh.Y(60), "UPHOLSTERY — FINISH TO CHOOSE", "PLAIN · NO PIPING, NO BUTTONS");
+    L2.add(vh.X(HB.t - 4), vh.Y(60), "DUSTY-ROSE SUEDE", "PLAIN · NO PIPING, NO BUTTONS");
     L2.add(vh.X(HB.t - 6), vh.Y(6), "TOP EDGE EASED, ¾ IN RADIUS", "");
     s2 += L2.draw(); }
 
@@ -500,9 +500,9 @@ const BEDFRAME = {
    "the floor, no legs, 2 in past the 6 ft × 6 ft 6 in mattress at the sides",
    "and foot, 11 in to the mattress. The storage inside is not drawn.",
    "The slim upholstered headboard behind it, the frame's width, 3 ft 4 in",
-   "high, plain, also to the floor. FINISH TO CHOOSE (owner) — wood,",
-   "leather or something shiny; it is settled before the Blender model.",
-   "Drawn as the suede headboard until then. Mattress 10 in, ASSUMED."]
+   "high, plain, also to the floor, in dusty-rose suede as the photo.",
+   "The base in GLOSS BLACK lacquer (owner, 7 Oct) — the room's black",
+   "accent, Deco with the rose. Lacquer polishes back; mattress 10 in, ASSUMED."]
     .forEach((n, i) => (s2 += text(300, 193 + i * 4.3, n, { size: 1.45 })));
 
   s2 += titleBlock({ title: "THE BED", sub: "Front · Side · Plan · Headboard", date: B.date, rev: B.rev, dwg: "AST-DR-035", scale: "AS NOTED @ A3" });
