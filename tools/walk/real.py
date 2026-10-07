@@ -432,47 +432,33 @@ bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=0.03, depth=0.008, locat
 pl = bpy.context.active_object; pl.rotation_euler = (math.pi / 2, 0, 0); setmat(pl, M_CHROME)
 bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=0.025, depth=0.03, location=P(AXx + 130, VS1 - 15, 1161))
 hd_ = bpy.context.active_object; hd_.rotation_euler = (math.pi / 2, 0, 0); setmat(hd_, M_CHROME)            # the mixer
-# the mirror (the owner's reference shape, assets/refs/vanity-mirror-ref-owner.png): a tall elongated octagon, 760 × 1000,
-# in a TEAK frame with a beaded inner edge (owner, 8 Oct: no metal rods), bevelled glass, hung flat on the wall on a
-# hidden cleat, centred on the tap line.
-MW, MH, MSH, MFR, MOFF, MZ0, TILT = 760.0, 1000.0, 240.0, 48.0, 22.0, 1240.0, 0.0
-def oct_pts(w, h, sh, inset=0.0):
-    hw, top = w / 2 - inset, h - inset
-    k = inset * math.tan(math.radians(22.5))
-    q = w / 4
-    return [(-q + k, inset), (q - k, inset), (hw, sh + inset * 0.4), (hw, top - sh - inset * 0.4), (q - k, top), (-q + k, top), (-hw, top - sh - inset * 0.4), (-hw, sh + inset * 0.4)]
-def oct_obj(name, outer, inner, depth, m):
-    bm = bmesh.new(); n = len(outer)
-    if inner is None:
-        f0 = [bm.verts.new((x / 1000, 0, z / 1000)) for x, z in outer]; bm.faces.new(f0)
-    else:
-        vo = [bm.verts.new((x / 1000, 0, z / 1000)) for x, z in outer]; vi = [bm.verts.new((x / 1000, 0, z / 1000)) for x, z in inner]
-        for i in range(n):
-            j = (i + 1) % n; bm.faces.new((vo[i], vo[j], vi[j], vi[i]))
-    me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
+# the mirror (owner, 8 Oct: "give a tri-fold a try", above the tap): three panels in polished teak frames with a small
+# beaded edge, bevelled glass — the centre flat on the wall on a hidden cleat, the two wings hinged off it and turned
+# 25 degrees forward so you see yourself from the side. Centred on the tap line.
+MCW, MWW, MH, MZ0, MFR, WANG = 560.0, 280.0, 900.0, 1240.0, 32.0, math.radians(25)
+M_MFRAME = M_DESK
+def lbox(name, x0_, x1_, y0_, y1_, z0_, z1_, m, par, bev=0.0):
+    me = bpy.data.meshes.new(name); bm = bmesh.new(); bmesh.ops.create_cube(bm, size=1.0); bm.to_mesh(me); bm.free()
     o = bpy.data.objects.new(name, me); sc.collection.objects.link(o); setmat(o, m)
-    so = o.modifiers.new("t", "SOLIDIFY"); so.thickness = depth / 1000; so.offset = 0
-    bv = o.modifiers.new("ease", "BEVEL"); bv.width = 0.0015; bv.segments = 2; bv.limit_method = "ANGLE"
+    o.scale = ((x1_ - x0_) / 1000, (y1_ - y0_) / 1000, (z1_ - z0_) / 1000); o.location = ((x0_ + x1_) / 2000, (y0_ + y1_) / 2000, (z0_ + z1_) / 2000)
+    o.parent = par
+    if bev: bv = o.modifiers.new("ease", "BEVEL"); bv.width = bev; bv.segments = 3; bv.limit_method = "ANGLE"
     return o
-M_NICKEL = M_DESK                                                                       # the frame and its beads: teak, polished
-mpiv = bpy.data.objects.new("van_mirror_pivot", None); sc.collection.objects.link(mpiv)
-mpiv.location = P(AXx, VS1 - MOFF, MZ0 + MH / 2)
-O = oct_pts(MW, MH, MSH); I1 = oct_pts(MW, MH, MSH, MFR); I2 = oct_pts(MW, MH, MSH, MFR - 10)
-parts = [oct_obj("van_mirror_frame", O, I1, 26, M_NICKEL), oct_obj("van_mirror", I1, None, 6, M_MIRROR),
-         oct_obj("van_mirror_lip", oct_pts(MW, MH, MSH, 6), oct_pts(MW, MH, MSH, 12), 30, M_NICKEL)]
-# the beads: one small sphere repeated round the frame's inner edge
-bpy.ops.mesh.primitive_uv_sphere_add(segments=10, ring_count=6, radius=0.0042, location=(0, 0, 0)); bead = bpy.context.active_object; setmat(bead, M_NICKEL)
-bead.data.name = "van_bead"; bpy.data.objects.remove(bead, do_unlink=True)
-bd = bpy.data.meshes["van_bead"]; nb = 0
-for i in range(len(I2)):
-    (x0_, z0_), (x1_, z1_) = I2[i], I2[(i + 1) % len(I2)]
-    seg = math.hypot(x1_ - x0_, z1_ - z0_); k_ = max(1, int(seg // 10.5))
-    for q_ in range(k_):
-        t_ = (q_ + 0.5) / k_; ob = bpy.data.objects.new(f"van_bead{nb}", bd); sc.collection.objects.link(ob); nb += 1
-        ob.location = ((x0_ + (x1_ - x0_) * t_) / 1000, 0.014, (z0_ + (z1_ - z0_) * t_) / 1000); parts.append(ob)
-for o_ in parts:
-    o_.parent = mpiv; o_.location.z -= MH / 2000
-mpiv.rotation_euler = (-TILT, 0, 0)                                                               # its top tipped out a little
+def mpanel(tag, x0_, x1_, par):
+    lbox(f"{tag}_back", x0_, x1_, 0, 6, 0, MH, M_MFRAME, par)
+    lbox(f"{tag}_glass", x0_ + MFR - 8, x1_ - MFR + 8, 6, 12, 8, MH - 8, M_MIRROR, par)
+    for nm, (a_, b_, c_, d_) in {"l": (x0_, x0_ + MFR, 0, MH), "r": (x1_ - MFR, x1_, 0, MH), "b": (x0_, x1_, 0, MFR), "t": (x0_, x1_, MH - MFR, MH)}.items():
+        lbox(f"{tag}_fr{nm}", a_, b_, 0, 24, c_, d_, M_MFRAME, par, 0.004)
+    for nm, (a_, b_, c_, d_) in {"l": (x0_ + MFR - 5, x0_ + MFR, MFR, MH - MFR), "r": (x1_ - MFR, x1_ - MFR + 5, MFR, MH - MFR), "b": (x0_ + MFR, x1_ - MFR, MFR - 5, MFR), "t": (x0_ + MFR, x1_ - MFR, MH - MFR, MH - MFR + 5)}.items():
+        lbox(f"{tag}_bead{nm}", a_, b_, 12, 20, c_, d_, M_MFRAME, par, 0.002)          # the small bead round the glass
+mc = bpy.data.objects.new("van_mirror", None); sc.collection.objects.link(mc); mc.location = P(AXx, VS1 - 22, MZ0)
+mpanel("van_mirror_c", -MCW / 2, MCW / 2, mc)
+for sx in (1, -1):
+    hw = bpy.data.objects.new(f"van_mirror_hinge{sx}", None); sc.collection.objects.link(hw); hw.parent = mc
+    hw.location = (sx * MCW / 2000, 0.024, 0); hw.rotation_euler = (0, 0, sx * WANG)
+    mpanel(f"van_mirror_w{sx}", 0 if sx > 0 else -MWW, MWW if sx > 0 else 0, hw)
+    for zh in (120, MH - 120):                                                                   # two small hinges each side
+        lbox(f"van_mirror_h{sx}{zh:.0f}", -4, 4, -4, 4, zh - 30, zh + 30, M_CHROME, hw)
 # the bathroom's marble on the pier as well (the owner): a skin on its three faces
 pz0, pz1 = VS1 - PIER["out"], VS1
 dbox("bath_pier_w", pxl - 10, pz0, 0, pxl, pz1, H, M_BEIGE); dbox("bath_pier_n", pxl - 10, pz0 - 10, 0, pxr + 10, pz0, H, M_BEIGE)

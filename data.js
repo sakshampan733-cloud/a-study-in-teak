@@ -741,7 +741,7 @@ window.PROJECT = {
             { label: "Veneer — the two ends", value: "Only the two pull-out ends — the 1 ft 6 in and the 6 in — are veneer: the 9292 burl, polished dark and red, as the owner's first vanity photo, high gloss, on 18 BWP / marine ply, every edge sealed. The bank and the top are the beige-gold bathroom marble, the same marble as the walls and the pier." },
             { label: "Fittings", value: "Chrome — already bought. Brass and gold were priced out for the bathroom, so this is the one place in the room that breaks from the brass rule. Cup pulls on the two end pull-outs only — the drawers have no handles and open with a push." },
             { label: "Hanging", value: "None on the floor (owner, 8 Oct) — there is a drain there. The row hangs on an 18 ply wall cleat with concealed steel brackets sized for the stone." },
-            { label: "Mirror", value: "The owner's reference shape: a tall elongated octagon, 760 × 1000, in a polished teak frame with a beaded inner edge and bevelled glass, hung flat on the wall on a hidden cleat, centred on the tap line. No metal rods (owner, 8 Oct)." },
+            { label: "Mirror", value: "A tri-fold (owner, 8 Oct), over the tap: a 560 × 900 centre panel flat on the wall and two 280 wings hinged off it, turned 25° forward — polished teak frames with a small bead round bevelled glass. No metal rods." },
           ],
           questions: ["The brackets that carry the stone, and the marble fronts' bond to the drawer boxes: the stone supplier to confirm.", "Bowl and spout — the actual sizes, so the drawing stops assuming them."],
         },

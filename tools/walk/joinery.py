@@ -329,6 +329,23 @@ def leaf_detail(dname, w, pair=False):
     d.rotation_euler.z = rz
 leaf_detail("door_d1", D1["leaf"], pair=True)
 leaf_detail("door_d2", D2["leaf"])
+# D3, the bathroom door (AST-DR-001 / -009: the same two-panel design, 2 ft 6 in): its leaf runs along local x from the
+# hinge, so the panels are hung on a helper turned to the y-running frame the other leaves use, at the leaf's far end
+d3_ = sc.objects["door_d3"]; rz3 = d3_.rotation_euler.z; d3_.rotation_euler.z = 0; bpy.context.view_layer.update()
+d3m = bpy.data.objects.new("door_d3_m", None); sc.collection.objects.link(d3m); d3m.parent = d3_
+d3m.location = (0.686, 0, 0); d3m.rotation_euler = (0, 0, math.pi / 2); bpy.context.view_layer.update()
+for face, xs in ((1, 0.0), (-1, -40.0)):
+    panel("door_d3_m", face, 100, RB, 686 - 200, 562, xs)
+    panel("door_d3_m", face, 100, RB + 562 + RL, 686 - 200, 1124, xs)
+for xs, face in ((0.0, 1), (-40.0, -1)):                                                       # knob Ø55 and escutcheon, away from the hinge
+    for (yy, r_, dep, zz) in ((70, 0.0275, 0.03, 972), (130, 0.017, 0.004, 972)):
+        wv = d3m.matrix_world @ Vector(((xs + face * dep * 500) / 1000, yy / 1000, zz / 1000))
+        if r_ > 0.02:
+            bpy.ops.mesh.primitive_uv_sphere_add(segments=32, ring_count=16, radius=r_, location=wv); kb = bpy.context.active_object; kb.scale = (0.75, 1, 1)
+        else:
+            bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=r_, depth=dep, location=wv); kb = bpy.context.active_object; kb.rotation_euler = (0, math.pi / 2, 0)
+        kb.rotation_euler.z += math.pi / 2; setmat(kb, M_BRASS); kb.parent = d3_; kb.matrix_parent_inverse = d3_.matrix_world.inverted()
+d3_.rotation_euler.z = rz3
 
 # ═══════════════════════════ CASINGS: AST-DR-011 ═══════════════════════════════
 for o in list(sc.objects):
