@@ -990,8 +990,8 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
     "b_front": ((2337, 2500, 1250), (2337, 5766, 1150), {"lens": 22, "fstop": 8.0}),
     "b_three": ((300, 3500, 1350), (2700, 5650, 900), {"lens": 26, "fstop": 5.6}),
     "b_cove": ((4100, 4950, 1650), (3150, 5740, 1700), {"lens": 24, "fstop": 5.6}),
-    "b_head": ((3350, 4250, 1450), (3000, 5700, 1000), {"lens": 30, "fstop": 4.0})      # over the pillows at the rose headboard and its frame,
-    "st_close": ((4150, 4950, 1000), (3560, 5560, 450), {"lens": 35, "fstop": 4.0})      # the cabriole side table, from the room side,
+    "b_head": ((3350, 4250, 1450), (3000, 5700, 1000), {"lens": 30, "fstop": 4.0}),      # over the pillows at the rose headboard and its frame
+    "st_close": ((4150, 4950, 1000), (3560, 5560, 450), {"lens": 35, "fstop": 4.0}),      # the cabriole side table, from the room side
     "st_wall": ((2337, 2250, 1550), (2337, 0, 1450), {"lens": 15, "fstop": 8.0}),      # the whole study wall, from over the desk
     "st_arch": ((1250, 1350, 1350), (744, 200, 2250), {"lens": 22, "fstop": 5.6}),     # up into the bookcase arch and its niches
     "st_chairf": ((2560, 1900, 1250), (2337, 1002, 760), {"lens": 32, "fstop": 4.0}),   # the chair's face, over the desk
