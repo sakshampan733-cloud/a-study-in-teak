@@ -102,9 +102,9 @@ for i in range(5):
 dbox("bw_panel_bed", XU(U1), SV(1), SKH, XU(U0), SV(0), NH, M_DARK)          # the joints read dark
 
 # ── the bed: a storage base to the floor, the headboard behind (owner, 7 Oct) ─────────────────────────────────────
-# The finish (owner, 7 Oct): one solid colour, a solid-colour laminate like the ones the owner saw — the room already
-# shines (gloss ceiling, marble floor, glass blocks), so the bed is MATTE: shown in super-matte black on the base and
-# the headboard alike, crisp edges. Both keep their own material, so a different laminate is a one-line swap.
+# The headboard stays the photo's dusty-rose suede (owner, 7 Oct: "keep the headboard same"). The base's finish is
+# still being chosen by the owner — matte black or solid brown laminate, or veneer; the room already shines (gloss
+# ceiling, marble floor, glass blocks), so it stays matte. Shown in super-matte black until then: a one-line swap.
 BC = (U0 + U1) / 2                                      # centred in the niche, on the TV's line
 FW, ML, MW, OV = 1929.0, 1981.0, 1829.0, 51.0          # base 6 ft 4 in; mattress 6 ft × 6 ft 6 in; 2 in past it at sides and foot
 HB_B, HB_T, HB_H = PL + 25.0, 76.0, 1016.0              # the headboard 1 in off the plaster, 3 in thick, 3 ft 4 in high
@@ -118,9 +118,9 @@ def laminate(name, col, rough):
     rough_var(nt, b, 0.05, 6.0, 4.0); noise_bump(nt, b, 300, 0.015, 0.0003)        # the fine grain of a super-matte face
     return m
 M_BED = laminate("bed_base_finish", (0.018, 0.018, 0.02), 0.62)
-M_HEAD = laminate("headboard_finish", (0.018, 0.018, 0.02), 0.62)
+M_HEAD = fabric("headboard_finish", (0.50, 0.33, 0.30), 0.75, 0.9, 700)      # dusty-rose suede
 o_ = dbox("bed_base", xa, SV(vF1), 0, xb, SV(vF0), BASE, M_BED); bevel(o_, 0.005, 3)
-o_ = dbox("headboard", xa, SV(HB_F), 0, xb, SV(HB_B), HB_H, M_HEAD); bevel(o_, 0.004, 3)
+o_ = dbox("headboard", xa, SV(HB_F), 0, xb, SV(HB_B), HB_H, M_HEAD); bevel(o_, 0.018, 5)
 for p_ in o_.data.polygons: p_.use_smooth = True
 # the mattress (the bedding is made on it next, in realism.py)
 o_ = box("mattress", XU(BC + MW / 2), SV(vF0 + ML), BASE, XU(BC - MW / 2), SV(vF0), BASE + MATT, WALL, FUR)

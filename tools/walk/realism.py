@@ -168,12 +168,24 @@ if STYLE:
             o_.location.y += (smax - (back + press_in)) / 1000            # Blender y = −s: move toward the wall until it touches
             nxt.append(ebb(o_)[2])
         back = max(nxt)                                                  # the next row leans on the front of this one
+    # symmetric (owner, 7 Oct: the pillows looked lopsided): each right-hand pillow is the left-hand one mirrored about the
+    # bed's centre line, so the pair match exactly; the lumbar sits dead centre, square on
+    cxb = P(bcx, 0, 0)[0]
+    for a_, b_ in (("pillow_euro0", "pillow_euro1"), ("pillow_std0", "pillow_std1")):
+        o0, o1 = sc.objects[a_], sc.objects[b_]
+        m_ = o0.copy()
+        for c in list(o1.users_collection): c.objects.link(m_)
+        bpy.data.objects.remove(o1, do_unlink=True); m_.name = b_
+        m_.location.x = 2 * cxb - o0.location.x
+        m_.rotation_euler = (o0.rotation_euler.x, -o0.rotation_euler.y, -o0.rotation_euler.z)
+        m_.scale = (-o0.scale.x, o0.scale.y, o0.scale.z)
+    lb_ = sc.objects["cushion_lumbar"]; lb_.location.x = cxb; lb_.rotation_euler.z = 0.0
     for o_ in [o for o in SOFT.objects if o.name.startswith(("pillow_", "cushion_"))]:
         for c in list(o_.users_collection): c.objects.unlink(o_)
         STY.objects.link(o_)
     # a throw over the foot, in a chunky weave
     th = grid("throw", 2250, 620, 14, STY)
-    th.location = Vector(P(bcx + 90, ms0 + 480, mz1 + 200)); th.rotation_euler.z = math.radians(4)
+    th.location = Vector(P(bcx, ms0 + 480, mz1 + 200))                     # square across the foot, centred (owner: symmetric)
     ruffle(th, 0.04, 5.5, 3)
     dv.modifiers.new("col", "COLLISION"); dv.collision.thickness_outer = 0.006; dv.collision.cloth_friction = 12
     simulate(th, 70, mass=0.1, tension=8, shear=2, bending=0.15, air=1.5, quality=8)
