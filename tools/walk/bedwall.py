@@ -122,24 +122,69 @@ o_ = box("mattress", XU(BC + MW / 2), SV(vF0 + ML), BASE, XU(BC - MW / 2), SV(vF
 setmat(o_, M_LINEN_WHITE); bevel(o_, 0.035, 5)
 for p_ in o_.data.polygons: p_.use_smooth = True
 
-# ── side tables: a white marble slab set flush in a teak rim (owner, 7 Oct), one drawer with a brass keyhole, four
-#    slim splayed legs ─────────────────────────────────────────────────────────────────────────────────────────────
-TW, TD, THt, TT, RIM = 406.0, 356.0, 610.0, 32.0, 45.0   # 16 in wide, 14 in deep, 24 in high; 1¼ in top, 1¾ in rim
+# ── side tables after the owner's photo (7 Oct, AST-DR-049): a shaped serpentine top with a moulded edge, polished
+#    dark — no stone; a burl apron with one drawer and a brass rosette knob; a carved console at each corner; slim
+#    cabriole legs ending in a scroll toe ─────────────────────────────────────────────────────────────────────────────
+TW, TD, THt, TT = 406.0, 356.0, 610.0, 22.0             # 16 in wide, 14 in deep, 24 in high, a 7/8 in top
+SERP, SIDEIN, APR, APS, APF, APB, LEG = 16.0, 8.0, 100.0, 34.0, 30.0, 24.0, 34.0
+M_STDARK = veneer("sidetable_dark", 0.20, 0.8, 0.42, 1.0, "dark_diva_crown.jpg", (0.9, 0.9, 1.1))   # top, legs, consoles: polished dark
+def st_outline():
+    n, r, o = 24, 9.0, []
+    for i in range(n + 1): y = (i / n) * (TD - r); o.append((SIDEIN * math.sin(math.pi * y / TD) ** 2, y))
+    for k in range(1, 4): a = math.pi - (k / 4) * math.pi / 2; o.append((r + r * math.cos(a), TD - r + r * math.sin(a)))
+    for i in range(n + 1): x = r + (i / n) * (TW - 2 * r); o.append((x, TD - SERP * math.sin(2 * math.pi * x / TW) ** 2))
+    for k in range(1, 4): a = math.pi / 2 - (k / 4) * math.pi / 2; o.append((TW - r + r * math.cos(a), TD - r + r * math.sin(a)))
+    for i in range(n, -1, -1): y = (i / n) * (TD - r); o.append((TW - SIDEIN * math.sin(math.pi * y / TD) ** 2, y))
+    return o
+# the cabriole, read off the drawing: (z, the leg's width, how far its centre stands out from the apron corner)
+CAB = [(488, 36, 0), (470, 38, 4), (440, 42, 11), (392, 42, 15), (330, 36, 12), (230, 24, 3), (150, 21, 1), (66, 19, 1.5), (30, 21, 7), (8, 26, 13), (0, 20, 13)]
+# the top's moulded edge, run round the outline: (how far in from the outline, height) — the thumbnail, a fillet, the cove
+EDGE_P = [(10, 610), (5, 609.6), (2, 608.2), (0.3, 605.5), (0, 602.5), (0.5, 599.5), (2, 597.5), (3.2, 596), (3.2, 593), (4.5, 590.5), (7, 588.6), (10, 588)]
 def side_table(k, uc):
-    x0_, x1_ = XU(uc + TW / 2), XU(uc - TW / 2); s0_, s1_ = SV(PL + TD), SV(PL)
-    for nm, (a0_, b0_, a1_, b1_) in {"l": (x0_, s0_, x0_ + RIM, s1_), "r": (x1_ - RIM, s0_, x1_, s1_),
-                                     "f": (x0_ + RIM, s0_, x1_ - RIM, s0_ + RIM), "b": (x0_ + RIM, s1_ - RIM, x1_ - RIM, s1_)}.items():
-        o_ = dbox(f"st{k}_rim_{nm}", a0_, b0_, THt - TT, a1_, b1_, THt, M_VEN); bevel(o_, 0.0025, 2)
-    o_ = dbox(f"st{k}_marble", x0_ + RIM + 1, s0_ + RIM + 1, THt - 20, x1_ - RIM - 1, s1_ - RIM - 1, THt, M_WHITE); bevel(o_, 0.0008, 1)
-    o_ = dbox(f"st{k}_box", x0_ + 10, s0_ + 10, THt - 150, x1_ - 10, s1_ - 4, THt - TT, M_VEN); bevel(o_, 0.003, 2)
-    o_ = dbox(f"st{k}_drawer", x0_ + 28, s0_ + 7, THt - 140, x1_ - 28, s0_ + 12, THt - TT - 10, M_VEN); bevel(o_, 0.002, 2)
-    bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.008, depth=0.004, location=P((x0_ + x1_) / 2, s0_ + 6, THt - 91))
-    kh = bpy.context.active_object; kh.name = f"st{k}_key"; kh.rotation_euler = (math.pi / 2, 0, 0); setmat(kh, M_BRASS)
-    for i_, (lx, ls) in enumerate(((x0_ + 32, s0_ + 32), (x1_ - 32, s0_ + 32), (x0_ + 32, s1_ - 26), (x1_ - 32, s1_ - 26))):
-        dx_, ds_ = (-28 if lx < (x0_ + x1_) / 2 else 28), (-28 if ls < (s0_ + s1_) / 2 else 18)
-        top, bot = Vector(P(lx, ls, THt - 150)), Vector(P(lx + dx_, ls + ds_, 0))
-        bpy.ops.mesh.primitive_cone_add(vertices=4, radius1=0.011, radius2=0.017, depth=(top - bot).length, location=(top + bot) / 2)
-        lg = bpy.context.active_object; lg.name = f"st{k}_leg{i_}"; lg.rotation_euler = (top - bot).to_track_quat("Z", "Y").to_euler(); setmat(lg, M_VEN)
+    W2P = lambda x, y, z: P(XU(uc - TW / 2 + x), SV(PL + y), z)          # table-local → the room
+    # the top: the moulded edge lofted round the outline (smooth), flat faces top and bottom
+    ol = st_outline(); n_ = len(ol); nrm = []
+    for i in range(n_):
+        (xa_, ya_), (xb_, yb_) = ol[i - 1], ol[(i + 1) % n_]
+        tx, ty = xb_ - xa_, yb_ - ya_; l_ = math.hypot(tx, ty) or 1.0
+        nrm.append((ty / l_, -tx / l_))                               # the outline runs clockwise on the page: this points out
+    cx_, cy_ = TW / 2, TD / 2
+    if sum(nx * (x - cx_) + ny * (y - cy_) for (x, y), (nx, ny) in zip(ol, nrm)) < 0: nrm = [(-nx, -ny) for nx, ny in nrm]
+    bm_ = bmesh.new()
+    rings = [[bm_.verts.new(W2P(x - nx * d, y - ny * d, z)) for (x, y), (nx, ny) in zip(ol, nrm)] for d, z in EDGE_P]
+    for ra, rb in zip(rings, rings[1:]):
+        for i in range(n_):
+            f_ = bm_.faces.new((ra[i], ra[(i + 1) % n_], rb[(i + 1) % n_], rb[i])); f_.smooth = True
+    ft_ = bm_.faces.new(rings[0]); fb_ = bm_.faces.new(rings[-1][::-1])
+    bmesh.ops.triangulate(bm_, faces=[ft_, fb_], quad_method="BEAUTY", ngon_method="EAR_CLIP")
+    bmesh.ops.recalc_face_normals(bm_, faces=bm_.faces[:]); top = mesh_obj(f"st{k}_top", bm_, M_STDARK, FUR)
+    x0_, x1_ = XU(uc - TW / 2 + APS), XU(uc + TW / 2 - APS); s0_, s1_ = SV(PL + TD - APF), SV(PL + APB)
+    zA, zB = THt - TT, THt - TT - APR
+    o_ = dbox(f"st{k}_apron", min(x0_, x1_), s0_, zB, max(x0_, x1_), s1_, zA, M_BURL); bevel(o_, 0.002, 2)
+    xa, xb = XU(uc - TW / 2 + 70), XU(uc + TW / 2 - 70)
+    o_ = dbox(f"st{k}_drawer", min(xa, xb), s0_ - 3, zB + 12, max(xa, xb), s0_ + 1, zA - 12, M_BURL); bevel(o_, 0.0025, 3)
+    for nm_, (rad, dep, off) in {"rose": (0.015, 0.003, 4.5), "knob": (0.008, 0.012, 10.5)}.items():
+        bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=rad, depth=dep, location=P(XU(uc), s0_ - off, zB + APR / 2))
+        kb = bpy.context.active_object; kb.name = f"st{k}_{nm_}"; kb.rotation_euler = (math.pi / 2, 0, 0); setmat(kb, M_BRASS); bevel(kb, 0.002, 3)
+    # the four legs and their consoles: the front pair bulge out on the diagonal, the back pair sideways only (the wall)
+    for i_, (lx, ly, sx, sy) in enumerate(((APS, TD - APF, -1, 1), (TW - APS, TD - APF, 1, 1), (APS, APB, -1, 0), (TW - APS, APB, 1, 0))):
+        cx, cy = lx - sx * LEG / 2, ly - (sy if sy else -1) * LEG / 2
+        bl = bmesh.new(); rings = []
+        for z, w, d in CAB:
+            ox, oy = cx + sx * d, cy + sy * d; h_ = w / 2
+            ring = []
+            for a in range(16):
+                t = 2 * math.pi * a / 16; c_, s_ = math.cos(t), math.sin(t)
+                rr_ = h_ / max(abs(c_), abs(s_)) ** 0.25 if max(abs(c_), abs(s_)) > 0 else h_      # a softly squared section
+                ring.append(bl.verts.new(W2P(ox + rr_ * c_ * 0.93, oy + rr_ * s_ * 0.93, z)))
+            rings.append(ring)
+        for ra, rb in zip(rings, rings[1:]):
+            for a in range(16): f_ = bl.faces.new((ra[a], ra[(a + 1) % 16], rb[(a + 1) % 16], rb[a])); f_.smooth = True
+        bl.faces.new(rings[-1]); bl.faces.new(rings[0][::-1]); bmesh.ops.recalc_face_normals(bl, faces=bl.faces[:])
+        lg = mesh_obj(f"st{k}_leg{i_}", bl, M_STDARK, FUR)
+        ca, cb = XU(uc - TW / 2 + lx - sx * 11 - 11), XU(uc - TW / 2 + lx - sx * 11 + 11)
+        cs0, cs1 = SV(PL + ly - (sy if sy else -1) * 11 + 11), SV(PL + ly - (sy if sy else -1) * 11 - 11)
+        o_ = dbox(f"st{k}_console{i_}", min(ca, cb), min(cs0, cs1), zB - 30, max(ca, cb), max(cs0, cs1), zA, M_STDARK); bevel(o_, 0.004, 3)
 tables_ = (U0 + (BC - FW / 2 - U0) / 2, U1 - (U1 - BC - FW / 2) / 2)
 for k, uc in enumerate(tables_): side_table(k, uc)
 

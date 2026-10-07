@@ -88,6 +88,19 @@ def flat(name, col, rough=0.8, metal=0.0, bump=0.0, coat=0.0):
     return m
 M_PAINT = flat("cream_paint", (0.72, 0.64, 0.52), 0.86, bump=0.04)
 M_CEIL = flat("ceiling_paint", (0.86, 0.83, 0.77), 0.9, bump=0.02)
+# the room's own ceiling (owner, 7 Oct, refs ceiling-gloss-ref-*-owner): high-gloss, reflective like lacquer — not glitter.
+# A clear coat over the cream, and a very slow wave in the surface so the windows' reflections ripple softly, as
+# hand-applied gloss does; the corridor and the dressing room's vault stay matte
+def ceil_gloss():
+    m, nt, b = node_mat("ceiling_gloss")
+    b.inputs["Base Color"].default_value = (0.84, 0.80, 0.73, 1); b.inputs["Roughness"].default_value = 0.10
+    b.inputs["Coat Weight"].default_value = 1.0; b.inputs["Coat Roughness"].default_value = 0.025
+    rough_var(nt, b, 0.04, 1.5, 3.0)
+    n = nt.nodes.new("ShaderNodeTexNoise"); n.inputs["Scale"].default_value = 1.2; n.inputs["Detail"].default_value = 2
+    bp = nt.nodes.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = 0.12; bp.inputs["Distance"].default_value = 0.004
+    nt.links.new(n.outputs["Fac"], bp.inputs["Height"]); nt.links.new(bp.outputs["Normal"], b.inputs["Normal"]); nt.links.new(bp.outputs["Normal"], b.inputs["Coat Normal"])
+    return m
+M_CEIL_GLOSS = ceil_gloss()
 M_BRASS = flat("brass", (0.80, 0.58, 0.28), 0.24, 1.0)
 M_BRONZE = flat("bronze", (0.20, 0.14, 0.10), 0.35, 1.0)
 M_IRON = flat("iron", (0.03, 0.03, 0.03), 0.45, 0.8)
@@ -188,7 +201,7 @@ for o in list(sc.objects):
     n = o.name
     if n == "walls": setmat(o, M_PAINT)
     elif n == "floor": setmat(o, M_FLOOR)
-    elif n == "ceiling": setmat(o, M_CEIL)
+    elif n == "ceiling": setmat(o, M_CEIL_GLOSS)
     elif n.startswith(("lin_", "door_")): setmat(o, M_VEN)
     elif n == "glass_win":
         mg, ntg, bg_ = node_mat("glass"); bg_.inputs["Transmission Weight"].default_value = 1.0; bg_.inputs["Roughness"].default_value = 0.0; bg_.inputs["IOR"].default_value = 1.45; setmat(o, mg)
@@ -788,6 +801,8 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
     "b_three": ((300, 3500, 1350), (2700, 5650, 900), {"lens": 26, "fstop": 5.6}),
     "b_cove": ((4380, 5080, 1650), (3150, 5740, 1700), {"lens": 26, "fstop": 5.6}),   # along the wall from the dressing corner: the cove in profile
     "b_head": ((3150, 4150, 1050), (3200, 5700, 850), {"lens": 38, "fstop": 2.8}),
+    "st_close": ((2950, 4650, 950), (3560, 5560, 430), {"lens": 40, "fstop": 4.0}),   # the side table by the dressing corner
+    "c_gloss": ((2337, 4700, 1350), (2700, 600, 2500), {"lens": 20, "fstop": 8.0}),    # up at the gloss ceiling, toward the window
     "t_front": ((2337, 3560, 980), (2337, 2780, 360), {"lens": 22, "fstop": 8}),
     "t_three": ((3550, 3700, 950), (2600, 2780, 260), {"lens": 28, "fstop": 5.6}),
     "t_end": ((3900, 3150, 700), (3300, 2650, 250), {"lens": 30, "fstop": 4}),
