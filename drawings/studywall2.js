@@ -310,6 +310,7 @@ const SW2 = {
   // ═════════════ SHEETS ═════════════
   const defs = `<defs><pattern id="hatchW" patternUnits="userSpaceOnUse" width="40" height="40" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="40" stroke="#888" stroke-width="4"/></pattern><pattern id="hatchW2" patternUnits="userSpaceOnUse" width="22" height="22" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="22" stroke="#777" stroke-width="2.4"/></pattern></defs>`;
   const mono = (svg) => svg.replace(/#8a3a22/g, "#1b1b1b");
+  const REV_FLAT = "1 — no arches (for comparison); counter shelf pushed back";
 
   function gaSheet(key, arched, dwg) {
     window.DK.begin(key);
@@ -389,7 +390,7 @@ const SW2 = {
       "Centre: the panel goes back to the wall plane, so the counter is a 9 in shelf and the pilasters stand 10½ in proud (approved).",
       "Mouldings, crown and lamp from the owner's photos. The arched scheme is AST-DR-040.",
     ]).forEach((n, i) => (s += text(18, 254 + i * 4.3, n, { size: 1.42 })));
-    s += titleBlock({ title: `STUDY WALL — ${arched ? "WITH ARCHES" : "WITHOUT ARCHES"}`, sub: "Elevation · Plan", date: K.date, rev: K.rev, dwg, scale: "1:20 @ A3" });
+    s += titleBlock({ title: `STUDY WALL — ${arched ? "WITH ARCHES" : "WITHOUT ARCHES"}`, sub: "Elevation · Plan", date: K.date, rev: arched ? K.rev : REV_FLAT, dwg, scale: "1:20 @ A3" });
     window.DRAWINGS[key] = { title: `Study wall — ${arched ? "with arches" : "without arches"} · ${dwg}`, svg: mono(sheet(s)), params: SW2 };
   }
 
@@ -586,7 +587,7 @@ const SW2 = {
      "Centre: panel at the wall plane, header at the cornice plane — the counter becomes a 9 in shelf under it. Hidden store A: lift the",
      "key book; a reed switch under the counter fires a solenoid and the false back slides aside (key override). Details: AST-DR-043."]
       .forEach((n, i) => (s += text(18, 248 + i * 4.3, n, { size: 1.42 })));
-    s += titleBlock({ title: `STUDY WALL — SECTIONS${arched ? "" : " (NO ARCHES)"}`, sub: "A–A bookcase · B–B centre · C–C window", date: K.date, rev: K.rev, dwg, scale: "1:15 @ A3" });
+    s += titleBlock({ title: `STUDY WALL — SECTIONS${arched ? "" : " (NO ARCHES)"}`, sub: "A–A bookcase · B–B centre · C–C window", date: K.date, rev: arched ? K.rev : REV_FLAT, dwg, scale: "1:15 @ A3" });
     window.DRAWINGS[key] = { title: `Study wall — sections${arched ? "" : " (no arches)"} · ${dwg}`, svg: mono(sheet(s)), params: SW2 };
   }
 
@@ -762,7 +763,7 @@ const SW2 = {
      "before cutting. The niches have no lights (owner). Store A needs a 12 V supply in the cupboard and a manual override; the joiner",
      "details the track and catch. Store B is mechanical only. All timber in the room's teak veneer; no colour in this set."]
       .forEach((n, i) => (s += text(18, 254 + i * 4.3, n, { size: 1.42 })));
-    s += titleBlock({ title: "STUDY WALL — DETAILS", sub: "Niches · crown · frame · skirting · hidden stores", date: K.date, rev: K.rev, dwg, scale: "AS NOTED @ A3" });
+    s += titleBlock({ title: "STUDY WALL — DETAILS", sub: "Niches · crown · frame · skirting · hidden stores", date: K.date, rev: "1 — for both schemes; niches for the arches only", dwg, scale: "AS NOTED @ A3" });
     window.DRAWINGS[key] = { title: `Study wall — details · ${dwg}`, svg: mono(sheet(s)), params: SW2 };
   }
   detailsSheet("studywall-details2", "AST-DR-043");
