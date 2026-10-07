@@ -6,7 +6,7 @@
 // brass twin-arm sconce from the owner's photo; the window has the approved red velvet over a white linen sheer.
 // With the arches: a segmental arch over the bookcase (books under it, as the owner's arched-bookcase photo) and the
 // same arch in the window head — wood only, the glass unchanged behind; three deep rectangular niches cut into the
-// underside of each arch (seen looking up); spandrel mouldings curved to the arch, the bookcase's right one a hinged flap.
+// underside of each arch (seen looking up); spandrel mouldings curved to the arch.
 // Real units mm. Elevation: x along the wall from the left corner, y UP from the floor. Plan: y = depth into the room.
 
 window.DRAWINGS = window.DRAWINGS || {};
@@ -182,10 +182,8 @@ const SW2 = {
     o += P(aIn, W(th * 1.6));
     o += P(arcPts(g, g.R + m, -aOut0, aOut0), "");
     [16, 30].forEach((d) => { const a = angAt(g, g.R + d, g.ys); o += P(arcPts(g, g.R + d, -a, a), W(th * 0.7)); });
-    // the spandrels: mouldings curved to the arch; the right-hand one is the hinged flap (hidden storage B)
-    const tR = spandrel(g, g.R + m, x1, yEnt, -1);
+    // the spandrels: mouldings curved to the arch
     o += spandrelPath(g, g.R + m, x0, yEnt, 1, th) + spandrelPath(g, g.R + m, x1, yEnt, -1, th);
-    o += `<circle cx="${f(tR[0][0] - 9)}" cy="${f(ey(tR[0][1] - 40))}" r="6" ${W(th)}/><circle cx="${f(tR[1][0] - 9)}" cy="${f(ey(tR[1][1] + 40))}" r="6" ${W(th)}/>`;
     return o;
   }
 
@@ -272,9 +270,8 @@ const SW2 = {
     o += `<path d="M -150 0 L ${xWin[0]} 0 L ${xWin[0]} ${-WN.wall} M -150 ${-WN.wall} L ${xWin[0]} ${-WN.wall} M ${K.W} 420 L ${K.W} ${-WN.wall}" stroke-width="${f(th * 3)}" fill="none"/>`;
     // window frame and glass in the middle of the wall; two casements
     o += `<rect x="${xWin[0]}" y="${WN.glass - 35}" width="${WN.w}" height="${WN.frameD}" ${W(th * 1.2)}/>` + `<line x1="${xWin[0]}" y1="${WN.glass}" x2="${K.W}" y2="${WN.glass}" ${W(th)}/><line x1="${winC}" y1="${WN.glass - 35}" x2="${winC}" y2="${WN.glass + 35}" ${W(th)}/>`;
-    // the counter and cupboards below (dashed), and the false back in the centre cupboard (hidden storage A)
+    // the counter and cupboards below (dashed)
     o += `<rect x="0" y="0" width="${K.W}" height="${B.d + B.over}" stroke-dasharray="${dash}" ${W(th)}/>`;
-    o += `<line x1="${xPanel[0] + 30}" y1="100" x2="${xPanel[1] - 30}" y2="100" stroke-dasharray="${dash}" ${W(th * 1.6)}/>`;
     // bookcase carcase, back and stiles cut, the shelf below seen
     o += `<rect x="0" y="0" width="${BK.w}" height="${BK.d}" fill="#fff"/><rect x="0" y="0" width="${BK.w}" height="${BK.back}" ${hatch}/>`;
     o += `<rect x="0" y="${BK.back}" width="${BK.stile}" height="${BK.d - BK.back}" ${hatch}/><rect x="${BK.w - BK.stile}" y="${BK.back}" width="${BK.stile}" height="${BK.d - BK.back}" ${hatch}/>`;
@@ -346,7 +343,7 @@ const SW2 = {
     if (arched) {
       EL.add(vE.X(400), vE.Y(ey(gB.ys + 200)), "ARCH OVER THE BOOKCASE", "BOOKS STAND UNDER IT — OWNER'S PHOTO");
       EL.add(vE.X(gB.cx - 250), vE.Y(ey(gB.ys + gB.rise - 30)), "3 DEEP NICHES IN ITS SOFFIT", "SEEN LOOKING UP — SHEET 042");
-      EL.add(vE.X(1300), vE.Y(ey(yEnt - 60)), "SPANDREL MOULDINGS, CURVED TO THE ARCH", "RIGHT ONE HINGES — HIDDEN STORE B");
+      EL.add(vE.X(1300), vE.Y(ey(yEnt - 60)), "SPANDREL MOULDINGS, CURVED TO THE ARCH", "");
     } else {
       EL.add(vE.X(BK.w / 2), vE.Y(ey((yBand + yEnt) / 2)), "BAND PANEL", "EVERY BAY");
       EL.add(vE.X(BK.w / 2), vE.Y(ey(yOpen - 13)), "FLAT HEAD", "");
@@ -355,7 +352,6 @@ const SW2 = {
     EL.add(vE.X(fa0 + 30), vE.Y(ey(fb0 + 200)), "3-STEP FRAME + BEAD ROW", "25 PROUD — OWNER'S PHOTO");
     EL.add(vE.X(pcx - 300), vE.Y(ey(pcy)), "OIL LANDSCAPE, GILT FRAME", "STAND-IN — THE OWNER CHOOSES");
     EL.add(vE.X(xPanel[0] + 300), vE.Y(ey(yTop + 60)), "PANEL AT THE WALL, PLAIN SKIRTING", "9 IN SHELF ON THE COUNTER — APPROVED");
-    EL.add(vE.X(xPanel[0] + 320), vE.Y(ey(300)), "FALSE BACK INSIDE", "HIDDEN STORE A — BOOK KEY");
     s += EL.draw() + ER.draw();
 
     // plan
@@ -373,7 +369,6 @@ const SW2 = {
     const PLb = labels(vP.X(K.W) + 16, "right", 196, 238);
     PLb.add(vP.X(fa0 + 35), vP.Y(C.back + 12), "FRAME STILE, 70 × 25", "");
     PLb.add(vP.X(pcx), vP.Y(C.back + 30), "PAINTING", "");
-    PLb.add(vP.X(xPanel[1] - 100), vP.Y(100), "FALSE BACK, 100 OFF THE WALL", "IN THE CUPBOARD BELOW");
     PLb.add(vP.X(xZone[0] + 300), vP.Y(WN.set + 60), "CURTAIN RODS OVERHEAD", "");
     s += PLb.draw();
 
@@ -384,7 +379,7 @@ const SW2 = {
       "arch's underside — no lights — and spandrel mouldings curved to follow the arch. The window's glass is unchanged: the wood arch",
       "fills the top 1 ft of the opening, veneered flush with the frame. Only 4 in is free above the window, so it cannot rise higher.",
       "Centre: the panel goes back to the wall plane, so the counter is a 9 in shelf and the pilasters stand 10½ in proud (approved).",
-      "Mouldings, crown and lamp from the owner's photos. Sections: AST-DR-042. Details and hidden storage: AST-DR-043.",
+      "Mouldings, crown and lamp from the owner's photos. Sections: AST-DR-042. Details: AST-DR-043.",
     ] : [
       "The earlier flat-headed scheme, kept so the two can be compared. Band panels over all three bays; the window head unchanged.",
       "Centre: the panel goes back to the wall plane, so the counter is a 9 in shelf and the pilasters stand 10½ in proud (approved).",
@@ -411,20 +406,14 @@ const SW2 = {
     o += `<line x1="${f(fx + 30)}" y1="${f(ey(yDen + 4))}" x2="${f(fx + 42)}" y2="${f(ey(yDen + 4))}" ${W(th * 0.6)}/>`;
     return o;
   }
-  // the cupboard and counter, common to all three; with the false back (hidden store A) in the centre
-  function baseSection(th, falseBack) {
+  // the cupboard and counter, common to all three
+  function baseSection(th) {
     let o = RS(18, 0, B.d - 30, B.plinth, `${hatchCut} ${W(th)}`) + RS(0, B.plinth, B.d, B.plinth + 18, `${hatchCut} ${W(th)}`);
     o += RS(0, B.plinth + 18, 9, B.h, `${hatchCut} ${W(th)}`) + RS(B.d - B.door, B.plinth + 20, B.d, B.h - 20, `${hatchCut} ${W(th * 1.2)}`);
-    o += RS(falseBack ? 112 : 18, 360, B.d - B.door - 6, 378, `${hatchCut} ${W(th)}`);            // the shelf stops at the false back
+    o += RS(18, 360, B.d - B.door - 6, 378, `${hatchCut} ${W(th)}`);
     // the counter: 40 thick, 280 deep, four reeds on its edge (as the desk)
     o += RS(0, B.h, B.d + B.over - 6, yTop, `${hatchCut} ${W(th * 1.4)}`);
     for (let i = 0; i < 4; i++) o += `<path d="M ${f(B.d + B.over - 6)} ${f(ey(B.h + 4 + i * 8))} a 4 4 0 0 0 0 ${f(-8)}" ${W(th)} fill="none"/>`;
-    if (falseBack) {
-      o += RS(100, B.plinth + 18, 109, B.h - 6, `${hatchCut} ${W(th * 1.2)}`);
-      o += RS(110, B.plinth + 30, 150, B.plinth + 70, `${W(th)}`) + RS(40, B.h - 12, 100, B.h, `${W(th)}`);                 // solenoid · reed switch
-      o += `<path d="M 70 ${f(ey(B.h - 12))} L 70 ${f(ey(B.plinth + 50))} L 110 ${f(ey(B.plinth + 50))}" stroke-dasharray="20 12" ${W(th * 0.8)} fill="none"/>`;
-      o += RS(45, yTop, 75, yTop + 240, `fill="#fff" ${W(th)}`) + RS(75, yTop, 230, yTop + 236, `${W(th * 0.6)}`);              // the key book on the counter
-    }
     return o;
   }
   // a pilaster seen beyond (its side, the flutes' depth, capital and pedestal), behind whatever is cut
@@ -438,7 +427,7 @@ const SW2 = {
 
   // A–A, through the bookcase at the crown of its arch
   function secA(th, arched) {
-    let o = RS(-230, 0, 0, K.H, `${hatchWall} ${W(th * 1.6)}`) + pilasterBeyond(th, 0) + baseSection(th, false);
+    let o = RS(-230, 0, 0, K.H, `${hatchWall} ${W(th * 1.6)}`) + pilasterBeyond(th, 0) + baseSection(th);
     const headY = arched ? gB.ys + gB.rise : yOpen;
     o += RS(0, yTop, BK.back, headY, `${hatchCut} ${W(th)}`);
     BK.shelves.forEach((y) => (o += RS(BK.back, y - BK.st, BK.d - 5, y, `${hatchCut} ${W(th * 1.2)}`)));
@@ -460,7 +449,7 @@ const SW2 = {
   }
   // B–B, through the centre bay at the painting
   function secB(th) {
-    let o = RS(-230, 0, 0, K.H, `${hatchWall} ${W(th * 1.6)}`) + pilasterBeyond(th, C.back) + baseSection(th, true);
+    let o = RS(-230, 0, 0, K.H, `${hatchWall} ${W(th * 1.6)}`) + pilasterBeyond(th, C.back) + baseSection(th);
     // the panel: 18 ply on 7 packers, up behind the header to the cornice; plain skirting on the counter
     o += RS(7, yTop, C.back, yEnt, `${hatchCut} ${W(th)}`);
     [900, 1450, 2000].forEach((y) => (o += RS(0, y, 7, y + 45, `${W(th * 0.6)}`)));
@@ -488,7 +477,7 @@ const SW2 = {
   function secC(th, arched) {
     const fi = WN.glass + WN.frameD / 2, fo = WN.glass - WN.frameD / 2;    // the frame's inside and outside faces
     let o = RS(-230, 0, 0, WN.sill, `${hatchWall} ${W(th * 1.6)}`) + RS(-230, WN.head, 0, K.H, `${hatchWall} ${W(th * 1.6)}`);
-    o += baseSection(th, false);
+    o += baseSection(th);
     // the window frame: sill and head members cut, the meeting stiles beyond, the glass
     o += RS(fo, WN.sill, fi, WN.sill + 45, `${hatchCut} ${W(th * 1.2)}`) + RS(fo, WN.head - 45, fi, WN.head, `${hatchCut} ${W(th * 1.2)}`);
     o += RS(fo + 10, WN.sill + 45, fi - 10, WN.head - 45, `${W(th * 0.5)}`) + Ln(WN.glass, WN.sill + 45, WN.glass, WN.head - 45, W(th * 1.4));
@@ -544,7 +533,7 @@ const SW2 = {
     s += LA.draw();
     // B
     s += chainV([0, B.h, yTop, yTop + C.skirt, fb0, fb1, yOpen, yEnt, K.H].map((y) => Y(vB, y)), vB.X(-230) - 3, [B.h, B.top, C.skirt, fb0 - yTop - C.skirt, fb1 - fb0, yOpen - fb1, yEnt - yOpen, entH], { from: vB.X(-230), size: 1.0 });
-    s += chainH([vB.X(0), vB.X(100), vB.X(B.d + B.over)], Y(vB, 0) + 5, [100, B.d + B.over - 100], { from: Y(vB, 0) + 1, size: 1.05 });
+    s += chainH([vB.X(0), vB.X(B.d + B.over)], Y(vB, 0) + 5, [B.d + B.over], { from: Y(vB, 0) + 1, size: 1.05 });
     s += chainH([vB.X(C.back + C.frameP), vB.X(B.d + B.over)], Y(vB, yTop) - 3, [`${B.d + B.over - C.back - C.frameP} CLEAR`], { from: Y(vB, yTop), size: 0.95 });
     const LB = labels(vB.X(BK.d + E.proj) + 12, "right", 26, 214);
     LB.add(vB.X(BK.d - 9), Y(vB, yBand + 150), "HEADER AT THE CORNICE PLANE", "BAND PANEL ON ITS FACE");
@@ -553,10 +542,6 @@ const SW2 = {
     LB.add(vB.X(C.back + 30), Y(vB, pcy + 200), "PAINTING, GILT FRAME 50", "ON A CLEAT");
     LB.add(vB.X(16), Y(vB, 1300), "PANEL 18 ON 7 PACKERS", "25 OFF THE WALL");
     LB.add(vB.X(C.back + 10), Y(vB, yTop + 60), "PLAIN SKIRTING 120 × 20", "");
-    LB.add(vB.X(150), Y(vB, yTop + 200), "THE KEY BOOK", "LIFT IT TO OPEN STORE A");
-    LB.add(vB.X(70), Y(vB, B.h - 6), "REED SWITCH UNDER THE TOP", "");
-    LB.add(vB.X(104), Y(vB, 400), "FALSE BACK, 100 OFF THE WALL", "SLIDES ASIDE — HIDDEN STORE A");
-    LB.add(vB.X(130), Y(vB, B.plinth + 50), "SOLENOID CATCH", "KEY OVERRIDE");
     s += LB.draw();
     // C
     const fi = WN.glass + WN.frameD / 2;
@@ -584,8 +569,7 @@ const SW2 = {
             : "The flat bookcase head carries a strip light under it and the band panel above.",
      arched ? "in front of the brick lintel. The window bay's panelling now runs at 280 like the rest, so the crown is one plane and the reveal 14 in."
             : "The window bay's panelling runs at 280 like the rest, so the crown is one plane and the reveal is 14 in.",
-     "Centre: panel at the wall plane, header at the cornice plane — the counter becomes a 9 in shelf under it. Hidden store A: lift the",
-     "key book; a reed switch under the counter fires a solenoid and the false back slides aside (key override). Details: AST-DR-043."]
+     "Centre: panel at the wall plane, header at the cornice plane — the counter becomes a 9 in shelf under it. Details: AST-DR-043."]
       .forEach((n, i) => (s += text(18, 248 + i * 4.3, n, { size: 1.42 })));
     s += titleBlock({ title: `STUDY WALL — SECTIONS${arched ? "" : " (NO ARCHES)"}`, sub: "A–A bookcase · B–B centre · C–C window", date: K.date, rev: arched ? K.rev : REV_FLAT, dwg, scale: "1:15 @ A3" });
     window.DRAWINGS[key] = { title: `Study wall — sections${arched ? "" : " (no arches)"} · ${dwg}`, svg: mono(sheet(s)), params: SW2 };
@@ -686,9 +670,9 @@ const SW2 = {
     }
 
     // 6 — skirting and counter edge, 1:2
-    s += heading(322, 168, "6 · SKIRTING + COUNTER", "SECTION · 1:4", 80);
+    s += heading(18, 168, "6 · SKIRTING + COUNTER", "SECTION · 1:4", 80);
     {
-      const sc = 4, v = view(337, 180 + 170 / sc, sc, "Skirting and counter"), th = v.w(0.1), Y = (y) => -y;
+      const sc = 4, v = view(33, 180 + 170 / sc, sc, "Skirting and counter"), th = v.w(0.1), Y = (y) => -y;
       let o = `<rect x="-14" y="${Y(170)}" width="14" height="170" fill="url(#hatchW)" stroke="none"/>`;
       o += `<rect x="0" y="${Y(160)}" width="18" height="120" fill="url(#hatchW2)" ${W(th)}/>`;
       o += `<path d="M 18 ${Y(40)} L 38 ${Y(40)} L 38 ${Y(152)} L 30 ${Y(160)} L 18 ${Y(160)} Z" fill="url(#hatchW2)" ${W(th * 1.4)}/>`;
@@ -714,58 +698,13 @@ const SW2 = {
       s += text(v.X(-10), v.Y(34), "STEPS AT 14 AND 28, ROUND THE CURVE TOO", { size: 1.2, fill: THIN });
     }
 
-    // 8 — hidden store A: the centre cupboard with its doors off, 1:15
-    s += heading(18, 168, "8 · HIDDEN STORE A — THE FALSE BACK", "CENTRE CUPBOARD, DOORS OFF · 1:20", 110);
-    {
-      const sc = 20, x0 = xPanel[0], v = view(24 - x0 / sc, 182 - ey(yTop + 300) / sc, sc, "Hidden store A"), th = v.w(0.09);
-      const ix0 = x0 + 20, ix1 = xPanel[1] - 20, mid = (ix0 + ix1) / 2;
-      let o = R(x0, 0, xPanel[1], B.h, W(th * 1.4)) + R(ix0, B.plinth + 18, ix1, B.h - 20, W(th)) + R(x0, B.h, xPanel[1], yTop, `fill="url(#hatchW2)" ${W(th)}`);
-      o += R(ix0, B.plinth + 30, mid + 30, B.h - 30, `${W(th * 1.4)}`) + R(mid - 30, B.plinth + 34, ix1, B.h - 34, `${W(th * 0.8)} stroke-dasharray="${dash(v)}"`);
-      o += Ln(ix0, B.h - 26, ix1, B.h - 26, W(th * 1.6)) + Ln(ix0, B.plinth + 26, ix1, B.plinth + 26, W(th * 1.6));
-      o += `<path d="M ${f(mid - 260)} ${f(ey(380))} L ${f(mid + 140)} ${f(ey(380))} m -50 -30 l 50 30 l -50 30" ${W(th * 1.6)} fill="none"/>`;
-      o += R(ix0 + 40, B.plinth + 40, ix0 + 140, B.plinth + 90, W(th)) + R(ix0 + 220, B.h - 14, ix0 + 320, B.h, W(th));
-      o += `<path d="M ${ix0 + 270} ${f(ey(B.h - 14))} L ${ix0 + 270} ${f(ey(B.plinth + 65))} L ${ix0 + 140} ${f(ey(B.plinth + 65))}" stroke-dasharray="${dash(v)}" ${W(th)} fill="none"/>`;
-      o += R(ix0 + 200, yTop, ix0 + 340, yTop + 240, `fill="#fff" ${W(th * 1.2)}`) + `<circle cx="${f(xPanel[1] - 60)}" cy="${f(ey(B.h + 8))}" r="12" ${W(th)}/>`;
-      s += v.g(o, 0.25);
-      s += chainH([v.X(ix0), v.X(mid + 30), v.X(ix1)], v.Y(ey(0)) + 4, [Math.round(mid + 30 - ix0), Math.round(ix1 - mid - 30)], { from: v.Y(ey(0)) + 0.5, size: 1.0 });
-      const L8 = labels(v.X(xPanel[1]) + 10, "right", 176, 236);
-      L8.add(v.X(ix0 + 270), v.Y(ey(yTop + 120)), "THE KEY BOOK ON THE COUNTER", "LIFT IT: THE REED SWITCH OPENS THE CATCH");
-      L8.add(v.X(mid - 100), v.Y(ey(380)), "LEFT LEAF SLIDES RIGHT", "BEHIND THE FIXED RIGHT LEAF");
-      L8.add(v.X(ix0 + 90), v.Y(ey(B.plinth + 65)), "SOLENOID CATCH, 12 V", "");
-      L8.add(v.X(xPanel[1] - 60), v.Y(ey(B.h + 8)), "OVERRIDE KEY UNDER THE EDGE", "");
-      L8.add(v.X(ix1 - 200), v.Y(ey(B.h - 60)), "CAVITY BEHIND: 1.2 M × 100 DEEP", "ABOUT 55 LITRES");
-      s += L8.draw();
-    }
-
-    // 9 — hidden store B: the bookcase's right spandrel panel is the door
-    s += heading(172, 168, "9 · HIDDEN STORE B — THE SPANDREL FLAP", "BOOKCASE, RIGHT CORNER · 1:10", 120);
-    {
-      const sc = 10, xa = 1000, v = view(176 - xa / sc, 182 - ey(yEnt) / sc, sc, "Hidden store B"), th = v.w(0.09);
-      const g = gB, m = K.bkArch.mould, sp = spandrel(g, g.R + m, BK.w, yEnt, -1);
-      let o = R(xa, gB.ys - 60, BK.w, yEnt, W(th * 0.6)) + Ln(xa, yEnt, BK.w, yEnt, W(th * 1.6));
-      o += P(arcPts(g, g.R, 0.15, g.th), W(th * 1.4)) + P(arcPts(g, g.R + m, 0.17, angAt(g, g.R + m, g.ys)), W(th));
-      o += P(sp, `fill="#fff" ${W(th * 1.6)}`, true) + P(spandrel(g, g.R + m, BK.w, yEnt, -1, 25, 30, 14), W(th * 0.8), true);
-      o += P(spandrel(g, g.R + m, BK.w, yEnt, -1, 45, 50, 0), `stroke-dasharray="${dash(v)}" ${W(th)}`, true);
-      [sp[0][1] - 50, sp[1][1] + 50].forEach((y) => (o += R(sp[0][0] - 6, y - 30, sp[0][0] + 6, y + 30, `fill="#fff" ${W(th)}`)));
-      const tip = sp.at(-2);
-      o += `<circle cx="${f(tip[0] + 40)}" cy="${f(ey(tip[1] + 20))}" r="10" ${W(th)}/>`;
-      s += v.g(o, 0.25);
-      const L9 = labels(v.X(BK.w) + 8, "right", 178, 236);
-      L9.add(v.X(sp[0][0]), v.Y(ey(sp[0][1] - 50)), "2 CONCEALED HINGES", "ON THE JAMB EDGE — SWINGS OUT");
-      L9.add(v.X(tip[0] + 40), v.Y(ey(tip[1] + 20)), "PUSH LATCH", "NO HANDLE");
-      L9.add(v.X((sp[0][0] + tip[0]) / 2), v.Y(ey(sp[0][1] - 90)), "THE CURVED SPANDREL PANEL", "IS THE DOOR");
-      L9.add(v.X(sp[0][0] - 120), v.Y(ey(sp[1][1] + 10)), "HOLLOW BEHIND (DASHED)", "ABOUT 10 L · PAPERS, KEYS");
-      s += L9.draw();
-    }
-
     s += heading(18, 244, "NOTES", `REVISION ${K.rev.split(" ")[0]}`, 120);
     ["Details for AST-DR-040/042 (and 041/044 except the arches). Mouldings from the owner's photos; profiles to be mocked up full size",
-     "before cutting. The niches have no lights (owner). Store A needs a 12 V supply in the cupboard and a manual override; the joiner",
-     "details the track and catch. Store B is mechanical only. All timber in the room's teak veneer; no colour in this set."]
+     "before cutting. The niches have no lights (owner). All timber in the room's teak veneer; no colour in this set."]
       .forEach((n, i) => (s += text(18, 254 + i * 4.3, n, { size: 1.42 })));
-    s += titleBlock({ title: "STUDY WALL — DETAILS", sub: "Niches · crown · frame · skirting · hidden stores", date: K.date, rev: "1 — for both schemes; niches for the arches only", dwg, scale: "AS NOTED @ A3" });
+    s += titleBlock({ title: "STUDY WALL — DETAILS", sub: "Niches · crown · frame · skirting", date: K.date, rev: "1 — for both schemes; niches for the arches only", dwg, scale: "AS NOTED @ A3" });
     window.DRAWINGS[key] = { title: `Study wall — details · ${dwg}`, svg: mono(sheet(s)), params: SW2 };
   }
   detailsSheet("studywall-details2", "AST-DR-043");
-  window.SW2GEOM = { gB, gW, niches, K, yEnt, entH, xPanel, xZone, xWin, fa0, fa1, fb0, fb1 };
+  window.SW2GEOM = { gB, gW, niches, K, yEnt, yTop, entH, xPanel, xZone, xWin, fa0, fa1, fb0, fb1, R, Ln, P, ey, W, spandrel, arcPts, angAt, defs, mono };
 })();
