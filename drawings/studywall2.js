@@ -6,7 +6,7 @@
 // brass twin-arm sconce from the owner's photo; the window has the approved red velvet over a white linen sheer.
 // With the arches: a segmental arch over the bookcase (books under it, as the owner's arched-bookcase photo) and the
 // same arch in the window head — wood only, the glass unchanged behind; three deep rectangular niches cut into the
-// underside of each arch (seen looking up); triangle mouldings in the spandrels, the bookcase's right one a hinged flap.
+// underside of each arch (seen looking up); spandrel mouldings curved to the arch, the bookcase's right one a hinged flap.
 // Real units mm. Elevation: x along the wall from the left corner, y UP from the floor. Plan: y = depth into the room.
 
 window.DRAWINGS = window.DRAWINGS || {};
@@ -72,21 +72,21 @@ const SW2 = {
     const L = 2 * g.th * g.R, gap = (L - N.n * N.len) / (N.n + 1);
     return Array.from({ length: N.n }, (_, i) => { const s0 = gap + i * (N.len + gap); return [-g.th + s0 / g.R, -g.th + (s0 + N.len) / g.R]; });
   }
-  // a triangle moulding fitted into a spandrel: corner (xc, yt), pointing along +dx, kept `gap` off the archivolt
-  function spandrelTri(g, ro, xc, yt, dx, inset = 25, gap = 30) {
-    const out = (x, y) => Math.hypot(x - g.cx, y - g.cy) >= ro + gap;
-    const segOut = (p, q) => { for (let i = 0; i <= 40; i++) { const t = i / 40; if (!out(p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t)) return false; } return true; };
-    const x0 = xc + dx * inset, y0 = yt - inset;
-    let yb = y0 - 40; while (yb > g.ys && out(x0, yb - 5)) yb -= 5;
-    yb += 40;                                                   // leave a margin above where the jamb meets the archivolt
-    let xt = x0 + dx * 40; while (segOut([x0, yb], [xt + dx * 5, y0]) && Math.abs(xt - x0) < 1400) xt += dx * 5;
-    return [[x0, y0], [x0, yb], [xt, y0]];
+  // a spandrel panel moulding (owner, 7 Oct: the triangle's long side curved to melt into the arch): a straight edge
+  // down the jamb, a straight edge under the cornice, and a curved edge running parallel to the archivolt, `gap` off it.
+  // k steps the outline inwards for the moulding's inner lines. Returns the outline, corner first.
+  function spandrel(g, ro, xc, yt, dx, inset = 25, gap = 30, k = 0) {
+    const x0 = xc + dx * (inset + k), y0 = yt - inset - k, rr = ro + gap + k;
+    const yb = Math.max(g.ys + 30, g.cy + Math.sqrt(Math.max(0, rr * rr - (x0 - g.cx) ** 2)));   // where the jamb edge meets the curve
+    // the curve runs on until the panel is 60 deep under the cornice, then a short square end — no long thin tail
+    const yTip = y0 - 60 + k, xt = g.cx - dx * Math.sqrt(Math.max(0, rr * rr - (yTip - g.cy) ** 2));
+    const aB = Math.atan2(x0 - g.cx, yb - g.cy), aC = Math.atan2(xt - g.cx, yTip - g.cy);
+    const arcP = Array.from({ length: 33 }, (_, i) => apt(g, rr, aB + ((aC - aB) * i) / 32));
+    return [[x0, y0], [x0, yb], ...arcP, [xt, y0]];
   }
-  const triPath = (t, th, k = 14) => {
-    const [a, b, c] = t, cxm = (a[0] + b[0] + c[0]) / 3, cym = (a[1] + b[1] + c[1]) / 3;
-    const sh = (p, d) => { const L = Math.hypot(p[0] - cxm, p[1] - cym); return [p[0] + ((cxm - p[0]) * d) / L, p[1] + ((cym - p[1]) * d) / L]; };
-    return P(t, `fill="#fff" ${W(th * 1.3)}`, true) + P(t.map((p) => sh(p, k)), W(th * 0.8), true) + P(t.map((p) => sh(p, k * 2)), W(th * 0.6), true);
-  };
+  const spandrelPath = (g, ro, xc, yt, dx, th, inset = 25, gap = 30) =>
+    P(spandrel(g, ro, xc, yt, dx, inset, gap, 0), `fill="#fff" ${W(th * 1.3)}`, true) +
+    P(spandrel(g, ro, xc, yt, dx, inset, gap, 14), W(th * 0.8), true) + P(spandrel(g, ro, xc, yt, dx, inset, gap, 28), W(th * 0.6), true);
 
   // ── pilaster (fluted shaft on a panelled pedestal; the counter wraps the pedestal) ──
   function pilaster(x0, th) {
@@ -182,9 +182,9 @@ const SW2 = {
     o += P(aIn, W(th * 1.6));
     o += P(arcPts(g, g.R + m, -aOut0, aOut0), "");
     [16, 30].forEach((d) => { const a = angAt(g, g.R + d, g.ys); o += P(arcPts(g, g.R + d, -a, a), W(th * 0.7)); });
-    // the spandrels: triangle mouldings; the right-hand one is the hinged flap (hidden storage B)
-    const tL = spandrelTri(g, g.R + m, x0, yEnt, 1), tR = spandrelTri(g, g.R + m, x1, yEnt, -1);
-    o += triPath(tL, th) + triPath(tR, th);
+    // the spandrels: mouldings curved to the arch; the right-hand one is the hinged flap (hidden storage B)
+    const tR = spandrel(g, g.R + m, x1, yEnt, -1);
+    o += spandrelPath(g, g.R + m, x0, yEnt, 1, th) + spandrelPath(g, g.R + m, x1, yEnt, -1, th);
     o += `<circle cx="${f(tR[0][0] - 9)}" cy="${f(ey(tR[0][1] - 40))}" r="6" ${W(th)}/><circle cx="${f(tR[1][0] - 9)}" cy="${f(ey(tR[1][1] + 40))}" r="6" ${W(th)}/>`;
     return o;
   }
@@ -236,7 +236,7 @@ const SW2 = {
     o += P(arcPts(g, g.R + m, -aO, Math.min(aO, aWall)), "");
     [20, 40].forEach((d) => { const a = angAt(g, g.R + d, g.ys), aw = Math.asin(Math.min(1, (z1 - g.cx) / (g.R + d))); o += P(arcPts(g, g.R + d, -a, Math.min(a, aw)), W(th * 0.7)); });
     // spandrel triangles in the two upper corners
-    o += triPath(spandrelTri(g, g.R + m, z0, yEnt, 1, 22, 25), th) + triPath(spandrelTri(g, g.R + m, z1, yEnt, -1, 22, 25), th);
+    o += spandrelPath(g, g.R + m, z0, yEnt, 1, th, 22, 25) + spandrelPath(g, g.R + m, z1, yEnt, -1, th, 22, 25);
     return o;
   }
 
@@ -345,7 +345,7 @@ const SW2 = {
     if (arched) {
       EL.add(vE.X(400), vE.Y(ey(gB.ys + 200)), "ARCH OVER THE BOOKCASE", "BOOKS STAND UNDER IT — OWNER'S PHOTO");
       EL.add(vE.X(gB.cx - 250), vE.Y(ey(gB.ys + gB.rise - 30)), "3 DEEP NICHES IN ITS SOFFIT", "SEEN LOOKING UP — SHEET 042");
-      EL.add(vE.X(1300), vE.Y(ey(yEnt - 60)), "TRIANGLE MOULDINGS", "RIGHT ONE HINGES — HIDDEN STORE B");
+      EL.add(vE.X(1300), vE.Y(ey(yEnt - 60)), "SPANDREL MOULDINGS, CURVED TO THE ARCH", "RIGHT ONE HINGES — HIDDEN STORE B");
     } else {
       EL.add(vE.X(BK.w / 2), vE.Y(ey((yBand + yEnt) / 2)), "BAND PANEL", "EVERY BAY");
       EL.add(vE.X(BK.w / 2), vE.Y(ey(yOpen - 13)), "FLAT HEAD", "");
@@ -374,7 +374,7 @@ const SW2 = {
     s += heading(18, 244, "NOTES", `REVISION ${K.rev.split(" ")[0]}`, 120);
     (arched ? [
       "Owner's second scheme (7 Oct). Arches over the bookcase and the window, three deep rectangular niches cut into each",
-      "arch's underside — no lights — and triangle mouldings in the spandrels. The window's glass is unchanged: the wood arch",
+      "arch's underside — no lights — and spandrel mouldings curved to follow the arch. The window's glass is unchanged: the wood arch",
       "fills the top 1 ft of the opening, veneered flush with the frame. Only 4 in is free above the window, so it cannot rise higher.",
       "Centre: the panel goes back to the wall plane, so the counter is a 9 in shelf and the pilasters stand 10½ in proud (approved).",
       "Mouldings, crown and lamp from the owner's photos. Sections: AST-DR-042. Details and hidden storage: AST-DR-043.",
