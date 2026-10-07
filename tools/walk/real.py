@@ -803,6 +803,7 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
     "b_head": ((3150, 4150, 1050), (3200, 5700, 850), {"lens": 38, "fstop": 2.8}),
     "st_close": ((2950, 4650, 950), (3560, 5560, 430), {"lens": 40, "fstop": 4.0}),   # the side table by the dressing corner
     "c_gloss": ((2337, 4700, 1350), (2700, 600, 2500), {"lens": 20, "fstop": 8.0}),    # up at the gloss ceiling, toward the window
+    "b_rug": ((3900, 3050, 1750), (2337, 4350, 100), {"lens": 22, "fstop": 8.0}),    # the bed's foot and the rug under it (bed side of the glass)
     "t_front": ((2337, 3560, 980), (2337, 2780, 360), {"lens": 22, "fstop": 8}),
     "t_three": ((3550, 3700, 950), (2600, 2780, 260), {"lens": 28, "fstop": 5.6}),
     "t_end": ((3900, 3150, 700), (3300, 2650, 250), {"lens": 30, "fstop": 4}),
