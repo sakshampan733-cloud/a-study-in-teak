@@ -4,7 +4,8 @@
 // the niche's edge (owner, 7 Oct: option A, 6 in along the wall then a 1 in flat, no step; the veneer wrapped over bent
 // ply, satin polish). The niche is 15 in deep, lined with parchment-plaster panels in a grid, and the bed in it is the one
 // in the owner's photo: a low dark-wood platform on turned feet, with the slim upholstered headboard back in dusty-rose
-// suede (owner, 7 Oct; the long cushion goes). Side tables 16 × 14 in, a white marble slab set flush in a teak rim on top.
+// suede (owner, 7 Oct; the long cushion goes). Side tables 16 × 14 in after the owner's photo — shaped top, burl drawer,
+// cabriole legs, no stone (AST-DR-049).
 // A Sony rear speaker high on each plain face. D1 opens flat along the 2 in face onto a floor stop.
 // Seen from the room: the dressing (right-wall) corner on the LEFT of the elevation, the entrance (left-wall) corner on
 // the RIGHT. u runs along the wall from the dressing corner; v comes out from the wall into the room. Real units mm.
@@ -12,7 +13,7 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const BEDWALL = {
-  rev: "5 — 2 in face, 15 in niche; headboard; marble-topped tables; speakers",
+  rev: "5 — 2 in face, 15 in niche; headboard; new side tables; speakers",
   date: "07.10.2026",
   W: 4724, H: 2769, T: 230,                 // 15 ft 6 in wall, 9 ft 1 in ceiling, 9 in walls (AST-DR-001)
   deep: 381, edge: 51,                      // 15 in at the niche (owner, 7 Oct); 2 in everywhere else — as deep as D1's
@@ -25,8 +26,9 @@ const BEDWALL = {
   skirt: 102,                               // the room's 4 in white marble skirting, carried on — flush with the veneer on this wall
   door: { leaf: 914, lin: 51, t: 45, knob: 65, back: 64, stop: 5.5 },  // D1: 3 ft leaf, 2 in lining — its hinge pin 2 in off this wall;
                                             // the floor stop holds it 5½° short of flat, so its 2½ in knob stays ⅝ in off the veneer
-  side: { w: 406, d: 356, h: 610, top: 32, rim: 45, stone: 20 },   // 16 in wide, 14 in deep (owner), 24 in high; the top a 1¾ in
-                                            // teak rim round a ¾ in white marble slab, set flush on a ½ in ply bed (owner, 7 Oct)
+  side: { w: 406, d: 356, h: 610, top: 22, serp: 16, sideIn: 8, apr: 100, aprS: 34, aprF: 30, aprB: 24, leg: 34, knee: 18, drawerX: 70 },
+                                            // 16 × 14 in (owner), 24 in high, after the owner's photo (7 Oct): shaped top, burl drawer,
+                                            // carved consoles, cabriole legs — no stone. Drawn in full on AST-DR-049
   spk: { w: 106, h: 216, d: 98, y0: 2362, u: 305 },  // Sony rear speakers (Sony's spec, 106 × 216 × 98), 2 in above the open door's
                                             // top, each in the middle of a plain face and square on the bed (owner: "high… a bit far")
   lamp: { y: 1290, span: 150, proj: 230 },  // a wall lamp over each side table (owner): the room's brass twin-arm sconce, as AST-DR-007
@@ -78,12 +80,24 @@ const BEDFRAME = {
   const PL = (pts, a = "") => `<path d="M ${pts.map(([x, y]) => `${f(x)} ${f(y)}`).join(" L ")}" fill="none" ${a}/>`;
   const RC = (x0, y0, x1, y1, a = "") => `<rect x="${f(Math.min(x0, x1))}" y="${f(Math.min(y0, y1))}" width="${f(Math.abs(x1 - x0))}" height="${f(Math.abs(y1 - y0))}" ${a}/>`;
 
-  // a side-table top in plan: the teak rim, the marble slab set in it, a few soft veins
-  function tableTop(c, v0, th) {
-    const T_ = K.side, x0 = c - T_.w / 2, x1 = c + T_.w / 2, v1 = v0 + T_.d, r = T_.rim;
-    let o = RC(x0, v0, x1, v1, `fill="#fff" stroke-width="${th}"`) + RC(x0 + r, v0 + r, x1 - r, v1 - r, `fill="${MARB}" stroke-width="${th * 0.8}"`);
-    const vx = (k) => `M ${f(x0 + r)} ${f(v0 + r + k * 60)} C ${f(x0 + 140)} ${f(v0 + r + k * 60 + 50)} ${f(x1 - 160)} ${f(v1 - r - 140 + k * 40)} ${f(x1 - r)} ${f(v1 - r - 60 + k * 30)}`;
-    return o + `<path d="${vx(0)} ${vx(1.3)}" fill="none" stroke-width="${th * 0.3}"/>`;
+  // a side table in plan (AST-DR-049): the shaped top — straight back, serpentine front, the sides drawn in a little —
+  // with the apron and the four leg tops under it dashed
+  const ST = K.side;
+  function stOutline() {
+    const n = 24, r = 9, o = [];
+    for (let i = 0; i <= n; i++) { const y = (i / n) * (ST.d - r); o.push([ST.sideIn * Math.sin(Math.PI * y / ST.d) ** 2, y]); }
+    for (let k = 1; k < 4; k++) { const a = Math.PI - (k / 4) * Math.PI / 2; o.push([r + r * Math.cos(a), ST.d - r + r * Math.sin(a)]); }
+    for (let i = 0; i <= n; i++) { const x = r + (i / n) * (ST.w - 2 * r); o.push([x, ST.d - ST.serp * Math.sin(2 * Math.PI * x / ST.w) ** 2]); }
+    for (let k = 1; k < 4; k++) { const a = Math.PI / 2 - (k / 4) * Math.PI / 2; o.push([ST.w - r + r * Math.cos(a), ST.d - r + r * Math.sin(a)]); }
+    for (let i = n; i >= 0; i--) { const y = (i / n) * (ST.d - r); o.push([ST.w - ST.sideIn * Math.sin(Math.PI * y / ST.d) ** 2, y]); }
+    return o;
+  }
+  function tableTop(c, v0, th, dash) {
+    const x0 = c - ST.w / 2;
+    let o = P(stOutline().map(([x, y]) => [x0 + x, v0 + y]), `fill="#fff" stroke-width="${th}"`);
+    if (dash) o += `<g fill="none" stroke-width="${th * 0.6}" stroke-dasharray="${dash}">` + RC(x0 + ST.aprS, v0 + ST.aprB, x0 + ST.w - ST.aprS, v0 + ST.d - ST.aprF)
+      + [[ST.aprS, ST.aprB], [ST.w - ST.aprS - ST.leg, ST.aprB], [ST.aprS, ST.d - ST.aprF - ST.leg], [ST.w - ST.aprS - ST.leg, ST.d - ST.aprF - ST.leg]].map(([x, y]) => RC(x0 + x, v0 + y, x0 + x + ST.leg, v0 + y + ST.leg)).join("") + `</g>`;
+    return o;
   }
   // D1 resting on its floor stop: the leaf 5½° off the 2 in face, a knob each side, the swing dashed
   function doorAtStop(th, dash) {
@@ -113,8 +127,8 @@ const BEDFRAME = {
     o += RC(N.u0 - K.plaster, K.plaster, N.u0, K.deep, `fill="${PAR}" stroke-width="${th * 0.8}"`) + RC(N.u1, K.plaster, N.u1 + K.plaster, K.deep, `fill="${PAR}" stroke-width="${th * 0.8}"`);
     // the rear speakers, high on the two plain faces — above the cut, dashed
     spkU.forEach((u) => (o += RC(u - K.spk.w / 2, K.edge, u + K.spk.w / 2, K.edge + K.spk.d, `fill="none" stroke-width="${th * 0.8}" stroke-dasharray="${dash}"`)));
-    // side tables with their marble tops, the headboard, frame, mattress, pillows
-    tables.forEach((c) => (o += tableTop(c, K.plaster, th)));
+    // the side tables' tops, the headboard, the storage base, mattress, pillows
+    tables.forEach((c) => (o += tableTop(c, K.plaster, th)));   // above the cut: the top only
     o += RC(bc - fw / 2, vHb, bc + fw / 2, vHf, `fill="${UPH}" stroke-width="${th * 1.2}"`);
     o += RC(bc - fw / 2, vHf, bc + fw / 2, vFr1, `fill="${WOOD}" stroke-width="${th}"`);
     o += RC(bc - B.mat.w / 2, vHf, bc + B.mat.w / 2, vMat1, `fill="#fff" stroke-width="${th}"`);
@@ -177,14 +191,23 @@ const BEDFRAME = {
     });
     return o;
   }
-  // a side table from the front: the top's teak rim (the marble is set flush inside it, so it does not show from here),
-  // one drawer with a brass keyhole, four slim splayed legs
-  function tableFront(c, Y, th) {
-    const T_ = K.side, w = T_.w, h = T_.h, x0 = c - w / 2, bx = 10, yb = h - 150;
-    let o = RC(x0, Y(h), x0 + w, Y(h - T_.top), `fill="${WOOD}" stroke-width="${th}"`);
-    o += RC(x0 + bx, Y(h - T_.top), x0 + w - bx, Y(yb), `fill="${WOOD}" stroke-width="${th}"`) + RC(x0 + bx + 18, Y(h - T_.top - 10), x0 + w - bx - 18, Y(yb + 10), `fill="none" stroke-width="${th * 0.6}"`);
-    o += `<circle cx="${f(c)}" cy="${f(Y((h - T_.top + yb) / 2))}" r="9" fill="#fff" stroke-width="${th * 0.8}"/>`;
-    o += `<path d="M ${f(x0 + bx + 4)} ${Y(yb)} L ${f(x0 - 8)} ${Y(0)} L ${f(x0 + 16)} ${Y(0)} L ${f(x0 + bx + 32)} ${Y(yb)} M ${f(x0 + w - bx - 4)} ${Y(yb)} L ${f(x0 + w + 8)} ${Y(0)} L ${f(x0 + w - 16)} ${Y(0)} L ${f(x0 + w - bx - 32)} ${Y(yb)}" fill="${WOOD}" stroke-width="${th}"/>`;
+  // a side table from the front (AST-DR-049): the moulded top, the apron with its burl drawer and knob, a console at each
+  // corner, the cabriole legs. `Y` maps height to the page; u0 the table's left edge, so it can be drawn at any scale
+  function stLeg(u0, dir, Y, th) {
+    const zB = ST.h - ST.top - ST.apr, k = ST.knee, U = (u) => u0 + dir * u, Pt = (u, z) => `${f(U(u))} ${f(Y(z))}`;
+    return `<path d="M ${Pt(0, zB)} C ${Pt(-10, zB - 14)} ${Pt(-k, zB - 46)} ${Pt(-k, zB - 96)} C ${Pt(-k, zB - 170)} ${Pt(-4, zB - 230)} ${Pt(4, 230)}`
+      + ` C ${Pt(9, 170)} ${Pt(11, 110)} ${Pt(8, 66)} C ${Pt(5, 36)} ${Pt(-4, 18)} ${Pt(-10, 8)} C ${Pt(-12, 4)} ${Pt(-10, 0)} ${Pt(-6, 0)} L ${Pt(12, 0)}`
+      + ` C ${Pt(16, 10)} ${Pt(21, 36)} ${Pt(23, 70)} C ${Pt(25, 116)} ${Pt(26, 176)} ${Pt(24, 236)} C ${Pt(21, zB - 220)} ${Pt(18, zB - 140)} ${Pt(22, zB - 70)} C ${Pt(26, zB - 30)} ${Pt(ST.leg, zB - 10)} ${Pt(ST.leg, zB)} Z" fill="${WOOD}" stroke-width="${th}"/>`;
+  }
+  function tableFront(c, Y, th, fine = false, side = false) {     // side: seen from the end, the wall on the left (x0 = c then)
+    const len = side ? ST.d : ST.w, x0 = side ? c : c - ST.w / 2, zA = ST.h - ST.top, zB = zA - ST.apr;
+    const a0 = x0 + (side ? ST.aprB : ST.aprS), a1 = x0 + len - (side ? ST.aprF : ST.aprS);
+    let o = stLeg(a0, 1, Y, th) + stLeg(a1, -1, Y, th);
+    o += RC(a0, Y(zA), a1, Y(zB), `fill="${WOOD}" stroke-width="${th}"`);
+    if (!side) o += RC(x0 + ST.drawerX, Y(zA - 12), x0 + ST.w - ST.drawerX, Y(zB + 12), `fill="#fff" stroke-width="${th * 0.7}"`)
+      + `<circle cx="${f(c)}" cy="${f(Y(zB + ST.apr / 2))}" r="${fine ? 15 : 12}" fill="#fff" stroke-width="${th * 0.7}"/>`;
+    [a0, a1 - 22].forEach((u) => (o += RC(u, Y(zA), u + 22, Y(zB - 20), `fill="#fff" stroke-width="${th * 0.6}"`) + (fine ? `<circle cx="${f(u + 11)}" cy="${f(Y(zA - 14))}" r="7" fill="none" stroke-width="${th * 0.5}"/>` : "")));
+    o += RC(x0, Y(ST.h), x0 + len, Y(zA), `fill="${WOOD}" stroke-width="${th}"`) + `<line x1="${f(x0 + 3)}" y1="${f(Y(ST.h - 10))}" x2="${f(x0 + len - 3)}" y2="${f(Y(ST.h - 10))}" stroke-width="${th * 0.4}"/>`;
     return o;
   }
   // a Sony rear speaker, centred on u: rounded cabinet, cloth grille, on its wall bracket
@@ -210,10 +233,8 @@ const BEDFRAME = {
     o += RC(0, Y(N.h + K.plaster), K.deep, Y(N.h), `fill="${PAR}" stroke-width="${th * 0.8}"`);          // the soffit, parchment plaster too
     // the niche back: parchment plaster on board, marble skirting at its foot
     o += RC(0, Y(N.h), K.plaster, Y(K.skirt), `fill="${PAR}" stroke-width="${th}"`) + RC(0, Y(K.skirt), K.plaster + 12, Y(0), `fill="${MARB}" stroke-width="${th}"`);
-    // beyond: the side table (thin, its marble-topped rim), and the build-out's 15 in face at the niche edge
-    { const T_ = K.side, v0 = K.plaster, v1 = v0 + T_.d;
-      o += `<g fill="none" stroke-width="${th * 0.5}" ${dsh}>` + RC(v0, Y(T_.h), v1, Y(T_.h - T_.top)) + RC(v0 + 10, Y(T_.h - T_.top), v1 - 10, Y(T_.h - 150))
-        + `<path d="M ${v0 + 14} ${Y(T_.h - 150)} L ${v0 - 4} ${Y(0)} M ${v1 - 14} ${Y(T_.h - 150)} L ${v1 + 4} ${Y(0)}"/></g>`; }
+    // beyond: the side table in profile (thin, dashed), and the build-out's 15 in face at the niche edge
+    o += `<g opacity=".6" stroke-dasharray="${th * 6} ${th * 4}">${tableFront(K.plaster, Y, th * 0.5, false, true)}</g>`.replace(/fill="#fff"/g, 'fill="none"');
     o += `<line x1="${K.deep}" y1="${Y(N.h)}" x2="${K.deep}" y2="${Y(0)}" stroke-width="${th * 0.5}" ${dsh}/>`;
     // beyond, high on the plain face past the niche: a rear speaker on its bracket
     o += `<g fill="none" stroke-width="${th * 0.7}" ${dsh}><rect x="${K.edge + 6}" y="${Y(spkY1)}" width="${K.spk.d}" height="${K.spk.h}" rx="10"/><path d="M ${K.edge} ${Y(K.spk.y0 + 140)} L ${K.edge + 6} ${Y(K.spk.y0 + 140)}"/></g>`;
@@ -253,23 +274,6 @@ const BEDFRAME = {
     return o + doorAtStop(th, dash);
   }
 
-  // ════════ DETAIL 3 — the side table's top: the marble set flush in the teak rim ════════
-  // section through a side edge, x across the edge (the rim on the right, outside), y down from the top face
-  function topEdge(th) {
-    const T_ = K.side, r = T_.rim, st = T_.stone, tt = T_.top, ply = tt - st, x0 = 30, xr = 80, xo = xr + r, ap = 18, xa = xo - 10;
-    const brk = (x, y0, y1) => `<path d="M ${x} ${y0} L ${x} ${y0 + (y1 - y0) * 0.35} L ${x - 4} ${y0 + (y1 - y0) * 0.45} L ${x + 4} ${y0 + (y1 - y0) * 0.55} L ${x} ${y0 + (y1 - y0) * 0.65} L ${x} ${y1}" fill="none" stroke-width="${th * 0.6}"/>`;
-    let o = `<path d="M ${x0} 0 L ${xr - 1} 0 L ${xr - 1} ${st} L ${x0} ${st} Z" fill="#fff" stroke-width="${th * 1.3}"/>`;                     // marble
-    o += `<path d="M ${x0 + 6} 6 C ${x0 + 20} 9 ${x0 + 30} 4 ${xr - 8} 12" fill="none" stroke-width="${th * 0.35}"/>`;                           // a vein
-    o += `<path d="M ${x0} ${st} L ${xr + 8} ${st} L ${xr + 8} ${tt} L ${x0} ${tt} Z" fill="url(#hatchBW2)" stroke-width="${th}"/>`;            // ply bed, tongued into the rim
-    o += `<path d="M ${xr} 0 L ${xo - 3} 0 Q ${xo} 0 ${xo} 3 L ${xo} ${tt} L ${xr + 8} ${tt} L ${xr + 8} ${st} L ${xr} ${st} Z" fill="#fff" stroke-width="${th * 1.3}"/>`;   // teak rim
-    o += [0.3, 0.55, 0.8].map((k) => `<path d="M ${xr + 12} ${f(tt * k - 2)} Q ${xr + 25} ${f(tt * k + 1)} ${xo - 4} ${f(tt * k - 1)}" fill="none" stroke-width="${th * 0.3}"/>`).join("");   // grain
-    o += `<line x1="${xr - 0.5}" y1="0" x2="${xr - 0.5}" y2="${st}" stroke-width="${th * 0.5}"/>`;                                                // the 1 mm joint
-    o += `<path d="M ${xa - ap} ${tt} L ${xa} ${tt} L ${xa} ${tt + 40}" fill="none" stroke-width="${th * 1.2}"/><path d="M ${xa - ap} ${tt} L ${xa - ap} ${tt + 40}" fill="none" stroke-width="${th * 1.2}"/>`;   // side rail
-    o += `<path d="M ${xa - ap - 14} ${tt + 4} L ${xa - ap} ${tt + 4} M ${xa - ap - 14} ${tt} L ${xa - ap - 14} ${tt + 12} L ${xa - ap} ${tt + 12}" fill="none" stroke-width="${th * 0.8}"/>`;   // a wooden button
-    o += brk(x0, -2, tt + 2) + `<path d="M ${xa - ap - 2} ${tt + 40} L ${xa + 2} ${tt + 40}" stroke-width="${th * 0.6}" stroke-dasharray="2 1.5"/>`;
-    return o;
-  }
-
   // ═════════════ SHEET 1 — AST-DR-034, THE BED WALL ═════════════
   window.DK.begin("bedwall");
   let s = frame();
@@ -297,7 +301,7 @@ const BEDFRAME = {
     s += note(ve.X(N.u0 + (N.u1 - N.u0) * 0.1), ve.Y(H - 1700), ve.X(N.u0 + 40), ve.Y(-110), "PARCHMENT PLASTER — BACK IN 5 × 3 PANELS", "THE NICHE'S SIDES AND SOFFIT PLAIN PARCHMENT TOO");
     s += note(ve.X(bc + fw / 2 - 150), ve.Y(H - HB.h + 150), ve.X(bc + fw / 2 + 120), ve.Y(H - 1150), "HEADBOARD ON A STORAGE BASE", "BOTH TO THE FLOOR · FINISH TO CHOOSE — AST-DR-035");
     s += note(ve.X(W - 150), ve.Y(H - 1500), ve.X(leafTip - 120), ve.Y(-110), "D1 OPEN ON ITS FLOOR STOP (DASHED)", "ALONG THE 2 IN FACE — DETAIL 2", "end");
-    s += note(ve.X(tables[0] - 60), ve.Y(H - 560), ve.X(N.u0 - CW) - 2, ve.Y(H - 420), "SIDE TABLE", "MARBLE TOP — DETAIL 3", "end");
+    s += note(ve.X(tables[0] - 60), ve.Y(H - 560), ve.X(N.u0 - CW) - 2, ve.Y(H - 420), "SIDE TABLE", "AFTER THE PHOTO — DETAIL 3", "end");
     s += note(ve.X(tables[1] + K.lamp.span), ve.Y(H - K.lamp.y - 140), ve.X(tables[1] + 260), ve.Y(H - 1700), "WALL LAMP, EACH SIDE", "BRASS TWIN-ARM, AS THE RIGHT WALL");
     s += note(ve.X(spkU[0] + K.spk.w / 2), ve.Y(H - K.spk.y0 - 120), ve.X(N.u0 + 700), ve.Y(170), "REAR SPEAKER, EACH SIDE", "SONY · THE RIGHT ONE 2 IN OVER THE OPEN DOOR");
     s += cutMark(ve.X(bc) + 4, ve.Y(-60), "A", "down");
@@ -314,7 +318,7 @@ const BEDFRAME = {
   s += note(vp.X(W + 60), vp.Y(500), vp.X(W) + 6, vp.Y(520), "ENTRANCE DOOR, 3 FT", "SWINGS ROUND TO THIS WALL");
   s += note(vp.X(-60), vp.Y(1100), vp.X(250), vp.Y(1500), "DRESSING DOOR", "2 FT 3 IN FROM THE CORNER");
   s += note(vp.X(spkU[0]), vp.Y(K.edge + K.spk.d), vp.X(250), vp.Y(700), "REAR SPEAKER OVER (DASHED)", "7 FT 9 IN UP");
-  s += note(vp.X(tables[0] - 60), vp.Y(K.plaster + K.side.d - 100), vp.X(330), vp.Y(1050), "SIDE TABLE 16 × 14 IN", "MARBLE INSET IN A TEAK RIM");
+  s += note(vp.X(tables[0] - 60), vp.Y(K.plaster + K.side.d - 100), vp.X(330), vp.Y(1050), "SIDE TABLE 16 × 14 IN", "SHAPED TOP — AST-DR-049");
   s += text(vp.X(bc), vp.Y(vHf + 1100), "BED 6 FT × 6 FT 6", { size: 1.6, anchor: "middle", fill: THIN });
   s += cutMark(vp.X(bc) + 4, vp.Y(vFr1 + 150), "A", "up");
 
@@ -353,40 +357,24 @@ const BEDFRAME = {
    ["5", "Marble skirting set flush with the veneer here — the leaf's heel clears it."]]
     .forEach(([n, t], i) => (s += bubble(324, 148 + i * 4.4 - 0.7, n) + text(328, 148 + i * 4.4, t, { size: 1.35 })));
 
-  // detail 3 — the side table's top: plan 1:10, section through its side edge 1:2
-  s += heading(206, 160, "DETAIL 3 · SIDE-TABLE TOP", "PLAN 1:10 · SECTION THROUGH THE SIDE EDGE 1:2 · MARBLE FLUSH IN A TEAK RIM", 110);
-  { const v3 = view(213, 176, 10, "Side table top plan"), t3 = v3.w(0.12), T_ = K.side;
-    s += v3.g(tableTop(T_.w / 2, 0, t3), 0.3);
-    s += chainH([v3.X(0), v3.X(T_.rim), v3.X(T_.w - T_.rim), v3.X(T_.w)], v3.Y(T_.d) + 4, [T_.rim, T_.w - 2 * T_.rim, T_.rim], { from: v3.Y(T_.d) + 0.5, size: 1.0 });
-    s += chainH([v3.X(0), v3.X(T_.w)], v3.Y(T_.d) + 9, [`${T_.w} TOP`], { from: v3.Y(T_.d) + 0.5, size: 1.1 });
-    s += chainV([v3.Y(0), v3.Y(T_.rim), v3.Y(T_.d - T_.rim), v3.Y(T_.d)], v3.X(T_.w) + 4, [T_.rim, T_.d - 2 * T_.rim, T_.rim], { from: v3.X(T_.w) + 0.5, size: 1.0 });
-    s += chainV([v3.Y(0), v3.Y(T_.d)], v3.X(T_.w) + 9, [`${T_.d}`], { from: v3.X(T_.w) + 0.5, size: 1.1 });
-    s += text(v3.X(T_.w / 2), v3.Y(T_.d / 2) + 0.5, "WHITE MARBLE", { size: 1.2, anchor: "middle", fill: THIN });
-  }
-  { const v4 = view(262 - 30 / 2, 180, 2, "Side table top section"), t4 = v4.w(0.1), T_ = K.side, xr = 80, xo = xr + T_.rim, xa = xo - 10;
-    s += v4.g(topEdge(t4), 0.3);
-    s += chainV([v4.Y(0), v4.Y(T_.stone), v4.Y(T_.top)], v4.X(xo) + 3, [T_.stone, T_.top - T_.stone], { from: v4.X(xo) + 0.5, size: 1.0 });
-    s += chainV([v4.Y(0), v4.Y(T_.top)], v4.X(xo) + 8, [T_.top], { from: v4.X(xo) + 0.5, size: 1.05 });
-    s += chainH([v4.X(xr), v4.X(xo)], v4.Y(0) - 3, [T_.rim], { from: v4.Y(0) - 0.5, size: 1.0 });
-    s += text(v4.X(55), v4.Y(T_.stone / 2) + 0.5, "WHITE MARBLE", { size: 1.25, anchor: "middle" }) + text(v4.X(55), v4.Y(T_.stone + 6) + 0.45, "½ IN PLY BED", { size: 1.05, anchor: "middle" });
-    s += text(v4.X(xr + T_.rim / 2 + 3), v4.Y(T_.top / 2) + 0.5, "TEAK", { size: 1.25, anchor: "middle" });
-    s += note(v4.X(xr - 0.5), v4.Y(0.5), v4.X(xo) + 13, v4.Y(-9), "1 MM JOINT, CLEAR SILICONE", "ALL ROUND THE STONE");
-    const L3 = labels(324, "right", 184, 206, { land: 5 });
-    L3.add(v4.X(xo - 2), v4.Y(2), "EASED TOP EDGE", "THE STONE AND THE RIM FLUSH ON TOP");
-    L3.add(v4.X(xa - 4), v4.Y(T_.top + 26), "SIDE RAIL, ¾ IN", "THE TOP HELD DOWN ON WOODEN BUTTONS");
-    s += L3.draw();
-    ["MARBLE — white, honed and sealed, ¾ in; set flush in the rim.",
-     "PLY BED — ½ in, tongued into a groove in the rim; the stone bedded",
-     "   on it in silicone, so it can move free of the timber.",
-     "RIM — teak, 1¾ × 1¼ in, mitred at the corners, polished dark."]
-      .forEach((n, i) => (s += text(324, 214 + i * 4, n, { size: 1.3 }))); }
+  // detail 3 — the side table, front and plan at 1:10; drawn in full on AST-DR-049
+  s += heading(206, 160, "DETAIL 3 · THE SIDE TABLES", "FRONT AND PLAN 1:10 · AFTER THE OWNER'S PHOTO · IN FULL ON AST-DR-049", 110);
+  { const v3 = view(214, 170, 10, "Side table front"), t3 = v3.w(0.12), Yt = (z) => ST.h - z;
+    s += v3.g(tableFront(ST.w / 2, Yt, t3, true) + `<line x1="-40" y1="${ST.h}" x2="${ST.w + 40}" y2="${ST.h}" stroke-width="${t3 * 3}"/>`, 0.3);
+    s += chainH([v3.X(0), v3.X(ST.w)], v3.Y(ST.h) + 4, [ST.w], { from: v3.Y(ST.h) + 0.5, size: 1.0 });
+    s += chainV([v3.Y(ST.h), v3.Y(0)], v3.X(ST.w) + 4, [ST.h], { from: v3.X(ST.w) + 0.5, size: 1.0 });
+    const v5 = view(268, 172, 10, "Side table plan"), t5 = v5.w(0.12), d5 = `${v5.w(0.8)} ${v5.w(0.5)}`;
+    s += v5.g(`<line x1="-30" y1="0" x2="${ST.w + 30}" y2="0" stroke-width="${t5 * 1.6}" stroke-dasharray="${d5}"/>` + tableTop(ST.w / 2, 0, t5, d5), 0.3);
+    s += chainV([v5.Y(0), v5.Y(ST.d)], v5.X(ST.w) + 4, [ST.d], { from: v5.X(ST.w) + 0.5, size: 1.0 });
+    ["Shaped top, moulded edge — wood, no stone.", "One drawer in burl, a brass rosette knob.", "Carved consoles; slim cabriole legs."]
+      .forEach((n, i) => (s += text(268, 214 + i * 3.6, n, { size: 1.2, fill: THIN }))); }
 
   // what is assumed
   s += heading(112, 238, "ASSUMED", "TELL ME IF ANY OF THESE IS WRONG", 80);
   ["Five panels across and three up, as sketched: each about 1 ft 10⅜ × 2 ft ⅝ in.",
    "The 4 in white marble skirting runs along the build-out (flush with the",
    "   veneer) and into the niche. The build-out runs to the ceiling.",
-   "Side tables 24 in high, one drawer, four splayed legs, as the photo.",
+   "Side tables 24 in high — the photo's table is taller; its look is kept.",
    "Speakers: Sony's rear speakers, 106 × 216 × 98 mm from Sony's spec",
    "   page — the Bar 6 has none in the box; confirm the model before the",
    "   brackets go up. Mattress 10 in (AST-DR-035)."]
@@ -408,14 +396,14 @@ const BEDFRAME = {
   ["DECIDED: 2 in face all along — D1 lies along it on a floor stop (detail 2).",
    "DECIDED: one smooth cove (option A); niche 15 in; tables 16 × 14 in.",
    "DECIDED: the headboard back — the long cushion goes; finish with the bed's.",
-   "DECIDED: tables topped in white marble, flush in a teak rim (detail 3).",
+   "DECIDED: side tables after the owner's photo, no stone (detail 3, AST-DR-049).",
    "DECIDED: two rear speakers high on the plain faces, either side, clear of D1.",
    "DECIDED: the bed on a storage base down to the floor, no legs — finish to come.",
    "1 · The bed stands 2 ft 5⅜ in clear of the TV drawers (was 2 ft 9¾ in).",
    "2 · Fix the lamp and speaker sockets (list B2) before the panels are made."]
     .forEach((n, i) => (s += text(322, 28 + i * 4.4, n, { size: 1.35, fill: /^\d/.test(n) ? "#b3261e" : INK })));
 
-  s += titleBlock({ title: "BED WALL — THE NICHE", sub: "Elevation · Plan · Section · Entrance corner · Table top", date: K.date, rev: K.rev, dwg: "AST-DR-034", scale: "AS NOTED @ A3" });
+  s += titleBlock({ title: "BED WALL — THE NICHE", sub: "Elevation · Plan · Section · Entrance corner · Side table", date: K.date, rev: K.rev, dwg: "AST-DR-034", scale: "AS NOTED @ A3" });
   window.DRAWINGS.bedwall = { title: "Bed wall — the niche · AST-DR-034", svg: mono(sheet(s)), model: true };
 
   // ═════════════ SHEET 2 — AST-DR-035, THE BED ═════════════
