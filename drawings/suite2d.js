@@ -50,7 +50,15 @@
   const study = { d: 280, book: 1489, pil: 240, xP2: xR - (70 + 1219) - 240 };
   const WD = { d: 686 };
   const mirror = { c: 674, w: 253, t: 25, off: 20 };
-  const rug = { w: 3050, l: 2440, y0: bedFoot + 15 - 600 };   // 10 × 8 ft wool rug under the bed (owner: "your choice")
+  // a whole leather hide across the bed's foot, 15° off square, a third under the base (owner, 7 Oct) — as the walk-through
+  const hide = (() => {
+    let p = [[1150, 0], [1125, 110], [1040, 190], [930, 300], [880, 470], [860, 640], [800, 840], [720, 990], [630, 1020], [590, 930], [520, 760], [300, 790], [0, 820],
+      [-300, 790], [-520, 760], [-600, 930], [-670, 1030], [-770, 1010], [-850, 840], [-910, 620], [-1000, 400], [-1080, 260], [-1125, 120], [-1150, 0]];
+    p = p.concat(p.slice(1, -1).reverse().map(([x, y]) => [x, -y]));
+    for (let k = 0; k < 3; k++) p = p.flatMap(([x0, y0], i) => { const [x1, y1] = p[(i + 1) % p.length]; return [[0.75 * x0 + 0.25 * x1, 0.75 * y0 + 0.25 * y1], [0.25 * x0 + 0.75 * x1, 0.25 * y0 + 0.75 * y1]]; });
+    const a = 75 * Math.PI / 180, K = 0.87, hx = 60, hy = bedFoot + 51 + 420;
+    return p.map(([x, y]) => [hx + K * (x * Math.sin(a) - y * Math.cos(a)), hy + K * (x * Math.cos(a) + y * Math.sin(a))]);
+  })();
 
   // the desk: the square-cornered version (AST-DR-028), its back 2 in from the glass — room for a monitor arm's clamp
   const desk = { L: 2286, D: 914, gap: 50 };
@@ -109,8 +117,8 @@
   // ── the pieces ──
   const P = {
     bed() {
-      let o = R(cx - rug.w / 2, rug.y0, cx + rug.w / 2, rug.y0 + rug.l, "hid");
-      o += Tx(cx - rug.w / 2 + 420, rug.y0 + 170, "RUG 10'×8'", "tx2", { size: 70 });
+      let o = `<path class="hid" d="M ${hide.map(([x, y]) => `${f(cx + x)} ${f(y)}`).join(" L ")} Z"/>`;
+      o += Tx(cx - 760, bedFoot - 330, "LEATHER HIDE", "tx2", { size: 70 });
       // the bed wall's build-out in plan: 2 in, the cove out to 15 in, the niche between (its plaster back a thin line)
       const cw = BW.cove + BW.flat, cv = (xe, dir) => Array.from({ length: 13 }, (_, i) => { const t = (i / 12) * Math.PI / 2;
         return [xe + dir * (cw - BW.cove * Math.sin(t)), L - (BW.deep - (BW.deep - BW.edge) * Math.cos(t))]; });

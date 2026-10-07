@@ -132,7 +132,7 @@ window.PROJECT = {
           {
             id: "ballast", t: "Polish needs something soft to answer it",
             body: "Polished floor, polished skirting, polished bathroom stone, satin lacquer on the panelling. Every one of those is right on its own; together they are a great deal of reflective surface, and rooms that bounce light read as lobbies. Homes feel calm because soft things absorb light — and sound. Echo is a larger part of a room not feeling like home than most people expect. A real rug over that marble, full curtains and an upholstered or leather bed are structural here, not decoration.",
-            check: "The curtains and the leather bed are already heading the right way. A rug is the missing piece, and nothing has been said about one yet.",
+            check: "Answered by the bedding, the suede headboard and the heavy curtains. The rug became a whole leather hide (owner, 7 Oct) — smooth leather softens less than wool, so the full red velvet curtains matter more now.",
             at: ["veneer", "bed"],
           },
           {
@@ -293,7 +293,7 @@ window.PROJECT = {
       { k: "Study end", v: "Top of the plan: study wall with shelves and cupboards; window at its right-hand end" },
       { k: "Desk", v: "Faces the partition; the study wall is behind the chair" },
       { k: "Partition", v: "Across the room, 11 ft from the bed wall: a floor-to-ceiling wall of hand-cast glass blocks, about 7 ft 9 in across, its ends turning gently towards the bed, a foot-wide Dark Diva column up the middle with the TV floating on it, and under it a low pill-shaped TV unit of drawers and two cabinets." },
-      { k: "Bed end", v: "Bottom of the plan: a 6 ft bed on a 10 × 8 ft rug, against a straight bed back running the full 15 ft 6 in wall — its design still open" },
+      { k: "Bed end", v: "Bottom of the plan: a 6 ft bed with a leather hide across its foot, against a straight bed back running the full 15 ft 6 in wall — its design still open" },
       { k: "Entrance", v: "At the very end of the left wall, hinged on the bed-wall corner so it opens flat along the bed wall. The left wall steps out about 5 in just before it." },
       { k: "Beyond right wall", v: "Washroom and dressing (plan to come)" },
       { k: "Ceiling", v: "Plain, deliberately — a coffered grid would have shown up the splay — and finished in high gloss (owner, 7 Oct): reflective like lacquer, not glitter, so it catches the windows. Gloss shows every dip, so the plaster wants a fine skim and a long-light check before the coats. The barrel vault belongs to the dressing room." },
@@ -548,7 +548,7 @@ window.PROJECT = {
         },
         {
           id: "bed", name: "Bed", status: "open",
-          glance: {"line": "The bed in the bed-wall niche: a gloss-black storage base straight down to the floor, the slim dusty-rose suede headboard behind in a thin black frame.", "facts": [["6 × 6½ ft", "mattress"], ["11 in", "storage base, to the floor"], ["3 ft 4 in", "headboard"], ["10 × 8 ft", "rug"]], "mats": ["burl", "teak"]},
+          glance: {"line": "The bed in the bed-wall niche: a gloss-black storage base straight down to the floor, the slim dusty-rose suede headboard behind in a thin black frame.", "facts": [["6 × 6½ ft", "mattress"], ["11 in", "storage base, to the floor"], ["3 ft 4 in", "headboard"], ["Whole hide", "cognac leather, across the foot"]], "mats": ["burl", "teak"]},
           drawings: ["bedframe"],
           refs: [
             { src: "assets/refs/bedwall-ref-6-plaster-grid-bed.jpg", caption: "Your ref (3 Oct) — THIS bed: low dark-wood platform on turned feet, slim upholstered headboard (owner: the same exact bed and headboard)" },
@@ -560,7 +560,7 @@ window.PROJECT = {
             { label: "Bed back (before)", value: "Superseded by the niche and headboard (3 Oct). DECIDED (owner, 1 Oct): NOT curved. A plain, straight bed back running corner to corner across the whole 15 ft 6 in bed wall. Its height (the owner said \"about 4\" — to confirm whether inches or feet) and what it is made of are still open. The curled bed back with a ledge at each end, and the sheet AST-DR-013 that draws it, are withdrawn." },
             { label: "Bedside tables", value: "After the owner's photo (7 Oct): a shaped serpentine top with a moulded edge, polished dark — no stone; a burl apron with one drawer and a brass rosette knob; a carved console at each corner; slim cabriole legs ending in a scroll toe. 16 in wide × 14 in deep × 24 in high, inside the 15 in niche, out of sight from the door. AST-DR-049; the bed-wall sheet AST-DR-034, detail 3." },
             { label: "Size", value: "6 ft × 6 ft 6 in, centred on the room's bed axis. Base and mattress heights assumed until the mattress is chosen." },
-            { label: "Rug", value: "A 10 × 8 ft wool rug under the lower two-thirds of the bed, about 2 ft proud of the foot and of each side (owner: \"your choice\"). Shown as oatmeal with a tobacco border in the walk-through." },
+            { label: "Rug", value: "A whole leather hide instead of the wool rug (owner, 7 Oct: \"a whole sheet of leather from an animal… at an angle\"): smooth cognac leather in its natural outline, about 2 m × 1.8 m, lying across the foot of the bed 15° off square — its legs reaching past both sides, a third of it under the gloss-black base. The 2 ft 5 in walk to the TV unit stays clear." },
             { label: "Veneer", inherit: "veneer" },
             { label: "Polish", inherit: "polish" },
           ],
