@@ -1000,9 +1000,9 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
     # the bed wall and the bed (3 Oct): straight on, three-quarter from the door side, the cove, the headboard
     "b_front": ((2337, 2500, 1250), (2337, 5766, 1150), {"lens": 22, "fstop": 8.0}),
     "b_three": ((300, 3500, 1350), (2700, 5650, 900), {"lens": 26, "fstop": 5.6}),
-    "b_cove": ((3950, 4900, 1650), (3150, 5740, 1700), {"lens": 22, "fstop": 5.6}),
-    "b_head": ((3350, 4250, 1450), (3000, 5700, 1000), {"lens": 30, "fstop": 4.0}),      # over the pillows at the rose headboard and its frame
-    "st_close": ((3950, 4800, 1000), (3560, 5560, 450), {"lens": 32, "fstop": 4.0}),      # the cabriole side table, from the room side
+    "b_cove": ((4150, 4600, 1500), (2337, 5766, 2100), {"lens": 22, "fstop": 5.6}),      # the bed wall from the dressing-door side: the cove sweeping into the niche
+    "b_head": ((3650, 3850, 1750), (2650, 5750, 1050), {"lens": 30, "fstop": 5.6}),      # the rose headboard in its black frame, the lamps, the parchment
+    "st_close": ((3950, 4450, 1150), (3560, 5560, 420), {"lens": 42, "fstop": 4.0}),      # the cabriole side table, from the room
     "st_wall": ((2337, 2250, 1550), (2337, 0, 1450), {"lens": 15, "fstop": 8.0}),      # the whole study wall, from over the desk
     "st_arch": ((1250, 1350, 1350), (744, 200, 2250), {"lens": 22, "fstop": 5.6}),     # up into the bookcase arch and its niches
     "st_chairf": ((2560, 1900, 1250), (2337, 1002, 760), {"lens": 32, "fstop": 4.0}),   # the chair's face, over the desk
