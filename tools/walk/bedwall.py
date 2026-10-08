@@ -140,12 +140,31 @@ def lacquer(name, col):
     return m
 M_BED = lacquer("bed_base_finish", (0.010, 0.010, 0.011))                 # gloss black lacquer
 M_HEAD = suede("headboard_finish", (0.50, 0.33, 0.30), 0.14, 5.0, 0.8)    # dusty-rose suede, the nap brushed in soft patches (owner, 9 Oct)
-o_ = dbox("bed_base", xa, SV(vF1), 0, xb, SV(vF0), BASE, M_BED); bevel(o_, 0.005, 3)
+def round_box(o, rc, re_, edges="z"):
+    """Soften a box (owner, 8 Oct: "the edges of the bed are too sharp… three foot to walk… it might hit me on my shin"):
+    the edges running along `edges` rounded to radius rc, then every remaining edge eased to re_, normals kept crisp."""
+    bm = bmesh.new(); bm.from_mesh(o.data); ax = "xyz".index(edges)
+    sel = [e for e in bm.edges if all(abs(e.verts[0].co[k] - e.verts[1].co[k]) < 1e-6 for k in range(3) if k != ax)]
+    if rc > 0: bmesh.ops.bevel(bm, geom=sel, offset=rc, segments=12, affect="EDGES", profile=0.5)
+    bm.to_mesh(o.data); bm.free()
+    for p_ in o.data.polygons: p_.use_smooth = True
+    b = o.modifiers.new("ease", "BEVEL"); b.width = re_; b.segments = 5; b.limit_method = "ANGLE"; b.harden_normals = True
+    return o
+o_ = dbox("bed_base", xa, SV(vF1), 0, xb, SV(vF0), BASE, M_BED); round_box(o_, 0.075, 0.015, "z")   # 3 in round in plan, top edge eased
 # the headboard: a rose suede panel in a thin gloss-black frame round its top and sides — 1¼ in face, as thin as the
 # dressing mirror's frame, 2¾ in deep — the panel ¼ in proud of it (owner, 7 Oct)
 HBF, HBD = 32.0, 70.0
 for nm_, (x0_, x1_, z0_, z1_) in {"top": (xa, xb, HB_H - HBF, HB_H), "l": (xa, xa + HBF, 0, HB_H - HBF), "r": (xb - HBF, xb, 0, HB_H - HBF)}.items():
-    o_ = dbox(f"headboard_frame_{nm_}", x0_, SV(HB_B + HBD), z0_, x1_, SV(HB_B), z1_, M_BED); bevel(o_, 0.003, 3)
+    o_ = dbox(f"headboard_frame_{nm_}", x0_, SV(HB_B + HBD), z0_, x1_, SV(HB_B), z1_, M_BED)
+    if nm_ == "top":                                     # the two top corners rounded, 2½ in (owner, 8 Oct)
+        bm_ = bmesh.new(); bm_.from_mesh(o_.data); mx_ = max(v.co.z for v in bm_.verts)
+        xs_ = [v.co.x for v in bm_.verts]; x_lo, x_hi = min(xs_), max(xs_)
+        sel_ = [e for e in bm_.edges if all(abs(v.co.z - mx_) < 1e-6 and (abs(v.co.x - x_lo) < 1e-6 or abs(v.co.x - x_hi) < 1e-6) for v in e.verts)
+                and abs(e.verts[0].co.x - e.verts[1].co.x) < 1e-6]
+        bmesh.ops.bevel(bm_, geom=sel_, offset=0.032, segments=12, affect="EDGES", profile=0.5); bm_.to_mesh(o_.data); bm_.free()
+        for p_ in o_.data.polygons: p_.use_smooth = True
+        b_ = o_.modifiers.new("ease", "BEVEL"); b_.width = 0.004; b_.segments = 3; b_.limit_method = "ANGLE"; b_.harden_normals = True
+    else: bevel(o_, 0.003, 3)
 o_ = dbox("headboard", xa + HBF, SV(HB_F), 0, xb - HBF, SV(HB_B + 2), HB_H - HBF, M_HEAD); bevel(o_, 0.006, 4)
 for p_ in o_.data.polygons: p_.use_smooth = True
 # the mattress (the bedding is made on it next, in realism.py)

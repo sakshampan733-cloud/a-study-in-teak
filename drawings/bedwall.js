@@ -36,13 +36,13 @@ const BEDWALL = {
 
 // The bed in the owner's photo, sized to the 6 ft × 6 ft 6 in mattress on the plan. Proportions read off the photo.
 const BEDFRAME = {
-  rev: "5 — gloss black base; rose suede headboard in a thin black frame",
-  date: "07.10.2026",
+  rev: "6 — base corners rounded 3 in and edges eased; headboard top corners rounded (owner, 8 Oct)",
+  date: "08.10.2026",
   mat: { w: 1829, l: 1981, h: 254 },        // 6 ft × 6 ft 6 in, 10 in thick — mattress to be chosen
   over: 51,                                 // the frame runs 2 in past the mattress at the sides and the foot
-  base: { h: 280 },                         // a storage base, a plain box straight down to the floor — no legs (owner, 7 Oct);
+  base: { h: 280, r: 75, ease: 15 },        // corners rounded 3 in in plan, every edge eased ⅝ in (owner, 8 Oct: 3 ft to walk past — the shins)                         // a storage base, a plain box straight down to the floor — no legs (owner, 7 Oct);
                                             // 11 in to the mattress, the storage inside not drawn; GLOSS BLACK lacquer (owner, 7 Oct)
-  head: { h: 1016, t: 76, gap: 25, ply: 18, ease: 6, frame: 32, fd: 70 },   // headboard top 3 ft 4 in off the floor, 3 in thick, 1 in off the
+  head: { h: 1016, t: 76, gap: 25, ply: 18, ease: 6, frame: 32, fd: 70, cr: 32 },   // cr: the frame's two top corners rounded (owner, 8 Oct)   // headboard top 3 ft 4 in off the floor, 3 in thick, 1 in off the
                                             // plaster; framed top and sides in a 1¼ in gloss-black border — as thin as the dressing
                                             // mirror's frame — 2¾ in deep, the rose panel ¼ in proud of it (owner, 7 Oct)
 };
@@ -223,7 +223,8 @@ const BEDFRAME = {
   // the headboard from the front: the thin black frame round its top and sides, the rose panel inside it
   function headFront(x0, Y, th) {
     const F = HB.frame, yb = yMat - 40;
-    return RC(x0, Y(HB.h), x0 + fw, Y(yb), `fill="${WOOD}" stroke-width="${th * 1.2}"`)
+    const r = HB.cr, yt = Y(HB.h), ybb = Y(yb);
+    return `<path d="M ${f(x0)} ${f(ybb)} L ${f(x0)} ${f(yt + r)} A ${r} ${r} 0 0 1 ${f(x0 + r)} ${f(yt)} L ${f(x0 + fw - r)} ${f(yt)} A ${r} ${r} 0 0 1 ${f(x0 + fw)} ${f(yt + r)} L ${f(x0 + fw)} ${f(ybb)} Z" fill="${WOOD}" stroke-width="${th * 1.2}"/>`
       + RC(x0 + F, Y(HB.h - F), x0 + fw - F, Y(yb), `fill="${UPH}" stroke-width="${th * 0.9}"`)
       + `<line x1="${f(x0 + F + 8)}" y1="${f(Y(HB.h - F - 10))}" x2="${f(x0 + fw - F - 8)}" y2="${f(Y(HB.h - F - 10))}" stroke-width="${th * 0.35}"/>`;
   }
@@ -420,7 +421,8 @@ const BEDFRAME = {
     let o = headFront(0, Y, th);
     [-1, 1].forEach((s2) => (o += RC(c + s2 * 60, Y(yMat + 200), c + s2 * (B.mat.w / 2 - 40), Y(yMat), `fill="#fff" stroke-width="${th}"`)));
     o += RC(B.over, Y(yMat), fwB - B.over, Y(yBase), `fill="#fff" stroke-width="${th * 1.2}"`);
-    o += RC(0, Y(yBase), fwB, Y(0), `fill="${WOOD}" stroke-width="${th * 1.2}"`);
+    o += RC(0, Y(yBase), fwB, Y(0), `rx="${B.base.ease}" fill="${WOOD}" stroke-width="${th * 1.2}"`);
+    [B.base.r, fwB - B.base.r].forEach((u) => (o += `<line x1="${f(u)}" y1="${f(Y(yBase) + B.base.ease)}" x2="${f(u)}" y2="${f(Y(0) - B.base.ease)}" stroke-width="${th * 0.4}"/>`));   // where the round corners turn
     o += `<line x1="-120" y1="${Y(0)}" x2="${fwB + 120}" y2="${Y(0)}" stroke-width="${th * 3}"/>`;
     return o;
   }
@@ -432,7 +434,8 @@ const BEDFRAME = {
     o += `<path d="M ${fd} ${Y(HB.h - F)} L ${HB.t - e} ${Y(HB.h - F)} Q ${HB.t} ${Y(HB.h - F)} ${HB.t} ${Y(HB.h - F - e)} L ${HB.t} ${Y(0)} L ${fd} ${Y(0)} Z" fill="${UPH}" stroke-width="${th}"/>`;
     o += `<line x1="${-HB.gap}" y1="${Y(0)}" x2="${-HB.gap}" y2="${Y(HB.h + 80)}" stroke-width="${th * 1.6}" stroke-dasharray="${dash}"/>`;
     o += RC(v0, Y(yMat), v0 + B.mat.l, Y(yBase), `fill="#fff" stroke-width="${th * 1.2}"`) + RC(v0 + 30, Y(yMat + 150), v0 + 560, Y(yMat), `fill="#fff" stroke-width="${th * 0.8}"`);
-    o += RC(v0, Y(yBase), lenB, Y(0), `fill="${WOOD}" stroke-width="${th * 1.2}"`);
+    o += RC(v0, Y(yBase), lenB, Y(0), `rx="${B.base.ease}" fill="${WOOD}" stroke-width="${th * 1.2}"`);
+    o += `<line x1="${f(lenB - B.base.r)}" y1="${f(Y(yBase) + B.base.ease)}" x2="${f(lenB - B.base.r)}" y2="${f(Y(0) - B.base.ease)}" stroke-width="${th * 0.4}"/>`;
     o += `<line x1="-120" y1="${Y(0)}" x2="${lenB + 120}" y2="${Y(0)}" stroke-width="${th * 3}"/>`;
     return o;
   }
@@ -440,7 +443,7 @@ const BEDFRAME = {
     const F = HB.frame, fd = HB.fd;
     let o = `<path d="M 0 0 L ${fwB} 0 L ${fwB} ${fd} L ${fwB - F} ${fd} L ${fwB - F} ${HB.t} L ${F} ${HB.t} L ${F} ${fd} L 0 ${fd} Z" fill="${UPH}" stroke-width="${th * 1.2}"/>`
       + `<path d="M ${F} 0 L ${F} ${fd} M ${fwB - F} 0 L ${fwB - F} ${fd}" stroke-width="${th * 0.6}"/>`;     // the frame's stiles, the panel between
-    o += RC(0, HB.t, fwB, lenB, `fill="${WOOD}" stroke-width="${th * 1.2}"`) + RC(B.over, HB.t, fwB - B.over, HB.t + B.mat.l, `fill="#fff" stroke-width="${th}"`);
+    o += RC(0, HB.t, fwB, lenB, `rx="${B.base.r}" fill="${WOOD}" stroke-width="${th * 1.2}"`) + RC(B.over, HB.t, fwB - B.over, HB.t + B.mat.l, `fill="#fff" stroke-width="${th}"`);
     [-1, 1].forEach((m) => (o += RC(fwB / 2 + m * 40, HB.t + 30, fwB / 2 + m * (B.mat.w / 2 - 20), HB.t + 330, `fill="#fff" stroke-width="${th * 0.7}"`)));   // pillows
     // the headboard's two bolts into the base, dashed
     o += `<g stroke-width="${th * 0.6}" stroke-dasharray="${dash}">` + [fwB * 0.25, fwB * 0.75].map((u) => `<line x1="${f(u)}" y1="${HB.ply}" x2="${f(u)}" y2="${HB.t + 80}"/>`).join("") + `</g>`;
@@ -469,7 +472,7 @@ const BEDFRAME = {
   s2 += chainH([vf.X(0), vf.X(fwB)], vf.Y(topB) + 11, [`${fwB} OVERALL — THE HEADBOARD THE SAME`], { from: vf.Y(topB) + 1, size: 1.4 });
   s2 += chainV([vf.Y(topB), vf.Y(topB - yBase), vf.Y(topB - yMat), vf.Y(0)], vf.X(fwB) + 6, [`${yBase} BASE`, `${B.mat.h} MATTRESS`, HB.h - yMat], { from: vf.X(fwB) + 1, size: 1.15 });
   s2 += chainV([vf.Y(topB), vf.Y(0)], vf.X(fwB) + 13, [`${HB.h} TO THE TOP`], { from: vf.X(fwB) + 1, size: 1.25 });
-  s2 += note(vf.X(fwB * 0.82), vf.Y(120), vf.X(fwB * 0.82) + 8, vf.Y(-60), "HEADBOARD, DUSTY-ROSE SUEDE", "IN A 1¼ IN GLOSS-BLACK FRAME, TOP AND SIDES");
+  s2 += note(vf.X(fwB * 0.82), vf.Y(120), vf.X(fwB * 0.82) + 8, vf.Y(-60), "HEADBOARD, DUSTY-ROSE SUEDE", "1¼ IN GLOSS-BLACK FRAME, ITS TOP CORNERS ROUNDED");
 
   const vsd = view(212, 34, scB, "Bed side"), tsd = vsd.w(0.12), dsd = `${vsd.w(1)} ${vsd.w(0.7)}`;
   s2 += heading(206, 17, "SIDE", `SCALE 1:${scB} · HEADBOARD LEFT, THE PLASTER BEHIND IT DASHED`, 110);
@@ -477,7 +480,7 @@ const BEDFRAME = {
   s2 += chainH([vsd.X(-HB.gap), vsd.X(0), vsd.X(HB.t), vsd.X(HB.t + B.mat.l), vsd.X(lenB)], vsd.Y(topB) + 5, [HB.gap, HB.t, `${B.mat.l} MATTRESS`, B.over], { from: vsd.Y(topB) + 1, size: 1.15 });
   s2 += chainH([vsd.X(0), vsd.X(lenB)], vsd.Y(topB) + 11, [`${lenB} OVERALL`], { from: vsd.Y(topB) + 1, size: 1.4 });
   s2 += note(vsd.X(HB.t / 2), vsd.Y(380), vsd.X(HB.t) + 12, vsd.Y(-60), "HEADBOARD, 3 IN", "BOLTED TO THE BASE — DETAIL 2 · 1 IN OFF THE PLASTER");
-  s2 += note(vsd.X(lenB - 300), vsd.Y(topB - 140), vsd.X(lenB) - 10, vsd.Y(topB + 120), "STORAGE BASE, TO THE FLOOR", "A PLAIN BOX, NO LEGS, GLOSS BLACK LACQUER · STORAGE NOT DRAWN", "end");
+  s2 += note(vsd.X(lenB - 300), vsd.Y(topB - 140), vsd.X(lenB) - 10, vsd.Y(topB + 120), "STORAGE BASE, TO THE FLOOR", "NO LEGS, GLOSS BLACK · CORNERS ROUNDED 3 IN, EDGES EASED ⅝ IN", "end");
 
   const scP2 = 20, vpl = view(28, 152, scP2, "Bed plan"), tpl = vpl.w(0.1), dpl = `${vpl.w(1)} ${vpl.w(0.7)}`;
   s2 += heading(18, 142, "PLAN", `SCALE 1:${scP2} · HEADBOARD AT THE TOP`, 80);

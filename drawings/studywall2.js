@@ -14,7 +14,7 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const SW2 = {
-  rev: "2 — curtains inside the window arch, no rods; a focus light in each niche (owner, 8 Oct)",
+  rev: "2 — curtains inside the window arch, no rods; a focus light in each niche; a strip light under each shelf (owner, 8 Oct)",
   date: "08.10.2026",
   W: 4547, H: 2769,                          // 14 ft 11 in wall, 9 ft 1 in ceiling (measured)
   base: { h: 646, top: 40, d: 255, over: 25, plinth: 100, door: 22 },   // cupboards; counter 686 = window sill
@@ -283,8 +283,11 @@ const SW2 = {
     return o + panel(w0, 1) + panel(w1, -1);
   }
 
+  // the shelf lights (owner, 8 Oct): a strip let into the underside of each shelf just behind its lip — drawn as a short
+  // dashed glow under every shelf line
+  const shelfLights = (th) => BK.shelves.map((z) => Ln(BK.stile + 20, z - 3, BK.w - BK.stile - 20, z - 3, `${W(th * 0.6)} stroke-dasharray="14 8"`)).join("");
   function elevation(th, arched) {
-    return baseBand(th) + bookcase(th, arched) + centrePanel(th) + windowZone(th, arched) + curtains(th, arched) + pilaster(xP1[0], th) + pilaster(xP2[0], th) +
+    return (arched ? shelfLights(th) : "") + baseBand(th) + bookcase(th, arched) + centrePanel(th) + windowZone(th, arched) + curtains(th, arched) + pilaster(xP1[0], th) + pilaster(xP2[0], th) +
       entablature(0, K.W, th) + lamp((xP1[0] + xP1[1]) / 2, th) + lamp((xP2[0] + xP2[1]) / 2, th) +
       `<line x1="-150" y1="${ey(0)}" x2="${K.W + 150}" y2="${ey(0)}" stroke-width="${f(th * 5)}"/><line x1="-150" y1="${ey(K.H)}" x2="${K.W + 150}" y2="${ey(K.H)}" stroke-width="${f(th * 3)}" stroke-dasharray="40 20"/>`;
   }
@@ -382,7 +385,7 @@ const SW2 = {
       EL.add(vE.X(BK.w / 2), vE.Y(ey((yBand + yEnt) / 2)), "BAND PANEL", "EVERY BAY");
       EL.add(vE.X(BK.w / 2), vE.Y(ey(yOpen - 13)), "FLAT HEAD", "");
     }
-    EL.add(vE.X(400), vE.Y(ey(1300)), "OPEN SHELVES, 280 DEEP", "");
+    EL.add(vE.X(400), vE.Y(ey(1300)), "OPEN SHELVES, 280 DEEP", arched ? "A STRIP LIGHT LET INTO EACH SHELF'S UNDERSIDE, 3000 K" : "");
     EL.add(vE.X(fa0 + 30), vE.Y(ey(fb0 + 200)), "3-STEP FRAME + BEAD ROW", "25 PROUD — OWNER'S PHOTO");
     EL.add(vE.X(pcx - 300), vE.Y(ey(pcy)), "OIL LANDSCAPE, GILT FRAME", "STAND-IN — THE OWNER CHOOSES");
     EL.add(vE.X(xPanel[0] + 300), vE.Y(ey(yTop + 60)), "PANEL AT THE WALL, PLAIN SKIRTING", "9 IN SHELF ON THE COUNTER — APPROVED");

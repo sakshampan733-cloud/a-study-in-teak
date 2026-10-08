@@ -200,3 +200,12 @@ frame_on("st2_c_bandfr", "s", FACE, CX0 + 60, CX1 - 60, YBAND + 45, YENT - 45, P
 bf_ = dbox("st2_c_bandfield", CX0 + 92, FACE, YBAND + 77, CX1 - 92, FACE + 6, YENT - 77, M_VEN); bevel(bf_, 0.008, 3)
 STUDY_PAINT = dict(cx=(CX0 + CX1) / 2, cz=(FB0 + FB1) / 2, w=860.0, h=640.0, s=25.0)        # the painting hangs here (realism.py)
 print(f"study wall (AST-DR-040): arches over the bookcase (R {gB['R']:.0f}) and the window (R {gW['R']:.0f}), 6 niches (a focus light in each), centre bay at 25, crown at {YENT:.0f}", flush=True)
+
+# ═══ the shelf lights (owner, 8 Oct): a cove strip let into the underside of every shelf, just behind its lip, washing
+#     the row of books below — 3000 K like the coves. The top row has the arch's niche lights. ═══
+for z_ in (890, 1160, 1430, 1700):
+    dbox(f"st2_shelfled{z_}", BX0 + STILE + 10, FACE - 54, z_ - 1, BX1 - STILE - 10, FACE - 38, z_ + 2, M_STRIP)
+    ld = bpy.data.lights.new(f"book_strip_s{z_}", "AREA"); ld.shape = "RECTANGLE"
+    ld.size, ld.size_y = (BX1 - BX0 - 2 * STILE - 20) / 1000, 0.014; ld.energy = float(os.environ.get("SHELF_LED", 12)); warm(ld, 3000)
+    lo_ = bpy.data.objects.new(f"book_strip_s{z_}", ld); sc.collection.objects.link(lo_); lo_.location = P((BX0 + BX1) / 2, FACE - 46, z_ - 4)
+print("study wall: a strip light under each of the 4 shelves", flush=True)
