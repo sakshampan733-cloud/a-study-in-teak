@@ -3,17 +3,19 @@
 // Both carry the approved counter shelf: the centre panel goes back to the wall plane, so the counter is a real
 // 9 in shelf and the two fluted pilasters stand nearly 11 in proud. The crown is the smaller dentil cornice from the
 // owner's photo; the frame round the painting carries a row of small beads (owner's photo); the wall lamps are the
-// brass twin-arm sconce from the owner's photo; the window has the approved red velvet over a white linen sheer.
+// brass twin-arm sconce from the owner's photo; the window's red velvet and white linen sheer hang INSIDE the window arch
+// from tracks in its soffit, no rods (owner, 8 Oct, his arched-doorway photo); the arched-off scheme keeps the rod.
 // With the arches: a segmental arch over the bookcase (books under it, as the owner's arched-bookcase photo) and the
 // same arch in the window head — wood only, the glass unchanged behind; three deep rectangular niches cut into the
-// underside of each arch (seen looking up); spandrel mouldings curved to the arch.
+// underside of each arch (seen looking up), a small focus light in the middle of each (owner, 8 Oct); spandrel
+// mouldings curved to the arch.
 // Real units mm. Elevation: x along the wall from the left corner, y UP from the floor. Plan: y = depth into the room.
 
 window.DRAWINGS = window.DRAWINGS || {};
 
 const SW2 = {
-  rev: "1 — owner's second scheme: arches, counter shelf pushed back",
-  date: "07.10.2026",
+  rev: "2 — curtains inside the window arch, no rods; a focus light in each niche (owner, 8 Oct)",
+  date: "08.10.2026",
   W: 4547, H: 2769,                          // 14 ft 11 in wall, 9 ft 1 in ceiling (measured)
   base: { h: 646, top: 40, d: 255, over: 25, plinth: 100, door: 22 },   // cupboards; counter 686 = window sill
   book: { w: 1489, d: 280, stile: 60, shelves: [890, 1160, 1430, 1700], st: 25, back: 18 },
@@ -26,9 +28,9 @@ const SW2 = {
   ent: { arch: 40, frieze: 120, bed: 25, dentil: 22, cove: 35, crown: 50, fillet: 15, proj: 120, dW: 12, dPitch: 20 },
   bkArch: { spring: 1999, rise: 320, mould: 46 },   // archivolt 46 so it lands on the bookcase's outer edge
   winArch: { rise: 300, mould: 56 },                // springs 1 ft below the head; archivolt lands on the architrave
-  niche: { n: 3, len: 380, wid: 180, depth: 90, cB: 149, cW: 140 },   // three deep rectangular niches in each soffit — no lights; centred across the soffit (the window's kept clear of the brick lintel)
+  niche: { n: 3, len: 380, wid: 180, depth: 90, cB: 149, cW: 140 },   // three deep rectangular niches in each soffit, a focus light (3000 K, 52 trim) in the middle of each; centred across the soffit (the window's kept clear of the brick lintel)
   lamp: { y: 1290, span: 160 },
-  curtain: { rod: 2440, sheer: 2030, tie: 1250 },
+  curtain: { rod: 2440, sheer: 2030, tie: 1250, sheerS: -50, velS: 22, tieW: 185, footW: 300 },   // rod/sheer: arched-off scheme; S = line off the wall in the arch
 };
 
 (function () {
@@ -240,6 +242,7 @@ const SW2 = {
 
   // ── the curtains (approved): red velvet on a rod under the cornice, tied back; white linen sheer under the arch ──
   function curtains(th, arched) {
+    if (arched) return archCurtains(th);
     const CU = K.curtain, sy = arched ? gW.ys - 10 : WN.head - 20, [w0, w1] = xWin, x0 = xZone[0] + 14;
     let o = `<g ${W(th * 0.5)}>`;
     for (let x = w0 + 40; x < w1 - 20; x += 60) o += Ln(x, sy - 10, x, WN.sill + 20, 'stroke-dasharray="40 30"');
@@ -254,6 +257,30 @@ const SW2 = {
       return s;
     };
     return o + panel(x0, 1) + panel(K.W, -1);
+  }
+
+  // ── with the arches (owner, 8 Oct, his arched-doorway photo): both curtains hang INSIDE the window arch from tracks in
+  //    its soffit — no rods. The sheer by the glass, the arch wide; the red velvet in front, two panels meeting at the
+  //    crown, swept back to the jambs, tied with gold rope and tassels at 1250, breaking on the counter ──
+  function archCurtains(th) {
+    const CU = K.curtain, g = gW, [w0, w1] = xWin, yb = yTop + 15, tie = CU.tie;
+    const az = (x) => g.cy + Math.sqrt(Math.max(0, g.R * g.R - (Math.min(Math.max(x, g.xa), g.xb) - g.cx) ** 2));
+    let o = `<g ${W(th * 0.5)}>`;
+    for (let x = w0 + 40; x < w1 - 20; x += 60) o += Ln(x, az(x) - 8, x, WN.sill + 20, 'stroke-dasharray="40 30"');
+    o += `</g>`;
+    const sweep = (xh, yh, xk, xb) => `C ${f(xh)} ${f(ey(yh - (yh - tie) * 0.55))} ${f(xk)} ${f(ey(tie + (yh - tie) * 0.45))} ${f(xk)} ${f(ey(tie))} C ${f(xk)} ${f(ey(1100))} ${f(xb)} ${f(ey(900))} ${f(xb)} ${f(ey(yb))}`;
+    const panel = (xo, d) => {
+      const head = Array.from({ length: 25 }, (_, i) => { const x = xo + (d * Math.abs(g.cx - xo) * i) / 24; return [x, az(x) - 4]; });
+      const [xc, yc] = head[24];
+      let s = `<path fill="#fff" ${W(th * 1.1)} d="M ${f(xo)} ${f(ey(yb))} L ${head.map(([x, y]) => `${f(x)} ${f(ey(y))}`).join(" L ")} ${sweep(xc, yc, xo + d * CU.tieW, xo + d * CU.footW)} Z"/>`;
+      for (let k = 1; k < 6; k++) {
+        const q = k / 6, xh = xo + d * Math.abs(g.cx - xo) * q, yh = az(xh) - 6;
+        s += `<path fill="none" ${W(th * 0.5)} d="M ${f(xh)} ${f(ey(yh))} ${sweep(xh, yh, xo + d * CU.tieW * q, xo + d * CU.footW * q)}"/>`;
+      }
+      s += `<path fill="none" ${W(th * 1.6)} d="M ${f(xo)} ${f(ey(tie))} L ${f(xo + d * CU.tieW)} ${f(ey(tie))}"/><ellipse cx="${f(xo + d * 34)}" cy="${f(ey(tie - 80))}" rx="12" ry="36" fill="#fff" ${W(th)}/>`;
+      return s;
+    };
+    return o + panel(w0, 1) + panel(w1, -1);
   }
 
   function elevation(th, arched) {
@@ -296,9 +323,16 @@ const SW2 = {
     o += `<rect x="${xZone[0]}" y="0" width="${WN.arch}" height="${WN.set}" ${hatch}/><rect x="${xZone[0]}" y="0" width="${WN.arch}" height="${WN.set}" fill="none"/>`;
     o += `<path d="M ${xWin[0]} ${WN.set} L ${xWin[0]} ${WN.glass + 35}" ${W(th * 1.2)}/><path d="M ${xZone[0]} ${WN.set} L ${xWin[0]} ${WN.set}" ${W(th)}/>`;
     if (arched) o += nicheP(gW, N.cW) + `<line x1="${xWin[0]}" y1="${WN.glass + 40}" x2="${K.W}" y2="${WN.glass + 40}" stroke-dasharray="${dash}" ${W(th)}/>`;
-    // curtains overhead (dashed): the sheer rod in the reveal, the red rod in front; the tied-back stacks
+    // curtains overhead (dashed). With the arches: both tracks bent to the arch — the sheer's on the lining by the glass,
+    // the velvet's let into the soffit behind the niches; the tied-back stacks at the jambs. Without: the rods.
+    if (arched) {
+      const CU = K.curtain;
+      o += `<line x1="${xWin[0]}" y1="${CU.sheerS}" x2="${K.W}" y2="${CU.sheerS}" stroke-dasharray="${dash}" ${W(th * 1.2)}/><line x1="${xWin[0]}" y1="${CU.velS}" x2="${K.W}" y2="${CU.velS}" stroke-dasharray="${dash}" ${W(th * 2)}/>`;
+      o += `<path d="M ${xWin[0]} ${CU.velS} c 0 60 120 85 ${CU.tieW} 40 M ${K.W} ${CU.velS} c 0 60 -120 85 -${CU.tieW} 40" stroke-dasharray="${dash}" ${W(th)} fill="none"/>`;
+    } else {
     o += `<line x1="${xWin[0]}" y1="${-30}" x2="${K.W}" y2="${-30}" stroke-dasharray="${dash}" ${W(th * 1.4)}/><line x1="${xZone[0] + 14}" y1="${WN.set + 60}" x2="${K.W}" y2="${WN.set + 60}" stroke-dasharray="${dash}" ${W(th * 2)}/>`;
     o += `<path d="M ${xZone[0] + 14} ${WN.set + 60} c 0 70 160 90 250 40 M ${K.W} ${WN.set + 60} c 0 70 -160 90 -250 40" stroke-dasharray="${dash}" ${W(th)} fill="none"/>`;
+    }
     // the cornice above (dashed)
     o += `<line x1="0" y1="${BK.d + E.proj}" x2="${K.W}" y2="${BK.d + E.proj}" stroke-dasharray="${dash}" ${W(th)}/>`;
     return o;
@@ -334,15 +368,15 @@ const SW2 = {
     ER.add(vE.X(xP2[0] - 22), vE.Y(ey(yCap + 70)), "MOULDED CAPITAL", "BREAKS FORWARD");
     if (arched) {
       ER.add(vE.X(winC), vE.Y(ey(gW.ys + 150)), "WOOD ARCH IN THE WINDOW HEAD", "VENEERED PANEL, FLUSH WITH THE FRAME — NO GLASS");
-      ER.add(vE.X(winC - 300), vE.Y(ey(gW.ys + gW.rise - 40)), "3 DEEP NICHES IN ITS SOFFIT", "SEEN LOOKING UP — SHEET 042");
+      ER.add(vE.X(winC - 300), vE.Y(ey(gW.ys + gW.rise - 40)), "3 DEEP NICHES IN ITS SOFFIT", "A FOCUS LIGHT IN EACH — SHEET 042");
     }
-    ER.add(vE.X(xZone[0] + 200), vE.Y(ey(1700)), "RED VELVET, TIED BACK", "WHITE LINEN SHEER UNDER THE " + (arched ? "ARCH" : "HEAD"));
+    ER.add(vE.X(xZone[0] + 200), vE.Y(ey(1700)), ...(arched ? ["RED VELVET + LINEN SHEER IN THE ARCH", "ON TRACKS IN ITS SOFFIT — NO RODS · TIED BACK"] : ["RED VELVET, TIED BACK", "WHITE LINEN SHEER UNDER THE HEAD"]));
     ER.add(vE.X((xP2[0] + xP2[1]) / 2 + K.lamp.span), vE.Y(ey(K.lamp.y + 150)), "WALL LAMP ×2", "BRASS TWIN-ARM — OWNER'S PHOTO");
     ER.add(vE.X(xP2[0] + 60), vE.Y(ey(1000)), "FLUTED PILASTER ×2", "STANDS 10½ IN PROUD OF THE PANEL");
     ER.add(vE.X(xZone[1] - 300), vE.Y(ey(350)), "CUPBOARDS UNDER ALL THREE BAYS", "COUNTER = WINDOW SILL, 2 FT 3 IN");
     if (arched) {
       EL.add(vE.X(400), vE.Y(ey(gB.ys + 200)), "ARCH OVER THE BOOKCASE", "BOOKS STAND UNDER IT — OWNER'S PHOTO");
-      EL.add(vE.X(gB.cx - 250), vE.Y(ey(gB.ys + gB.rise - 30)), "3 DEEP NICHES IN ITS SOFFIT", "SEEN LOOKING UP — SHEET 042");
+      EL.add(vE.X(gB.cx - 250), vE.Y(ey(gB.ys + gB.rise - 30)), "3 DEEP NICHES IN ITS SOFFIT", "A FOCUS LIGHT IN EACH — SHEET 042");
       EL.add(vE.X(1300), vE.Y(ey(yEnt - 60)), "SPANDREL MOULDINGS, CURVED TO THE ARCH", "");
     } else {
       EL.add(vE.X(BK.w / 2), vE.Y(ey((yBand + yEnt) / 2)), "BAND PANEL", "EVERY BAY");
@@ -369,14 +403,14 @@ const SW2 = {
     const PLb = labels(vP.X(K.W) + 16, "right", 196, 238);
     PLb.add(vP.X(fa0 + 35), vP.Y(C.back + 12), "FRAME STILE, 70 × 25", "");
     PLb.add(vP.X(pcx), vP.Y(C.back + 30), "PAINTING", "");
-    PLb.add(vP.X(xZone[0] + 300), vP.Y(WN.set + 60), "CURTAIN RODS OVERHEAD", "");
+    PLb.add(vP.X(xZone[0] + 300), vP.Y(arched ? K.curtain.velS : WN.set + 60), arched ? "CURTAIN TRACKS IN THE ARCH, OVERHEAD" : "CURTAIN RODS OVERHEAD", arched ? "NO RODS" : "");
     s += PLb.draw();
 
     // notes
     s += heading(18, 244, "NOTES", `REVISION ${K.rev.split(" ")[0]}`, 120);
     (arched ? [
       "Owner's second scheme (7 Oct). Arches over the bookcase and the window, three deep rectangular niches cut into each",
-      "arch's underside — no lights — and spandrel mouldings curved to follow the arch. The window's glass is unchanged: the wood arch",
+      "arch's underside — a focus light in each (8 Oct) — and spandrel mouldings curved to follow the arch. The window's glass is unchanged: the wood arch",
       "fills the top 1 ft of the opening, veneered flush with the frame. Only 4 in is free above the window, so it cannot rise higher.",
       "Centre: the panel goes back to the wall plane, so the counter is a 9 in shelf and the pilasters stand 10½ in proud (approved).",
       "Mouldings, crown and lamp from the owner's photos. Sections: AST-DR-042. Details: AST-DR-043.",
@@ -494,8 +528,16 @@ const SW2 = {
     } else {
       o += RS(fi, WN.head, WN.set, WN.head + 18, `${hatchCut} ${W(th)}`) + RS(0, WN.head + 18, WN.set, yEnt, `${hatchCut} ${W(th * 1.2)}`) + RS(WN.set, WN.head, WN.set + 18, WN.head + WN.arch, `${hatchCut} ${W(th)}`);
     }
+    if (arched) {
+      // both in the arch (owner, 8 Oct), cut here at the crown: the sheer on a slim track on the lining, the velvet on a
+      // track let into the soffit, 22 off the wall behind the niche — tied back beyond. No rods.
+      const CU = K.curtain, hc = WN.head;
+      o += `<rect x="${CU.sheerS - 8}" y="${f(ey(hc))}" width="16" height="10" fill="#fff" ${W(th)}/><path d="M ${CU.sheerS} ${f(ey(hc - 10))} C ${CU.sheerS + 15} ${f(ey(1700))} ${CU.sheerS - 15} ${f(ey(1200))} ${CU.sheerS} ${f(ey(WN.sill + 20))}" ${W(th * 0.6)} fill="none"/>`;
+      o += `<rect x="${CU.velS - 10}" y="${f(ey(hc + 22))}" width="20" height="22" fill="#fff" ${W(th * 1.2)}/><path d="M ${CU.velS} ${f(ey(hc))} C ${CU.velS - 10} ${f(ey(1700))} ${CU.velS + 60} ${f(ey(1400))} ${CU.velS + 44} ${f(ey(CU.tie))} C ${CU.velS + 20} ${f(ey(1000))} ${CU.velS + 50} ${f(ey(800))} ${CU.velS + 30} ${f(ey(yTop + 15))}" ${W(th * 0.6)} stroke-dasharray="40 20" fill="none"/>`;
+      return o + crownSection(WN.set, th) + floorCeil(WN.set + 400);
+    }
     // curtains: the sheer on its rod in the reveal; the red rod in front on a bracket, the red tied back beyond
-    const sy = arched ? gW.ys - 10 : WN.head - 20;
+    const sy = WN.head - 20;
     o += `<circle cx="-30" cy="${f(ey(sy))}" r="9" fill="#fff" ${W(th)}/><path d="M -30 ${f(ey(sy))} C -10 ${f(ey(1700))} -50 ${f(ey(1200))} -28 ${f(ey(WN.sill + 20))}" ${W(th * 0.6)} fill="none"/>`;
     const rx = WN.set + 60, ry = K.curtain.rod;
     o += Ln(WN.set + 18, ry, rx, ry, W(th * 1.6)) + `<circle cx="${rx}" cy="${f(ey(ry))}" r="16" fill="#fff" ${W(th * 1.2)}/>`;
@@ -557,15 +599,20 @@ const SW2 = {
       LC.add(vC.X(fi + 9), Y(vC, gW.ys + 150), "VENEERED PANEL UNDER THE ARCH", "FLUSH WITH THE FRAME — NO GLASS");
       LC.add(vC.X(WN.set + 9), Y(vC, WN.head + 30), "ARCHIVOLT", "");
     }
-    LC.add(vC.X(WN.set + 60), Y(vC, K.curtain.rod), "RED VELVET ON A BRASS ROD", "TIED BACK, BEYOND");
-    LC.add(vC.X(-30), Y(vC, (arched ? gW.ys : WN.head) - 10), "LINEN SHEER ROD", "IN THE REVEAL");
+    if (arched) {
+      LC.add(vC.X(K.curtain.velS + 44), Y(vC, K.curtain.tie + 300), "RED VELVET ON A TRACK LET INTO", "THE SOFFIT — NO ROD · TIED BACK, BEYOND");
+      LC.add(vC.X(K.curtain.sheerS), Y(vC, 1900), "LINEN SHEER ON A SLIM TRACK", "ON THE LINING, BEHIND THE VELVET");
+    } else {
+      LC.add(vC.X(WN.set + 60), Y(vC, K.curtain.rod), "RED VELVET ON A BRASS ROD", "TIED BACK, BEYOND");
+      LC.add(vC.X(-30), Y(vC, WN.head - 10), "LINEN SHEER ROD", "IN THE REVEAL");
+    }
     LC.add(vC.X(WN.glass), Y(vC, 1400), "WINDOW, GLASS UNCHANGED", "");
     LC.add(vC.X(-40), Y(vC, WN.sill - 8), "REVEAL SILL ON TO THE COUNTER", "");
     s += LC.draw();
     s += heading(18, 238, "NOTES", `REVISION ${K.rev.split(" ")[0]}`, 120);
     [arched ? "All three cut looking along the wall to the right (cut lines on AST-DR-040's plan). Each arch's head is a ply former, veneered;"
             : "All three cut looking along the wall to the right (cut lines on AST-DR-041's plan).",
-     arched ? "its three niches are boxes let into it, 90 deep, lined in the same veneer — no lights. The window's niches stay in the timber,"
+     arched ? "its three niches are boxes let into it, 90 deep, lined in the same veneer, a small focus light (3000 K) in the middle of each. The window's niches stay in the timber,"
             : "The flat bookcase head carries a strip light under it and the band panel above.",
      arched ? "in front of the brick lintel. The window bay's panelling now runs at 280 like the rest, so the crown is one plane and the reveal 14 in."
             : "The window bay's panelling runs at 280 like the rest, so the crown is one plane and the reveal is 14 in.",
@@ -592,6 +639,8 @@ const SW2 = {
       let o = `<rect x="0" y="${d0}" width="${f(L)}" height="${d1 - d0}" ${W(th * 1.4)}/>`;
       nn.forEach(([u0]) => (o += `<rect x="${f(u0)}" y="${c - N.wid / 2}" width="${N.len}" height="${N.wid}" ${W(th * 1.4)}/><rect x="${f(u0 + 12)}" y="${c - N.wid / 2 + 12}" width="${N.len - 24}" height="${N.wid - 24}" ${W(th * 0.6)}/>` +
         [[0, 0], [1, 0], [0, 1], [1, 1]].map(([i, j]) => `<line x1="${f(u0 + i * N.len)}" y1="${f(c - N.wid / 2 + j * N.wid)}" x2="${f(u0 + 12 + i * (N.len - 24))}" y2="${f(c - N.wid / 2 + 12 + j * (N.wid - 24))}" ${W(th * 0.6)}/>`).join("")));
+      nn.forEach(([u0]) => { const cx = u0 + N.len / 2;                       // the focus light in the middle of each (owner, 8 Oct)
+        o += `<circle cx="${f(cx)}" cy="${c}" r="26" fill="#fff" ${W(th)}/><circle cx="${f(cx)}" cy="${c}" r="16" ${W(th * 0.6)} fill="none"/><path d="M ${f(cx - 11)} ${c - 11} L ${f(cx + 11)} ${c + 11} M ${f(cx - 11)} ${c + 11} L ${f(cx + 11)} ${c - 11}" ${W(th * 0.5)}/>`; });
       o += `<line x1="0" y1="${d1 + 18}" x2="${f(L)}" y2="${d1 + 18}" ${W(th * 0.8)}/>` + extra(th, L);
       s += v.g(o, 0.25);
       s += chainH([v.X(0), ...nn.flatMap(([u0, u1]) => [v.X(u0), v.X(u1)]), v.X(L)], v.Y(d1 + 18) + 5, [Math.round(nn[0][0]), N.len, Math.round(nn[1][0] - nn[0][1]), N.len, Math.round(nn[2][0] - nn[1][1]), N.len, Math.round(L - nn[2][1])], { from: v.Y(d1 + 18) + 1, size: 1.0 });
@@ -603,7 +652,9 @@ const SW2 = {
     soffit(gB, BK.back, BK.d, N.cB, 22, 32, 12, "Bookcase soffit unrolled", () => "");
     s += text(22 + 780 / 12, 32 + (BK.d + 14) / 12, "ARCHIVOLT ON THE FACE (18 PROUD)", { size: 1.2, fill: THIN, anchor: "middle" });
     s += heading(222, 17, "2 · WINDOW ARCH — ITS UNDERSIDE", "LOOKING UP, UNROLLED FLAT · 1:12", 120);
-    soffit(gW, WN.glass + WN.frameD / 2 + 18, WN.set, N.cW, 226, 32, 12, "Window soffit unrolled", (th, L) => `<line x1="0" y1="0" x2="${f(L)}" y2="0" stroke-dasharray="40 24" ${W(th)}/>`);
+    soffit(gW, WN.glass + WN.frameD / 2 + 18, WN.set, N.cW, 226, 32, 12, "Window soffit unrolled", (th, L) => `<line x1="0" y1="0" x2="${f(L)}" y2="0" stroke-dasharray="40 24" ${W(th)}/>` +
+      `<line x1="0" y1="${K.curtain.sheerS}" x2="${f(L)}" y2="${K.curtain.sheerS}" ${W(th * 1.6)}/><rect x="0" y="${K.curtain.velS - 10}" width="${f(L)}" height="20" fill="#fff" ${W(th * 1.2)}/>`);
+    s += text(226 + 700 / 12, 32 + 300 / 12, "CURTAIN TRACKS: SHEER (SLIM, ON THE LINING) · VELVET (LET IN, 20 SLOT) — BOTH BENT TO THE ARCH", { size: 1.1, fill: THIN, anchor: "middle" });
     s += text(226 + 700 / 12, 32 - 14 / 12, "BRICK LINTEL ON THE WALL SIDE OF THE DASHED LINE — LINING ONLY", { size: 1.2, fill: THIN, anchor: "middle" });
 
     // 3 — a niche in section, across the soffit at the crown (bookcase)
@@ -621,10 +672,14 @@ const SW2 = {
       o += `<rect x="${BK.d - 18}" y="${Y(hd)}" width="18" height="${hd}" fill="url(#hatchW2)" ${W(th * 1.2)}/>`;
       o += `<path d="M ${BK.d} ${Y(0)} L ${BK.d + 18} ${Y(0)} L ${BK.d + 18} ${Y(16)} L ${BK.d + 10} ${Y(16)} L ${BK.d + 10} ${Y(30)} L ${BK.d + 6} ${Y(K.bkArch.mould)} L ${BK.d} ${Y(K.bkArch.mould)} Z" fill="url(#hatchW2)" ${W(th * 1.2)}/>`;
       o += `<line x1="-60" y1="${Y(hd)}" x2="${BK.d + 60}" y2="${Y(hd)}" ${W(th)} stroke-dasharray="${dash(v)}"/>`;
+      { const lc = (n0 + n1) / 2;                                                   // the focus light, recessed in the niche's top
+        o += `<rect x="${lc - 20}" y="${Y(N.depth + 62)}" width="40" height="50" fill="#fff" ${W(th)}/><rect x="${lc - 26}" y="${Y(N.depth + 2)}" width="52" height="4" fill="#000" ${W(th * 0.5)}/>`;
+        o += `<path d="M ${lc - 8} ${Y(N.depth - 2)} L ${lc - 40} ${Y(-40)} M ${lc + 8} ${Y(N.depth - 2)} L ${lc + 40} ${Y(-40)}" stroke-dasharray="${dash(v)}" ${W(th * 0.5)} fill="none"/>`; }
       s += v.g(o, 0.25);
       s += chainH([v.X(BK.back), v.X(n0), v.X(n1), v.X(BK.d)], v.Y(0) + 5, [n0 - BK.back, N.wid, BK.d - n1], { from: v.Y(0) + 0.5, size: 1.05 });
       s += chainV([v.Y(0), v.Y(-N.depth), v.Y(-hd)], v.X(BK.d + 18) + 4, [N.depth, hd - N.depth], { from: v.X(BK.d + 18) + 0.5, size: 1.05 });
       const L3 = labels(v.X(BK.d + 18) + 18, "right", 90, 150);
+      L3.add(v.X((n0 + n1) / 2 + 20), v.Y(-N.depth - 40), "FOCUS LIGHT, 3000 K, 52 TRIM", "ONE IN THE MIDDLE OF EACH NICHE");
       L3.add(v.X((n0 + n1) / 2), v.Y(-N.depth + 6), "NICHE BOX, 12 PLY", "LINED IN THE SAME VENEER");
       L3.add(v.X(BK.back + 30), v.Y(-9), "BENT PLY SOFFIT, 3 × 6", "ON CURVED RIBS (DASHED)");
       L3.add(v.X(BK.d + 9), v.Y(-20), "ARCHIVOLT", "");
@@ -700,9 +755,9 @@ const SW2 = {
 
     s += heading(18, 244, "NOTES", `REVISION ${K.rev.split(" ")[0]}`, 120);
     ["Details for AST-DR-040/042 (and 041/044 except the arches). Mouldings from the owner's photos; profiles to be mocked up full size",
-     "before cutting. The niches have no lights (owner). All timber in the room's teak veneer; no colour in this set."]
+     "before cutting. Each niche has one small focus light, 3000 K, in the middle of its top (owner, 8 Oct). All timber in the room's teak veneer; no colour in this set."]
       .forEach((n, i) => (s += text(18, 254 + i * 4.3, n, { size: 1.42 })));
-    s += titleBlock({ title: "STUDY WALL — DETAILS", sub: "Niches · crown · frame · skirting", date: K.date, rev: "1 — for both schemes; niches for the arches only", dwg, scale: "AS NOTED @ A3" });
+    s += titleBlock({ title: "STUDY WALL — DETAILS", sub: "Niches · crown · frame · skirting", date: K.date, rev: "2 — niche lights (owner, 8 Oct); niches for the arches only", dwg, scale: "AS NOTED @ A3" });
     window.DRAWINGS[key] = { title: `Study wall — details · ${dwg}`, svg: mono(sheet(s)), params: SW2 };
   }
   detailsSheet("studywall-details2", "AST-DR-043");

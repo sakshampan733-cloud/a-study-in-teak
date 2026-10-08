@@ -139,7 +139,7 @@ def lacquer(name, col):
     rough_var(nt, b, 0.03, 4.0, 3.0)
     return m
 M_BED = lacquer("bed_base_finish", (0.010, 0.010, 0.011))                 # gloss black lacquer
-M_HEAD = fabric("headboard_finish", (0.50, 0.33, 0.30), 0.75, 0.9, 700)      # dusty-rose suede
+M_HEAD = suede("headboard_finish", (0.50, 0.33, 0.30), 0.14, 5.0, 0.8)    # dusty-rose suede, the nap brushed in soft patches (owner, 9 Oct)
 o_ = dbox("bed_base", xa, SV(vF1), 0, xb, SV(vF0), BASE, M_BED); bevel(o_, 0.005, 3)
 # the headboard: a rose suede panel in a thin gloss-black frame round its top and sides — 1¼ in face, as thin as the
 # dressing mirror's frame, 2¾ in deep — the panel ¼ in proud of it (owner, 7 Oct)

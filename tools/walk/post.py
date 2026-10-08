@@ -8,7 +8,7 @@ from PIL import Image, ImageChops, ImageFilter
 
 def arg(name, default):
     return float(sys.argv[sys.argv.index(name) + 1]) if name in sys.argv else default
-GRAIN, VIG = arg("--grain", 0.10), arg("--vig", 0.16)
+GRAIN, VIG, CA = arg("--grain", 0.10), arg("--vig", 0.16), arg("--ca", 0.0006)   # CA: lateral colour fringe, as a real lens
 
 SIZE = sys.argv[sys.argv.index("--size") + 1] if "--size" in sys.argv else None     # e.g. 1920x1080: scale up first
 
@@ -18,6 +18,14 @@ def post(src, dst):
         tw, th = (int(v) for v in SIZE.split("x"))
         if im.size != (tw, th): im = im.resize((tw, th), Image.LANCZOS)
     w, h = im.size
+    # lateral chromatic aberration: red drawn out a hair, blue pulled in, toward the frame's edges
+    if CA > 0:
+        r, g_, b = im.split()
+        def zoom(ch, k):
+            nw, nh = int(round(w * (1 + k))), int(round(h * (1 + k)))
+            z = ch.resize((nw, nh), Image.BICUBIC); l, t = (nw - w) // 2, (nh - h) // 2
+            return z.crop((l, t, l + w, t + h))
+        im = Image.merge("RGB", (zoom(r, CA), zoom(g_, CA / 2), b))     # red out, blue in, relative to green
     # vignette: darken toward the corners, following the frame's shape
     rad = Image.radial_gradient("L").resize((w, h), Image.BILINEAR)
     vig = rad.point(lambda v: 255 - int(255 * VIG * (v / 255.0) ** 2.4))
@@ -36,7 +44,7 @@ def post(src, dst):
     out.save(dst, quality=95) if dst.lower().endswith((".jpg", ".jpeg")) else out.save(dst)
 
 if __name__ == "__main__":
-    a = [x for x in sys.argv[1:] if not x.startswith("--") and not (sys.argv[sys.argv.index(x) - 1] in ("--grain", "--vig", "--size"))]
+    a = [x for x in sys.argv[1:] if not x.startswith("--") and not (sys.argv[sys.argv.index(x) - 1] in ("--grain", "--vig", "--size", "--ca"))]
     if "--dir" in sys.argv:
         src, dst = a[0], a[1]; os.makedirs(dst, exist_ok=True)
         ext = ".jpg" if "--jpg" in sys.argv else ".png"                      # --jpg: quality 95, about a tenth the size

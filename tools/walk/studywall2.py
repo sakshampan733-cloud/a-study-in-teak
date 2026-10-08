@@ -85,6 +85,20 @@ def three_niches(g, n=3, n_len=380.0):
     L = 2 * g["th"] * g["R"]; gap = (L - n * n_len) / (n + 1)
     return [(gap + i * (n_len + gap), gap + i * (n_len + gap) + n_len) for i in range(n)]
 
+def niche_spots(name, g, niche_c, niches, n_dep=90.0):
+    """The owner's niche lights (9 Oct): one small focus light in the middle of each niche's top — a black trim flush
+    with the curved top, the lens glowing in it, and a 3000 K spot pointing straight down onto what is below."""
+    for k, (a, b) in enumerate(niches):
+        th_ = -g["th"] + (a + b) / 2 / g["R"]
+        for r_, rad, dep, m_, tag in ((n_dep - 2, 0.026, 0.004, M_TRIM, "trim"), (n_dep - 4.5, 0.016, 0.002, M_DISC, "lens")):
+            x_, z_ = apt(g, g["R"] + r_, th_)
+            bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=rad, depth=dep, location=P(x_, niche_c, z_))
+            o_ = bpy.context.active_object; o_.name = f"{name}_{tag}{k}"; o_.rotation_euler = (0, th_, 0); setmat(o_, m_)
+        x_, z_ = apt(g, g["R"] + n_dep - 14, th_)
+        ld = bpy.data.lights.new(f"{name}{k}", "SPOT"); ld.spot_size = math.radians(40); ld.spot_blend = 0.5; ld.shadow_soft_size = 0.006
+        ld.energy = float(os.environ.get("NICHE_SPOT", 3)); warm(ld, 3000)
+        so_ = bpy.data.objects.new(f"{name}{k}", ld); sc.collection.objects.link(so_); so_.location = P(x_, niche_c, z_)
+
 def archivolt(name, g, s_face, mould, a0=None, a1=None, steps=(20, 14, 8)):
     """The archivolt on the face: three steps, `mould` wide outward from the arch, proud of the face."""
     a0 = -ang_at(g, g["R"] + mould, g["ys"]) if a0 is None else a0
@@ -137,6 +151,7 @@ for x0_ in (BX0, BX1 - STILE):
 dbox("st2_bback_hi", BX0 + STILE, 0, 2039, BX1 - STILE, 18, YENT, M_VEN)
 face_with_arch("st2_bk_face", gB, BX0, BX1, YENT, FACE, 22, M_VEN)
 soffit("st2_bk_soffit", gB, 18, FACE - 22, FACE - 149, three_niches(gB))
+niche_spots("st2_bk_nspot", gB, FACE - 149, three_niches(gB))
 archivolt("st2_bk_volt", gB, FACE, 46)
 for (a, b) in ((BX0, BX0 + STILE), (BX1 - STILE, BX1)):
     im = dbox(f"st2_bk_impost{a:.0f}", a - 6, FACE - 4, gB["ys"] - 34, b + 6, FACE + 14, gB["ys"], M_VEN); bevel(im, 0.002, 2)
@@ -157,6 +172,7 @@ so_ = pw_.modifiers.new("t", "SOLIDIFY"); so_.thickness = 0.02
 dbox("st2_win_head", ZX0, GLASS_S, WIN["head"], xR, FACE, YENT, M_VEN)                          # the head over the window, to the crown
 face_with_arch("st2_win_face", gW, ZX0, xR, WIN["head"], FACE, 22, M_VEN)
 soffit("st2_win_soffit", gW, GLASS_S, FACE - 22, FACE - 140, three_niches(gW))
+niche_spots("st2_win_nspot", gW, FACE - 140, three_niches(gW))
 a_wall = math.asin(min(1.0, (xR - gW["cx"]) / (gW["R"] + 56)))
 archivolt("st2_win_volt", gW, FACE, 56, None, min(a_wall, ang_at(gW, gW["R"] + 56, gW["ys"])))
 spandrel_frame("st2_win_spanL", gW, gW["R"] + 56, ZX0, YENT, 1, FACE, 22, 25)
@@ -183,4 +199,4 @@ dbox("st2_c_band", CX0, 0, YBAND, CX1, FACE, YENT, M_VEN)
 frame_on("st2_c_bandfr", "s", FACE, CX0 + 60, CX1 - 60, YBAND + 45, YENT - 45, P_ogee(32, 14), 1)
 bf_ = dbox("st2_c_bandfield", CX0 + 92, FACE, YBAND + 77, CX1 - 92, FACE + 6, YENT - 77, M_VEN); bevel(bf_, 0.008, 3)
 STUDY_PAINT = dict(cx=(CX0 + CX1) / 2, cz=(FB0 + FB1) / 2, w=860.0, h=640.0, s=25.0)        # the painting hangs here (realism.py)
-print(f"study wall (AST-DR-040): arches over the bookcase (R {gB['R']:.0f}) and the window (R {gW['R']:.0f}), 6 niches, centre bay at 25, crown at {YENT:.0f}", flush=True)
+print(f"study wall (AST-DR-040): arches over the bookcase (R {gB['R']:.0f}) and the window (R {gW['R']:.0f}), 6 niches (a focus light in each), centre bay at 25, crown at {YENT:.0f}", flush=True)

@@ -19,6 +19,29 @@ def bb(o):
     xs, ss, zs = [c.x * 1000 for c in cs], [-c.y * 1000 for c in cs], [c.z * 1000 for c in cs]
     return min(xs), min(ss), min(zs), max(xs), max(ss), max(zs)
 
+def suede(name, col, mott=0.16, patch=7.0, sheen=0.7):
+    """Real suede (owner, 9 Oct: the AI bed "made suede feel like suede"): a matt, soft nap that reads lighter or darker
+    wherever it was brushed the other way — soft patches of tone a hand or two across, a paler sheen where the light
+    grazes it, and the nap's own fine grain."""
+    m, nt, b = node_mat(name); N = nt.nodes; Lk = nt.links.new
+    tc = N.new("ShaderNodeTexCoord")
+    nz = N.new("ShaderNodeTexNoise"); nz.inputs["Scale"].default_value = patch; nz.inputs["Detail"].default_value = 5
+    nz.inputs["Roughness"].default_value = 0.62; nz.inputs["Distortion"].default_value = 0.35
+    Lk(tc.outputs["Object"], nz.inputs["Vector"])
+    cr = N.new("ShaderNodeValToRGB"); e0, e1 = cr.color_ramp.elements
+    e0.position, e1.position = 0.36, 0.66
+    e0.color = (*[c * (1 - mott) for c in col], 1); e1.color = (*[min(1.0, c * (1 + mott)) for c in col], 1)
+    Lk(nz.outputs["Fac"], cr.inputs["Fac"]); Lk(cr.outputs["Color"], b.inputs["Base Color"])
+    b.inputs["Roughness"].default_value = 0.92; b.inputs["Specular IOR Level"].default_value = 0.2
+    b.inputs["Sheen Weight"].default_value = sheen; b.inputs["Sheen Roughness"].default_value = 0.45
+    b.inputs["Sheen Tint"].default_value = (*[min(1.0, 0.35 + c) for c in col], 1)
+    fn = N.new("ShaderNodeTexNoise"); fn.inputs["Scale"].default_value = 900.0; fn.inputs["Detail"].default_value = 2
+    Lk(tc.outputs["Object"], fn.inputs["Vector"])
+    bp = N.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = 0.04; bp.inputs["Distance"].default_value = 0.0002
+    Lk(fn.outputs["Fac"], bp.inputs["Height"]); Lk(bp.outputs["Normal"], b.inputs["Normal"])
+    return m
+M_SUEDE_TAUPE = suede("suede_taupe", (0.30, 0.235, 0.18))
+
 STY = bpy.data.collections.new("styling"); sc.collection.children.link(STY)
 SOFT = bpy.data.collections.new("bedding"); sc.collection.children.link(SOFT)
 
@@ -108,13 +131,13 @@ DW, DD = (mx1 - mx0) + 2 * 200, (ms1 - ms0) - 470 + 150          # 8 in over eac
                                                                   # black base shows below the bedding), 470 short of the head
 dv = grid("duvet", DW, DD, 16, SOFT)
 dv.location = Vector(P(bcx, ms0 - 150 + DD / 2, mz1 + 60))
-ruffle(dv, 0.03, 4.5, 1)
+ruffle(dv, 0.008, 3.0, 1)                                           # barely: a made bed, not a tossed one
 FLOOR_ = sc.objects.get("floor")
 if FLOOR_: FLOOR_.modifiers.new("col", "COLLISION"); FLOOR_.collision.thickness_outer = 0.004
-simulate(dv, 70, mass=0.08, tension=12, shear=4, bending=0.3, air=1.5, quality=8)
+simulate(dv, 90, mass=0.12, tension=25, shear=10, bending=2.5, air=1.2, quality=10)     # a stiff, full duvet: rounds the edge, no crumple
 finish(dv, 0.030, 2, 0.0, M_LINEN_IVORY)
 tx_ = bpy.data.textures.new("duvet_loft", "CLOUDS"); tx_.noise_scale = 0.22; tx_.noise_depth = 2      # the down inside settles unevenly
-dl = dv.modifiers.new("loft", "DISPLACE"); dl.texture = tx_; dl.strength = 0.012; dl.mid_level = 0.35; dl.texture_coords = "GLOBAL"
+dl = dv.modifiers.new("loft", "DISPLACE"); dl.texture = tx_; dl.strength = 0.006; dl.mid_level = 0.35; dl.texture_coords = "GLOBAL"
 dv.modifiers.new("col", "COLLISION"); dv.collision.thickness_outer = 0.005; dv.collision.cloth_friction = 10
 
 # a white top sheet folded back over the duvet's head edge
@@ -125,20 +148,55 @@ simulate(fs, 45, mass=0.05, tension=10, bending=0.08, air=2.0, quality=8)
 finish(fs, 0.004, 2, 0.0, M_LINEN_WHITE)
 dv.modifiers.remove(dv.modifiers["col"])
 
-def pillow(name, w, h, cover, pressure=6.0):
-    """A pillow the way cloth makes one: a flat case, pumped up from inside, so the corners pinch and the faces dome."""
-    bpy.ops.mesh.primitive_cube_add(size=1)
-    o = bpy.context.active_object; o.name = name
-    for c in o.users_collection: c.objects.unlink(o)
-    SOFT.objects.link(o)
-    o.data.transform(Matrix.Diagonal((w / 1000, h / 1000, 0.03, 1.0)))
-    sd = o.modifiers.new("s", "SUBSURF"); sd.subdivision_type = "SIMPLE"; sd.levels = 4
-    dg = bpy.context.evaluated_depsgraph_get(); me = bpy.data.meshes.new_from_object(o.evaluated_get(dg)); o.modifiers.clear(); o.data = me
-    for v in o.data.vertices: v.co += v.normal * 0.0 + Vector((0, 0, 0.004 * noise.noise(v.co * 9 + Vector((len(name), 0, 0)))))
-    simulate(o, 30, mass=0.2, tension=8, shear=3, bending=0.05, pressure=pressure, shrink=0.05, air=3.0, quality=8)
+def pillow(name, w, h, T, cover, flange=0.0, curl=0.0, seed=0):
+    """A made-up hotel pillow (owner, 9 Oct: "like the AI bed" — firm, crisp, soft): full and firm, a crisp seam all
+    round, the faces domed and flattening toward the middle, the corners pinched to soft dog-ears with a few creases
+    running out of them, the sides drawn in a little by the stuffing, the top curling back a touch where it leans; a
+    sham carries a flat flange round it. Modelled, not simulated — pumped cloth came out puffy and limp. w × h is the
+    body, T its full thickness, all mm; the pillow lies in x (across) and y (up its height), z through it."""
+    nu = 80; nv = max(28, round(nu * h / w)); pin = 0.045
+    def at(u, v): return (u * w / 2 * (1 - pin * (1 - v * v)), v * h / 2 * (1 - 1.5 * pin * (1 - u * u)))
+    def gu(q): return max(0.0, 1 - abs(q) ** 3.0) ** 0.45                    # long way: the stuffing spreads, fuller to the ends
+    def gv(q): return max(0.0, 1 - abs(q) ** 2.2) ** 0.5                     # short way: a rounder dome
+    off = Vector((seed * 2.3, seed * 1.1, 0.7))
+    def crease(x, y):
+        c = 0.0
+        for cx_ in (-1, 1):
+            for cy_ in (-1, 1):
+                dx, dy = cx_ * w / 2 - x, cy_ * h / 2 - y; d = math.hypot(dx, dy)
+                c += math.sin(math.atan2(abs(dy), abs(dx)) * 7 + 1.7 * cx_ + 0.9 * cy_ + seed) * math.exp(-d / 190.0) * min(1.0, d / 25.0)
+        return c
+    bm = bmesh.new(); V = {}
+    for side in (1, -1):
+        for i in range(nu + 1):
+            for j in range(nv + 1):
+                u, v = -1 + 2 * i / nu, -1 + 2 * j / nv
+                x, y = at(u, v); t = gu(u) * gv(v); st = math.sqrt(t)
+                lump = 5.0 * noise.noise(Vector((x / 260, y / 260, side * 0.8)) + off) + 1.8 * noise.noise(Vector((x / 90, y / 90, side * 0.8)) + off)
+                z = side * (T / 2 * t + st * (6.0 * crease(x, y) + lump))                  # stuffing never sits even; creases out of the corners
+                V[side, i, j] = bm.verts.new((x / 1000, y / 1000, (z + curl * ((v + 1) / 2) ** 2) / 1000))
+        for i in range(nu):
+            for j in range(nv):
+                q = (V[side, i, j], V[side, i + 1, j], V[side, i + 1, j + 1], V[side, i, j + 1])
+                bm.faces.new(q if side > 0 else q[::-1])
+    bmesh.ops.remove_doubles(bm, verts=bm.verts[:], dist=1e-6)                  # the two faces meet in the seam
+    if flange:                                                                   # the sham's flange: a flat band, a little wavy
+        per = ([(-1 + 2 * i / nu, -1) for i in range(nu)] + [(1, -1 + 2 * j / nv) for j in range(nv)] +
+               [(1 - 2 * i / nu, 1) for i in range(nu)] + [(-1, 1 - 2 * j / nv) for j in range(nv)])
+        rings = []
+        for k, (u, v) in enumerate(per):
+            x, y = at(u, v); nx_, ny_ = (u >= 1) - (u <= -1), (v >= 1) - (v <= -1)
+            zc = curl * ((v + 1) / 2) ** 2; wav = 2.5 * noise.noise(Vector((k * 0.09, seed * 0.7, 3.3)))
+            rings.append([bm.verts.new(((x + nx_ * dd) / 1000, (y + ny_ * dd) / 1000, (zc + dz + (wav if dd > 0 else 0)) / 1000))
+                          for dd, dz in ((-14.0, 1.5), (flange, 1.5), (flange, -1.5), (-14.0, -1.5))])
+        for k in range(len(rings)):
+            ra, rb = rings[k], rings[(k + 1) % len(rings)]
+            for i0, i1 in ((0, 1), (1, 2), (2, 3), (3, 0)): bm.faces.new((ra[i0], ra[i1], rb[i1], rb[i0]))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
+    for p_ in me.polygons: p_.use_smooth = True
+    o = bpy.data.objects.new(name, me); SOFT.objects.link(o)
     ss = o.modifiers.new("sub", "SUBSURF"); ss.levels = 1; ss.render_levels = 2
-    tx = bpy.data.textures.new(name + "_w", "CLOUDS"); tx.noise_scale = 0.06
-    dp = o.modifiers.new("w", "DISPLACE"); dp.texture = tx; dp.strength = 0.004; dp.mid_level = 0.5
     setmat(o, cover); return o
 
 def lean(o, x, s_wall, tilt, h, depth_off, z_seat):
@@ -152,9 +210,11 @@ if STYLE:
     _bc = sc.objects.get("back_cushion")                               # pillows lean on the long cushion, else a headboard, else the wall
     wall_s = (bb(_bc)[1] + 40) if _bc else (ms1 + 2 if sc.objects.get("headboard") else ms1 + 60)
     for k, sg in enumerate((-1, 1)):
-        e = pillow(f"pillow_euro{k}", 640, 640, M_LINEN_IVORY, 2.6); lean(e, bcx + sg * 420, wall_s, 18, 640, 80, mz1 - 10)
-        p_ = pillow(f"pillow_std{k}", 720, 480, M_LINEN_WHITE, 2.2); lean(p_, bcx + sg * 400, wall_s, 28, 480, 250, mz1 - 15)
-    lb = pillow("cushion_lumbar", 560, 300, M_LINEN_TAUPE, 3.0); lean(lb, bcx, wall_s, 32, 300, 400, mz1 - 10)
+        # the AI bed's arrangement (owner, 9 Oct): two big ivory shams standing nearly upright across the headboard,
+        # meeting in the middle; two white sleeping pillows leaning on them, meeting in the middle; the lumbar centred
+        e = pillow(f"pillow_euro{k}", 800, 500, 200, M_LINEN_IVORY, flange=45, curl=14, seed=1); lean(e, bcx + sg * 445, wall_s, 9, 590, 80, mz1 - 10)
+        p_ = pillow(f"pillow_std{k}", 720, 470, 180, M_LINEN_WHITE, curl=10, seed=2); lean(p_, bcx + sg * 362, wall_s, 20, 470, 250, mz1 - 15)
+    lb = pillow("cushion_lumbar", 500, 300, 130, M_SUEDE_TAUPE, curl=4, seed=3); lean(lb, bcx, wall_s, 26, 300, 400, mz1 - 10)
     # then rest each row where it touches: its lowest point sunk a little into the mattress, its back against the wall
     # or against the row behind it (measured on the pillow as it will render, not guessed)
     def ebb(o):
@@ -162,7 +222,7 @@ if STYLE:
         cs = [oe.matrix_world @ Vector(c) for c in oe.bound_box]
         return min(c.z for c in cs) * 1000, max(-c.y for c in cs) * 1000, min(-c.y for c in cs) * 1000
     back = wall_s - 6
-    for row, sink, press_in in ((("pillow_euro0", "pillow_euro1"), 10, 0), (("pillow_std0", "pillow_std1"), 14, 45), (("cushion_lumbar",), 12, 40)):
+    for row, sink, press_in in ((("pillow_euro0", "pillow_euro1"), 10, 0), (("pillow_std0", "pillow_std1"), 16, 40), (("cushion_lumbar",), 12, 35)):
         nxt = []
         for n_ in row:
             o_ = sc.objects[n_]; zmin, smax, smin = ebb(o_)
@@ -185,15 +245,14 @@ if STYLE:
     for o_ in [o for o in SOFT.objects if o.name.startswith(("pillow_", "cushion_"))]:
         for c in list(o_.users_collection): c.objects.unlink(o_)
         STY.objects.link(o_)
-    # a throw over the foot, in a chunky weave
+    # a runner across the foot (the AI bed's): taupe suede, laid square and smooth, falling straight down both sides
     th = grid("throw", 2250, 620, 14, STY)
     th.location = Vector(P(bcx, ms0 + 480, mz1 + 200))                     # square across the foot, centred (owner: symmetric)
-    ruffle(th, 0.04, 5.5, 3)
+    ruffle(th, 0.01, 3.5, 3)
     dv.modifiers.new("col", "COLLISION"); dv.collision.thickness_outer = 0.006; dv.collision.cloth_friction = 12
-    simulate(th, 70, mass=0.1, tension=8, shear=2, bending=0.15, air=1.5, quality=8)
+    simulate(th, 80, mass=0.15, tension=20, shear=6, bending=1.2, air=1.2, quality=10)
     dv.modifiers.remove(dv.modifiers["col"])
-    M_KNIT = fabric("knit_taupe", (0.30, 0.24, 0.18), 0.9, 1.0, 220)
-    finish(th, 0.009, 2, 0.0, M_KNIT)
+    finish(th, 0.006, 2, 0.0, M_SUEDE_TAUPE)
 for n_ in ("mattress", "bed_frame", "bed_base", "bed_rail_l", "bed_rail_r", "headboard", "back_cushion", "floor"):
     o_ = sc.objects.get(n_)
     if o_ and "col" in o_.modifiers: o_.modifiers.remove(o_.modifiers["col"])

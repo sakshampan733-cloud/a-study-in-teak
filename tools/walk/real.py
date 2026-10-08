@@ -827,8 +827,17 @@ def pleated(name, rows, m, thick=0.003, crumple=0.0):
     sd = o.modifiers.new("s", "SUBSURF"); sd.levels = 1; sd.render_levels = 2
     for p_ in me.polygons: p_.use_smooth = True
     return o
-# the sheer: fine soft pleats across the window zone, hung from its own rod just under the velvet's, down to the counter
-SH_Z0, SH_Z1, SH_S = CTOP + 16.0, 2420.0, FACE + 22.0                       # the sheer all the way up (owner, 8 Oct): rod to counter
+# ── the curtains IN the arch (owner, 8 Oct, his arched-doorway photo: "not out but in the arch… it hides the bar"; both
+#    the white and the red go in). No rods at all: each hangs from a track recessed into the arch's underside, its head
+#    following the curve. The white linen sheer by the glass, the full arch wide, down to the counter; the red velvet
+#    in front of it — two panels meeting at the crown, swept back to the jambs and tied with the gold rope and tassels
+#    at 1250, breaking on the counter. The velvet hangs behind the soffit's niches, so their focus lights wash its folds.
+GW_ = gW                                                                    # the window arch (studywall2.py)
+AX0, AX1, ACX = GW_["xa"], GW_["xb"], GW_["cx"]
+def arch_z(x): return GW_["cy"] + math.sqrt(max(0.0, GW_["R"] ** 2 - (min(max(x, AX0), AX1) - ACX) ** 2))
+TUCK = 14.0                                                                 # each head runs up into its track's slot
+# the sheer: fine soft pleats, the arch wide, 24 in front of the glass
+SH_Z0, SH_S = CTOP + 16.0, GLASS_S + 24.0
 rv = random.Random(7); rows = []
 SNF = 15; sw_ = [rv.uniform(0.7, 1.4) for _ in range(SNF)]; st_ = sum(sw_); sed = [0.0]
 for w_ in sw_: sed.append(sed[-1] + w_ / st_)
@@ -839,20 +848,18 @@ def sfold(t, z):                                                            # so
             q = (t - sed[f]) / (sed[f + 1] - sed[f]); q = min(1, max(0, q + 0.15 * math.sin(z / 600 + sph[f]) * q * (1 - q)))
             return sam[f] * math.sin(math.pi * q)
     return 0.0
-for j in range(61):
-    z = SH_Z0 + (SH_Z1 - SH_Z0) * j / 60
-    rows.append([(ZX0 + 60 + (WX1 - ZX0 - 90) * i / 240, SH_S + 22 * (sfold(i / 240, z) - 0.5) * 2 + 4 * math.sin(z / 350 + i * 0.05), z) for i in range(241)])
+for j in range(73):
+    h = j / 72; row = []
+    for i in range(241):
+        t = i / 240; x = AX0 + 6 + (AX1 - AX0 - 12) * t; z = SH_Z0 + (arch_z(x) + TUCK - SH_Z0) * h
+        row.append((x, SH_S + 14 * (sfold(t, z) - 0.5) * 2 + 3 * math.sin(z / 350 + i * 0.05), z))
+    rows.append(row)
 pleated("curtain_sheer", rows, M_SHEER, 0.0008)
-rr_ = dbox("curtain_sheer_rod", ZX0 + 40, SH_S - 6, SH_Z1 + 2, WX1 - 20, SH_S + 6, SH_Z1 + 14, M_BRASS); bevel(rr_, 0.005, 3)
-# the velvet: two panels either side of the window — full at the rod, swept to the tie-back, flaring and breaking on the
-# counter. Folds of uneven width and depth, the way heavy cloth really hangs.
-VR_Z, VR_S, VTIE, VBOT = 2440.0, FACE + 50.0, 1250.0, CTOP + 14.0
-VX0 = ZX0 + 14.0
-def vel_width(z):
-    if z >= VTIE: u = (z - VTIE) / (VR_Z - VTIE); return 175 + 175 * (u * u * (3 - 2 * u))
-    u = (VTIE - z) / (VTIE - VBOT); return 175 + 150 * math.sin(min(1.0, u * 1.5) * math.pi / 2)
-for k_, (xo, d) in enumerate(((VX0, 1), (WX1 - 6, -1))):
-    rv = random.Random(31 + k_)
+# the velvet: from the arch, swept back to the jambs, tied, flaring to the counter
+VS, VTIE, VBOT = 22.0, 1250.0, CTOP + 14.0                                  # its line: behind the niches (50–230 off the wall)
+TIE_W, BOT_W = 185.0, 300.0                                                 # each panel's width gathered at the tie, and at the counter
+for k_, (jx, d) in enumerate(((AX0 + 4, 1), (AX1 - 4, -1))):
+    rv = random.Random(31 + k_); half = abs(ACX - jx) + 4
     NF = 9; wts = [rv.uniform(0.7, 1.35) for _ in range(NF)]; tot = sum(wts)
     edges = [0.0]
     for w_ in wts: edges.append(edges[-1] + w_ / tot)
@@ -865,28 +872,34 @@ for k_, (xo, d) in enumerate(((VX0, 1), (WX1 - 6, -1))):
                 return amps[f] * math.sin(math.pi * min(1, max(0, q + tw * q * (1 - q))))
         return 0.0
     rows = []
-    for j in range(81):
-        z = VBOT + (VR_Z - 25 - VBOT) * j / 80; w_ = vel_width(z)
-        amp = 30 + 22 * math.exp(-((z - VTIE) / 240) ** 2) + 20 * (1 - (z - VBOT) / (VR_Z - VBOT)) ** 2
-        belly = 34 * math.exp(-((z - (VTIE + 330)) / 260) ** 2) + 22 * math.exp(-((z - (VTIE - 230)) / 200) ** 2)
-        brk = 26 * max(0.0, 1 - (z - VBOT) / 110) ** 2                              # the break where it meets the counter
-        row = []
+    for j in range(97):
+        h = j / 96; row = []
         for i in range(97):
             t = i / 96
-            row.append((xo + d * (w_ + brk * 1.2) * t, VR_S + amp * (fold(t, z) - 0.5) * 2 + belly * math.sin(math.pi * t) + brk * math.sin(t * 7), z + (brk * 0.6 * math.sin(t * 11) if z < VBOT + 40 else 0)))
+            xtop = jx + d * half * t; ztop = arch_z(xtop) + TUCK; z = VBOT + (ztop - VBOT) * h
+            xtie, xbot = jx + d * TIE_W * t, jx + d * BOT_W * t
+            if z >= VTIE:                                                       # the sweep from the head down to the tie-back
+                u = (z - VTIE) / max(1.0, ztop - VTIE); x = xtie + (xtop - xtie) * (u * u * (3 - 2 * u))
+            else:                                                               # and the flare below it
+                u = (VTIE - z) / (VTIE - VBOT); x = xtie + (xbot - xtie) * math.sin(min(1.0, u * 1.5) * math.pi / 2)
+            amp = 16 + 30 * math.exp(-((z - VTIE) / 260) ** 2) + 14 * (1 - h) ** 2    # tight at the head, deep where gathered
+            belly = 55 * math.exp(-((z - VTIE) / 380) ** 2) * (1 - 0.4 * t)          # drawn forward into the room at the tie
+            brk = 26 * max(0.0, 1 - (z - VBOT) / 110) ** 2                              # the break where it meets the counter
+            row.append((x + d * brk * 1.2 * t, VS + amp * (fold(t, z) - 0.5) * 2 + belly + brk * math.sin(t * 7),
+                        z + (brk * 0.6 * math.sin(t * 11) if z < VBOT + 40 else 0)))
         rows.append(row)
     pleated(f"curtain_velvet{k_}", rows, M_VELVET, 0.006, 0.006)
-    # the tie-back: a twisted gold silk rope round the gathered waist, a tassel hanging from it
-    cx_ = xo + d * 88
+    # the tie-back: a twisted gold silk rope round the gathered waist, hooked into the jamb, a tassel hanging in front
+    cx_, cs_ = jx + d * TIE_W / 2, VS + 44
     cv = bpy.data.curves.new(f"curtain_tie{k_}", "CURVE"); cv.dimensions = "3D"; cv.bevel_depth = 0.0075; cv.bevel_resolution = 3
     for strand in range(2):
         spl = cv.splines.new("POLY"); n = 96; spl.points.add(n - 1)
         for i in range(n):
             a = 2 * math.pi * i / n; tw = 0.004 * math.cos(a * 9 + strand * math.pi)
-            spl.points[i].co = (*P(cx_ + (110 + tw * 1000) * math.cos(a), VR_S + 8 + (62 + tw * 1000) * math.sin(a), VTIE + 6 * math.sin(a * 9 + strand * math.pi)), 1)
+            spl.points[i].co = (*P(cx_ + (TIE_W / 2 + 14 + tw * 1000) * math.cos(a), cs_ + (70 + tw * 1000) * math.sin(a), VTIE + 6 * math.sin(a * 9 + strand * math.pi)), 1)
         spl.use_cyclic_u = True
     tie = bpy.data.objects.new(f"curtain_tie{k_}", cv); DET.objects.link(tie); tie.data.materials.append(M_SILK_GOLD)
-    xt, st_ = cx_ + d * 80, VR_S + 70
+    xt, st_ = jx + d * 34, cs_ + 84
     bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=12, radius=0.02, location=P(xt, st_, VTIE - 40)); tsh_ = bpy.context.active_object; tsh_.scale = (1, 1, 1.25)
     setmat(tsh_, M_SILK_GOLD); tsh_.name = f"curtain_tassel_head{k_}"     # (not `hd`: that is the hidden door, from furnish.py)
     for q in range(56):                                                         # the fringe: fine silk strands
@@ -897,12 +910,7 @@ for k_, (xo, d) in enumerate(((VX0, 1), (WX1 - 6, -1))):
         bot_ = Vector(P(xt + (rr + 0.006) * 1000 * math.cos(a), st_ + (rr + 0.006) * 1000 * math.sin(a), VTIE - 62 - L_ * 1000))
         fs.location = (top_ + bot_) / 2; fs.rotation_euler = (bot_ - top_).to_track_quat("Z", "Y").to_euler(); setmat(fs, M_SILK_GOLD)
     bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.016, depth=0.03, location=P(xt, st_, VTIE - 66)); setmat(bpy.context.active_object, M_SILK_GOLD)
-bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.015, depth=(WX1 - VX0 + 10) / 1000, location=P((VX0 + WX1) / 2, VR_S, VR_Z))
-vrod = bpy.context.active_object; vrod.name = "curtain_velvet_rod"; vrod.rotation_euler = (0, math.pi / 2, 0); setmat(vrod, M_BRASS)
-bpy.ops.mesh.primitive_uv_sphere_add(radius=0.03, location=P(VX0 - 20, VR_S, VR_Z)); setmat(bpy.context.active_object, M_BRASS)
-for x_ in (VX0 + 40, WX1 - 60):
-    dbox(f"curtain_bracket{x_:.0f}", x_ - 8, FACE, VR_Z - 8, x_ + 8, VR_S, VR_Z + 8, M_BRASS)
-print(f"curtains: sheer + red velvet pair, tied back, window {WX0:.0f}-{WX1:.0f}", flush=True)
+print(f"curtains: in the arch — sheer + red velvet pair on hidden tracks, tied back, no rods, window {AX0:.0f}-{AX1:.0f}", flush=True)
 
 # ── the corridor outside the front door, wider and longer than the stub furnish.py left ──
 for o_ in [o for o in sc.objects if o.name.startswith("cor_")]: bpy.data.objects.remove(o_, do_unlink=True)
@@ -961,6 +969,8 @@ except Exception as e: print("white balance?", e)
 
 if os.environ.get("REAL4", "1") != "0":                              # stage 4: the realism pass (bedding, styling, depth, night, lens)
     exec(compile(open(os.path.join(HERE, "realism.py")).read(), "realism.py", "exec"))
+if os.environ.get("REALTEST") == "1":                                # 9 Oct: scanned surface detail + a higher render quality (test)
+    exec(compile(open(os.path.join(HERE, "realtest.py")).read(), "realtest.py", "exec"))
 
 EYE_R = 1600; LENS_R = float(os.environ.get("LENS", 18))
 VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
@@ -998,6 +1008,8 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
     "st_close": ((3950, 4450, 1150), (3560, 5560, 420), {"lens": 42, "fstop": 4.0}),      # the cabriole side table, from the room
     "st_wall": ((2337, 2250, 1550), (2337, 0, 1450), {"lens": 15, "fstop": 8.0}),      # the whole study wall, from over the desk
     "st_arch": ((1250, 1350, 1350), (744, 200, 2250), {"lens": 22, "fstop": 5.6}),     # up into the bookcase arch and its niches
+    "st_wall2": ((4250, 2250, 1450), (1450, 300, 1600), {"lens": 20, "fstop": 5.6}),   # the desk wall three-quarter from the window corner: both arches lit, the desk
+    "st_wall3": ((520, 2280, 1480), (3300, 300, 1450), {"lens": 18, "fstop": 5.6}),    # and from the bookcase end, toward the window arch
     "st_chairf": ((2560, 1900, 1250), (2337, 1002, 760), {"lens": 32, "fstop": 4.0}),   # the chair's face, over the desk
     "st_lamp": ((2300, 2330, 1400), (1430, 1880, 1180), {"lens": 26, "fstop": 4.0}),   # the Tommy Shelby lamp at the desk's left end
     "mould_c": ((2600, 1100, 1500), (2337, 0, 1450), {"lens": 26, "fstop": 5.6}),       # the counter frame's carving, close
