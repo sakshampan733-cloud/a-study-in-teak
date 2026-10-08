@@ -25,7 +25,7 @@
     ["9116", 6, "hhhhs"], ["9616", 6, "hhhhhh"], ["9126", 6, "HHHHs"], ["9626", 6, "HHHHHH"], ["9136", 6, "HHsww"], ["9146", 6, "shhs"], ["9156", 6, "HHHsw"],
     ["9166", 6, "hhsww"], ["9176", 6, "hhhsw"], ["9186", 6, "hhhhww"],
     ["9118", 8, "hhhhhhs"], ["9818", 8, "hhhhhhhh"], ["9128", 8, "hhhhsww"], ["9148", 8, "shhhhs"], ["9158", 8, "hhhhhhww"], ["9828", 8, "HHHHHHHH"],
-    ["9178", 8, "hshsww"], ["9188", 8, "HHHsHs"], ["9198", 8, "HHHHHHww"], ["9138", 8, "hhhwwhs"], ["9168", 8, "hhhshs"]].map(([code, m, lay]) => ({ code, m, lay }));
+    ["9178", 8, "hshsww"], ["9188", 8, "HHHsHs"], ["9198", 8, "HHHHHHww"], ["9138", 8, "hhhwwhs"], ["9168", 8, "hhhshs"]].map(([code, m, lay]) => ({ code, m, lay, stack: lay.includes("H") }));
   const BOX = { 1: "3″ × 3″ (75 × 75 mm)", 2: "3″ × 3″ (75 × 75 mm)", 3: "4″ × 3″ (100 × 75 mm)", 4: "5″ × 3″ (135 × 75 mm)", 6: "8″ × 3″ (210 × 75 mm)", 8: "9″ or 8″ × 3″ (230/210 × 80 mm)" };
   const cat = (code) => CAT.find((c) => c.code === code) || CAT.find((c) => c.code === "9818");
   const posOf = (lay) => [...lay].flatMap((ch, col) => (ch === "H" ? [{ k: "h", col, row: 0 }, { k: "h", col, row: 1 }] : [{ k: ch, col, row: 0 }]));
@@ -33,7 +33,7 @@
     return [h && `${h} hole${h > 1 ? "s" : ""}`, s && `${s} socket${s > 1 ? "s" : ""}`, w && `${w} window${w > 1 ? "s" : ""}`].filter(Boolean).join(" + "); };
   const SLOT = {
     sw: { k: "h", n: "Switch" }, dim: { k: "h", n: "LED dimmer" }, fan: { k: "h", n: "Fan regulator" }, bell: { k: "h", n: "Bell push" }, scene: { k: "h", n: "Scene key" }, spare: { k: "h", n: "Blank" },
-    s6: { k: "s", n: "Socket 6A" }, s16: { k: "s", n: "Socket 16A" }, s13: { k: "s", n: "Multi socket 13A" },
+    s6: { k: "s", n: "Normal socket 6A" }, s16: { k: "s", n: "Power socket 16A" }, s13: { k: "s", n: "Multi socket 13A" },
     usbc: { k: "w", n: "USB-C charger" }, nightlamp: { k: "w", n: "Night lamp" }, usbac: { k: "w", n: "USB A + C charger" }, eth: { k: "w", n: "Ethernet" }, tv: { k: "w", n: "TV point" }, blankw: { k: "w", n: "Blank" },
   };
   const BLANK = { h: "spare", s: "s6", w: "blankw" };
@@ -126,29 +126,31 @@
     { id: "entry", name: "By the main door", zone: "bedroom", at: [-177, 4700], plates: [PL("9158",
       S("sw", ["sp_left"]), S("sw", ["sp_right"]), S("sw", ["sp_mid"]), S("sw", ["sp_part"]), S("sw", ["cove_l", "cove_r", "cove_b"]), S("dim", ["cove_l", "cove_r", "cove_b"]), S("nightlamp"), S("usbc"))] },
     { id: "bedL", name: "Bed back · left side", zone: "bedroom", at: [1144, 5730], plates: [PL("9128",
-      S("sw", ["bed_l"]), S("dim", ["bed_l"]), S("sw", ["cove_l", "cove_r", "cove_b"]), S("sw", ["sp_left"]), S("s6"), S("usbc"), S("nightlamp"))] },
+      S("sw", ["bed_l"]), S("dim", ["bed_l"]), S("sw", ["cove_l", "cove_r", "cove_b"]), S("sw", ["sp_left"]), S("s6"), S("usbc"), S("nightlamp")), PL("9152", S("s6"))] },
     { id: "bedR", name: "Bed back · right side", zone: "bedroom", at: [3531, 5730], plates: [PL("9138",
-      S("sw", ["bed_r"]), S("dim", ["bed_r"]), S("sw", ["sp_right"]), S("usbc"), S("eth"), S("sw", ["ac_bed"]), S("s16"))] },
+      S("sw", ["bed_r"]), S("dim", ["bed_r"]), S("sw", ["sp_right"]), S("usbc"), S("eth"), S("sw", ["ac_bed"]), S("s16")), PL("9152", S("s6"))] },
     { id: "tv", name: "Partition · beside the TV", zone: "bedroom", at: [2950, 2470], plates: [PL("9178",
-      S("sw", ["tv"]), S("s6", ["tv"]), S("sw", ["soundbar"]), S("s6", ["soundbar"]), S("eth"), S("tv"))] },
-    { id: "deskCol", name: "Partition column · behind the desk", zone: "study", at: [2274, 2340], plates: [PL("9128",
-      S("sw", ["desk_sp"]), S("sw", ["monitor"]), S("sw", ["desk_lamp"]), S("spare"), S("s6", ["monitor"]), S("usbc"), S("eth"))] },
-    { id: "deskUnder", name: "Under the desk", zone: "study", at: [2337, 1700], plates: [PL("9178",
-      S("sw", ["desk_lamp"]), S("s6", ["desk_lamp"]), S("sw", ["desk_pc"]), S("s16", ["desk_pc"]), S("usbc"), S("nightlamp"))] },
+      S("sw", ["tv"]), S("s16", ["tv"]), S("sw", ["soundbar"]), S("s16", ["soundbar"]), S("eth"), S("tv")), PL("9152", S("s16")), PL("9152", S("s6"))] },
+    { id: "deskCol", name: "Partition column · behind the desk", zone: "study", at: [2274, 2340], plates: [PL("9148",
+      S("s16", ["monitor"]), S("sw", ["desk_sp"]), S("sw", ["monitor"]), S("sw", ["desk_lamp"]), S("spare"), S("s16", ["desk_pc"])), PL("9152", S("s6")), PL("9152", S("s6")), PL("9132", S("usbc"), S("eth"))] },
+    { id: "deskUnder", name: "Under the desk", zone: "study", at: [2337, 1700], plates: [PL("9148",
+      S("s16", ["desk_pc"]), S("sw", ["desk_lamp"]), S("sw", ["desk_pc"]), S("spare"), S("spare"), S("s16", ["desk_pc"])), PL("9152", S("s6", ["desk_lamp"])), PL("9152", S("s6")), PL("9132", S("usbc"), S("nightlamp"))] },
     { id: "stLeft", name: "Study · left wall", zone: "study", at: [-50, 1600], plates: [PL("9818",
       S("sw", ["st_lamps"]), S("sw", ["st_pairL"]), S("sw", ["st_pairC"]), S("sw", ["st_pairR"]), S("sw", ["desk_sp"]), S("sw", ["shelf"]), S("sw", ["niche_bk", "niche_win"]), S("dim", ["shelf", "niche_bk", "niche_win"]))] },
     { id: "shelfB", name: "Inside the bookcase", zone: "study", at: [744, 320], plates: [PL("9178",
-      S("sw", ["shelf"]), S("s6"), S("sw", [], { lab: "16A socket" }), S("s16"), S("nightlamp"), S("usbc"))] },
-    { id: "midCab", name: "Inside the middle cabinet (under the counter frame)", zone: "study", at: [2373, 200], plates: [PL("9136",
-      S("sw", ["picture"]), S("sw", ["counter"]), S("dim", ["picture", "counter"]), S("sw", [], { lab: "6A socket" }), S("s6"), S("usbc"), S("nightlamp"))] },
+      S("sw", ["shelf"]), S("s6"), S("spare"), S("s16"), S("nightlamp"), S("usbc"))] },
+    { id: "midCab", name: "Inside the middle cabinet (under the counter frame)", zone: "study", at: [2373, 200], plates: [PL("9176",
+      S("sw", ["picture"]), S("sw", ["counter"]), S("dim", ["picture", "counter"]), S("s6"), S("nightlamp"))] },
     { id: "winR", name: "Right wall · by the window (Wi-Fi)", zone: "study", at: [4547, 1000], plates: [PL("9138",
       S("sw", ["rw_study"]), S("sw", ["st_pairR"]), S("spare"), S("eth"), S("usbc"), S("sw", ["wifi"]), S("s6", ["wifi"]))] },
     { id: "dressR", name: "Right wall · by the dressing door", zone: "bedroom", at: [4547, 4080], plates: [PL("9138",
       S("sw", ["rw_bed"]), S("sw", ["sp_mid"]), S("sw", ["dr_mid"]), S("nightlamp"), S("usbc"), S("sw", ["dr_coffer", "dr_vault", "dr_door"]), S("s6"))] },
-    { id: "dress", name: "Dressing room · beside the bathroom door", zone: "dressing", at: [4800, 3150], plates: [PL("9126",
-      S("sw", ["dr_mid"]), S("sw", ["dr_mirror"]), S("sw", ["dr_coffer", "dr_vault", "dr_door"]), S("dim", ["dr_coffer", "dr_vault", "dr_door"]), S("sw", ["wd_left"]), S("sw", ["wd_right"]), S("sw", ["tunnel"]), S("sw", ["ac_dr"]), S("s6"))] },
-    { id: "bath", name: "Bathroom · inside, beside its door", zone: "bathroom", at: [4800, 2450], plates: [PL("9424",
-      S("sw", ["b_van"]), S("sw", ["b_wc"]), S("sw", ["b_mid"]), S("sw", ["b_tub"]), S("sw", ["b_cove"]), S("dim", ["b_mid", "b_tub", "b_cove"]), S("sw", ["exhaust"]), S("sw", ["geyser"]))] },
+    { id: "dress", name: "Dressing room · beside the bathroom door", zone: "dressing", at: [4800, 3150], plates: [PL("9616",
+      S("sw", ["dr_mid"]), S("sw", ["dr_mirror"]), S("sw", ["dr_coffer", "dr_vault", "dr_door"]), S("dim", ["dr_coffer", "dr_vault", "dr_door"]), S("sw", ["wd_left", "wd_right", "tunnel"]), S("sw", ["ac_dr"]))] },
+    { id: "dressM", name: "Dressing room · mirror end", zone: "dressing", at: [8500, 3350], plates: [PL("9176",
+      S("sw", ["dr_mirror"]), S("sw", ["wd_left", "wd_right", "tunnel"]), S("spare"), S("s16"), S("nightlamp"))] },
+    { id: "bath", name: "Bathroom · inside, beside its door", zone: "bathroom", at: [4800, 2450], plates: [PL("9414",
+      S("sw", ["b_van", "b_wc"]), S("sw", ["b_mid", "b_tub"]), S("sw", ["b_cove"]), S("dim", ["b_mid", "b_tub", "b_cove"])), PL("9144", S("sw", ["exhaust"]), S("sw", ["geyser"]), S("s6"))] },
   ];
   const CLAUDE_LIGHTS = {
     st_pairL: { w: 7 }, st_pairC: { w: 7 }, st_pairR: { w: 7 }, desk_sp: { w: 7 }, sp_part: { w: 7 }, sp_mid: { w: 7 }, sp_left: { w: 7 }, sp_right: { w: 7 },
@@ -158,7 +160,7 @@
     wd_left: { w: 9.6, auto: "motion", fade: 1 }, wd_right: { w: 9.6, auto: "motion", fade: 1 }, tunnel: { auto: "motion" },
     ac_bed: { w: 1500 }, ac_dr: { w: 1200 }, tv: { w: 150 }, soundbar: { w: 60 }, wifi: { w: 15 }, geyser: { w: 2000 }, exhaust: { w: 30 }, monitor: { w: 60 }, desk_pc: { w: 300 },
   };
-  const ABOUT_CLAUDE = "My plan. Every circuit on its own switch, because you like control. The bedroom's main lights work from the door and from the bed — both sides of the room's spots and the coves — so you never get up to switch off; the middle spots and the dressing lights work from the door and from the dressing door too. Dimmers only where light sets a mood: the three coves together (at 6 W a metre so they stay under the TG9 dimmer's 100 W), each bed lamp, the shelf and niche lights, the picture light and the counter frame, the dressing coves, and the bath. A night lamp on the boards in low or dark places — under the desk, inside the bookcase and the middle cabinet, at the bed, by the door and by the dressing door — so you can find them at night. USB-C wherever you sit or stand; Ethernet at the bed, the TV, the desk and the router. 8M plates on the walls; smaller where the provision is small: 6M in the dressing room and the middle cabinet, 4M in the bathroom.";
+  const ABOUT_CLAUDE = "My plan, drawn on your rules: only the long in-line plates (no holes stacked on holes), real Norisys TG9 plates from the catalogue, and a lot of sockets where the power goes — the desk, the TV and the partition each get several power sockets (16A, three-pin) and normal ones (6A). Every circuit is on its own switch, because you like control. The bedroom's main lights work from the door and from the bed, and the dressing lights from both its doors. Dimmers only where light sets a mood, each under the TG9's 100 W. A night lamp on the boards in low and dark places — under the desk, inside the bookcase and the middle cabinet, at the bed, by the door and the dressing door. USB-C wherever you sit or stand; Ethernet at the bed, the TV, the desk and the router. 8M plates on the walls; smaller where the provision is small — 6M in the dressing room and the middle cabinet, 4M in the bathroom — and the bathroom's geyser and fan, with a normal socket, on a second 4M plate beside the first.";
   const SCENES = [
     { id: "off", name: "All off", levels: {} },
     { id: "night", name: "Night", levels: { bed_l: 25, bed_r: 25, cove_b: 15 } },
@@ -187,17 +189,18 @@
     const over = which === "claude" ? CLAUDE_LIGHTS : {};
     return { v: VER, light: Object.fromEntries(FIX.map((f) => [f.id, { ...lightDefault(f), ...(over[f.id] || {}) }])), boards, scenes: JSON.parse(JSON.stringify(SCENES)), custom: [] };
   };
-  let st, mode = "plan", live = {}, level = {}, root, ed = null, addOpen = false, pl = null, note = "";
+  let st, mode = "plan", live = {}, level = {}, root, ed = null, addOpen = false, pl = null, note = "", pick0 = null;
   const af = { zone: "dressing", kind: "spot", name: "", n: 1, w: 8, K: 3000, wire: "" };
   const fixAll = () => FIX.concat(st.custom || []);
   const fixById = (id) => fixAll().find((f) => f.id === id);
   // ── the plans: Claude's, the one from the Canva deck, and any the owner saves (kept in this browser) ──
-  const LIBKEY = "ast.switchplans.v3";
+  const LIBKEY = "ast.switchplans.v3", REV = 4;
   let lib;
   const fixPlan = (s) => { for (const f of FIX.concat(s.custom || [])) s.light[f.id] = { ...lightDefault(f), ...(s.light[f.id] || {}) }; return s; };
+  const ABOUT_CANVA = "Your electric plan from Canva (months ago), carried onto the room as it is now — the same boards and what you listed on each, on real TG9 plates.";
   const freshLib = () => ({ active: "claude", order: ["claude", "canva"], plans: {
-    claude: { name: "Claude's plan", builtin: "claude", about: ABOUT_CLAUDE, st: defaults("claude") },
-    canva: { name: "From your Canva plan", builtin: "canva", about: "Your electric plan from Canva (months ago), carried onto the room as it is now — the same boards and what you listed on each, on real TG9 plates.", st: defaults("canva") } } });
+    claude: { name: "Claude's plan", builtin: "claude", about: ABOUT_CLAUDE, rev: REV, st: defaults("claude") },
+    canva: { name: "From your Canva plan", builtin: "canva", about: ABOUT_CANVA, rev: REV, st: defaults("canva") } } });
   function loadLib() {
     let L = null; try { L = JSON.parse(localStorage.getItem(LIBKEY) || "null"); } catch (e) {}
     if (!L || !L.plans || !L.order) {
@@ -206,6 +209,7 @@
       if (old && old.v === VER) { L.plans.earlier = { name: "My earlier changes", st: old }; L.order.push("earlier"); }
     }
     L.order = L.order.filter((id) => L.plans[id]);
+    for (const id of L.order) { const q = L.plans[id]; if (q.builtin && q.rev !== REV) { q.st = defaults(q.builtin); q.rev = REV; q.about = q.builtin === "claude" ? ABOUT_CLAUDE : ABOUT_CANVA; } }
     for (const id of L.order) L.plans[id].st = fixPlan(L.plans[id].st);
     if (!L.plans[L.active]) L.active = L.order[0];
     return L;
@@ -273,16 +277,20 @@
     });
     return html;
   }
-  function plateSelect(b, p, pi) {
-    const sizes = [...new Set(CAT.map((c) => c.m))];
-    return `<select data-act="pcode" data-b="${b.id}" data-p="${pi}">${sizes.map((m) => `<optgroup label="${m}M · box ${BOX[m]}">${CAT.filter((c) => c.m === m).map((c) => `<option value="${c.code}"${c.code === p.code ? " selected" : ""}>${c.code} · ${descOf(c)}</option>`).join("")}</optgroup>`).join("")}</select>`;
+  const CATIMG = (code) => `../assets/catalog/${code}.jpg`;
+  function pickHTML() {
+    if (!pick0) return "";
+    const b = st.boards.find((x) => x.id === pick0.b), p = b?.plates[pick0.p]; if (!p) return "";
+    const sizes = [...new Set(CAT.filter((c) => !c.stack).map((c) => c.m))];
+    return `<div class="swp-ed swp-pick"><div class="swp-ed-top"><span class="mono">${bNo(b)} · plate ${pick0.p + 1} · choose a Norisys TG9 plate — all in a line, none stacked</span><button class="mini" data-act="pickx">Close</button></div>
+      ${sizes.map((m) => `<div class="swp-sub mono">${m}M · back box ${BOX[m]}</div><div class="pk-row">${CAT.filter((c) => !c.stack && c.m === m).map((c) => `<button class="pk${c.code === p.code ? " sel" : ""}" data-act="pickc" data-code="${c.code}" title="${c.code} · ${descOf(c)}"><img src="${CATIMG(c.code)}" alt="" style="width:${Math.round(c.m * 26 + 40)}px"><span>${c.code}</span><i>${descOf(c)}</i></button>`).join("")}</div>`).join("")}</div>`;
   }
   function boardHTML(b) {
     return `<div class="swp-board" id="swp-b-${b.id}"><div class="swp-bt"><span class="swp-bn">${bNo(b)}</span><h4>${esc(b.name)}</h4>
       ${mode === "plan" ? `<span class="swp-tools"><button class="mini" data-act="addplate" data-b="${b.id}">+ Plate</button><button class="mini" data-act="placeboard" data-b="${b.id}">Move on plan</button><button class="mini" data-act="rename" data-b="${b.id}">Rename</button><button class="mini" data-act="delboard" data-b="${b.id}">Remove</button></span>` : ""}</div>
       ${b.plates.map((p, pi) => { const c = cat(p.code);
         return `<div class="swp-plate-row"><div class="swp-plate m${c.m}">${plateHTML(b, p, pi)}</div>
-        <div class="swp-pmeta"><span class="mono">Norisys ${c.code} · ${c.m}M · box ${BOX[c.m]}</span>${mode === "plan" ? `${plateSelect(b, p, pi)}<button class="mini" data-act="delplate" data-b="${b.id}" data-p="${pi}" title="Remove this plate">✕</button>` : ""}</div></div>`; }).join("")}</div>`;
+        <div class="swp-pmeta"><img class="swp-cat" src="${CATIMG(p.code)}" alt="Norisys ${c.code}" data-open="img:${CATIMG(p.code)}" style="width:${Math.round(c.m * 17 + 26)}px" title="The plate from the Norisys catalogue — click to enlarge"><span class="mono">Norisys ${c.code} · ${c.m}M · ${descOf(c)} · box ${BOX[c.m]}${c.stack ? " · STACKED" : ""}</span>${mode === "plan" ? `<button class="mini" data-act="pickopen" data-b="${b.id}" data-p="${pi}">Change plate</button><button class="mini" data-act="delplate" data-b="${b.id}" data-p="${pi}" title="Remove this plate">✕</button>` : ""}</div></div>`; }).join("")}</div>`;
   }
   // ── the slot editor (plan mode) ──
   function editorHTML() {
@@ -298,7 +306,7 @@
           const other = where(f.id).filter((w) => `${w.b.id}.${w.pi}.${w.qi}` !== ed && w.q.t === "sw");
           return `<button class="chip${q.c.includes(f.id) ? " sel" : ""}" data-act="slight" data-l="${f.id}" title="${other.length ? "Also switched from: " + other.map((w) => bNo(w.b) + " #" + (w.qi + 1)).join(", ") : ""}">${esc(f.name)}${other.length && q.t === "sw" ? ` <i>· ${other.length + 1}-way</i>` : ""}</button>`; }).join("")}</div>`).join("")}`;
     return `<div class="swp-ed"><div class="swp-ed-top"><span class="mono">${bNo(b)} ${esc(b.name)} · plate ${+pi + 1} · ${k === "h" ? "hole" : k === "s" ? "socket" : "window"} ${+qi + 1}</span><button class="mini" data-act="close">Done</button></div>
-      <div class="swp-sub mono">What sits here</div><div class="chips">${types}</div>${pick}</div>`;
+      <div class="swp-sub mono">What sits here</div><div class="chips">${types}</div>${k === "s" ? `<p class="swp-hint"><b>Power</b> — 16A and 6A, three-pin, shuttered (Norisys T9332): the heavy loads, PC, TV, AC, iron. <b>Normal</b> — 6A three-pin, shuttered (T9213): lamps, chargers. <b>Multi</b> — 13A, takes two-pin plugs too (T9532), but the catalogue marks it <i>only for export outside India</i> — ask the dealer before using it.</p>` : ""}${pick}</div>`;
   }
   // ── adding lights: what, how many, how many watts, what colour, and where (click the plan) ──
   function wireOptions() {
@@ -363,7 +371,7 @@
       <div class="swp-totals mono">${totals()}</div>
       <p class="swp-help">${mode === "plan" ? "Click any hole, socket or window on a plate to choose what sits there and which lights it works — a light on two switches becomes two-way. Change a plate with its list: every Norisys TG9 layout is there, with its back-box size. Add lights with + Add lights and click the plan to place them. Watts and colours are in the table below; the starting watts are estimates. Everything saves in this browser." : "Press the switches. Each light glows up at its own speed; dimmers slide. Scene keys set the room in one press."}</p>
       <div class="swp-grid"><div class="swp-planbox"><div class="swp-plan${pl ? " placing" : ""}">${planSVG()}</div>
-        ${mode === "try" ? `<div class="swp-scenes"><span class="mono">Scenes</span>${st.scenes.map((s) => `<button class="mini" data-act="runscene" data-s="${s.id}">${esc(s.name)}</button>`).join("")}<button class="mini" data-act="savescene">+ Save the room as a scene</button></div>` : addHTML() + editorHTML()}</div>
+        ${mode === "plan" ? pickHTML() : ""}${mode === "try" ? `<div class="swp-scenes"><span class="mono">Scenes</span>${st.scenes.map((s) => `<button class="mini" data-act="runscene" data-s="${s.id}">${esc(s.name)}</button>`).join("")}<button class="mini" data-act="savescene">+ Save the room as a scene</button></div>` : addHTML() + editorHTML()}</div>
         <div class="swp-boards">${byZone}<button class="btn steel swp-addb" data-act="addboard">+ Add a board</button></div></div>
       <div class="group-label"><span class="eyebrow">Every light · how it behaves</span></div><div class="swp-lights">${lightsHTML()}</div>`;
   }
@@ -459,6 +467,9 @@
     else if (a === "stype" && cur?.q) { cur.q.t = t.dataset.t; if (!FEEDS(cur.q.t)) cur.q.c = []; if (cur.q.t === "scene" && !cur.q.scene) cur.q.scene = st.scenes[0]?.id; }
     else if (a === "slight" && cur?.q) { const l = t.dataset.l, i = cur.q.c.indexOf(l); i < 0 ? cur.q.c.push(l) : cur.q.c.splice(i, 1); if (cur.q.t === "spare" && cur.q.c.length) cur.q.t = "sw"; }
     else if (a === "sscene" && cur?.q) cur.q.scene = t.dataset.s;
+    else if (a === "pickopen") { pick0 = { b: t.dataset.b, p: +t.dataset.p }; ed = null; addOpen = false; render(); root.querySelector(".swp-pick")?.scrollIntoView({ behavior: "smooth", block: "nearest" }); return; }
+    else if (a === "pickx") pick0 = null;
+    else if (a === "pickc" && pick0) { const p = B(pick0.b).plates[pick0.p]; conform(p, t.dataset.code); pick0 = null; ed = null; }
     else if (a === "delplate") { if (confirm("Remove this plate?")) B(t.dataset.b).plates.splice(+t.dataset.p, 1); ed = null; }
     else if (a === "addplate") { const p = { code: "9212", slots: [] }; conform(p, "9212"); B(t.dataset.b).plates.push(p); }
     else if (a === "placeboard") { pl = { board: t.dataset.b }; render(); root.querySelector(".swp-plan")?.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
@@ -495,7 +506,6 @@
     const t = e.target;
     if (t.dataset.lp) { const L = st.light[t.dataset.l]; L[t.dataset.lp] = t.type === "checkbox" ? t.checked : t.dataset.lp === "auto" ? t.value : +t.value; save(); render(); return; }
     if (t.dataset.cf) { const f = fixById(t.dataset.l); if (!f) return; f[t.dataset.cf] = t.dataset.cf === "n" ? Math.max(1, +t.value || 1) : t.value; save(); render(); return; }
-    if (t.dataset.act === "pcode") { const p = st.boards.find((b) => b.id === t.dataset.b).plates[+t.dataset.p]; conform(p, t.value); ed = null; save(); render(); return; }
     if (t.dataset.af === "wire") { af.wire = t.value; return; }
     if (t.id === "swp-file" && t.files[0]) { t.files[0].text().then((s) => { try { const j = JSON.parse(s.includes("DATA {") ? s.slice(s.indexOf("DATA {") + 5) : s); if (j.v === VER) { st = fixPlan(j); save(); render(); } else alert("That plan is from an older version."); } catch (err) { alert("That file is not a switch plan."); } }); }
   }
@@ -509,6 +519,11 @@
 .swp-plans{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin-bottom:10px}.swp-plans>.mono{font-size:11px;color:var(--dim)}.swp-pacts{display:flex;flex-wrap:wrap;gap:6px}
 .swp-about{font:400 15px/1.45 var(--grotesk);color:#e7dccd;max-width:980px;margin:4px 0 18px;padding:14px 16px;border-left:2px solid var(--ember);background:rgba(204,100,55,.06)}
 .win.nl{background:radial-gradient(circle,#ffcf8a 0%,#d7893a 55%,#3a2614 100%);box-shadow:0 0 10px 2px rgba(255,170,80,.55)}
+.swp-cat{display:block;border-radius:3px;box-shadow:0 1px 4px rgba(0,0,0,.6);cursor:zoom-in;margin-right:6px}
+.swp-pick{max-height:60vh;overflow:auto}.pk-row{display:flex;flex-wrap:wrap;gap:10px}
+.pk{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 8px 6px;border:1px solid var(--steel);border-radius:8px;background:rgba(255,255,255,.03);color:var(--white);cursor:pointer}
+.pk img{display:block;height:auto;border-radius:2px}.pk span{font:400 11px var(--mono)}.pk i{font:400 10px/1.2 var(--grotesk);font-style:normal;color:var(--dim);max-width:140px;text-align:center}
+.pk:hover{border-color:var(--white)}.pk.sel{border-color:var(--ember);background:rgba(204,100,55,.14)}
 .swp-bar{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center}
 .swp-modes,.swp-acts{display:flex;flex-wrap:wrap;gap:8px}
 .swp-acts .btn{height:34px;font-size:12px;padding:0 14px}
