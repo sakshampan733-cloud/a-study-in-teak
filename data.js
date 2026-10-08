@@ -424,8 +424,8 @@ window.PROJECT = {
         },
         {
           id: "shelf", name: "Study Wall — Bookcase, Panelled Centre, Window", status: "open",
-          glance: {"line": "A full-height teak study wall: bookcase, panel, window.", "facts": [["14 ft 11 in", "wide"], ["2 ft 3 in", "counter = window sill"], ["11 in", "deep"], ["2", "fluted pilasters"]], "mats": ["teak"]},
-          drawings: ["studywall", "studywall-details"],
+          glance: {"line": "A full-height teak study wall: an arched bookcase, a panelled centre, an arched window — six small lit niches in the two arches.", "facts": [["14 ft 11 in", "wide"], ["2 ft 3 in", "counter = window sill"], ["11 in", "deep"], ["2", "fluted pilasters"], ["6", "niches, a spot in each"]], "mats": ["teak"]},
+          drawings: ["studywall-arch", "studywall-arch-sections", "studywall-details2"],
           refs: [
             { src: "assets/refs/wall-ref-0-study-layout.jpg", caption: "Layout reference — bookcase, panelled centre with painting, desk in front" },
             { src: "assets/refs/wall-ref-1-library-pilasters.jpg", caption: "Ref. 1 — full-height fluted pilasters, moulded painting panel, cupboards below" },
@@ -434,15 +434,16 @@ window.PROJECT = {
             { src: "assets/refs/wall-ref-4-dark-study-bands-sconces.jpg", caption: "Ref. 3 — panel band over every bay, twin sconces, pedestals stepping forward" },
           ],
           parts: [
-            { label: "Layout", value: "Left: bookcase with open shelves and a flat head (no arch). Centre: moulded panel (a painting may hang here). Right: the window. A moulded panel band of the same height runs over all three bays under the cornice. Two fluted pilasters on stepped-forward pedestals frame the centre, each carrying a twin sconce. Cupboards under all three bays." },
+            { label: "Layout", value: "Left: bookcase with open shelves under a segmental arch. Centre: moulded panel, pushed back to 25 off the wall so the counter is a real 9 in shelf, with the painting in it. Right: the window, with the same arch in its head. A moulded panel band of the same height runs over all three bays under the cornice. Two fluted pilasters on stepped-forward pedestals frame the centre, each carrying a twin sconce. Cupboards under all three bays." },
             { label: "Style", value: "After the reference study: full-height teak panelling, cornice and frieze running across the whole wall, a desk-height cupboard band with a projecting top, open shelves lit from above." },
             { label: "References chosen", value: "Ref. 1: fluted pilasters with plain moulded capitals, moulded painting panel. Ref. 2: block-and-dentil cornice (plain, no carving). Ref. 3 (dark study): moulded panel band over every bay, twin candle sconces with shades on the pilasters, pedestals that step forward below the counter." },
             { label: "Pilasters", value: "Two, 240 wide: panelled pedestal from floor to counter, 25 wider each side and 50 further forward, with the counter wrapping it; above, the fluted shaft (9 stopped flutes) on a moulded base up to a plain moulded capital. A twin sconce on each." },
             { label: "Cornice", value: "Full width, projecting 160 beyond the shelves: stepped architrave, plain frieze, plain modillion blocks with a sunk panel at 105 centres, dentils, cyma crown. Breaks forward over each pilaster." },
-            { label: "Bookcase", value: "Open shelves, flat head rail with a strip light under it, moulded band panel above. No arch." },
+            { label: "Bookcase", value: "Open shelves under a segmental arch (spring 1999, rise 320), an archivolt in three steps, impost blocks and spandrel mouldings curved to the arch. A strip light is let into the underside of every shelf (3000 K), washing the row of books below." },
+            { label: "Arches and niches (owner-approved, 7–8 Oct)", value: "Each arch's underside carries three deep rectangular niches, 380 × 180 and 90 deep, lined in the same veneer — six in all, with one small focus light (3000 K) in the middle of each. The window's arch is a veneered wood panel flush with the frame; the glass behind is unchanged." },
             { label: "Cupboards", value: "Under all three bays (bookcase, centre panel, window): 2 ft 3 in (686) high to the top — set by the window sill, so the counter and the sill are one surface — 280 (11 in) deep from the wall including the 25 overhang, two doors per bay with a moulded frame and raised field, brass drop handles. Each bay has its own reeded 40 mm top matching the desk, dying into the pilasters." },
             { label: "Centre panel", value: "Bolection-moulded frame with a raised field; painting (drawn 700 × 900) optional, with a picture light." },
-            { label: "Window side", value: "The window is hard into the right-hand corner, so the architrave and panelled reveal can only run down its left side — there is no wall left on the right for a return. The band panel runs above it and the cornice carries across, so the wall still reads as one piece. Counter top and sill are level at 686." },
+            { label: "Window side", value: "The window is hard into the right-hand corner, so the architrave and panelled reveal can only run down its left side — there is no wall left on the right for a return; the right-hand reveal is lined in the same teak veneer, frame to face, so the bay is wood on both sides. The band panel runs above it and the cornice carries across, so the wall still reads as one piece. Counter top and sill are level at 686." },
             { label: "Wood", inherit: "wood" },
             { label: "Polish", inherit: "polish" },
             { label: "Dimensions", value: "Wall 14 ft 11 in (4547), ceiling 9 ft 1 in (2769). The unit comes 11 in (280) off the wall; pilasters stand 40 proud of it, pedestals 50 proud of the counter. Bays are set out from the window: bookcase 1489, pilaster 240, centre panel 1289, pilaster 240, window bay 1289 — the centre panel is set equal to the window bay so the two pilasters frame a matched pair." },
@@ -456,18 +457,16 @@ window.PROJECT = {
         },
         {
           id: "curtains", name: "Window Curtains", status: "open",
-          glance: {"line": "One white sheer curtain, gathered to the left.", "facts": [["1", "curtain, left side only"], ["White", "light-filtering"], ["Iron", "volute tieback"]], "mats": ["linen", "iron"]},
+          glance: {"line": "Red velvet over a white linen sheer, both hung inside the window arch — no rod anywhere.", "facts": [["2", "layers: sheer behind, velvet in front"], ["No rods", "hung from tracks in the arch's underside"], ["Gold rope", "tie-backs with tassels, at 4 ft 1 in"]], "mats": ["linen"]},
           refs: [
             { src: "assets/refs/paint-ref-1-warm-cream-room-sheer-curtains.jpg", caption: "Curtain reference — white, light-filtering curtains in soft folds, floor to ceiling" },
-            { src: "assets/refs/curtain-ref-1-volute-tieback.jpg", caption: "Tieback — a black iron volute (spiral) hook holding the curtain back" },
           ],
           parts: [
-            { label: "Where", value: "The window on the study wall." },
-            { label: "Fabric", value: "White, light-filtering — not see-through, but daylight passes softly through (like a heavy voile or linen sheer)." },
-            { label: "Tieback", value: "A black iron volute (spiral) hook fixed to the wall, holding the curtain back, as in the reference." },
-            { label: "Track / rod", value: "", hint: "Ceiling track or rod, and how full the pleats are" },
-            { label: "How it draws", value: "A single curtain, gathering to the left only. The window is hard into the right-hand corner, so there is no wall on that side for a curtain to stack on — a pair would sit over the glass permanently." },
-            { label: "Length", value: "", hint: "Floor length, just kissing the floor, as in the reference?" },
+            { label: "Where", value: "The window on the study wall — hung inside its arch, so the curtains fill the arch's opening and no rod shows (owner, 8 Oct, from his arched-doorway photo: \"in the arch… it hides the bar\")." },
+            { label: "Sheer", value: "White linen, light-filtering, in fine soft pleats the width of the arch, close to the glass and falling to the counter." },
+            { label: "Velvet", value: "Heavy red velvet in front of the sheer: two panels meeting at the crown of the arch, swept back to the jambs, tied with gold silk rope and a tassel at 4 ft 1 in (1250), then falling to the counter and breaking on it. The soffit's niche lights wash its folds." },
+            { label: "Track / rod", value: "No rods. Each layer hangs from a slim track let into the arch's underside, bent to the arch; the velvet's runs behind the niches." },
+            { label: "Drawn", value: "Study wall, AST-DR-040 (elevation, plan) and AST-DR-042 (section), revision 2." },
           ],
           questions: [],
         },
@@ -549,12 +548,13 @@ window.PROJECT = {
         {
           id: "bed", name: "Bed", status: "open",
           glance: {"line": "The bed in the bed-wall niche: a gloss-black storage base straight down to the floor, the slim dusty-rose suede headboard behind in a thin black frame.", "facts": [["6 × 6½ ft", "mattress"], ["11 in", "storage base, to the floor"], ["3 ft 4 in", "headboard"], ["Whole hide", "cognac leather, across the foot"]], "mats": ["burl", "teak"]},
-          drawings: ["bedframe"],
+          drawings: ["bedframe", "sidetable"],
           refs: [
             { src: "assets/refs/bedwall-ref-6-plaster-grid-bed.jpg", caption: "Your ref (3 Oct) — THIS bed: low dark-wood platform on turned feet, slim upholstered headboard (owner: the same exact bed and headboard)" },
             { src: "assets/refs/bed-ref-1-low-platform-bed.jpg", caption: "Bed reference (Newberry Projects) — low bed with a thick upholstered base" },
           ],
           parts: [
+            { label: "Edges (owner, 8 Oct)", value: "There are only about 3 ft to walk past the bed, so nothing is sharp: the storage base's four corners are rounded to a 3 in radius in plan and every edge eased, and the headboard frame's two top corners are rounded. Drawn on AST-DR-035, revision 6." },
             { label: "Decided (owner, 7 Oct)", value: "A bed with storage, not legs: a plain box straight down to the floor, 2 in past the mattress at the sides and foot, 11 in to the mattress — the storage inside is not drawn. The slim upholstered headboard is back and the long cushion goes. Finish (owner, 7 Oct): the base in GLOSS BLACK lacquer — the room's one black accent, Art Deco with the rose — and the headboard in dusty-rose suede, framed round its top and sides in a 1¼ in gloss-black border — as thin as the dressing mirror's frame — the suede panel ¼ in proud of it. The bedding hangs 8 in, so the base's black shows below it. AST-DR-035 rev 5." },
             { label: "The bed (before, 3 Oct)", value: "The same exact bed and headboard as in the owner's photo: a low dark-wood platform — a 4 in rail with a 1 in lip on turned bun feet — and a slim, plain upholstered headboard the frame's width, standing in the bed-wall niche. Drawn on AST-DR-035, sized to the 6 ft × 6 ft 6 in mattress; mattress thickness still to choose. No headboard (owner, later on 3 Oct): a long white cushion along the back, in a cream textured weave, leaning on the parchment." },
             { label: "Bed back (before)", value: "Superseded by the niche and headboard (3 Oct). DECIDED (owner, 1 Oct): NOT curved. A plain, straight bed back running corner to corner across the whole 15 ft 6 in bed wall. Its height (the owner said \"about 4\" — to confirm whether inches or feet) and what it is made of are still open. The curled bed back with a ledge at each end, and the sheet AST-DR-013 that draws it, are withdrawn." },
@@ -634,6 +634,7 @@ window.PROJECT = {
         },
         {
           id: "wardrobe", name: "Wardrobes", status: "open",
+          drawings: ["wardrobes", "wardrobe-interiors"],
           glance: {"line": "Two teak runs, the same veneer inside, every back lit from behind. No glass.", "facts": [["7", "bays, 28 leaves"], ["9 ft", "tall"], ["2 ft 3 in", "deep"], ["535½ sq ft", "of lining"]], "mats": ["teak", "lining"]},
           refs: [
             { src: "assets/refs/wardrobe-ref-4-inside-finish-lit-niche.jpg", caption: "CONFIRMED — the owner's own reference for the inside finish: warm lit niche, cream/beige lining, dark wood surround" },
@@ -652,6 +653,7 @@ window.PROJECT = {
         },
         {
           id: "end-bay-doors", name: "End-Bay Doors", status: "final",
+          drawings: ["foldslide"],
           glance: {"line": "The end bays fold out, then slide back inside.", "facts": [["C", "chosen"], ["1 ft 6½ in", "folded depth"], ["Brass", "piano hinge"]], "mats": ["teak", "brass"]},
           video: { src: "assets/video/dressing-endbay-foldin.mp4", poster: "assets/video/dressing-endbay-foldin.jpg", caption: "Three ways, one after another. A — folds into the cupboard, parks at the mirror end. B — folds into the cupboard, parks at the front end. C — folds out like the owner's photo, then slides back into the cupboard. Each one plays its whole movement three times: from the doorway, looking into the bay, and from above. Red line = the front of the wardrobe." },
           parts: [
@@ -747,6 +749,7 @@ window.PROJECT = {
         },
         {
           id: "fittings", name: "Fittings & Fixtures", status: "brief",
+          drawings: ["bathroom"],
           glance: {"line": "Shower glass, WC and bath position still to decide.", "facts": [["Done", "floor, niche, walls"], ["3", "left: shower, WC, bath"]], "mats": ["beigeMarble", "chrome"], "img": "assets/refs/stone-ref-3-beige-gold-bathroom-marble.jpg"},
           parts: [
             { label: "Status", value: "Everything else in the bathroom is done — floor, niche, walls, ceiling. Only the vanity, the shower glass enclosure, the WC and the bathtub position are left." },

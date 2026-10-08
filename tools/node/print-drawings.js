@@ -31,7 +31,7 @@ function siteOrder() {
   })(ctx.window.PROJECT);
   return seen.filter((k) => fs.existsSync(path.join(CAD, k + ".svg")));
 }
-const JOIN = {};
+const JOIN = { "studywall-arch-sections": "studywall-arch", "studywall-details2": "studywall-arch" };   // the arched study wall: elevation + sections + details, one set
 const family = (k) => JOIN[k] || k.replace(/-(details|3d)$/, "");
 
 // ── in the browser: drop the mm layer, convert the notes, thicken, and map the ink ───────────────────────────────

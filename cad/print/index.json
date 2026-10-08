@@ -224,23 +224,6 @@
   "pages": 10,
   "pagesA4": 10
  },
- "vanity-c": {
-  "title": "VANITY — SCHEME C",
-  "dwgs": [
-   "AST-DR-021",
-   "AST-DR-022"
-  ],
-  "keys": [
-   "vanity-c",
-   "vanity-drawer"
-  ],
-  "starts": [
-   0,
-   10
-  ],
-  "pages": 18,
-  "pagesA4": 18
- },
  "desk-plain": {
   "title": "DESK (PLAIN, SQUARE) — GENERAL ARRANGEMENT",
   "dwgs": [
@@ -260,20 +243,6 @@
   ],
   "pages": 24,
   "pagesA4": 24
- },
- "bedframe": {
-  "title": "THE BED",
-  "dwgs": [
-   "AST-DR-035"
-  ],
-  "keys": [
-   "bedframe"
-  ],
-  "starts": [
-   0
-  ],
-  "pages": 8,
-  "pagesA4": 8
  },
  "bedwall": {
   "title": "BED WALL — THE NICHE",
@@ -302,5 +271,123 @@
   ],
   "pages": 8,
   "pagesA4": 8
+ },
+ "studywall-arch": {
+  "title": "STUDY WALL — WITH ARCHES",
+  "dwgs": [
+   "AST-DR-040",
+   "AST-DR-042",
+   "AST-DR-043"
+  ],
+  "keys": [
+   "studywall-arch",
+   "studywall-arch-sections",
+   "studywall-details2"
+  ],
+  "starts": [
+   0,
+   4,
+   8
+  ],
+  "pages": 17,
+  "pagesA4": 17
+ },
+ "bedframe": {
+  "title": "THE BED",
+  "dwgs": [
+   "AST-DR-035"
+  ],
+  "keys": [
+   "bedframe"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 7,
+  "pagesA4": 7
+ },
+ "sidetable": {
+  "title": "THE SIDE TABLES",
+  "dwgs": [
+   "AST-DR-049"
+  ],
+  "keys": [
+   "sidetable"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 7,
+  "pagesA4": 7
+ },
+ "wardrobes": {
+  "title": "THE WARDROBES",
+  "dwgs": [
+   "AST-DR-025"
+  ],
+  "keys": [
+   "wardrobes"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 2,
+  "pagesA4": 2
+ },
+ "wardrobe-interiors": {
+  "title": "WARDROBE INTERIORS",
+  "dwgs": [
+   "AST-DR-048"
+  ],
+  "keys": [
+   "wardrobe-interiors"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 6,
+  "pagesA4": 6
+ },
+ "foldslide": {
+  "title": "END-BAY DOORS",
+  "dwgs": [
+   "AST-DR-026"
+  ],
+  "keys": [
+   "foldslide"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 3,
+  "pagesA4": 3
+ },
+ "vanity-c": {
+  "title": "VANITY — SCHEME C",
+  "dwgs": [
+   "AST-DR-021"
+  ],
+  "keys": [
+   "vanity-c"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 10,
+  "pagesA4": 10
+ },
+ "bathroom": {
+  "title": "BATHROOM",
+  "dwgs": [
+   "AST-DR-037"
+  ],
+  "keys": [
+   "bathroom"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 7,
+  "pagesA4": 7
  }
 }
