@@ -474,7 +474,7 @@ bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=0.025, depth=0.03, locat
 hd_ = bpy.context.active_object; hd_.rotation_euler = (math.pi / 2, 0, 0); setmat(hd_, M_CHROME)            # the mixer
 # the mirror (owner, 8 Oct): a mini version of the dressing room's tri-fold (AST-DR-027) — the same thin hammered-brass
 # frames, plain glass, the wings at 45° — small: 2 ft 6 in tall, 1 ft 4½ in across the centre, hung over the tap.
-MCW, MWW, MH, MZ0, MFR, MT, WANG = 420.0, 160.0, 760.0, 1250.0, 15.0, 20.0, math.radians(45)   # smaller, thinner frames (owner, 8 Oct)
+MCW, MWW, MH, MZ0, MFR, MT, WANG = 420.0, 160.0, 760.0, 1250.0, 0.0, 20.0, math.radians(45)   # smaller; now frameless (owner, 9 Oct)
 def lbox(name, x0_, x1_, y0_, y1_, z0_, z1_, m, par, bev=0.0):
     me = bpy.data.meshes.new(name); bm = bmesh.new(); bmesh.ops.create_cube(bm, size=1.0); bm.to_mesh(me); bm.free()
     o = bpy.data.objects.new(name, me); sc.collection.objects.link(o); setmat(o, m)
@@ -482,22 +482,15 @@ def lbox(name, x0_, x1_, y0_, y1_, z0_, z1_, m, par, bev=0.0):
     o.parent = par
     if bev: bv = o.modifiers.new("ease", "BEVEL"); bv.width = bev; bv.segments = 3; bv.limit_method = "ANGLE"
     return o
-def mpanel(tag, x0_, x1_, par):                      # frame pieces are named van_mirror_fr*: wardrobe2.py dresses them in hammered brass
-    lbox(f"{tag}_glass", x0_ + MFR - 6, x1_ - MFR + 6, 4, 10, MFR - 6, MH - MFR + 6, M_MIRROR, par)
-    lbox(f"{tag}_back", x0_ + 2, x1_ - 2, 0, 4, 2, MH - 2, M_DARK, par)
-    for nm, (a_, b_, c_, d_) in {"l": (x0_, x0_ + MFR, 0, MH), "r": (x1_ - MFR, x1_, 0, MH), "b": (x0_ + MFR, x1_ - MFR, 0, MFR), "t": (x0_ + MFR, x1_ - MFR, MH - MFR, MH)}.items():
-        lbox(f"van_mirror_fr_{tag}{nm}", a_, b_, 0, MT, c_, d_, M_BRASS, par, 0.003)
-    # the ribbed inner strip of the dressing mirror's frame, in miniature: short ribs across the frame by the glass
-    bm_ = bmesh.new(); rect = [(x0_ + MFR - 3, MFR - 3), (x1_ - MFR + 3, MFR - 3), (x1_ - MFR + 3, MH - MFR + 3), (x0_ + MFR - 3, MH - MFR + 3)]
-    for i in range(4):
-        (ua, za), (ub, zb) = rect[i], rect[(i + 1) % 4]; L = math.hypot(ub - ua, zb - za); n = int(L // 3.6)
-        horiz = abs(zb - za) < 1
-        for q in range(n):
-            t = (q + 0.5) / n; cu, cz = ua + (ub - ua) * t, za + (zb - za) * t
-            Mx = Matrix.Translation((cu / 1000, (MT + 0.8) / 1000, cz / 1000)) @ (Matrix.Identity(4) if horiz else Matrix.Rotation(math.pi / 2, 4, "Y")) @ Matrix.Diagonal((0.0012, 0.0012, 0.006, 1))
-            bmesh.ops.create_cone(bm_, cap_ends=True, segments=6, radius1=1.0, radius2=1.0, depth=1.0, matrix=Mx)
-    me_ = bpy.data.meshes.new(f"van_mirror_fr_rib{tag}"); bm_.to_mesh(me_); bm_.free()
-    rb_ = bpy.data.objects.new(f"van_mirror_fr_rib{tag}", me_); sc.collection.objects.link(rb_); rb_.parent = par; setmat(rb_, M_BRASS)
+def mpanel(tag, x0_, x1_, par):                      # FRAMELESS (owner, 9 Oct): a polished bevelled glass panel, nothing round it
+    g = lbox(f"van_mirror_{tag}_glass", x0_, x1_, 0, 8, 0, MH, M_MIRROR, par, 0.0032)
+    for sg_ in g.modifiers: sg_.segments = 3
+    if tag == "c":                                   # the centre panel stands off the wall on four small round brass standoffs
+        for zx in (45, MH - 45):
+            for ux in (x0_ + 45, x1_ - 45):
+                bpy.ops.mesh.primitive_cylinder_add(vertices=20, radius=0.0075, depth=0.018, location=((ux) / 1000, 0.0, zx / 1000))
+                so_ = bpy.context.active_object; so_.rotation_euler = (math.pi / 2, 0, 0); so_.location = (ux / 1000, -0.009, zx / 1000)
+                so_.parent = par; setmat(so_, M_BRASS); so_.name = f"van_mirror_fr_standoff{ux:.0f}_{zx}"
 vmc = bpy.data.objects.new("van_mirror", None); sc.collection.objects.link(vmc); vmc.location = P(AXx, VS1 - 18, MZ0)
 mpanel("c", -MCW / 2, MCW / 2, vmc)
 for sx in (1, -1):

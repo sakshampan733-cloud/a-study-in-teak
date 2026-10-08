@@ -17,7 +17,7 @@ const BATH = {
   win: { x0: 380, x1: 990, sill: 1829, h: 305 },     // the bathroom window, 2 ft × 1 ft (owner, 8 Oct) — sill NOT measured
   door: { x0: 0, x1: 762, lin: 38, leaf: 686 },      // D3, from the dressing room, hinged on the left going in
   bay: 1219, deep: 1041,                             // WC and shower: 4 ft wide, 3 ft 5 in from the wall (owner)
-  glass: { t: 10, h: 2000, door: 600 },              // clear toughened, frameless, 6 ft 6¾ in — ASSUMED
+  glass: { t: 10, h: 2769, door: 600 },              // clear toughened, frameless, FLOOR TO CEILING (owner, 9 Oct)
   wc: { w: 360, l: 540, rim: 400, plate: 1000 },     // wall-hung on the 7 in wall, cistern inside it — ASSUMED type
   tub: { w: 800, l: 1700, h: 600, rim: 60, y0: 250 },   // freestanding oval, 5 ft 7 × 2 ft 7½ — ASSUMED
   van: { x0: 1016, x1: 2540, d: 610, bank: [1169, 2083], bowl: 406 },   // scheme C, 5 ft × 2 ft, against the pier
@@ -116,7 +116,7 @@ const BATH = {
       o += RC(c - 70, Z(1150), c + 70, Z(1010), `fill="${CHR}" stroke-width="${t * 0.8}"`) + `<circle cx="${c}" cy="${Z(1080)}" r="30" fill="none" stroke-width="${t * 0.7}"/>`;
       o += `<path d="M ${c} ${Z(2280)} L ${c} ${Z(2200)}" stroke-width="${t * 2}"/>` + RC(c - 125, Z(2200), c + 125, Z(2180), `fill="${CHR}" stroke-width="${t * 0.8}"`);
       o += RC(x1W + 60, Z(8), x2S - 60, Z(0), `fill="${CHR}" stroke="none"`); }
-    // the glass fronts, 2000 high: fixed panels, the two doors (lines meet at the hinge side), the edge-on divider and side
+    // the glass fronts, floor to ceiling: fixed panels, the two doors (lines meet at the hinge side), the edge-on divider and side
     const panels = [[K.chase.d, doorWC[0] - 6], [doorWC[0], doorWC[1], "L"], [doorSH[0], doorSH[1], "L"], [doorSH[1] + 6, x2S]];
     panels.forEach(([a, b, hinge]) => {
       o += RC(a, Z(g), b, Z(0), `fill="${GLS}" fill-opacity="0.45" stroke-width="${t}"`);
@@ -203,7 +203,7 @@ const BATH = {
   s += note(vs.X(tcx + 150), vs.Y(-1020), vs.X(3400), 31, "FILLER", "", "start");
   s += note(vs.X(tcx - 250), vs.Y(-K.tub.h + 60), vs.X(3400), 38, "TUB, CUT", "", "start");
   s += chainV([vs.Y(-K.drop), vs.Y(-K.H)], vs.X((x1W + x2S) / 2) + 2, [K.H - K.drop], { from: vs.X(x2S) - 2, size: 1.0 });
-  s += note(vs.X(x1W + 200), vs.Y(-K.drop - 150), vs.X(1950), 24.5, "CEILING DROPPED 1 FT OVER THE SHOWER — 8 FT", "SHOWER BAY ONLY · THE GLASS OPEN ABOVE");
+  s += note(vs.X(x1W + 200), vs.Y(-K.drop - 150), vs.X(1950), 24.5, "CEILING DROPPED 1 FT OVER THE SHOWER — 8 FT", "SHOWER BAY ONLY · THE GLASS RUNS UP TO THE CEILING");
 
   // assumed and to ask
   s += heading(258, 158, "ASSUMED", "FROM THE SKETCH — TELL ME IF ANY OF THESE IS WRONG", 150);

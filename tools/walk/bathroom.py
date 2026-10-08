@@ -10,7 +10,7 @@ from mathutils import Vector
 
 BX = lambda x: BA["x0"] + x
 BY = lambda y: BA["s0"] + y
-CHASE_D, CHASE_L, BAY, DEEP, GL_H = 178.0, 1092.0, 1219.0, 1041.0, 2000.0
+CHASE_D, CHASE_L, BAY, DEEP, GL_H = 178.0, 1092.0, 1219.0, 1041.0, 2769.0          # the glass runs to the ceiling (owner, 9 Oct)
 X1W, X2S = CHASE_D + BAY, CHASE_D + 2 * BAY                     # the WC | shower divider, the shower's east side
 DROP = 2438.0                                                    # the shower's ceiling, 8 ft
 M_GLASS = None
@@ -73,7 +73,7 @@ for sy in (-1, 1):
     setmat(bpy.context.active_object, M_CHROME)
 bbox("bath_flush", CHASE_D, wc_y - 115, 920, CHASE_D + 8, wc_y + 115, 1080, M_CHROME, 0.002)
 
-# ── the glass: fronts in one line, the divider, the shower's east side; 10 mm clear, 2000 high, chrome hinges ──
+# ── the glass: fronts in one line, the divider, the shower's east side; 10 mm clear, floor to ceiling, chrome hinges ──
 for nm, (x0, y0, x1, y1) in {"front": (CHASE_D, DEEP, X2S, DEEP + 10), "div": (X1W - 5, 10, X1W + 5, DEEP), "east": (X2S - 5, 10, X2S + 5, DEEP + 10)}.items():
     bbox(f"bath_glass_{nm}", x0, y0, 0, x1, y1, GL_H, M_GLASS)
 for x_ in (X1W - 640, X1W + 20, X1W + 600):                       # door joints and hinges
@@ -143,7 +143,8 @@ bbox("bath_filler", TCX - 14, 130, 0, TCX + 14, 158, 1040, M_CHROME, 0.006)
 bbox("bath_filler_spout", TCX - 14, 130, 1010, TCX + 14, 330, 1040, M_CHROME, 0.006)
 
 # ── the window over the WC (size still to measure): frosted glass in a bronze frame ──
-mf_, ntf_, bf_ = node_mat("frosted"); bf_.inputs["Transmission Weight"].default_value = 1.0; bf_.inputs["Roughness"].default_value = 0.45
+mf_, ntf_, bf_ = node_mat("frosted"); bf_.inputs["Base Color"].default_value = (0.74, 0.76, 0.80, 1); bf_.inputs["Roughness"].default_value = 0.6
+bf_.inputs["Emission Color"].default_value = (0.78, 0.86, 1.0, 1); bf_.inputs["Emission Strength"].default_value = 0.8       # frosted glass: a soft daylight glow, not a white hole
 bbox("bath_win_glass", BWX0, -T / 2 - 6, BWS, BWX1, -T / 2 + 6, BWS + BWH, mf_)
 for nm, (a, b, c, d) in {"l": (BWX0, BWX0 + 40, BWS, BWS + BWH), "r": (BWX1 - 40, BWX1, BWS, BWS + BWH), "b": (BWX0, BWX1, BWS, BWS + 40), "t": (BWX0, BWX1, BWS + BWH - 40, BWS + BWH)}.items():
     bbox(f"bath_win_{nm}", a, -70, c, b, -40, d, M_BRONZE)
@@ -157,6 +158,6 @@ for i, (x_, y_) in enumerate(SPOTS_B):
     z_ = H
     bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.032, depth=0.004, location=P(BX(x_), BY(y_), z_ - 2)); setmat(bpy.context.active_object, M_TRIM)
     bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.022, depth=0.003, location=P(BX(x_), BY(y_), z_ - 4)); setmat(bpy.context.active_object, M_DISC)
-    ld = bpy.data.lights.new(f"bath_spot{i + 1}", "SPOT"); ld.spot_size = math.radians(55); ld.spot_blend = 0.7; ld.shadow_soft_size = 0.015; ld.energy = 9; warm(ld, 3000)
+    ld = bpy.data.lights.new(f"bath_spot{i + 1}", "SPOT"); ld.spot_size = math.radians(62); ld.spot_blend = 0.45; ld.shadow_soft_size = 0.02; ld.energy = float(os.environ.get("BATH_SPOT", 160)); warm(ld, 3000)   # bright, so each makes its own pool on the polished floor (owner, 9 Oct)
     so = bpy.data.objects.new(f"bath_spot{i + 1}", ld); sc.collection.objects.link(so); so.location = P(BX(x_), BY(y_), z_ - 12)
 print(f"bathroom: chase + 2 niches, WC, glass, shower drop at {DROP:.0f} with 4 coves, tub, window, {len(SPOTS_B)} spots", flush=True)
