@@ -158,9 +158,10 @@ function overview() {
 
   // The film: the rendered walk-through (tools/walk/make_film.sh), shot by shot. Start times are seconds into the film —
   // each shot is 12 frames shorter than it was rendered, where it dissolves into the next.
-  const FILM = [["From the door", 0], ["The reveal", 5.75], ["The partition", 11.25], ["The study", 16.25], ["The desk", 21.25], ["The sconces", 26.25], ["The bed", 31.75],
-    ["The dressing-room door", 37.5], ["The dressing room", 43], ["The vault", 48.5], ["The vanity", 53.5]];
-  const walk = `<section class="section" style="padding-bottom:24px">${head("The walk-through", "Walk the rooms.", "Rendered in Blender from the drawings, in the real finishes and light: in through the door, the partition, the study and desk, the bed, the dressing room and the vanity. The bed back, the way the curved drawers open and the wardrobe interiors are not designed yet, so they are shown as placeholders.")}</section>
+  const FILM = [["From the door", 0.0], ["The reveal", 5.75], ["The partition", 11.25], ["The study", 16.25], ["The arch", 21.25], ["The desk", 26.25],
+    ["The sconces", 31.25], ["The bed", 36.75], ["The hide", 42.5], ["The dressing-room door", 47.5], ["The dressing room", 53.0], ["The vault", 58.5],
+    ["The hidden door", 63.5], ["The tunnel", 70.0], ["The vanity", 75.0], ["The bath", 80.0], ["The WC and shower", 85.0]];
+  const walk = `<section class="section" style="padding-bottom:24px">${head("The walk-through", "Walk the rooms.", "Rendered in Blender from the drawings, in the real finishes and light: in through the door, past the partition to the study and its arches, the desk, the bed, the dressing room, the hidden door and its tunnel, and the bathroom — vanity, bath, WC and shower.")}</section>
     <section class="film reveal" id="film"><div class="wrap"><div class="film-frame"><video controls playsinline muted preload="none" poster="media/room-film-poster.jpg"></video></div>
       <div class="film-music"><div class="film-song"><div id="film-song"></div></div>
         <div class="film-song-t"><span class="mono">Soundtrack</span><b>Devil In A New Dress</b><span>Kanye West ft. Rick Ross · plays with the film, from the start</span></div></div>
@@ -254,6 +255,7 @@ function mountModel() {
     ["film", () => true, mountFilm, null],
     ["p2d", () => window.SUITE2D?.mount, (el) => window.SUITE2D.mount(el), "Plan unavailable"],
     ["p3d", () => window.PARTITION3D?.mount, (el) => window.PARTITION3D.mount(el, { tv: true }), "Model unavailable"],
+    ["swp", () => window.SWITCHPLAN?.mount, (el) => window.SWITCHPLAN.mount(el), "Planner unavailable"],
   ];
   const run = new Map();
   mounts = new IntersectionObserver((es) => es.forEach((e) => {
@@ -456,9 +458,7 @@ function lighting() {
     : `<div class="sheet-card reveal"><div class="empty">Switch boards not mapped yet</div></div>`;
   return pageHero("lighting", "Switch plan", "Lighting & Switches", L.intro) +
     `<section class="bone on-bone index-strip" data-light><div class="eyebrow" style="text-align:center" data-decode>The one rule</div><div class="tally-ink" style="font:400 20px/1.2 var(--cond);color:var(--void)">${esc(L.dimmers[0]?.rule || "")}</div></section>` +
-    `<div class="group-label"><span class="eyebrow" data-decode>01 · Dimmer groups</span></div><div class="cards">${dims}</div>
-    <div class="group-label"><span class="eyebrow" data-decode>02 · By zone</span></div><div class="sheets" style="margin-top:0">${zones}</div>
-    <div class="group-label"><span class="eyebrow" data-decode>03 · Switch boards</span></div><div class="sheets" style="margin-top:0">${boards}</div>
+    `<div class="group-label"><span class="eyebrow" data-decode>01 · The switch planner</span></div><div id="swp"></div>
     ${(L.notes || []).length ? `<div class="asks reveal" style="margin-top:var(--gap)"><span class="eyebrow">Notes</span><ul class="ask-list notes">${L.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul></div>` : ""}` +
     pointers("lighting") + nextLink("lighting") + footer();
 }

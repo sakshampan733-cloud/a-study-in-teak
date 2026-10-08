@@ -765,12 +765,12 @@ window.PROJECT = {
 
   // ── Lighting & switch plan ──────────────────────────────────
   lighting: {
-    intro: "Which switch turns on which light, grouped by zone. Dimmer groups can span several switches.",
+    intro: "Which switch works which light. Every light in the suite as it is now built, on the switch boards from your electric plan — put any light on any switch, make it dim, give it a slow glow-up, mark what is automated, then press the switches and watch the plan light up.",
     notes: [
-      "The lighting/RCP photo on the Overview is out of date — the plan has changed since it was taken (drawn up months ago). Treat it as a starting point only, to be rechecked before anything here is treated as final.",
-      "Bulb colour — to see at the shop. The cove and focus lights are currently 4000 K natural white (8 W).",
-      "At 4000 K the reddish teak goes flat and the cream paint and parchment turn cold. 2700–3000 K suits everything chosen so far.",
-      "Keep 4000 K only where you need to see properly: the bathroom mirror and the desk task light.",
+      "Colours decided (owner, 7–8 Oct): coves, focus spots and LED strips 3000 K; the lamps 2700 K; the whole bathroom 2700 K.",
+      "Switches: Norisys TG9 toggles on modular plates — a toggle hole is 1M, a socket window 2M, a USB-C or Ethernet window 1M (the owner's electric plan in Canva).",
+      "Glow-up (soft start) and dimming need dimmable LED drivers matched to the dimmers — confirm the dimmer type with the electrician before the drivers are bought.",
+      "The planner keeps your changes in this browser. Use Copy for Claude to send them back so the drawings and this site follow, and Print for the electrician for the schedule.",
     ],
     zones: [
       { id: "bedroom",  name: "Bedroom" },
