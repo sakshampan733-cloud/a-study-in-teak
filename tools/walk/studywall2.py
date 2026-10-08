@@ -209,3 +209,10 @@ for z_ in (890, 1160, 1430, 1700):
     ld.size, ld.size_y = (BX1 - BX0 - 2 * STILE - 20) / 1000, 0.014; ld.energy = float(os.environ.get("SHELF_LED", 12)); warm(ld, 3000)
     lo_ = bpy.data.objects.new(f"book_strip_s{z_}", ld); sc.collection.objects.link(lo_); lo_.location = P((BX0 + BX1) / 2, FACE - 46, z_ - 4)
 print("study wall: a strip light under each of the 4 shelves", flush=True)
+
+# ═══ the window's right reveal lined in the veneer (owner, 8 Oct: "this strip is empty, looks weird, it should have
+#     veneer"): the side wall inside the bay, from the window frame to the unit's face, the counter up into the arch —
+#     so the bay is wood on both sides, as the left reveal already is ═══
+rl_ = dbox("st2_wrev_r", xR - 12, GLASS_S, CTOP, xR, FACE, gW["ys"] + 40, M_VEN); bevel(rl_, 0.002, 2)
+dbox("st2_wrev_r_edge", xR - 18, FACE - 6, CTOP, xR, FACE, gW["ys"] + 40, M_VEN)              # a slim lipping on its front edge
+print("study wall: the window's right reveal lined in veneer", flush=True)

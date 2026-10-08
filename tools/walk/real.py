@@ -851,14 +851,14 @@ def sfold(t, z):                                                            # so
 for j in range(73):
     h = j / 72; row = []
     for i in range(241):
-        t = i / 240; x = AX0 + 6 + (AX1 - AX0 - 12) * t; z = SH_Z0 + (arch_z(x) + TUCK - SH_Z0) * h
+        t = i / 240; x = AX0 + 6 + (AX1 - AX0 - 30) * t; z = SH_Z0 + (arch_z(x) + TUCK - SH_Z0) * h
         row.append((x, SH_S + 14 * (sfold(t, z) - 0.5) * 2 + 3 * math.sin(z / 350 + i * 0.05), z))
     rows.append(row)
 pleated("curtain_sheer", rows, M_SHEER, 0.0008)
 # the velvet: from the arch, swept back to the jambs, tied, flaring to the counter
 VS, VTIE, VBOT = 22.0, 1250.0, CTOP + 14.0                                  # its line: behind the niches (50–230 off the wall)
 TIE_W, BOT_W = 185.0, 300.0                                                 # each panel's width gathered at the tie, and at the counter
-for k_, (jx, d) in enumerate(((AX0 + 4, 1), (AX1 - 4, -1))):
+for k_, (jx, d) in enumerate(((AX0 + 4, 1), (AX1 - 22, -1))):                # (the right jamb now lined: 18 in from the plaster)
     rv = random.Random(31 + k_); half = abs(ACX - jx) + 4
     NF = 9; wts = [rv.uniform(0.7, 1.35) for _ in range(NF)]; tot = sum(wts)
     edges = [0.0]

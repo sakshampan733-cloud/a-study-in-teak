@@ -14,7 +14,7 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const SW2 = {
-  rev: "2 — curtains inside the window arch, no rods; a focus light in each niche; a strip light under each shelf (owner, 8 Oct)",
+  rev: "2 — curtains inside the window arch, no rods; a focus light in each niche; a strip light under each shelf; the right reveal veneered (owner, 8 Oct)",
   date: "08.10.2026",
   W: 4547, H: 2769,                          // 14 ft 11 in wall, 9 ft 1 in ceiling (measured)
   base: { h: 646, top: 40, d: 255, over: 25, plinth: 100, door: 22 },   // cupboards; counter 686 = window sill
@@ -325,6 +325,8 @@ const SW2 = {
     // window bay: panelling to 200, the reveal lining back to the frame
     o += `<rect x="${xZone[0]}" y="0" width="${WN.arch}" height="${WN.set}" ${hatch}/><rect x="${xZone[0]}" y="0" width="${WN.arch}" height="${WN.set}" fill="none"/>`;
     o += `<path d="M ${xWin[0]} ${WN.set} L ${xWin[0]} ${WN.glass + 35}" ${W(th * 1.2)}/><path d="M ${xZone[0]} ${WN.set} L ${xWin[0]} ${WN.set}" ${W(th)}/>`;
+    // the right reveal lined in the veneer too (owner, 8 Oct): 12 on the plaster, frame to face, a lipped front edge
+    o += `<rect x="${K.W - 12}" y="${WN.glass + 35}" width="12" height="${WN.set - WN.glass - 35}" ${hatch}/><rect x="${K.W - 12}" y="${WN.glass + 35}" width="12" height="${WN.set - WN.glass - 35}" fill="none" ${W(th)}/>`;
     if (arched) o += nicheP(gW, N.cW) + `<line x1="${xWin[0]}" y1="${WN.glass + 40}" x2="${K.W}" y2="${WN.glass + 40}" stroke-dasharray="${dash}" ${W(th)}/>`;
     // curtains overhead (dashed). With the arches: both tracks bent to the arch — the sheer's on the lining by the glass,
     // the velvet's let into the soffit behind the niches; the tied-back stacks at the jambs. Without: the rods.
