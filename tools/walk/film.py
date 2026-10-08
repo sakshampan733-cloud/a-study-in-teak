@@ -30,9 +30,13 @@ SHOTS = [
         {"open": ("door_d2",), "ev": 1.3, "tilt": True}),
     # the bathroom (8 Oct): the vanity square on — marble bank, red-burl ends, the tri-fold, the door beside it — then the tub
     ("s10_vanity", 132, ((4777 + 1500, 1150, 1450), (4777 + 1250, 2718, 1150)), ((4777 + 1300, 1380, 1430), (4777 + 1250, 2718, 1150)), 15, 6.3,
-        {"ev": 0.5}),
+        {"ev": 0.8}),
     ("s11_bath", 132, ((4777 + 1150, 2050, 1500), (4777 + 3300, 950, 900)), ((4777 + 1450, 1900, 1500), (4777 + 3300, 700, 900)), 18, 6.3,
-        {"ev": 0.5}),
+        {"ev": 0.8}),
+    # the WC and the shower (owner, 8 Oct: "you don't show my shower or my WC"): from by the tub, a slow drift across the
+    # glass — the wall-hung WC and its niches beyond, the shower's mixer, hand shower and rain panel
+    ("s11b_wc", 132, ((4777 + 2400, 2350, 1550), (4777 + 900, 450, 1200)), ((4777 + 2150, 2050, 1500), (4777 + 1000, 400, 1250)), 18, 6.3,
+        {"ev": 0.8}),
     # the dressing room's hidden door: the wardrobe pair turns and slides, the door swings, and on into the tunnel
     ("s12_mech", 168, ((6900, 3950, 1450), (8100, 5550, 1250)), ((7050, 4150, 1450), (8100, 5550, 1250)), 20, 5.6,
         {"open": ("door_d2",), "ev": 1.0, "mech": 8}),

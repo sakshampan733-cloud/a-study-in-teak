@@ -6,6 +6,9 @@
 # east of the pier with a floor-standing filler; the owner's ten spots (his light plan, 7 Oct); marble walls, as the
 # owner's photo. The vanity (scheme C) is built just before this, in real.py.
 import bpy, bmesh, math
+# the bathroom's light is warmer than the room's (owner, 8 Oct: "the lights are not warm enough… in the whole washroom"):
+# every spot and cove at 2700 K, and at night the frosted window is only a faint warm glow, not daylight
+BATH_K = float(os.environ.get("BATH_K", 2700))
 from mathutils import Vector
 
 BX = lambda x: BA["x0"] + x
@@ -118,7 +121,7 @@ for i, (x0, y0, x1, y1) in enumerate(CV):
     bbox(f"bath_cove{i}_strip", min(x0, x1) - (0 if x0 != x1 else 9), min(y0, y1) - (0 if y0 != y1 else 9), DROP - 4,
          max(x0, x1) + (0 if x0 != x1 else 9), max(y0, y1) + (0 if y0 != y1 else 9), DROP, M_STRIP)
     ld = bpy.data.lights.new(f"bath_cove{i}", "AREA"); ld.shape = "RECTANGLE"
-    ld.size, ld.size_y = (L_, 0.018) if y0 == y1 else (0.018, L_); ld.energy = 24 * L_; warm(ld, 3000)
+    ld.size, ld.size_y = (L_, 0.018) if y0 == y1 else (0.018, L_); ld.energy = 24 * L_; warm(ld, BATH_K)
     lo = bpy.data.objects.new(f"bath_cove{i}", ld); sc.collection.objects.link(lo); lo.location = P(BX((x0 + x1) / 2), BY((y0 + y1) / 2), DROP - 8)
 
 # ── the tub: a freestanding oval, 5 ft 7 × 2 ft 7½, east of the pier; a floor-standing filler at its head ──
@@ -142,22 +145,22 @@ for p_ in met.polygons: p_.use_smooth = True
 bbox("bath_filler", TCX - 14, 130, 0, TCX + 14, 158, 1040, M_CHROME, 0.006)
 bbox("bath_filler_spout", TCX - 14, 130, 1010, TCX + 14, 330, 1040, M_CHROME, 0.006)
 
-# ── the window over the WC (size still to measure): frosted glass in a bronze frame ──
-mf_, ntf_, bf_ = node_mat("frosted"); bf_.inputs["Base Color"].default_value = (0.74, 0.76, 0.80, 1); bf_.inputs["Roughness"].default_value = 0.6
-bf_.inputs["Emission Color"].default_value = (0.78, 0.86, 1.0, 1); bf_.inputs["Emission Strength"].default_value = 0.8       # frosted glass: a soft daylight glow, not a white hole
+# ── the window over the WC: frosted glass in a bronze frame ──
+mf_, ntf_, bf_ = node_mat("frosted"); bf_.inputs["Base Color"].default_value = (0.30, 0.28, 0.26, 1)       # a night pane: dark, not a white hole; bf_.inputs["Roughness"].default_value = 0.6
+bf_.inputs["Emission Color"].default_value = (1.0, 0.80, 0.58, 1); bf_.inputs["Emission Strength"].default_value = 0.10      # frosted glass at night: the street's faint warm glow
 bbox("bath_win_glass", BWX0, -T / 2 - 6, BWS, BWX1, -T / 2 + 6, BWS + BWH, mf_)
 for nm, (a, b, c, d) in {"l": (BWX0, BWX0 + 40, BWS, BWS + BWH), "r": (BWX1 - 40, BWX1, BWS, BWS + BWH), "b": (BWX0, BWX1, BWS, BWS + 40), "t": (BWX0, BWX1, BWS + BWH - 40, BWS + BWH)}.items():
     bbox(f"bath_win_{nm}", a, -70, c, b, -40, d, M_BRONZE)
-ld = bpy.data.lights.new("bath_daylight", "AREA"); ld.size, ld.size_y = (BWX1 - BWX0) / 1000, BWH / 1000; ld.energy = 10; warm(ld, 5200)
+ld = bpy.data.lights.new("bath_daylight", "AREA"); ld.size, ld.size_y = (BWX1 - BWX0) / 1000, BWH / 1000; ld.energy = 1.0; warm(ld, 3200)                                       # night: barely anything comes in
 lo = bpy.data.objects.new("bath_daylight", ld); sc.collection.objects.link(lo); lo.location = P(BX((BWX0 + BWX1) / 2), BY(25), BWS + BWH / 2)
 lo.rotation_euler = (math.radians(-90), 0, 0); lo.visible_camera = False; lo.visible_glossy = False   # into the room
 
-# ── the owner's ten spots (his light plan, 7 Oct), recessed in the ceiling, 3000 K ──
+# ── the owner's ten spots (his light plan, 7 Oct), recessed in the ceiling, 2700 K (8 Oct) ──
 SPOTS_B = [(889, 483), (1092, 483), (533, 2388), (1753, 2388), (533, 1575), (1727, 1549), (2616, 1499), (3251, 483), (3302, 1524), (3302, 2362)]
 for i, (x_, y_) in enumerate(SPOTS_B):
     z_ = H
     bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.032, depth=0.004, location=P(BX(x_), BY(y_), z_ - 2)); setmat(bpy.context.active_object, M_TRIM)
     bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.022, depth=0.003, location=P(BX(x_), BY(y_), z_ - 4)); setmat(bpy.context.active_object, M_DISC)
-    ld = bpy.data.lights.new(f"bath_spot{i + 1}", "SPOT"); ld.spot_size = math.radians(62); ld.spot_blend = 0.45; ld.shadow_soft_size = 0.02; ld.energy = float(os.environ.get("BATH_SPOT", 160)); warm(ld, 3000)   # bright, so each makes its own pool on the polished floor (owner, 9 Oct)
+    ld = bpy.data.lights.new(f"bath_spot{i + 1}", "SPOT"); ld.spot_size = math.radians(62); ld.spot_blend = 0.45; ld.shadow_soft_size = 0.02; ld.energy = float(os.environ.get("BATH_SPOT", 160)); warm(ld, BATH_K)   # bright, so each makes its own pool on the polished floor (owner, 9 Oct)
     so = bpy.data.objects.new(f"bath_spot{i + 1}", ld); sc.collection.objects.link(so); so.location = P(BX(x_), BY(y_), z_ - 12)
 print(f"bathroom: chase + 2 niches, WC, glass, shower drop at {DROP:.0f} with 4 coves, tub, window, {len(SPOTS_B)} spots", flush=True)

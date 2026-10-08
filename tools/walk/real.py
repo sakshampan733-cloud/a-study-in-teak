@@ -1044,7 +1044,7 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
 }
 EV_BASE = None
 EVX = {"wd_open": 1.0, "wd_shoes": 1.0, "h_wardrobe": 0.9, "dress": 0.8, "h_dress": 0.8, "vault": 0.8, "mirror": 0.8,      # exposure lifts by view:
-       "bath_van": 0.5, "bath_van2": 0.5, "bath_wc": 0.5, "bath_tub": 0.5, "bath_up": 0.5, "d2close": 0.3}               # interiors with less light
+       "bath_van": 0.8, "bath_van2": 0.8, "bath_wc": 0.8, "bath_tub": 0.8, "bath_up": 0.8, "d2close": 0.3}               # interiors with less light
 def shoot(name):
     global EV_BASE
     cp, tp = VIEWS[name][:2]
