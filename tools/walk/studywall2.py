@@ -216,3 +216,17 @@ print("study wall: a strip light under each of the 4 shelves", flush=True)
 rl_ = dbox("st2_wrev_r", xR - 12, GLASS_S, CTOP, xR, FACE, gW["ys"] + 40, M_VEN); bevel(rl_, 0.002, 2)
 dbox("st2_wrev_r_edge", xR - 18, FACE - 6, CTOP, xR, FACE, gW["ys"] + 40, M_VEN)              # a slim lipping on its front edge
 print("study wall: the window's right reveal lined in veneer", flush=True)
+
+# ═══ the counter frame's two small lights (owner, 9 Oct: "the counter frame looks dark… two small lights like the
+#     niche"): two recessed focus spots in the soffit over the centre bay, like the niches', tipped a little toward the
+#     wall to wash the frame and the painting, 3000 K ═══
+for k_, dx_ in enumerate((-300.0, 300.0)):
+    cxk = (CX0 + CX1) / 2 + dx_
+    for z_off, rad, dep, m_, tag in ((2, 0.026, 0.004, M_TRIM, "trim"), (4.5, 0.016, 0.002, M_DISC, "lens")):
+        bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=rad, depth=dep, location=P(cxk, 150, YOPEN - z_off))
+        bpy.context.active_object.name = f"st2_c_spot_{tag}{k_}"; setmat(bpy.context.active_object, m_)
+    ld = bpy.data.lights.new(f"st2_c_spot{k_}", "SPOT"); ld.spot_size = math.radians(40); ld.spot_blend = 0.5; ld.shadow_soft_size = 0.006
+    ld.energy = float(os.environ.get("NICHE_SPOT", 3)); warm(ld, 3000)
+    so_ = bpy.data.objects.new(f"st2_c_spot{k_}", ld); sc.collection.objects.link(so_); so_.location = P(cxk, 150, YOPEN - 14)
+    so_.rotation_euler = (math.radians(18), 0, 0)                       # toward the wall
+print("study wall: two small spots over the counter frame", flush=True)
