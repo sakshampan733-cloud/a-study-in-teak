@@ -20,13 +20,40 @@ _nt.links.new(_vo.outputs["Distance"], _bp.inputs["Height"]); _nt.links.new(_bp.
 for o in sc.objects:
     if o.type == "MESH" and o.name.startswith(("wdN", "wdS")) and ("_h0" in o.name or "_h1" in o.name): setmat(o, M_HBRASS)
 
-# ── the wardrobe handles after the owner's photo (wardrobe-handle-ref-owner.webp): a tall faceted bar of dark hammered
-#    brass standing off the door on two posts, its six facets catching a bright polished edge ──
-M_HANDLE = flat("handle_antique_brass", (0.20, 0.13, 0.055), 0.32, 1.0)
-_hn = M_HANDLE.node_tree; _hb_ = _hn.nodes["Principled BSDF"]
-_hv = _hn.nodes.new("ShaderNodeTexVoronoi"); _hv.inputs["Scale"].default_value = 210
-_hbp = _hn.nodes.new("ShaderNodeBump"); _hbp.inputs["Strength"].default_value = 0.8; _hbp.inputs["Distance"].default_value = 0.0008
+# ── the wardrobe handles, after the owner's photo (wardrobe-handle-ref-owner.webp), redone 9 Oct ("hammered brass"): a
+#    chunky faceted bar — a flattened hexagon 38 wide, 22 proud, 450 long — whose faces are really hammered (dents cut
+#    into the metal by displacement, not just a texture), bright brass that darkens in the dents and is polished on the
+#    edges, standing off the door on two posts ──
+M_HAMMER, _hn, _hb_ = node_mat("hammered_brass_handle")
+_hb_.inputs["Metallic"].default_value = 1.0; _hb_.inputs["Roughness"].default_value = 0.22
+_geo = _hn.nodes.new("ShaderNodeNewGeometry"); _cr = _hn.nodes.new("ShaderNodeValToRGB")
+_cr.color_ramp.elements[0].position = 0.42; _cr.color_ramp.elements[1].position = 0.56
+_cr.color_ramp.elements[0].color = (0.36, 0.22, 0.08, 1); _cr.color_ramp.elements[1].color = (0.86, 0.62, 0.30, 1)
+_hn.links.new(_geo.outputs["Pointiness"], _cr.inputs["Fac"]); _hn.links.new(_cr.outputs["Color"], _hb_.inputs["Base Color"])
+_hv = _hn.nodes.new("ShaderNodeTexVoronoi"); _hv.inputs["Scale"].default_value = 160
+_hbp = _hn.nodes.new("ShaderNodeBump"); _hbp.inputs["Strength"].default_value = 0.35; _hbp.inputs["Distance"].default_value = 0.0006
 _hn.links.new(_hv.outputs["Distance"], _hbp.inputs["Height"]); _hn.links.new(_hbp.outputs["Normal"], _hb_.inputs["Normal"])
+_dent = bpy.data.textures.new("hammer_dents", "VORONOI"); _dent.noise_scale = 0.0065; _dent.distance_metric = "DISTANCE"
+HSEC = [(-19, 0), (19, 0), (19, 9), (11, 22), (-11, 22), (-19, 9)]       # across the door, out of it (mm)
+def hammered_bar(name, hx, face, out_, zc, L=450.0):
+    bm_ = bmesh.new(); rings = []
+    for j in range(91):
+        z = zc - L / 2 + L * j / 90
+        taper = 1.0 if 6 < j < 84 else 0.94                                # the ends eased
+        rings.append([bm_.verts.new(P(hx + a * taper, face + out_ * (2 + b * taper), z)) for a, b in HSEC])
+    n = len(HSEC)
+    for ra, rb in zip(rings, rings[1:]):
+        for k in range(n): bm_.faces.new((ra[k], ra[(k + 1) % n], rb[(k + 1) % n], rb[k]))
+    bm_.faces.new(rings[0][::-1]); bm_.faces.new(rings[-1])
+    bmesh.ops.recalc_face_normals(bm_, faces=bm_.faces[:])
+    me = bpy.data.meshes.new(name); bm_.to_mesh(me); bm_.free()
+    o = bpy.data.objects.new(name, me); sc.collection.objects.link(o); setmat(o, M_HAMMER)
+    bv_ = o.modifiers.new("edge", "BEVEL"); bv_.width = 0.0015; bv_.segments = 2; bv_.limit_method = "ANGLE"
+    sd_ = o.modifiers.new("fine", "SUBSURF"); sd_.levels = 2; sd_.render_levels = 3; sd_.subdivision_type = "SIMPLE"
+    dp_ = o.modifiers.new("dents", "DISPLACE"); dp_.texture = _dent; dp_.strength = -0.0011; dp_.mid_level = 0.0; dp_.texture_coords = "GLOBAL"
+    sm_ = o.modifiers.new("soft", "SUBSURF"); sm_.levels = 0; sm_.render_levels = 1
+    for p_ in me.polygons: p_.use_smooth = True
+    return o
 nh = 0
 for o in list(sc.objects):
     if o.type != "MESH" or not o.name.startswith(("wdN", "wdS", "tb")) or not (o.name.endswith("_h0") or o.name.endswith("_h1")): continue
@@ -34,69 +61,23 @@ for o in list(sc.objects):
     if dr: ds0, ds1 = _bb(dr)[1], _bb(dr)[4]; face, out_ = (hs0, 1) if abs(hs0 - ds1) < abs(hs1 - ds0) else (hs1, -1)
     else: face, out_ = hs0, 1
     hx = (hx0 + hx1) / 2; nm_ = o.name; bpy.data.objects.remove(o, do_unlink=True)
-    bpy.ops.mesh.primitive_cylinder_add(vertices=6, radius=0.0155, depth=0.44, location=P(hx, face + out_ * 40, 1200))
-    bar = bpy.context.active_object; bar.name = nm_; bar.data.materials.append(M_HANDLE); bar.data.materials.append(M_BRASS)
-    bv_ = bar.modifiers.new("edge", "BEVEL"); bv_.width = 0.0016; bv_.segments = 2; bv_.limit_method = "ANGLE"; bv_.material = 1
-    for zp in (1200 - 165, 1200 + 165):
-        bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=0.0055, depth=0.028, location=P(hx, face + out_ * 14, zp))
+    hammered_bar(nm_, hx, face + out_ * 26, out_, 1200)
+    for zp in (1200 - 175, 1200 + 175):
+        bpy.ops.mesh.primitive_cylinder_add(vertices=20, radius=0.0065, depth=0.03, location=P(hx, face + out_ * 13, zp))
         po = bpy.context.active_object; po.name = nm_ + f"_post{zp}"; po.rotation_euler = (math.pi / 2, 0, 0); setmat(po, M_BRASS)
     nh += 1
-print(f"wardrobe handles: {nh} faceted hammered-brass bars (owner's photo)", flush=True)
+print(f"wardrobe handles: {nh} chunky hammered-brass bars, dents in the metal (owner's photo)", flush=True)
 
 for o in sc.objects:                                                          # the dressing mirror's frame: hammered brass (owner)
-    if o.type == "MESH" and (o.name.startswith(("mirror_c", "van_mirror_fr")) and o.name != "mirror_cg"): setmat(o, M_HBRASS)   # + the bathroom's mini tri-fold
-# ── the dressing mirror's frame after the owner's photos (mirror-frame-ref-1/2-owner): two strips — a ribbed strip next
-#    to the glass and a hammered strip outside it — on the centre panel and on both wings (which had no frame) ──
-def _box(bm_, O, ex, ez, n, u0, u1, z0, z1, d0, d1):
-    vs = [bm_.verts.new(O + ex * (u / 1000) + ez * (z / 1000) + n * (d / 1000)) for u, z, d in
-          ((u0, z0, d0), (u1, z0, d0), (u1, z1, d0), (u0, z1, d0), (u0, z0, d1), (u1, z0, d1), (u1, z1, d1), (u0, z1, d1))]
-    for f in ((0, 1, 2, 3), (4, 7, 6, 5), (0, 4, 5, 1), (1, 5, 6, 2), (2, 6, 7, 3), (3, 7, 4, 0)): bm_.faces.new([vs[i] for i in f])
-def _ribs(bm_, O, ex, ez, n, u0, u1, z0, z1, d, pitch=4.2, ln=11.0, r=1.8):
-    rect = [(u0, z0), (u1, z0), (u1, z1), (u0, z1)]; cen = ((u0 + u1) / 2, (z0 + z1) / 2)
-    for i in range(4):
-        (ua, za), (ub, zb) = rect[i], rect[(i + 1) % 4]; L = math.hypot(ub - ua, zb - za); k = int(L // pitch)
-        T = (ex * (ub - ua) + ez * (zb - za)).normalized(); N = n.cross(T)
-        mid = O + ex * ((ua + ub) / 2000) + ez * ((za + zb) / 2000); c0 = O + ex * (cen[0] / 1000) + ez * (cen[1] / 1000)
-        if N.dot(c0 - mid) < 0: N = -N
-        for q in range(k):
-            t = (q + 0.5) / k; c = O + ex * ((ua + (ub - ua) * t) / 1000) + ez * ((za + (zb - za) * t) / 1000) + n * (d / 1000)
-            Mx = Matrix.Translation(c) @ Matrix(((T.x, n.x, N.x, 0), (T.y, n.y, N.y, 0), (T.z, n.z, N.z, 0), (0, 0, 0, 1))) @ Matrix.Diagonal((r / 1000, r / 1000, ln / 1000, 1))
-            bmesh.ops.create_cone(bm_, cap_ends=True, segments=8, radius1=1.0, radius2=1.0, depth=1.0, matrix=Mx)
-def _mesh(name, bm_, m):
-    me = bpy.data.meshes.new(name); bm_.to_mesh(me); bm_.free()
-    o = bpy.data.objects.new(name, me); sc.collection.objects.link(o); setmat(o, m); return o
+    if o.type == "MESH" and o.name.startswith("van_mirror_fr"): setmat(o, M_HBRASS)          # the bathroom mirror's hinges and standoffs
+# ── the dressing mirror: FRAMELESS (owner, 9 Oct — the hammered frame "has no definition"): the glass runs the full
+#    height and width of the centre panel, its backing dark and out of sight; the wings are bare glass as they were ──
 _cg = sc.objects.get("mirror_cg"); _cs = sc.objects.get("mirror_c")
 if _cg and _cs:
-    gx0, gs0, gz0, gx1, gs1, gz1 = _bb(_cg); cx0_, cs0_, cz0_, cx1_, cs1_, cz1_ = _bb(_cs)
-    ez_ = Vector((0, 0, 1))
-    # the centre panel: ribbed strip round the glass, on the hammered slab's face
-    bm_ = bmesh.new(); O = Vector(P(gx1, gs0, gz0)); ex_ = Vector((0, -1, 0)); n_ = Vector((-1, 0, 0))
-    _ribs(bm_, O, ex_, ez_, n_, -8, (gs1 - gs0) + 8, -8, (gz1 - gz0) + 8, 1.0)
-    _mesh("mirror_c_ribs", bm_, M_HBRASS)
-    # the wings: a frame (hammered outer strip + ribbed inner strip) on each
-    for w_ in ("mirror_w0", "mirror_w1"):
-        wo = sc.objects.get(w_)
-        if not wo: continue
-        vs = [wo.matrix_world @ v.co for v in wo.data.vertices]
-        lo = [v for v in vs if v.z < 0.01]
-        far = max(lo, key=lambda v: (v - Vector(P(gx1, (gs0 + gs1) / 2, 0))).length)                 # the wing's free end
-        near = min(lo, key=lambda v: (v - Vector(P(gx1, (gs0 + gs1) / 2, 0))).length)
-        ex_ = (far - near); ex_.z = 0; wl = ex_.length * 1000; ex_.normalize()
-        n_ = Vector((-ex_.y, ex_.x, 0))
-        if n_.dot(Vector(P(gx1 - 1500, (gs0 + gs1) / 2, 0)) - near) < 0: n_ = -n_                   # the face toward the room
-        th = 25.0; O = near + n_ * 0.0                                                                  # band edge on the face side
-        # find the face plane: the band's vertices furthest along n_
-        dmax = max((v - near).dot(n_) for v in lo); O = near - n_ * ((near - near).dot(n_)) + n_ * 0.0
-        O = Vector((near.x, near.y, 0)) + n_ * (dmax - (near - Vector((near.x, near.y, 0))).dot(n_))
-        O = O - ex_ * 0.0
-        u_a = min((v - O).dot(ex_) for v in lo) * 1000; u_b = max((v - O).dot(ex_) for v in lo) * 1000
-        H_ = max(v.z for v in vs) * 1000
-        bm_ = bmesh.new()
-        for (u0, u1, z0, z1) in ((u_a, u_a + 30, 0, H_), (u_b - 30, u_b, 0, H_), (u_a + 30, u_b - 30, 0, 60), (u_a + 30, u_b - 30, H_ - 60, H_)):
-            _box(bm_, O, ex_, ez_, n_, u0, u1, z0, z1, 0, 7)
-        _mesh(w_ + "_frame", bm_, M_HBRASS)
-        bm_ = bmesh.new(); _ribs(bm_, O, ex_, ez_, n_, u_a + 26, u_b - 26, 56, H_ - 56, 8.0); _mesh(w_ + "_ribs", bm_, M_HBRASS)
-    print("dressing mirror: two-strip frame (ribbed + hammered) on the centre and both wings", flush=True)
+    cx0_, cs0_, cz0_, cx1_, cs1_, cz1_ = _bb(_cs)
+    bpy.data.objects.remove(_cg, do_unlink=True); setmat(_cs, M_DARK)
+    g_ = dbox("mirror_cg", cx0_ - 3, cs0_ + 1, 1, cx0_, cs1_ - 1, cz1_ - 1, M_MIRROR); bevel(g_, 0.0015, 2)
+    print("dressing mirror: frameless (glass the full panel)", flush=True)
 
 M_LITBACK = glow("wardrobe_litback", (1.0, 1.0, 1.0), float(os.environ.get("WD_GLOW", 1.6)))   # warm white, 3000 K like the coves (owner: warm, not yellow)
 _lt = M_LITBACK.node_tree; _lbb = _lt.nodes.new("ShaderNodeBlackbody"); _lbb.inputs["Temperature"].default_value = 3000

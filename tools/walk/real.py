@@ -1002,6 +1002,7 @@ VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
     "st_lamp": ((2300, 2330, 1400), (1430, 1880, 1180), {"lens": 26, "fstop": 4.0}),   # the Tommy Shelby lamp at the desk's left end
     "mould_c": ((2600, 1100, 1500), (2337, 0, 1450), {"lens": 26, "fstop": 5.6}),       # the counter frame's carving, close
     "mould_r": ((3300, 3600, 1500), (4547, 3700, 1500), {"lens": 35, "fstop": 5.6}),   # the right wall's layered frames and pearls
+    "wd_handle": ((7350, 4250, 1350), (7040, 3700, 1200), {"lens": 45, "fstop": 2.8}),   # the hammered-brass handles, close
     "st_chair": ((3600, 2250, 1300), (2337, 1050, 650), {"lens": 26, "fstop": 5.6}),   # the green chair at the desk
     "hide_close": ((3350, 3150, 520), (2700, 3700, 0), {"lens": 32, "fstop": 4.0}),     # low over the hide's fur
     "wd_open": ((7000, 4950, 1500), (7000, 3300, 1250), {"lens": 15, "fstop": 6.3}),   # L2 and L3 open, square on from the aisle: shirts, the lit perfume niche

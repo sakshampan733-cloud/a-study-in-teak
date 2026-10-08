@@ -305,7 +305,7 @@ if STYLE and DESK_TOP:
     tcx = (tx0 + tx1) / 2
     seat = ts0 + 40                                                    # the sitter's edge: the drawer side, toward the study wall
     # the blotter: oxblood leather in a darker leather frame
-    M_LEA = leather("leather_oxblood", (0.065, 0.010, 0.008)); M_LEA2 = leather("leather_dark", (0.022, 0.009, 0.006), 0.38)   # a deep oxblood, not pink
+    M_LEA = leather("leather_oxblood", (0.032, 0.0055, 0.0045)); M_LEA2 = leather("leather_dark", (0.022, 0.009, 0.006), 0.38)   # a deep oxblood, not pink
     bw, bd = 600, 420; bs0 = seat + 40
     bpy.ops.mesh.primitive_cube_add(size=1, location=P(tcx, bs0 + bd / 2, TZ + 3)); bl = bpy.context.active_object
     bl.scale = (bw / 1000, bd / 1000, 0.006); solid("blotter", STY, M_LEA2, 0.002, 3)
@@ -328,34 +328,56 @@ if STYLE and DESK_TOP:
             o.location = Vector(P(cx_, cs_, 0)) + Vector((rel.x * math.cos(a) - rel.y * math.sin(a), rel.x * math.sin(a) + rel.y * math.cos(a), o.location.z))
             o.rotation_euler.z += a
         z += t
-    # the desk lamp from the owner's Peaky Blinders still (Tommy Shelby's desk): a tall turned column in dark bronze on a
-    # stepped square foot, brass collars, a brass gallery, and a white opal glass shade, lit — at the left-hand end
-    lx, ls = tx0 + 210, (ts0 + ts1) / 2 + 70
-    M_OPAL = glow("opal_glass", (1.0, 0.64, 0.36), 0.55)                   # milky opaline glass, glowing warm from the bulb inside (2700 K)
-    def lathe(name, prof, m, cx, cs, z0, seg=48, smooth=True):
-        bm = bmesh.new(); rings = [[bm.verts.new(P(cx + r * math.cos(2 * math.pi * k / seg), cs + r * math.sin(2 * math.pi * k / seg), z0 + z)) for k in range(seg)] for r, z in prof]
+    # the desk lamp (owner, 9 Oct: "the green lamp we had before"): a banker's lamp at the left-hand end — an oval brass
+    # base stepped twice, a slim brass stem rising to a yoke, a pull chain, and the half-round shade of cased glass, deep
+    # emerald outside and white opal inside, glowing warm underneath (2700 K)
+    lx, ls = tx0 + 230, (ts0 + ts1) / 2 + 60
+    M_OPAL = glow("opal_glass", (1.0, 0.78, 0.5), 1.4)
+    mg, ntg, bgl = node_mat("banker_glass")
+    bgl.inputs["Base Color"].default_value = (0.012, 0.16, 0.05, 1); bgl.inputs["Roughness"].default_value = 0.04
+    bgl.inputs["Transmission Weight"].default_value = 0.45; bgl.inputs["Coat Weight"].default_value = 1.0; bgl.inputs["IOR"].default_value = 1.52
+    def lathe(name, prof, m, cx, cs, z0, seg=64, smooth=True, sx=1.0):
+        bm = bmesh.new(); rings = [[bm.verts.new(P(cx + sx * r * math.cos(2 * math.pi * k / seg), cs + r * math.sin(2 * math.pi * k / seg), z0 + z)) for k in range(seg)] for r, z in prof]
         for ra, rb in zip(rings, rings[1:]):
             for k in range(seg):
                 f_ = bm.faces.new((ra[k], ra[(k + 1) % seg], rb[(k + 1) % seg], rb[k])); f_.smooth = smooth
         bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
         me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
         o = bpy.data.objects.new(name, me); STY.objects.link(o); setmat(o, m); return o
-    M_DBRONZE = flat("lamp_bronze", (0.035, 0.028, 0.022), 0.32, 1.0)
-    for nm, (w, z0, z1) in {"foot0": (150, 0, 26), "foot1": (118, 26, 44), "foot2": (90, 44, 58)}.items():
-        bpy.ops.mesh.primitive_cube_add(size=1, location=P(lx, ls, TZ + (z0 + z1) / 2)); o_ = bpy.context.active_object
-        o_.scale = (w / 1000, w / 1000, (z1 - z0) / 1000); solid(f"lamp_{nm}", STY, M_DBRONZE, 0.003, 3)
-    lathe("lamp_column", [(0, 58), (20, 58), (24, 70), (17, 96), (15, 200), (16, 330), (14, 470), (18, 520), (12, 540), (0, 540)], M_DBRONZE, lx, ls, TZ)
-    for zc in (70, 330, 520):
-        lathe(f"lamp_collar{zc}", [(0, zc - 7), (22, zc - 7), (25, zc), (22, zc + 7), (0, zc + 7)], M_BRASS, lx, ls, TZ)
-    lathe("lamp_gallery", [(0, 540), (48, 540), (52, 548), (46, 556), (40, 556), (0, 556)], M_BRASS, lx, ls, TZ)
-    lathe("lamp_shade", [(36, 556), (62, 572), (86, 610), (92, 650), (80, 700), (52, 735), (24, 752), (0, 756)], M_OPAL, lx, ls, TZ)
-    _sh = sc.objects.get("lamp_shade")
-    if _sh:
-        _ss = _sh.modifiers.new("smooth", "SUBSURF"); _ss.levels = 2; _ss.render_levels = 3
-        for p_ in _sh.data.polygons: p_.use_smooth = True
-    lathe("lamp_finial", [(0, 752), (8, 754), (10, 766), (4, 780), (0, 784)], M_BRASS, lx, ls, TZ)
-    ld = bpy.data.lights.new("lamp_bulb", "POINT"); ld.energy = 6; ld.shadow_soft_size = 0.03; warm(ld, 2700)   # lamps 2700 K (owner, 7 Oct)
-    lo = bpy.data.objects.new("lamp_bulb", ld); STY.objects.link(lo); lo.location = Vector(P(lx, ls, TZ + 640))
+    # the base: oval, 1.5 : 1, stepped, with a moulded rim
+    lathe("lamp_base", [(0, 0), (82, 0), (86, 4), (86, 9), (80, 14), (66, 16), (62, 22), (52, 26), (40, 28), (0, 28)], M_BRASS, lx, ls, TZ, sx=1.45)
+    lathe("lamp_stem", [(0, 28), (14, 28), (12, 40), (9, 46), (9, 250), (12, 258), (12, 268), (0, 268)], M_BRASS, lx, ls, TZ)
+    # the yoke: a bar across under the shade, two short arms up into its ends
+    bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.005, depth=0.21, location=P(lx, ls, TZ + 268)); y_ = solid("lamp_yoke", STY, M_BRASS, 0)
+    y_.rotation_euler = (0, math.pi / 2, 0)
+    for sx_ in (-1, 1):
+        bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=0.004, depth=0.04, location=P(lx + sx_ * 104, ls, TZ + 286)); solid(f"lamp_arm{sx_}", STY, M_BRASS, 0)
+    # the shade: half a cylinder lying across, 240 long, its ends closed by quarter-spheres; cased glass (solidify: emerald
+    # outside, opal inside), tipped a little toward the chair
+    me = bpy.data.meshes.new("lamp_shade_g"); bm = bmesh.new(); R_, L_, seg = 0.074, 0.20, 40
+    rows = []
+    for j in range(25):
+        u = j / 24; x = -L_ / 2 - R_ * 0.55 + (L_ + R_ * 1.1) * u
+        cap = max(0.0, abs(x) - L_ / 2) / (R_ * 0.55)                         # the rounded ends
+        r = R_ * math.sqrt(max(0.0, 1 - cap * cap))
+        rows.append([bm.verts.new((x, r * math.cos(math.pi * i / seg), r * math.sin(math.pi * i / seg) * 0.92)) for i in range(seg + 1)])
+    for a_, b_ in zip(rows, rows[1:]):
+        for i in range(seg):
+            if (a_[i].co - a_[i + 1].co).length > 1e-6 or (b_[i].co - b_[i + 1].co).length > 1e-6:
+                bm.faces.new((a_[i], a_[i + 1], b_[i + 1], b_[i]))
+    bmesh.ops.remove_doubles(bm, verts=bm.verts[:], dist=1e-6); bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    bm.to_mesh(me); bm.free()
+    sh = bpy.data.objects.new("lamp_shade", me); STY.objects.link(sh); sh.location = Vector(P(lx, ls, TZ + 282)); sh.rotation_euler = (math.radians(-12), 0, 0)
+    sh.data.materials.append(mg); sh.data.materials.append(M_OPAL)
+    for p_ in me.polygons: p_.use_smooth = True
+    so = sh.modifiers.new("t", "SOLIDIFY"); so.thickness = 0.003; so.material_offset = 1; so.offset = -1
+    ss_ = sh.modifiers.new("s", "SUBSURF"); ss_.levels = 1; ss_.render_levels = 2
+    # the pull chain: a string of little brass beads hanging from under the shade, a pull at its end
+    for k in range(14):
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=8, ring_count=4, radius=0.0018, location=P(lx + 40, ls + 30, TZ + 262 - k * 5)); solid(f"lamp_chain{k}", STY, M_BRASS, 0)
+    bpy.ops.mesh.primitive_cone_add(vertices=16, radius1=0.005, radius2=0.002, depth=0.016, location=P(lx + 40, ls + 30, TZ + 186)); solid("lamp_pull", STY, M_BRASS, 0)
+    ld = bpy.data.lights.new("lamp_bulb", "POINT"); ld.energy = 7; ld.shadow_soft_size = 0.03; warm(ld, 2700)   # lamps 2700 K (owner, 7 Oct)
+    lo = bpy.data.objects.new("lamp_bulb", ld); STY.objects.link(lo); lo.location = Vector(P(lx, ls, TZ + 270))
     # a small ceramic vase on the study counter, by the window
     vs_ = [o for o in sc.objects if o.name == "glass_win"]
     if vs_:
