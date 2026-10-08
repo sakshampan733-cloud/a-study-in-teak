@@ -406,7 +406,10 @@ function tabPage(t) {
       </details>
     </section>`;
   }).join("");
-  return pageHero(t.id, t.kicker, t.title, t.intro) + index + pointers(t.id) + items + nextLink(t.id) + footer();
+  const rd = t.renders || [];
+  const renders = rd.length ? `<section class="renders reveal" id="renders-${t.id}"><div class="gallery-label"><span class="eyebrow" data-decode>Renders · ${pad2(rd.length)}</span>${rd.length > 3 ? `<div class="gallery-nav"><button class="btn" data-gal="-1" aria-label="Previous">←</button><button class="btn" data-gal="1" aria-label="Next">→</button></div>` : ""}</div>
+    <div class="gallery${rd.length < 3 ? " few" : ""}">${rd.map((r) => `<figure class="shot" data-open="img:${esc(U(r.src))}"><div class="frame"><img src="${esc(U(r.src))}" alt="${esc(r.caption)}" loading="lazy"></div><figcaption>${esc(r.caption)}</figcaption></figure>`).join("")}</div></section>` : "";
+  return pageHero(t.id, t.kicker, t.title, t.intro) + renders + index + pointers(t.id) + items + nextLink(t.id) + footer();
 }
 
 function veneer() {

@@ -329,6 +329,7 @@ window.PROJECT = {
   tabs: [
     {
       id: "doors", title: "Doors & Moulding", kicker: "Three doors, one design",
+      renders: [{ src: "assets/renders/d1close.jpg", caption: "The entrance door" }],
       intro: "All three doors are to look the same. Each door is the sum of three separate decisions — design, veneer and polish — plus the moulding around it.",
       items: [
         {
@@ -386,6 +387,7 @@ window.PROJECT = {
     },
     {
       id: "study", title: "Study", kicker: "Desk & study wall",
+      renders: [{ src: "assets/renders/st_wall.jpg", caption: "The study wall from over the desk" }, { src: "assets/renders/st_wall3.jpg", caption: "Across the desk to the window arch" }, { src: "assets/renders/st_arch.jpg", caption: "Up into the bookcase arch and its niche lights" }, { src: "assets/renders/mould_c.jpg", caption: "The counter frame's carving" }, { src: "assets/renders/window.jpg", caption: "The window arch with its curtains hung inside it" }, { src: "assets/renders/r_desk.jpg", caption: "The desk" }, { src: "assets/renders/st_chair.jpg", caption: "The green chair at the desk" }, { src: "assets/renders/st_chairf.jpg", caption: "The chair, close" }, { src: "assets/renders/st_lamp.jpg", caption: "The banker's lamp" }],
       intro: "",
       items: [
         {
@@ -474,6 +476,7 @@ window.PROJECT = {
     },
     {
       id: "walls", title: "Left & Right Walls", kicker: "Wall treatments",
+      renders: [{ src: "assets/renders/h_right.jpg", caption: "The right wall" }, { src: "assets/renders/mould_r.jpg", caption: "The right wall's moulding" }],
       intro: "",
       items: [
         {
@@ -524,6 +527,7 @@ window.PROJECT = {
     },
     {
       id: "bedroom", title: "Bedroom", kicker: "TV unit · bed · headboard",
+      renders: [{ src: "assets/renders/b_three.jpg", caption: "The bed, three-quarter view" }, { src: "assets/renders/b_front.jpg", caption: "The bed, from the foot" }, { src: "assets/renders/r_bed.jpg", caption: "Pillows and wall lamp" }, { src: "assets/renders/b_head.jpg", caption: "The headboard" }, { src: "assets/renders/b_rug.jpg", caption: "The hide at the foot of the bed" }, { src: "assets/renders/st_close.jpg", caption: "The side table" }, { src: "assets/renders/r_pbed.jpg", caption: "The partition and TV, from the bed" }, { src: "assets/renders/b_cove.jpg", caption: "The bed-wall niche and its cove" }],
       intro: "",
       items: [
         {
@@ -613,6 +617,7 @@ window.PROJECT = {
     },
     {
       id: "dressing", title: "Dressing", kicker: "Wardrobes · mirror",
+      renders: [{ src: "assets/renders/h_dress.jpg", caption: "The dressing room" }, { src: "assets/renders/h_wardrobe.jpg", caption: "The wardrobes" }, { src: "assets/renders/vault.jpg", caption: "The vaulted ceiling" }, { src: "assets/renders/mirror.jpg", caption: "The dressing mirror" }, { src: "assets/renders/wd_handle.jpg", caption: "The hammered brass handles" }, { src: "assets/renders/d2close.jpg", caption: "The dressing door" }],
       intro: "",
       items: [
         {
@@ -709,6 +714,7 @@ window.PROJECT = {
     },
     {
       id: "bathroom", title: "Bathroom", kicker: "Vanity · painted ceiling",
+      renders: [{ src: "assets/renders/bath_van.jpg", caption: "The vanity" }, { src: "assets/renders/bath_van2.jpg", caption: "The vanity and the door beside it" }, { src: "assets/renders/bath_wc.jpg", caption: "The WC and shower, behind the glass" }, { src: "assets/renders/bath_tub.jpg", caption: "The tub" }, { src: "assets/renders/bath_up.jpg", caption: "The shower ceiling and its cove" }],
       intro: "",
       items: [
         {
