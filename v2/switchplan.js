@@ -34,7 +34,7 @@
   const SLOT = {
     sw: { k: "h", n: "Switch" }, dim: { k: "h", n: "LED dimmer" }, fan: { k: "h", n: "Fan regulator" }, bell: { k: "h", n: "Bell push" }, scene: { k: "h", n: "Scene key" }, spare: { k: "h", n: "Blank" },
     s6: { k: "s", n: "Socket 6A" }, s16: { k: "s", n: "Socket 16A" }, s13: { k: "s", n: "Multi socket 13A" },
-    usbc: { k: "w", n: "USB-C charger" }, usbac: { k: "w", n: "USB A + C charger" }, eth: { k: "w", n: "Ethernet" }, tv: { k: "w", n: "TV point" }, blankw: { k: "w", n: "Blank" },
+    usbc: { k: "w", n: "USB-C charger" }, nightlamp: { k: "w", n: "Night lamp" }, usbac: { k: "w", n: "USB A + C charger" }, eth: { k: "w", n: "Ethernet" }, tv: { k: "w", n: "TV point" }, blankw: { k: "w", n: "Blank" },
   };
   const BLANK = { h: "spare", s: "s6", w: "blankw" };
   const FEEDS = (t) => ["sw", "dim", "fan", "s6", "s16", "s13"].includes(t);
@@ -83,13 +83,15 @@
     F("tv", "bedroom", "TV", "load", 1, 0, P([2274, 2480])),
     F("soundbar", "bedroom", "Sound bar", "load", 1, 0, P([2274, 2560])),
     F("wifi", "study", "Wi-Fi router", "load", 1, 0, P([4470, 1300])),
+    F("monitor", "study", "Desk · monitor", "load", 1, 0, P([2274, 2260])),
+    F("desk_pc", "study", "Desk · computer / power point", "load", 1, 0, P([2900, 1750])),
     F("geyser", "bathroom", "Geyser", "load", 1, 0, P([BX(3500), 2000])),
     F("exhaust", "bathroom", "Exhaust fan", "load", 1, 0, P([BX(1000), 120])),
   ];
   // ── the boards: the owner's electric plan on the room as it is now, in real TG9 plates (a starting point — change anything) ──
   const S = (t, c = [], extra = {}) => ({ t, c, ...extra });
   const PL = (code, ...slots) => ({ code, slots });
-  const BOARDS = [
+  const BOARDS_CANVA = [
     { id: "entry", name: "By the door · main board", zone: "bedroom", at: [-177, 4760], plates: [PL("9818",
       S("sw", ["sp_left"]), S("sw", ["sp_right"]), S("sw", ["sp_mid"]), S("sw", ["sp_part"]), S("sw", ["cove_l", "cove_r", "cove_b"]), S("dim", ["cove_l", "cove_r", "cove_b"]), S("sw", ["rw_bed"]), S("scene", [], { scene: "off" }))] },
     { id: "bedL", name: "Bed back · left side", zone: "bedroom", at: [1144, 5730], plates: [PL("9128",
@@ -109,13 +111,54 @@
       PL("9142", S("sw", ["desk_lamp"]), S("usbc")), PL("9152", S("s6", ["desk_lamp"])), PL("9146", S("s6"), S("spare"), S("spare"), S("s16")), PL("9132", S("eth"), S("usbc"))] },
     { id: "stRight", name: "Study · right wall", zone: "study", at: [4547, 1250], plates: [PL("9128",
       S("sw", ["wifi"]), S("sw", ["rw_study"]), S("spare"), S("spare"), S("s6", ["wifi"]), S("eth"), S("usbc"))] },
-    { id: "dress", name: "Dressing room · by its door", zone: "dressing", at: [4860, 5500], plates: [
+    { id: "dress", name: "Dressing room · beside the bathroom door", zone: "dressing", at: [4800, 3150], plates: [
       PL("9158", S("sw", ["dr_mid"]), S("sw", ["dr_mirror"]), S("sw", ["dr_coffer", "dr_vault", "dr_door"]), S("dim", ["dr_coffer", "dr_vault", "dr_door"]), S("sw", ["ac_dr"]), S("spare"), S("usbc"), S("usbc")),
       PL("9148", S("s6"), S("sw", ["wd_left"]), S("sw", ["wd_right"]), S("sw", ["tunnel"]), S("spare"), S("s16", ["ac_dr"]))] },
-    { id: "bath", name: "Bathroom · by its door", zone: "bathroom", at: [4900, 2620], plates: [
+    { id: "bath", name: "Bathroom · inside, beside its door", zone: "bathroom", at: [4800, 2450], plates: [
       PL("9818", S("sw", ["b_van"]), S("sw", ["b_wc"]), S("sw", ["b_mid"]), S("sw", ["b_tub"]), S("sw", ["b_cove"]), S("dim", ["b_mid", "b_tub", "b_cove"]), S("sw", ["geyser"]), S("sw", ["exhaust"])),
       PL("9148", S("s6"), S("spare"), S("spare"), S("spare"), S("spare"), S("s16", ["geyser"]))] },
   ];
+  // ── Claude's plan (9 Oct): every circuit on its own switch; the room's main lights two-way between the door and the bed;
+  //    dimmers only where light sets a mood, each kept under the TG9's 100 W; a night lamp on the boards in dark or low
+  //    places; USB-C wherever you sit or stand; Ethernet at the bed, the TV, the desk and the router. 8M plates on the
+  //    walls; smaller where the provision is small — 6M in the dressing room and the middle cabinet, 4M in the bathroom.
+  const BOARDS_CLAUDE = [
+    { id: "entry", name: "By the main door", zone: "bedroom", at: [-177, 4700], plates: [PL("9158",
+      S("sw", ["sp_left"]), S("sw", ["sp_right"]), S("sw", ["sp_mid"]), S("sw", ["sp_part"]), S("sw", ["cove_l", "cove_r", "cove_b"]), S("dim", ["cove_l", "cove_r", "cove_b"]), S("nightlamp"), S("usbc"))] },
+    { id: "bedL", name: "Bed back · left side", zone: "bedroom", at: [1144, 5730], plates: [PL("9128",
+      S("sw", ["bed_l"]), S("dim", ["bed_l"]), S("sw", ["cove_l", "cove_r", "cove_b"]), S("sw", ["sp_left"]), S("s6"), S("usbc"), S("nightlamp"))] },
+    { id: "bedR", name: "Bed back · right side", zone: "bedroom", at: [3531, 5730], plates: [PL("9138",
+      S("sw", ["bed_r"]), S("dim", ["bed_r"]), S("sw", ["sp_right"]), S("usbc"), S("eth"), S("sw", ["ac_bed"]), S("s16"))] },
+    { id: "tv", name: "Partition · beside the TV", zone: "bedroom", at: [2950, 2470], plates: [PL("9178",
+      S("sw", ["tv"]), S("s6", ["tv"]), S("sw", ["soundbar"]), S("s6", ["soundbar"]), S("eth"), S("tv"))] },
+    { id: "deskCol", name: "Partition column · behind the desk", zone: "study", at: [2274, 2340], plates: [PL("9128",
+      S("sw", ["desk_sp"]), S("sw", ["monitor"]), S("sw", ["desk_lamp"]), S("spare"), S("s6", ["monitor"]), S("usbc"), S("eth"))] },
+    { id: "deskUnder", name: "Under the desk", zone: "study", at: [2337, 1700], plates: [PL("9178",
+      S("sw", ["desk_lamp"]), S("s6", ["desk_lamp"]), S("sw", ["desk_pc"]), S("s16", ["desk_pc"]), S("usbc"), S("nightlamp"))] },
+    { id: "stLeft", name: "Study · left wall", zone: "study", at: [-50, 1600], plates: [PL("9818",
+      S("sw", ["st_lamps"]), S("sw", ["st_pairL"]), S("sw", ["st_pairC"]), S("sw", ["st_pairR"]), S("sw", ["desk_sp"]), S("sw", ["shelf"]), S("sw", ["niche_bk", "niche_win"]), S("dim", ["shelf", "niche_bk", "niche_win"]))] },
+    { id: "shelfB", name: "Inside the bookcase", zone: "study", at: [744, 320], plates: [PL("9178",
+      S("sw", ["shelf"]), S("s6"), S("sw", [], { lab: "16A socket" }), S("s16"), S("nightlamp"), S("usbc"))] },
+    { id: "midCab", name: "Inside the middle cabinet (under the counter frame)", zone: "study", at: [2373, 200], plates: [PL("9136",
+      S("sw", ["picture"]), S("sw", ["counter"]), S("dim", ["picture", "counter"]), S("sw", [], { lab: "6A socket" }), S("s6"), S("usbc"), S("nightlamp"))] },
+    { id: "winR", name: "Right wall · by the window (Wi-Fi)", zone: "study", at: [4547, 1000], plates: [PL("9138",
+      S("sw", ["rw_study"]), S("sw", ["st_pairR"]), S("spare"), S("eth"), S("usbc"), S("sw", ["wifi"]), S("s6", ["wifi"]))] },
+    { id: "dressR", name: "Right wall · by the dressing door", zone: "bedroom", at: [4547, 4080], plates: [PL("9138",
+      S("sw", ["rw_bed"]), S("sw", ["sp_mid"]), S("sw", ["dr_mid"]), S("nightlamp"), S("usbc"), S("sw", ["dr_coffer", "dr_vault", "dr_door"]), S("s6"))] },
+    { id: "dress", name: "Dressing room · beside the bathroom door", zone: "dressing", at: [4800, 3150], plates: [PL("9126",
+      S("sw", ["dr_mid"]), S("sw", ["dr_mirror"]), S("sw", ["dr_coffer", "dr_vault", "dr_door"]), S("dim", ["dr_coffer", "dr_vault", "dr_door"]), S("sw", ["wd_left"]), S("sw", ["wd_right"]), S("sw", ["tunnel"]), S("sw", ["ac_dr"]), S("s6"))] },
+    { id: "bath", name: "Bathroom · inside, beside its door", zone: "bathroom", at: [4800, 2450], plates: [PL("9424",
+      S("sw", ["b_van"]), S("sw", ["b_wc"]), S("sw", ["b_mid"]), S("sw", ["b_tub"]), S("sw", ["b_cove"]), S("dim", ["b_mid", "b_tub", "b_cove"]), S("sw", ["exhaust"]), S("sw", ["geyser"]))] },
+  ];
+  const CLAUDE_LIGHTS = {
+    st_pairL: { w: 7 }, st_pairC: { w: 7 }, st_pairR: { w: 7 }, desk_sp: { w: 7 }, sp_part: { w: 7 }, sp_mid: { w: 7 }, sp_left: { w: 7 }, sp_right: { w: 7 },
+    dr_mid: { w: 7 }, dr_mirror: { w: 7 }, b_wc: { w: 7 }, b_van: { w: 7 }, b_mid: { w: 7 }, b_tub: { w: 7 },
+    cove_l: { w: 6, fade: 2 }, cove_r: { w: 6, fade: 2 }, cove_b: { w: 6, fade: 2 }, dr_vault: { w: 6, fade: 2 }, dr_door: { w: 6, fade: 2 }, dr_coffer: { w: 9.6, fade: 2 }, b_cove: { w: 6, fade: 2 },
+    shelf: { w: 4.8 }, st_lamps: { w: 10 }, rw_study: { w: 10 }, rw_bed: { w: 10 }, bed_l: { w: 10, fade: 2 }, bed_r: { w: 10, fade: 2 },
+    wd_left: { w: 9.6, auto: "motion", fade: 1 }, wd_right: { w: 9.6, auto: "motion", fade: 1 }, tunnel: { auto: "motion" },
+    ac_bed: { w: 1500 }, ac_dr: { w: 1200 }, tv: { w: 150 }, soundbar: { w: 60 }, wifi: { w: 15 }, geyser: { w: 2000 }, exhaust: { w: 30 }, monitor: { w: 60 }, desk_pc: { w: 300 },
+  };
+  const ABOUT_CLAUDE = "My plan. Every circuit on its own switch, because you like control. The bedroom's main lights work from the door and from the bed — both sides of the room's spots and the coves — so you never get up to switch off; the middle spots and the dressing lights work from the door and from the dressing door too. Dimmers only where light sets a mood: the three coves together (at 6 W a metre so they stay under the TG9 dimmer's 100 W), each bed lamp, the shelf and niche lights, the picture light and the counter frame, the dressing coves, and the bath. A night lamp on the boards in low or dark places — under the desk, inside the bookcase and the middle cabinet, at the bed, by the door and by the dressing door — so you can find them at night. USB-C wherever you sit or stand; Ethernet at the bed, the TV, the desk and the router. 8M plates on the walls; smaller where the provision is small: 6M in the dressing room and the middle cabinet, 4M in the bathroom.";
   const SCENES = [
     { id: "off", name: "All off", levels: {} },
     { id: "night", name: "Night", levels: { bed_l: 25, bed_r: 25, cove_b: 15 } },
@@ -137,23 +180,44 @@
     K: f.K || 3000, w: f.w ?? WDEF[f.kind] ?? 8, len: perM(f) ? +(f.len ?? lenMM(geoOf(f).lines) / 1000).toFixed(2) : undefined });
   const wattOf = (f) => { const L = st.light[f.id] || {}; return perM(f) ? (+L.w || 0) * (+L.len || 0) : (+L.w || 0) * (f.n || 1); };
   const fmtW = (w) => (w >= 100 ? Math.round(w) : Math.round(w * 10) / 10) + " W";
-  const defaults = () => {
-    const boards = JSON.parse(JSON.stringify(BOARDS));
+  const defaults = (which = "claude") => {
+    const boards = JSON.parse(JSON.stringify(which === "canva" ? BOARDS_CANVA : BOARDS_CLAUDE));
     boards.forEach((b) => b.plates.forEach((p) => { const want = posOf(cat(p.code).lay).map((q) => q.k).join(""), got = p.slots.map((q) => (SLOT[q.t] || SLOT.spare).k).join("");
       if (want !== got) { console.warn("switchplan: plate", b.id, p.code, "wants", want, "has", got); conform(p, p.code); } }));
-    return { v: VER, light: Object.fromEntries(FIX.map((f) => [f.id, lightDefault(f)])), boards, scenes: JSON.parse(JSON.stringify(SCENES)), custom: [] };
+    const over = which === "claude" ? CLAUDE_LIGHTS : {};
+    return { v: VER, light: Object.fromEntries(FIX.map((f) => [f.id, { ...lightDefault(f), ...(over[f.id] || {}) }])), boards, scenes: JSON.parse(JSON.stringify(SCENES)), custom: [] };
   };
   let st, mode = "plan", live = {}, level = {}, root, ed = null, addOpen = false, pl = null, note = "";
   const af = { zone: "dressing", kind: "spot", name: "", n: 1, w: 8, K: 3000, wire: "" };
   const fixAll = () => FIX.concat(st.custom || []);
   const fixById = (id) => fixAll().find((f) => f.id === id);
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
-  function load() {
-    let s = null; try { s = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {}
-    const d = defaults(); if (!s) return d;
-    if (s.v !== VER) { d.custom = s.custom || []; for (const [k, v] of Object.entries(s.light || {})) d.light[k] = { ...d.light[k], ...v }; s = d; }   // the plates are new: boards restart, light settings stay
-    for (const f of FIX.concat(s.custom)) s.light[f.id] = { ...lightDefault(f), ...(s.light[f.id] || {}) };
-    return s;
+  // ── the plans: Claude's, the one from the Canva deck, and any the owner saves (kept in this browser) ──
+  const LIBKEY = "ast.switchplans.v3";
+  let lib;
+  const fixPlan = (s) => { for (const f of FIX.concat(s.custom || [])) s.light[f.id] = { ...lightDefault(f), ...(s.light[f.id] || {}) }; return s; };
+  const freshLib = () => ({ active: "claude", order: ["claude", "canva"], plans: {
+    claude: { name: "Claude's plan", builtin: "claude", about: ABOUT_CLAUDE, st: defaults("claude") },
+    canva: { name: "From your Canva plan", builtin: "canva", about: "Your electric plan from Canva (months ago), carried onto the room as it is now — the same boards and what you listed on each, on real TG9 plates.", st: defaults("canva") } } });
+  function loadLib() {
+    let L = null; try { L = JSON.parse(localStorage.getItem(LIBKEY) || "null"); } catch (e) {}
+    if (!L || !L.plans || !L.order) {
+      L = freshLib();
+      let old = null; try { old = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {}
+      if (old && old.v === VER) { L.plans.earlier = { name: "My earlier changes", st: old }; L.order.push("earlier"); }
+    }
+    L.order = L.order.filter((id) => L.plans[id]);
+    for (const id of L.order) L.plans[id].st = fixPlan(L.plans[id].st);
+    if (!L.plans[L.active]) L.active = L.order[0];
+    return L;
+  }
+  const saveLib = () => { try { localStorage.setItem(LIBKEY, JSON.stringify(lib)); } catch (e) {} };
+  const save = () => { lib.plans[lib.active].st = st; saveLib(); };
+  const usePlan = (id) => { lib.active = id; st = lib.plans[id].st; live = {}; level = {}; ed = null; pl = null; saveLib(); };
+  function newPlanId(name) { const id = "p" + Math.random().toString(36).slice(2, 7); lib.plans[id] = { name, st: null }; lib.order.push(id); return id; }
+  function emptied(src) {         // the same boards and plates, every hole blank, sockets and windows kept, no lights on anything
+    const c = JSON.parse(JSON.stringify(src));
+    c.boards.forEach((b) => b.plates.forEach((p) => p.slots.forEach((q) => { const k = (SLOT[q.t] || SLOT.spare).k; q.c = []; delete q.lab; delete q.scene; if (k === "h") q.t = "spare"; })));
+    return c;
   }
   const esc = (t = "") => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const bNo = (b) => "B" + (st.boards.indexOf(b) + 1);
@@ -197,8 +261,8 @@
     else if (q.t === "dim" || q.t === "fan") face = mode === "try" && q.t === "dim" ? `<input type="range" min="5" max="100" value="${level[key] ?? 100}" data-dim="${key}" aria-label="Dimmer">` : `<span class="knob"></span>`;
     else if (q.t === "scene") face = `<span class="btn-s"></span>`;
     else if (T.k === "s") face = `<span class="sock"><i></i><i></i><i></i></span>`;
-    else face = `<span class="win">${{ usbc: "C", usbac: "A·C", eth: "LAN", tv: "TV", blankw: "" }[q.t] ?? ""}</span>`;
-    const lab = q.t === "scene" ? (st.scenes.find((s) => s.id === q.scene)?.name || "Scene") : names.length ? names.join(" + ") : T.n;
+    else face = `<span class="win${q.t === "nightlamp" ? " nl" : ""}">${{ usbc: "C", usbac: "A·C", eth: "LAN", tv: "TV", blankw: "", nightlamp: "" }[q.t] ?? ""}</span>`;
+    const lab = q.t === "scene" ? (st.scenes.find((s) => s.id === q.scene)?.name || "Scene") : names.length ? names.join(" + ") : q.lab || T.n;
     return `<button class="${cls}" data-slot="${key}" title="${esc(T.n + (names.length ? ": " + names.join(", ") : "") + (over ? ` — ${Math.round(dimLoad(q))} W, over the dimmer's ${DIM_MAX} W` : ""))}">${face}<span class="cap"><b>${String(qi + 1).padStart(2, "0")}${over ? " · OVER" : ""}</b>${esc(lab)}</span></button>`;
   }
   function plateHTML(b, p, pi) {
@@ -284,14 +348,18 @@
     const overDims = []; st.boards.forEach((b) => b.plates.forEach((p) => p.slots.forEach((q) => { if (q.t === "dim" && dimLoad(q) > DIM_MAX) overDims.push(q); })));
     const lightW = fixAll().filter((f) => f.kind !== "load").reduce((a, f) => a + wattOf(f), 0), appW = fixAll().filter((f) => f.kind === "load").reduce((a, f) => a + wattOf(f), 0);
     const part = (k, n) => (c[k] ? `<span><b>${c[k]}</b> ${n}</span>` : "");
-    return `${part("sw", "switches")}${part("dim", "dimmers")}${part("fan", "fan regulators")}${part("scene", "scene keys")}${part("s6", "6A sockets")}${part("s16", "16A sockets")}${part("s13", "13A sockets")}${part("usbc", "USB-C")}${part("usbac", "USB A+C")}${part("eth", "Ethernet")}${part("tv", "TV points")}
+    return `${part("sw", "switches")}${part("dim", "dimmers")}${part("fan", "fan regulators")}${part("scene", "scene keys")}${part("s6", "6A sockets")}${part("s16", "16A sockets")}${part("s13", "13A sockets")}${part("usbc", "USB-C")}${part("nightlamp", "night lamps")}${part("usbac", "USB A+C")}${part("eth", "Ethernet")}${part("tv", "TV points")}
       <span><b>${Object.values(codes).reduce((a, b) => a + b, 0)}</b> plates · ${Object.entries(codes).sort().map(([k, n]) => `${k}×${n}`).join(" ")}</span><span><b>${fmtW(lightW)}</b> of light${appW ? ` · <b>${fmtW(appW)}</b> appliances` : ""}</span>
       ${unsw ? `<span class="warn"><b>${unsw}</b> without a switch</span>` : ""}${overDims.length ? `<span class="warn"><b>${overDims.length}</b> dimmer${overDims.length > 1 ? "s" : ""} over ${DIM_MAX} W</span>` : ""}`;
   }
   function render() {
     const byZone = ZONES.map(([z, zn]) => { const bs = st.boards.filter((b) => b.zone === z); return bs.length ? `<div class="swp-zone"><div class="eyebrow">${zn}</div>${bs.map(boardHTML).join("")}</div>` : ""; }).join("");
-    root.innerHTML = `<div class="swp-bar"><div class="swp-modes"><button class="btn${mode === "plan" ? "" : " steel"}" data-mode="plan">Plan the switches</button><button class="btn${mode === "try" ? "" : " steel"}" data-mode="try">Try it</button>${mode === "plan" ? `<button class="btn steel" data-act="addopen">+ Add lights</button>` : ""}</div>
-        <div class="swp-acts"><button class="btn steel" data-act="copy">Copy for Claude</button><button class="btn steel" data-act="print">Print for the electrician</button><button class="btn steel" data-act="dl">Download</button><button class="btn steel" data-act="ul">Load</button><button class="btn steel" data-act="reset">Start again</button><input type="file" accept=".json,application/json,.txt" id="swp-file" hidden></div></div>
+    const P0 = lib.plans[lib.active];
+    root.innerHTML = `<div class="swp-plans"><span class="mono">Plans</span><div class="chips">${lib.order.map((id) => `<button class="chip${id === lib.active ? " sel" : ""}" data-act="plan" data-p="${id}">${esc(lib.plans[id].name)}</button>`).join("")}</div>
+        <div class="swp-pacts"><button class="mini" data-act="psave">Save a copy as…</button><button class="mini" data-act="pnew">New empty plan</button><button class="mini" data-act="pren">Rename</button>${P0.builtin ? `<button class="mini" data-act="prestore">Restore the original</button>` : `<button class="mini" data-act="pdel">Delete</button>`}</div></div>
+      ${P0.about ? `<p class="swp-about">${esc(P0.about)}</p>` : ""}
+      <div class="swp-bar"><div class="swp-modes"><button class="btn${mode === "plan" ? "" : " steel"}" data-mode="plan">Plan the switches</button><button class="btn${mode === "try" ? "" : " steel"}" data-mode="try">Try it</button>${mode === "plan" ? `<button class="btn steel" data-act="addopen">+ Add lights</button>` : ""}</div>
+        <div class="swp-acts"><button class="btn steel" data-act="copy">Copy for Claude</button><button class="btn steel" data-act="print">Print for the electrician</button><button class="btn steel" data-act="dl">Download</button><button class="btn steel" data-act="ul">Load</button><input type="file" accept=".json,application/json,.txt" id="swp-file" hidden></div></div>
       <div class="swp-totals mono">${totals()}</div>
       <p class="swp-help">${mode === "plan" ? "Click any hole, socket or window on a plate to choose what sits there and which lights it works — a light on two switches becomes two-way. Change a plate with its list: every Norisys TG9 layout is there, with its back-box size. Add lights with + Add lights and click the plan to place them. Watts and colours are in the table below; the starting watts are estimates. Everything saves in this browser." : "Press the switches. Each light glows up at its own speed; dimmers slide. Scene keys set the room in one press."}</p>
       <div class="swp-grid"><div class="swp-planbox"><div class="swp-plan${pl ? " placing" : ""}">${planSVG()}</div>
@@ -300,9 +368,9 @@
       <div class="group-label"><span class="eyebrow">Every light · how it behaves</span></div><div class="swp-lights">${lightsHTML()}</div>`;
   }
   // ── text out: for Claude, and the electrician's schedule ──
-  const slotText = (q) => `${SLOT[q.t]?.n || q.t}${q.t === "scene" ? " — " + (st.scenes.find((s) => s.id === q.scene)?.name || "") : q.c.length ? " — " + q.c.map((id) => fixById(id)?.name || id).join(" + ") : ""}`;
+  const slotText = (q) => `${SLOT[q.t]?.n || q.t}${q.t === "scene" ? " — " + (st.scenes.find((s) => s.id === q.scene)?.name || "") : q.c.length ? " — " + q.c.map((id) => fixById(id)?.name || id).join(" + ") : q.lab ? " — " + q.lab : ""}`;
   function asText() {
-    const lines = ["SWITCH PLAN — A Study in Teak (paste this to Claude)", ""];
+    const lines = [`SWITCH PLAN — "${lib.plans[lib.active].name}" — A Study in Teak (paste this to Claude)`, ""];
     st.boards.forEach((b) => { lines.push(`[${bNo(b)} ${b.name}]`); b.plates.forEach((p, pi) => { const c = cat(p.code); lines.push(`  plate ${pi + 1}: Norisys ${c.code}, ${c.m}M (${descOf(c)}), box ${BOX[c.m]}`); p.slots.forEach((q, qi) => lines.push(`    ${qi + 1}. ${slotText(q)}`)); }); });
     lines.push("", "LIGHTS");
     fixAll().forEach((f) => { const L = st.light[f.id] || {}; lines.push(`  ${f.name} (${zoneName(f.zone)}, ${KINDS[f.kind]}): ${perM(f) ? `${L.w} W/m × ${L.len} m` : `${f.n} × ${L.w} W`} = ${fmtW(wattOf(f))}${f.kind === "load" ? "" : `, ${L.K} K, ${L.dim ? "dims" : "no dim"}, glow-up ${L.fade ? L.fade + " s" : "instant"}`}, ${AUTO[L.auto] || "Manual"}${f.custom ? `, NEW — at ${JSON.stringify(geoOf(f))} (mm: x from the left wall, s from the study wall)` : ""}`); });
@@ -318,7 +386,7 @@
         const note = [q.t === "dim" ? `LED dimmer ${DIM_MAX} W — load ${fmtW(dimLoad(q))}${dimLoad(q) > DIM_MAX ? " (OVER — split it)" : ""}; soft-start ${Math.max(0, ...ls.map((f) => +(st.light[f.id]?.fade || 0)))} s` : "", ways.length && q.t === "sw" ? "two-way" : "",
           q.t === "sw" && ls.length ? fmtW(ls.filter((f) => f.kind !== "load").reduce((a, f) => a + wattOf(f), 0)) : "",
           ...ls.filter((f) => st.light[f.id]?.auto && st.light[f.id].auto !== "none").map((f) => f.name + ": " + AUTO[st.light[f.id].auto])].filter(Boolean).join("; ");
-        return `<tr><td>${qi ? "" : `${pi + 1} · Norisys ${c.code} (${c.m}M · ${descOf(c)})<br>box ${BOX[c.m]} · aluminium TA${c.code.slice(1)}`}</td><td>${qi + 1}</td><td>${SLOT[q.t]?.n || q.t}</td><td>${q.t === "scene" ? "Scene: " + esc(st.scenes.find((s) => s.id === q.scene)?.name || "") : esc(ls.map((f) => f.name).join(" + ") || "—")}</td><td>${esc(note)}</td></tr>`; }).join(""); }).join("")}</table>`).join("");
+        return `<tr><td>${qi ? "" : `${pi + 1} · Norisys ${c.code} (${c.m}M · ${descOf(c)})<br>box ${BOX[c.m]} · aluminium TA${c.code.slice(1)}`}</td><td>${qi + 1}</td><td>${SLOT[q.t]?.n || q.t}</td><td>${q.t === "scene" ? "Scene: " + esc(st.scenes.find((s) => s.id === q.scene)?.name || "") : esc(ls.map((f) => f.name).join(" + ") || q.lab || "—")}</td><td>${esc(note)}</td></tr>`; }).join(""); }).join("")}</table>`).join("");
     const lt = `<h2>Every light</h2><table><tr><th>Light</th><th>Room</th><th>Qty</th><th>Watts</th><th>Total</th><th>Colour</th><th>Dims</th><th>Glow-up</th><th>Automation</th><th>Switched from</th></tr>${fixAll().map((f) => { const L = st.light[f.id] || {}, ld = f.kind === "load";
       return `<tr><td>${esc(f.name)}</td><td>${zoneName(f.zone)}</td><td>${perM(f) ? L.len + " m" : f.n}</td><td>${perM(f) ? L.w + " W/m" : L.w + " W"}</td><td>${wattOf(f) ? fmtW(wattOf(f)) : "—"}</td><td>${ld ? "—" : L.K + " K"}</td><td>${ld ? "—" : L.dim ? "Yes" : "No"}</td><td>${ld ? "—" : L.fade ? L.fade + " s" : "Instant"}</td><td>${AUTO[L.auto] || "Manual"}</td><td>${esc(where(f.id).filter((x) => x.q.t === "sw").map((x) => bNo(x.b) + " #" + (x.qi + 1)).join(", ") || "—")}</td></tr>`; }).join("")}</table>`;
     const codes = {}; st.boards.forEach((b) => b.plates.forEach((p) => (codes[p.code] = (codes[p.code] || 0) + 1)));
@@ -413,7 +481,12 @@
     else if (a === "print") { printSheet(); return; }
     else if (a === "dl") { const u = URL.createObjectURL(new Blob([JSON.stringify(st, null, 1)], { type: "application/json" })); const l = document.createElement("a"); l.href = u; l.download = "switch-plan.json"; l.click(); setTimeout(() => URL.revokeObjectURL(u), 2000); return; }
     else if (a === "ul") { root.querySelector("#swp-file").click(); return; }
-    else if (a === "reset") { if (!confirm("Start again from the suggested plan? Your changes in this browser will be replaced.")) return; st = defaults(); live = {}; level = {}; ed = null; pl = null; }
+    else if (a === "plan") { usePlan(t.dataset.p); render(); return; }
+    else if (a === "psave") { const n = prompt("Name the copy", lib.plans[lib.active].builtin ? "My plan" : lib.plans[lib.active].name + " (copy)"); if (!n) return; const id = newPlanId(n); lib.plans[id].st = JSON.parse(JSON.stringify(st)); usePlan(id); render(); return; }
+    else if (a === "pnew") { const n = prompt("Name the new plan", "Plan B"); if (!n) return; const id = newPlanId(n); lib.plans[id].st = emptied(st); usePlan(id); render(); return; }
+    else if (a === "pren") { const P0 = lib.plans[lib.active], n = prompt("Rename this plan", P0.name); if (!n) return; P0.name = n; saveLib(); render(); return; }
+    else if (a === "pdel") { if (!confirm(`Delete "${lib.plans[lib.active].name}"? This cannot be undone.`)) return; const id = lib.active; lib.order = lib.order.filter((x) => x !== id); delete lib.plans[id]; usePlan(lib.order[0]); render(); return; }
+    else if (a === "prestore") { const P0 = lib.plans[lib.active]; if (!confirm(`Put "${P0.name}" back the way it was? Changes made to it in this browser go.`)) return; st = defaults(P0.builtin); P0.st = st; live = {}; level = {}; ed = null; pl = null; }
     else return;
     save(); render();
   }
@@ -424,7 +497,7 @@
     if (t.dataset.cf) { const f = fixById(t.dataset.l); if (!f) return; f[t.dataset.cf] = t.dataset.cf === "n" ? Math.max(1, +t.value || 1) : t.value; save(); render(); return; }
     if (t.dataset.act === "pcode") { const p = st.boards.find((b) => b.id === t.dataset.b).plates[+t.dataset.p]; conform(p, t.value); ed = null; save(); render(); return; }
     if (t.dataset.af === "wire") { af.wire = t.value; return; }
-    if (t.id === "swp-file" && t.files[0]) { t.files[0].text().then((s) => { try { const j = JSON.parse(s.includes("DATA {") ? s.slice(s.indexOf("DATA {") + 5) : s); if (j.v === VER) { st = j; save(); render(); } else alert("That plan is from an older version."); } catch (err) { alert("That file is not a switch plan."); } }); }
+    if (t.id === "swp-file" && t.files[0]) { t.files[0].text().then((s) => { try { const j = JSON.parse(s.includes("DATA {") ? s.slice(s.indexOf("DATA {") + 5) : s); if (j.v === VER) { st = fixPlan(j); save(); render(); } else alert("That plan is from an older version."); } catch (err) { alert("That file is not a switch plan."); } }); }
   }
   function onInput(e) {
     const t = e.target;
@@ -433,6 +506,9 @@
   }
   const CSS = `
 .swp{margin-top:24px}
+.swp-plans{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin-bottom:10px}.swp-plans>.mono{font-size:11px;color:var(--dim)}.swp-pacts{display:flex;flex-wrap:wrap;gap:6px}
+.swp-about{font:400 15px/1.45 var(--grotesk);color:#e7dccd;max-width:980px;margin:4px 0 18px;padding:14px 16px;border-left:2px solid var(--ember);background:rgba(204,100,55,.06)}
+.win.nl{background:radial-gradient(circle,#ffcf8a 0%,#d7893a 55%,#3a2614 100%);box-shadow:0 0 10px 2px rgba(255,170,80,.55)}
 .swp-bar{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center}
 .swp-modes,.swp-acts{display:flex;flex-wrap:wrap;gap:8px}
 .swp-acts .btn{height:34px;font-size:12px;padding:0 14px}
@@ -518,7 +594,7 @@
   function mount(el) {
     root = el; root.classList.add("swp");
     if (!document.getElementById("swp-css")) { const s = document.createElement("style"); s.id = "swp-css"; s.textContent = CSS; document.head.appendChild(s); }
-    st = load(); render();
+    lib = loadLib(); st = lib.plans[lib.active].st; render();
     root.addEventListener("click", onClick); root.addEventListener("change", onChange); root.addEventListener("input", onInput);
     document.addEventListener("keydown", (e) => { if (e.key === "Escape" && pl && root.isConnected) { pl = null; render(); } });
   }
