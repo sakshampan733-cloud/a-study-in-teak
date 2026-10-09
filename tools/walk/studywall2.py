@@ -161,14 +161,9 @@ spandrel_frame("st2_bk_spanR", gB, gB["R"] + 46, BX1, YENT, -1, FACE)
 # ═══ the window: the arch in its head, a wood panel flush with the frame above it, niches in its soffit ═══
 gW = seg_arch(WX0, WX1, WIN["head"] - 300.0, 300.0)
 GLASS_S = -T / 2 + 40                                                  # the window frame's room face
-bmw = bmesh.new(); n_ = 40
-for side in (-1, 1):
-    arc = [apt(gW, gW["R"], side * gW["th"] * (1 - i / n_)) for i in range(n_ + 1)]
-    xo = WX0 if side < 0 else WX1
-    pts = [(xo, WIN["head"]), (gW["cx"], WIN["head"])] + arc[::-1]
-    vs = [bmw.verts.new(P(x, GLASS_S, z)) for x, z in pts]; bmw.faces.new(vs if side > 0 else vs[::-1])
-pw_ = bm_obj("st2_win_archpanel", bmw, M_VEN)
-so_ = pw_.modifiers.new("t", "SOLIDIFY"); so_.thickness = 0.02
+# the whole arch zone is wood (AST-DR-040: glass seen only up to the springing; owner, 9 Oct: "don't put glass where glass
+# isn't") — a veneered panel flush with the frame from the springing to the head, the arch in front of it
+pw_ = dbox("st2_win_archpanel", WX0, GLASS_S, gW["ys"], WX1, GLASS_S + 20, WIN["head"], M_VEN)
 dbox("st2_win_head", ZX0, GLASS_S, WIN["head"], xR, FACE, YENT, M_VEN)                          # the head over the window, to the crown
 face_with_arch("st2_win_face", gW, ZX0, xR, WIN["head"], FACE, 22, M_VEN)
 soffit("st2_win_soffit", gW, GLASS_S, FACE - 22, FACE - 140, three_niches(gW))
