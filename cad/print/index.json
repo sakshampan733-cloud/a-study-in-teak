@@ -389,5 +389,25 @@
   ],
   "pages": 7,
   "pagesA4": 7
+ },
+ "desk-curved": {
+  "title": "DESK (HOLLOW CORNERS) — GENERAL ARRANGEMENT",
+  "dwgs": [
+   "AST-DR-045",
+   "AST-DR-046",
+   "AST-DR-047"
+  ],
+  "keys": [
+   "desk-curved",
+   "desk-curved-details",
+   "desk-curved-3d"
+  ],
+  "starts": [
+   0,
+   9,
+   19
+  ],
+  "pages": 24,
+  "pagesA4": 24
  }
 }
