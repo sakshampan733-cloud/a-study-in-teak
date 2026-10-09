@@ -14,7 +14,7 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const SW2 = {
-  rev: "2 — curtains inside the window arch, no rods; a focus light in each niche; a strip light under each shelf; the right reveal veneered (owner, 8 Oct)",
+  rev: "3 — the arch shown as a panel in front of the window (curtains not drawn); curtains inside the window arch, no rods; a focus light in each niche; a strip light under each shelf; the right reveal veneered (owner, 8 Oct)",
   date: "08.10.2026",
   W: 4547, H: 2769,                          // 14 ft 11 in wall, 9 ft 1 in ceiling (measured)
   base: { h: 646, top: 40, d: 255, over: 25, plinth: 100, door: 22 },   // cupboards; counter 686 = window sill
@@ -214,23 +214,25 @@ const SW2 = {
     const top = arched ? gW.ys : WN.head;
     // left jamb architrave, stepped (the window is hard into the right-hand corner)
     o += R(w0 - ar, WN.sill, w0, arched ? gW.ys : WN.head + ar) + `<g ${W(th)}>${Ln(w0 - ar + 20, WN.sill, w0 - ar + 20, arched ? gW.ys : WN.head + ar - 20)}${Ln(w0 - ar + 40, WN.sill, w0 - ar + 40, arched ? gW.ys : WN.head + ar - 40)}</g>`;
-    // casements below `top`, glazing bars at thirds
-    o += R(w0, WN.sill, w1, top);
+    // casements, glazing bars at thirds. With the arch the window is untouched behind it: the glass and its bars run up
+    // until the arch's curve hides them (owner, 9 Oct) — the arch is a panel in front, not a cut-down window
+    const upTo = (x) => (arched ? Math.min(WN.head, gW.cy + Math.sqrt(Math.max(0, gW.R * gW.R - (x - gW.cx) ** 2))) : top);
+    o += arched ? Ln(w0, WN.sill, w1, WN.sill) + Ln(w0, WN.sill, w0, upTo(w0)) + Ln(w1, WN.sill, w1, upTo(w1)) : R(w0, WN.sill, w1, top);
     const mid = (w0 + w1) / 2, hgt = WN.head - WN.sill - 40;
     [[w0 + 20, mid - 5], [mid + 5, w1 - 20]].forEach(([a, b]) => {
-      o += Ln(a, WN.sill + 20, a, top, W(th)) + Ln(b, WN.sill + 20, b, top, W(th)) + Ln(a, WN.sill + 20, b, WN.sill + 20, W(th));
+      o += Ln(a, WN.sill + 20, a, upTo(a), W(th)) + Ln(b, WN.sill + 20, b, upTo(b), W(th)) + Ln(a, WN.sill + 20, b, WN.sill + 20, W(th));
       for (let k = 1; k < 3; k++) { const y = WN.sill + 20 + (hgt * k) / 3; if (y < top) o += Ln(a, y, b, y, W(th)); }
-      o += Ln((a + b) / 2, WN.sill + 20, (a + b) / 2, top, W(th));
+      const c = (a + b) / 2; o += Ln(c, WN.sill + 20, c, upTo(c), W(th));
     });
     if (!arched) {
       o += R(w0 - ar, WN.head, w1, WN.head + ar) + Ln(w0 - ar + 20, WN.head + ar - 20, w1, WN.head + ar - 20, W(th)) + Ln(w0, WN.head, w1, WN.head, W(th));
       return o;
     }
     const g = gW, m = K.winArch.mould;
-    // the veneered panel under the arch, set back flush with the window frame: no glass in the arch
+    // the arch's edge: a panel set in front of the window, hiding only the corners above this curve — the glass shows
+    // through the arch right up to it (owner, 9 Oct)
     const aIn = arcPts(g, g.R, -g.th, g.th);
-    o += P([[w0, g.ys], ...aIn, [w1, g.ys]], `fill="#fff" ${W(th * 1.6)}`, true);
-    o += P([[w0 + 30, g.ys + 30], ...arcPts(g, g.R - 30, -angAt(g, g.R - 30, g.ys + 30), angAt(g, g.R - 30, g.ys + 30)), [w1 - 30, g.ys + 30]], W(th * 0.5), true);
+    o += P(aIn, W(th * 1.6));
     // the archivolt, continuing the architrave; it dies into the side wall on the right
     const aO = angAt(g, g.R + m, g.ys), aWall = Math.asin(Math.min(1, (z1 - g.cx) / (g.R + m)));
     o += P(arcPts(g, g.R + m, -aO, Math.min(aO, aWall)), "");
@@ -242,7 +244,7 @@ const SW2 = {
 
   // ── the curtains (approved): red velvet on a rod under the cornice, tied back; white linen sheer under the arch ──
   function curtains(th, arched) {
-    if (arched) return archCurtains(th);
+    if (arched) return "";   // curtains left off the drawing so the arch over the window reads clearly (owner, 9 Oct)
     const CU = K.curtain, sy = arched ? gW.ys - 10 : WN.head - 20, [w0, w1] = xWin, x0 = xZone[0] + 14;
     let o = `<g ${W(th * 0.5)}>`;
     for (let x = w0 + 40; x < w1 - 20; x += 60) o += Ln(x, sy - 10, x, WN.sill + 20, 'stroke-dasharray="40 30"');
@@ -352,7 +354,7 @@ const SW2 = {
     window.DK.begin(key);
     let s = frame() + defs;
     const sc = 20, vE = view(64, 32, sc, `Study wall elevation${arched ? " with arches" : ""}`), tE = vE.w(0.09);
-    s += heading(18, 17, `ELEVATION — STUDY WALL${arched ? ", WITH THE ARCHES" : ", WITHOUT ARCHES"}`, `SCALE 1:${sc} · SEEN FROM THE ROOM · CURTAINS SHOWN TIED BACK`, 150);
+    s += heading(18, 17, `ELEVATION — STUDY WALL${arched ? ", WITH THE ARCHES" : ", WITHOUT ARCHES"}`, `SCALE 1:${sc} · SEEN FROM THE ROOM · ${arched ? "CURTAINS NOT DRAWN" : "CURTAINS SHOWN TIED BACK"}`, 150);
     s += vE.g(elevation(tE, arched), 0.25);
     const yb = vE.Y(ey(0));
     s += chainH([0, xBook[1], xP1[1], xPanel[1], xP2[1], K.W].map(vE.X), yb + 5, [BK.w, PL.w, PNW, PL.w, xZone[1] - xZone[0]], { from: yb + 1, size: 1.25 });
@@ -372,10 +374,10 @@ const SW2 = {
     ER.add(vE.X(xPanel[0] + 600), vE.Y(ey(yCrn + 10)), "SMALLER DENTIL CROWN", "AS OWNER'S PHOTO · NO MODILLIONS");
     ER.add(vE.X(xP2[0] - 22), vE.Y(ey(yCap + 70)), "MOULDED CAPITAL", "BREAKS FORWARD");
     if (arched) {
-      ER.add(vE.X(winC), vE.Y(ey(gW.ys + 150)), "WOOD ARCH IN THE WINDOW HEAD", "VENEERED PANEL, FLUSH WITH THE FRAME — NO GLASS");
+      ER.add(vE.X(winC), vE.Y(ey(gW.ys + 150)), "WOOD ARCH SET IN FRONT OF THE WINDOW", "HIDES ONLY THE TOP CORNERS · THE GLASS RUNS ON BEHIND, NOTHING CUT");
       ER.add(vE.X(winC - 300), vE.Y(ey(gW.ys + gW.rise - 40)), "3 DEEP NICHES IN ITS SOFFIT", "A FOCUS LIGHT IN EACH — SHEET 042");
     }
-    ER.add(vE.X(xZone[0] + 200), vE.Y(ey(1700)), ...(arched ? ["RED VELVET + LINEN SHEER IN THE ARCH", "ON TRACKS IN ITS SOFFIT — NO RODS · TIED BACK"] : ["RED VELVET, TIED BACK", "WHITE LINEN SHEER UNDER THE HEAD"]));
+    ER.add(vE.X(xZone[0] + 200), vE.Y(ey(1700)), ...(arched ? ["CURTAINS NOT DRAWN — SEE THE CURTAINS PAGE", "VELVET + SHEER HANG INSIDE THE ARCH, ON HIDDEN TRACKS"] : ["RED VELVET, TIED BACK", "WHITE LINEN SHEER UNDER THE HEAD"]));
     ER.add(vE.X((xP2[0] + xP2[1]) / 2 + K.lamp.span), vE.Y(ey(K.lamp.y + 150)), "WALL LAMP ×2", "BRASS TWIN-ARM — OWNER'S PHOTO");
     ER.add(vE.X(xP2[0] + 60), vE.Y(ey(1000)), "FLUTED PILASTER ×2", "STANDS 10½ IN PROUD OF THE PANEL");
     ER.add(vE.X(xZone[1] - 300), vE.Y(ey(350)), "CUPBOARDS UNDER ALL THREE BAYS", "COUNTER = WINDOW SILL, 2 FT 3 IN");
@@ -416,7 +418,7 @@ const SW2 = {
     (arched ? [
       "Owner's second scheme (7 Oct). Arches over the bookcase and the window, three deep rectangular niches cut into each",
       "arch's underside — a focus light in each (8 Oct) — and spandrel mouldings curved to follow the arch. The window's glass is unchanged: the wood arch",
-      "fills the top 1 ft of the opening, veneered flush with the frame. Only 4 in is free above the window, so it cannot rise higher.",
+      "is a veneered panel set in front of the window's top: it hides only the corners, the glass runs on behind, nothing is cut. Curtains not drawn.",
       "Centre: the panel goes back to the wall plane, so the counter is a 9 in shelf and the pilasters stand 10½ in proud (approved).",
       "Mouldings, crown and lamp from the owner's photos. Sections: AST-DR-042. Details: AST-DR-043.",
     ] : [
@@ -533,7 +535,7 @@ const SW2 = {
     } else {
       o += RS(fi, WN.head, WN.set, WN.head + 18, `${hatchCut} ${W(th)}`) + RS(0, WN.head + 18, WN.set, yEnt, `${hatchCut} ${W(th * 1.2)}`) + RS(WN.set, WN.head, WN.set + 18, WN.head + WN.arch, `${hatchCut} ${W(th)}`);
     }
-    if (arched) {
+    if (arched && false) {
       // both in the arch (owner, 8 Oct), cut here at the crown: the sheer on a slim track on the lining, the velvet on a
       // track let into the soffit, 22 off the wall behind the niche — tied back beyond. No rods.
       const CU = K.curtain, hc = WN.head;
@@ -605,8 +607,7 @@ const SW2 = {
       LC.add(vC.X(WN.set + 9), Y(vC, WN.head + 30), "ARCHIVOLT", "");
     }
     if (arched) {
-      LC.add(vC.X(K.curtain.velS + 44), Y(vC, K.curtain.tie + 300), "RED VELVET ON A TRACK LET INTO", "THE SOFFIT — NO ROD · TIED BACK, BEYOND");
-      LC.add(vC.X(K.curtain.sheerS), Y(vC, 1900), "LINEN SHEER ON A SLIM TRACK", "ON THE LINING, BEHIND THE VELVET");
+      LC.add(vC.X(WN.glass), Y(vC, gW.ys + 120), "THE ARCH: A PANEL IN FRONT OF THE WINDOW", "THE FRAME AND GLASS UNTOUCHED BEHIND IT");
     } else {
       LC.add(vC.X(WN.set + 60), Y(vC, K.curtain.rod), "RED VELVET ON A BRASS ROD", "TIED BACK, BEYOND");
       LC.add(vC.X(-30), Y(vC, WN.head - 10), "LINEN SHEER ROD", "IN THE REVEAL");

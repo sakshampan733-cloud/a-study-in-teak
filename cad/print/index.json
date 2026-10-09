@@ -272,26 +272,6 @@
   "pages": 8,
   "pagesA4": 8
  },
- "studywall-arch": {
-  "title": "STUDY WALL — WITH ARCHES",
-  "dwgs": [
-   "AST-DR-040",
-   "AST-DR-042",
-   "AST-DR-043"
-  ],
-  "keys": [
-   "studywall-arch",
-   "studywall-arch-sections",
-   "studywall-details2"
-  ],
-  "starts": [
-   0,
-   4,
-   8
-  ],
-  "pages": 17,
-  "pagesA4": 17
- },
  "bedframe": {
   "title": "THE BED",
   "dwgs": [
@@ -409,5 +389,25 @@
   ],
   "pages": 24,
   "pagesA4": 24
+ },
+ "studywall-arch": {
+  "title": "STUDY WALL — WITH ARCHES",
+  "dwgs": [
+   "AST-DR-040",
+   "AST-DR-042",
+   "AST-DR-043"
+  ],
+  "keys": [
+   "studywall-arch",
+   "studywall-arch-sections",
+   "studywall-details2"
+  ],
+  "starts": [
+   0,
+   3,
+   7
+  ],
+  "pages": 16,
+  "pagesA4": 16
  }
 }
