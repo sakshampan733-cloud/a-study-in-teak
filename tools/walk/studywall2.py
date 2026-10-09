@@ -145,7 +145,11 @@ for i, a in enumerate((float(book), float(xP2))):
     dbox(f"st2_capx{i}", a - 13, CASE, 2439, a + pil + 13, CASE + 53, YENT, M_VEN)            # the capital carried up to the crown
 
 # ═══ the bookcase: the arch over its top bay ═══
-gB = seg_arch(BX0 + STILE, BX1 - STILE, 1999.0, 320.0)
+# both arches come down so the window arch hides the window's whole top rail (owner, 9 Oct: "all I can see is the glass";
+# the top frame is about 4 in) — the window arch springs 401 below the head, the bookcase arch springs at the same line
+ARCH_DROP = 101.0
+ARCH_SPRING = WIN["head"] - 300.0 - ARCH_DROP                           # 1936
+gB = seg_arch(BX0 + STILE, BX1 - STILE, ARCH_SPRING, 320.0)
 for x0_ in (BX0, BX1 - STILE):
     dbox(f"st2_bside_hi{x0_:.0f}", x0_, 0, 2039, x0_ + STILE, FACE, YENT, M_VEN)
 dbox("st2_bback_hi", BX0 + STILE, 0, 2039, BX1 - STILE, 18, YENT, M_VEN)
@@ -159,7 +163,7 @@ spandrel_frame("st2_bk_spanL", gB, gB["R"] + 46, BX0, YENT, 1, FACE)
 spandrel_frame("st2_bk_spanR", gB, gB["R"] + 46, BX1, YENT, -1, FACE)
 
 # ═══ the window: the arch in its head, a wood panel flush with the frame above it, niches in its soffit ═══
-gW = seg_arch(WX0, WX1, WIN["head"] - 300.0, 300.0)
+gW = seg_arch(WX0, WX1, ARCH_SPRING, 300.0)
 GLASS_S = -T / 2 + 40                                                  # the window frame's room face
 # the arch is a veneered panel set in front of the window, filling only the corners above its curve: the glass runs on
 # behind it, seen through the arch right up to the curve (owner, 9 Oct)

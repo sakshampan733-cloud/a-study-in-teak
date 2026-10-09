@@ -601,7 +601,7 @@ def book_obj(name, x0, s0, z0, w, d, h, tone):
     return o
 bookx = {}
 for z in (686, 890 + 25, 1160 + 25, 1430 + 25, 1700 + 25):
-    top = min([zz for zz in (890, 1160, 1430, 1700, 2039) if zz > z + 10]); room_h = top - z - 15
+    top = min([zz for zz in (890, 1160, 1430, 1700, gB["ys"]) if zz > z + 10]); room_h = top - z - 15    # the top row stops under the arch's springing
     x = 70 + rng.uniform(0, 30); nb = 0; setn = 0; set_tone = set_h = set_w = set_d = 0
     while x < book - 90:
         r_ = rng.random()
