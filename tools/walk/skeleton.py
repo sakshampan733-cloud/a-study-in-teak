@@ -24,7 +24,8 @@ H = 2769                     # ceiling, 9 ft 1 in, level throughout (measured)
 ROOF = 480                   # slab drawn above the ceiling — thick enough to take the dressing dome
 # bedroom (AST-DR-000): 14'11" at the study wall, 15'6" at the bed wall; left wall leans 2 in then steps 5 in
 BED = dict(xR=4547, L=5766, xLs=-50, xLb=-177, yStep=4600)
-WIN = dict(x0=4547 - 1219, x1=4547, sill=686, head=2337)          # study-wall window, hard into the right corner
+WIN = dict(x0=4547 - 1219, x1=4547, sill=737, head=2388)          # study-wall window, hard into the right corner: 5 ft 5 in frame to frame,
+                                                                   # its top 15 in under the 9 ft 1 in ceiling, so it starts 2 in above the 686 counter (owner, 9 Oct)
 # doors: leaf + lining each side. All leaves 7 ft 7 in.
 LEAF_H, LIN = 2311, 51
 D1 = dict(leaf=914)                                              # entrance, end of the left wall, at the bed-wall corner

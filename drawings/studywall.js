@@ -13,7 +13,7 @@ const WALL = {
   band: { h: 400, rail: 40 },   // moulded panel band under the cornice — same size over all three bays (ref. 3)
   pil: { w: 240, proj: 40, flutes: 9, capH: 130, d: 280, ped: 25, pedProj: 50 },  // ref. 1 fluted shaft; ref. 3 pedestal steps forward below the counter
   panel: { w: 1400, set: 200, frame: 70, painting: [760, 860], paintingC: 1440 },
-  win: { w: 1219, sill: 686, head: 2337, fromRight: 0, arch: 70, wall: 230 },  // measured: 4 ft wide, 5 ft 5 in tall, sill 2 ft 3 in, hard into the right-hand corner
+  win: { w: 1219, sill: 737, head: 2388, fromRight: 0, arch: 70, wall: 230 },  // measured: 4 ft wide, 5 ft 5 in tall frame to frame, head 15 in under the ceiling (owner 9 Oct) — 2 in above the counter, sill 2 ft 3 in, hard into the right-hand corner
   sconce: { y: 1290, span: 150 },  // twin-arm candle sconce with shade, one on each pilaster (ref. 3)
   ent: { architrave: 60, frieze: 80, mod: 70, dentil: 30, crown: 90, proj: 160, modW: 44, modPitch: 105 },
 };

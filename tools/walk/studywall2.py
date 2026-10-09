@@ -47,9 +47,12 @@ def face_with_arch(name, g, x0, x1, z_top, s_face, thick, m, x_clip=None):
         xo = x0 if side < 0 else x1
         pts = [(xo, z_top), (g["cx"], z_top)] + arc[::-1]                                   # crown → springing
         if abs(xo - pts[-1][0]) > 0.5: pts.append((xo, g["ys"]))
+        rings = []
         for ds in (0.0, -thick):
             vs = [bm.verts.new(P(x, s_face + ds, z)) for x, z in pts]
-            bm.faces.new(vs if side > 0 else vs[::-1])
+            bm.faces.new(vs if side > 0 else vs[::-1]); rings.append(vs)
+        for i in range(len(pts)):                                                           # its edges: a closed solid, so it prints
+            j = (i + 1) % len(pts); bm.faces.new((rings[0][i], rings[0][j], rings[1][j], rings[1][i]))
     o = bm_obj(name, bm, m)
     return o
 
@@ -79,6 +82,28 @@ def soffit(name, g, s_back, s_face, niche_c, niches, n_len=380.0, n_wid=180.0, n
         for t_ in (a, b):
             bm.faces.new([bm.verts.new(v) for v in (lo(t_, ns0), lo(t_, ns1), hi(t_, ns1), hi(t_, ns0))])
     bmesh.ops.remove_doubles(bm, verts=bm.verts[:], dist=1e-6)
+    # the head's timber behind those faces, 1 off them: a 20 skin over the soffit, full depth round each niche, a cap
+    # over each niche's top — hidden in the room, but it gives the printed model real wood there, not paper-thin sheets
+    SK, M_ = 20.0, 25.0
+    tf = sorted(set(ts + [min(L, max(0.0, t)) for a, b in niches for t in (a - M_, b + M_)]))
+    deep = lambda t: any(a - M_ <= t <= b + M_ for a, b in niches)
+    def block(t0, t1, s0, s1, r0, r1):
+        k = max(1, int((t1 - t0) / 30)); tt = [t0 + (t1 - t0) * q / k for q in range(k + 1)]
+        cl = lambda x: min(g["xb"], max(g["xa"], x))                                       # kept within the arch's span
+        ring = lambda r, s_: [bm.verts.new(P(cl(apt(g, r, ang(t))[0]), s_, apt(g, r, ang(t))[1])) for t in tt]
+        A, B, C, D = ring(r0, s0), ring(r1, s0), ring(r1, s1), ring(r0, s1)
+        fs = []
+        for q in range(k):
+            for (u, v) in ((A, B), (B, C), (C, D), (D, A)):
+                fs.append(bm.faces.new((u[q], u[q + 1], v[q + 1], v[q])))
+        fs.append(bm.faces.new((A[0], B[0], C[0], D[0]))); fs.append(bm.faces.new((A[-1], D[-1], C[-1], B[-1])))
+        bmesh.ops.recalc_face_normals(bm, faces=fs)
+    for i in range(len(tf) - 1):
+        t0, t1 = tf[i], tf[i + 1]; tm = (t0 + t1) / 2
+        for j in range(len(ss) - 1):
+            s0, s1 = ss[j], ss[j + 1]
+            if inside(tm, (s0 + s1) / 2): block(t0, t1, s0, s1, g["R"] + n_dep + 1, g["R"] + n_dep + 1 + SK)
+            else: block(t0, t1, s0, s1, g["R"] + 1, g["R"] + (n_dep + 1 + SK if deep(tm) else 1 + SK))
     return bm_obj(name, bm, m or M_VEN)
 
 def three_niches(g, n=3, n_len=380.0):
@@ -145,10 +170,10 @@ for i, a in enumerate((float(book), float(xP2))):
     dbox(f"st2_capx{i}", a - 13, CASE, 2439, a + pil + 13, CASE + 53, YENT, M_VEN)            # the capital carried up to the crown
 
 # ═══ the bookcase: the arch over its top bay ═══
-# both arches come down so the window arch hides the window's whole top rail (owner, 9 Oct: "all I can see is the glass";
-# the top frame is about 4 in) — the window arch springs 401 below the head, the bookcase arch springs at the same line
-ARCH_DROP = 101.0
-ARCH_SPRING = WIN["head"] - 300.0 - ARCH_DROP                           # 1936
+# the window arch's crown sits at the underside of the window's top rail, so it hides the whole rail (owner, 9 Oct: "all I
+# can see is the glass"; the frame is 2 in) — it springs 351 below the head; the bookcase arch springs at the same line
+ARCH_DROP = 51.0
+ARCH_SPRING = WIN["head"] - 300.0 - ARCH_DROP                           # 2037
 gB = seg_arch(BX0 + STILE, BX1 - STILE, ARCH_SPRING, 320.0)
 for x0_ in (BX0, BX1 - STILE):
     dbox(f"st2_bside_hi{x0_:.0f}", x0_, 0, 2039, x0_ + STILE, FACE, YENT, M_VEN)

@@ -14,7 +14,7 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const SW2 = {
-  rev: "4 — both arches lowered 4 in, springing together, so the window arch's crown hides the window's top rail (owner, 9 Oct); 3 — the arch shown as a panel in front of the window (curtains not drawn); curtains inside the window arch, no rods; a focus light in each niche; a strip light under each shelf; the right reveal veneered (owner, 8 Oct)",
+  rev: "4 — the window re-measured (5 ft 5 in frame to frame, 2 ft 5 in to 7 ft 10 in, head 15 in under the ceiling, 2 in frame); the window arch's crown at the underside of its top rail so only glass shows, the bookcase arch springing level with it (owner, 9 Oct); 3 — the arch shown as a panel in front of the window (curtains not drawn); curtains inside the window arch, no rods; a focus light in each niche; a strip light under each shelf; the right reveal veneered (owner, 8 Oct)",
   date: "09.10.2026",
   W: 4547, H: 2769,                          // 14 ft 11 in wall, 9 ft 1 in ceiling (measured)
   base: { h: 646, top: 40, d: 255, over: 25, plinth: 100, door: 22 },   // cupboards; counter 686 = window sill
@@ -23,11 +23,11 @@ const SW2 = {
   // the centre: panel 25 off the wall (approved), a slim 3-step frame 25 proud with a bead row, plain skirting
   centre: { back: 25, skirt: 120, skirtT: 20, frameW: 70, frameP: 25, inset: 80, bead: 8, beadPitch: 14,
             painting: [860, 640], gilt: 50, band: 360, rail: 40 },
-  win: { w: 1219, sill: 686, head: 2337, arch: 70, wall: 230, set: 280, glass: -115, frameD: 70 },   // window bay to 280 like the rest: the crown runs on one plane, the reveal is 14 in
+  win: { w: 1219, sill: 737, head: 2388, arch: 70, wall: 230, set: 280, glass: -115, frameD: 70 },   // window bay to 280 like the rest: the crown runs on one plane, the reveal is 14 in
   // the smaller crown (owner's photo): stepped architrave, plain frieze, bed mould, fine dentils, cove, cyma, fillet
   ent: { arch: 40, frieze: 120, bed: 25, dentil: 22, cove: 35, crown: 50, fillet: 15, proj: 120, dW: 12, dPitch: 20 },
-  bkArch: { spring: 1936, rise: 320, mould: 46 },   // springs with the window arch (owner, 9 Oct)   // archivolt 46 so it lands on the bookcase's outer edge
-  winArch: { rise: 300, mould: 56, drop: 101 },   // its crown 4 in below the window head, so the window's top rail never shows (owner, 9 Oct)                // springs 1 ft below the head; archivolt lands on the architrave
+  bkArch: { spring: 2037, rise: 320, mould: 46 },   // springs with the window arch (owner, 9 Oct)   // archivolt 46 so it lands on the bookcase's outer edge
+  winArch: { rise: 300, mould: 56, drop: 51 },   // its crown 2 in below the window head, at the underside of the 2 in frame, so the window's top rail never shows (owner, 9 Oct)                // springs 1 ft below the head; archivolt lands on the architrave
   niche: { n: 3, len: 380, wid: 180, depth: 90, cB: 149, cW: 140 },   // three deep rectangular niches in each soffit, a focus light (3000 K, 52 trim) in the middle of each; centred across the soffit (the window's kept clear of the brick lintel)
   lamp: { y: 1290, span: 160 },
   curtain: { rod: 2440, sheer: 2030, tie: 1250, sheerS: -50, velS: 22, tieW: 185, footW: 300 },   // rod/sheer: arched-off scheme; S = line off the wall in the arch
@@ -374,13 +374,13 @@ const SW2 = {
     ER.add(vE.X(xPanel[0] + 600), vE.Y(ey(yCrn + 10)), "SMALLER DENTIL CROWN", "AS OWNER'S PHOTO · NO MODILLIONS");
     ER.add(vE.X(xP2[0] - 22), vE.Y(ey(yCap + 70)), "MOULDED CAPITAL", "BREAKS FORWARD");
     if (arched) {
-      ER.add(vE.X(winC), vE.Y(ey(gW.ys + 150)), "WOOD ARCH SET IN FRONT OF THE WINDOW", "ITS CROWN 4 IN BELOW THE HEAD: THE WINDOW'S TOP RAIL NEVER SHOWS");
+      ER.add(vE.X(winC), vE.Y(ey(gW.ys + 150)), "WOOD ARCH SET IN FRONT OF THE WINDOW", "ITS CROWN AT THE UNDERSIDE OF THE 2 IN FRAME: THE WINDOW'S TOP RAIL NEVER SHOWS");
       ER.add(vE.X(winC - 300), vE.Y(ey(gW.ys + gW.rise - 40)), "3 DEEP NICHES IN ITS SOFFIT", "A FOCUS LIGHT IN EACH — SHEET 042");
     }
     ER.add(vE.X(xZone[0] + 200), vE.Y(ey(1700)), ...(arched ? ["CURTAINS NOT DRAWN — SEE THE CURTAINS PAGE", "VELVET + SHEER HANG INSIDE THE ARCH, ON HIDDEN TRACKS"] : ["RED VELVET, TIED BACK", "WHITE LINEN SHEER UNDER THE HEAD"]));
     ER.add(vE.X((xP2[0] + xP2[1]) / 2 + K.lamp.span), vE.Y(ey(K.lamp.y + 150)), "WALL LAMP ×2", "BRASS TWIN-ARM — OWNER'S PHOTO");
     ER.add(vE.X(xP2[0] + 60), vE.Y(ey(1000)), "FLUTED PILASTER ×2", "STANDS 10½ IN PROUD OF THE PANEL");
-    ER.add(vE.X(xZone[1] - 300), vE.Y(ey(350)), "CUPBOARDS UNDER ALL THREE BAYS", "COUNTER = WINDOW SILL, 2 FT 3 IN");
+    ER.add(vE.X(xZone[1] - 300), vE.Y(ey(350)), "CUPBOARDS UNDER ALL THREE BAYS", "COUNTER 2 FT 3 IN · THE WINDOW STARTS 2 IN ABOVE IT");
     if (arched) {
       EL.add(vE.X(400), vE.Y(ey(gB.ys + 200)), "ARCH OVER THE BOOKCASE", "BOOKS STAND UNDER IT — OWNER'S PHOTO");
       EL.add(vE.X(gB.cx - 250), vE.Y(ey(gB.ys + gB.rise - 30)), "3 DEEP NICHES IN ITS SOFFIT", "A FOCUS LIGHT IN EACH — SHEET 042");
@@ -418,7 +418,7 @@ const SW2 = {
     (arched ? [
       "Owner's second scheme (7 Oct). Arches over the bookcase and the window, three deep rectangular niches cut into each",
       "arch's underside — a focus light in each (8 Oct) — and spandrel mouldings curved to follow the arch. The window's glass is unchanged: the wood arch",
-      "is a veneered panel set in front of the window's top: its crown sits 4 in below the head, so the window's top rail is hidden and only glass shows; both arches spring at one line. Curtains not drawn.",
+      "is a veneered panel set in front of the window's top: its crown sits at the underside of the window's 2 in top rail, so the window's top rail is hidden and only glass shows; both arches spring at one line. Curtains not drawn.",
       "Centre: the panel goes back to the wall plane, so the counter is a 9 in shelf and the pilasters stand 10½ in proud (approved).",
       "Mouldings, crown and lamp from the owner's photos. Sections: AST-DR-042. Details: AST-DR-043.",
     ] : [
@@ -613,7 +613,7 @@ const SW2 = {
       LC.add(vC.X(-30), Y(vC, WN.head - 10), "LINEN SHEER ROD", "IN THE REVEAL");
     }
     LC.add(vC.X(WN.glass), Y(vC, 1400), "WINDOW, GLASS UNCHANGED", "");
-    LC.add(vC.X(-40), Y(vC, WN.sill - 8), "REVEAL SILL ON TO THE COUNTER", "");
+    LC.add(vC.X(-40), Y(vC, WN.sill - 8), "REVEAL SILL, 2 IN ABOVE THE COUNTER", "");
     s += LC.draw();
     s += heading(18, 238, "NOTES", `REVISION ${K.rev.split(" ")[0]}`, 120);
     [arched ? "All three cut looking along the wall to the right (cut lines on AST-DR-040's plan). Each arch's head is a ply former, veneered;"
