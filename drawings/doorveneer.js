@@ -30,7 +30,7 @@ const DVEN = {
   const LN = (a, b, c, d, w) => `<line x1="${f(a)}" y1="${f(b)}" x2="${f(c)}" y2="${f(d)}" stroke-width="${w}"/>`;
   const RC = (a, b, c, d, w, fl) => `<rect x="${f(a)}" y="${f(b)}" width="${f(c - a)}" height="${f(d - b)}" fill="${fl || "none"}" stroke-width="${w}"/>`;
   const LEAVES = [
-    { key: "door-narrow", name: "D2 · D3", sub: "DRESSING AND BATHROOM · 2 FT 6 · AS AST-DR-009" },
+    { key: "door-narrow", name: "D2", sub: "DRESSING · 2 FT 6 · AS AST-DR-009 (D3, THE BATHROOM, IS THE SAME AT 2 FT 3 — AST-DR-009B)" },
     { key: "door", name: "D1", sub: "MAIN DOOR · 3 FT · AS AST-DR-001" },
   ];
 

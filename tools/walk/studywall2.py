@@ -140,14 +140,34 @@ def archivolt(name, g, s_face, mould, a0=None, a1=None, steps=(20, 14, 8)):
         for r_ in (rows[0], rows[-1]): bm.faces.new((r_[0], r_[1], r_[3], r_[2]))
         bm_obj(f"{name}{k}", bm, M_VEN)
 
-def spandrel_frame(name, g, ro, xc, yt, dx, s_face, inset=25, gap=30):
-    """A moulding round the spandrel: down the jamb, along under the cornice, and curved parallel to the archivolt."""
-    x0, y0, rr = xc + dx * inset, yt - inset, ro + gap
+def spandrel_outline(g, ro, xc, yt, dx, inset, gap, k):
+    """The spandrel panel's outline exactly as the drawing draws it (drawings/studywall2.js spandrel()): a straight edge
+    down the jamb, a straight edge under the cornice, and a curve parallel to the archivolt, `gap` off it; k steps the
+    outline inwards. Corner first; always the same number of points, so outlines k=0 and k=14 pair up point for point."""
+    x0, y0, rr = xc + dx * (inset + k), yt - inset - k, ro + gap + k
     yb = max(g["ys"] + 30, g["cy"] + math.sqrt(max(0.0, rr * rr - (x0 - g["cx"]) ** 2)))
-    yTip = y0 - 60; xt = g["cx"] - dx * math.sqrt(max(0.0, rr * rr - (yTip - g["cy"]) ** 2))
+    yTip = y0 - 60 + k; xt = g["cx"] - dx * math.sqrt(max(0.0, rr * rr - (yTip - g["cy"]) ** 2))
     aB, aC = math.atan2(x0 - g["cx"], yb - g["cy"]), math.atan2(xt - g["cx"], yTip - g["cy"])
-    pts = [(x0, y0), (x0, yb)] + [apt(g, rr, aB + (aC - aB) * i / 24) for i in range(25)] + [(xt, y0)]
-    sweep(name, [(0, 0), (0, 8), (5, 10), (10, 8), (14, 0)], [(x, s_face, z) for x, z in pts], (0, -1, 0), True, M_VEN)
+    return [(x0, y0), (x0, yb)] + [apt(g, rr, aB + (aC - aB) * i / 32) for i in range(33)] + [(xt, y0)]
+def spandrel_frame(name, g, ro, xc, yt, dx, s_face, inset=25, gap=30):
+    """The moulding round a spandrel, as the drawing has it: a raised band between the outline (k = 0) and the outline
+    stepped in 14 (10 proud), and a bead from 14 to 28 (5 proud). Built from the two outlines, so the left and right
+    panels are exact mirror images and nothing spikes out at the sharp corners (the old swept profile sat inside the
+    outline on one side and outside it on the other, and its mitres overshot — the unequal triangles in the 9 Oct print)."""
+    bm = bmesh.new()
+    def ring(k_out, k_in, h):
+        A, B = spandrel_outline(g, ro, xc, yt, dx, inset, gap, k_out), spandrel_outline(g, ro, xc, yt, dx, inset, gap, k_in)
+        n = len(A)
+        a0 = [bm.verts.new(P(x, s_face, z)) for x, z in A]; b0 = [bm.verts.new(P(x, s_face, z)) for x, z in B]
+        a1 = [bm.verts.new(P(x, s_face + h, z)) for x, z in A]; b1 = [bm.verts.new(P(x, s_face + h, z)) for x, z in B]
+        for i in range(n):
+            j = (i + 1) % n
+            for q in ((a1[i], a1[j], b1[j], b1[i]), (a0[i], b0[i], b0[j], a0[j]), (a0[i], a0[j], a1[j], a1[i]), (b0[i], b1[i], b1[j], b0[j])):
+                try: bm.faces.new(q)
+                except ValueError: pass
+    ring(0, 14, 10); ring(14, 28, 5)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    return bm_obj(name, bm, M_VEN)
 
 # ═══ the crown: the smaller dentil cornice, breaking forward over the pilasters ═══
 def P_crown():
@@ -207,6 +227,7 @@ niche_spots("st2_win_nspot", gW, FACE - 140, three_niches(gW))
 a_wall = math.asin(min(1.0, (xR - gW["cx"]) / (gW["R"] + 56)))
 archivolt("st2_win_volt", gW, FACE, 56, None, min(a_wall, ang_at(gW, gW["R"] + 56, gW["ys"])))
 spandrel_frame("st2_win_spanL", gW, gW["R"] + 56, ZX0, YENT, 1, FACE, 22, 25)
+spandrel_frame("st2_win_spanR", gW, gW["R"] + 56, xR, YENT, -1, FACE, 22, 25)   # the corner one, as drawn (missing until 16 Oct)
 for o in list(sc.objects):
     if o.name == "st_wrev": o.scale.z = 1.0
 dbox("st2_wrev_hi", ZX0, 0, 2439, WIN["x0"], FACE, YENT, M_VEN)

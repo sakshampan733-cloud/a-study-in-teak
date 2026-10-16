@@ -12,7 +12,7 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const XWALL = (function () {
-  const B = { wall: 5766, t: 229, door: { from: 4318, w: 686, lining: 51 } };   // from AST-DR-000
+  const B = { wall: 5766, t: 229, door: { from: 4267, w: 762, lining: 51 } };   // from AST-DR-000 (rev 7: the owner's 27 Sept tape)
   const Dr = { w: 2819, d: 3759, t: 229, d2: { w: 686, corner: 762, frame: 711 }, wd: { w: 914, d: 711 },
                d3: { w: 762, from: 2845 }, tun: { w: 914, l: 2337 } };  // from AST-DR-023
   const doorEnd = B.door.from + B.door.w;

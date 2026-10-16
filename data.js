@@ -221,10 +221,10 @@ window.PROJECT = {
       },
       {
         id: "sill-datum", name: "The window sill height did not reconcile", status: "solved",
-        what: "Three measurements of the same window did not add up to the ceiling, and the sill was given variously as 2 ft 3 in and 3 ft 4 in. Re-measured properly — floor to the underside of the window frame — it is 2 ft 3 in.",
+        what: "Three measurements of the same window did not add up to the ceiling, and the sill was given variously as 2 ft 3 in and 3 ft 4 in. Re-measured on 9 Oct: the window is 5 ft 5 in frame to frame and its top is 15 in under the 9 ft 1 in ceiling, which puts the bottom of the frame at 2 ft 5 in (737) — 2 in above the 2 ft 3 in counter.",
         effect: "The sill sets the datum for the study wall — the counter and the cupboard tops both land on it. The right wall rail follows it too. Two drawings are built on that number. It cannot be guessed.",
-        doing: "Closed. The datum is fixed at 686, which is what both drawings were already built on, so nothing had to be redrawn. The wall above the window is 15 in, as the owner measured (9 Oct): the window is 5 ft 5 in frame to frame, head at 2388, so it starts 2 in above the 686 counter.",
-        need: "",
+        doing: "Closed. The counter datum stays at 686 (2 ft 3 in); the window frame starts 2 in above it at 737 and its head is at 2388, 15 in under the ceiling. The study-wall drawings and the 3D model are set out on these numbers.",
+        need: "One tape check when convenient: floor to the bottom of the window frame — 2 ft 5 in is what the other three measurements imply.",
       },
       {
         id: "partition-square", name: "The partition sits between two walls that are not parallel", status: "open",
@@ -297,7 +297,7 @@ window.PROJECT = {
       { k: "Entrance", v: "At the very end of the left wall, hinged on the bed-wall corner so it opens flat along the bed wall. The left wall steps out about 5 in just before it." },
       { k: "Beyond right wall", v: "Washroom and dressing (plan to come)" },
       { k: "Ceiling", v: "Plain, deliberately — a coffered grid would have shown up the splay — and finished in high gloss (owner, 7 Oct): reflective like lacquer, not glitter, so it catches the windows. Gloss shows every dip, so the plaster wants a fine skim and a long-light check before the coats. The barrel vault belongs to the dressing room." },
-      { k: "Doors", v: "3 — one design, two widths, all 7 ft 7 in tall. D1 is 3 ft, D2 and D3 are 2 ft 6 in." },
+      { k: "Doors", v: "3 — one design, two widths, all 7 ft 7 in tall. D1 is 3 ft, D2 (dressing) 2 ft 6 in, D3 (bathroom) 2 ft 3 in." },
     ],
   },
 
@@ -334,8 +334,8 @@ window.PROJECT = {
       items: [
         {
           id: "door", name: "Doors (×3)", status: "open",
-          glance: {"line": "One four-panel teak door design, in two widths.", "facts": [["7 ft 7 in", "tall"], ["3 ft", "main door"], ["2 ft 6 in", "dressing & bath"], ["45 mm", "veneered blockboard"]], "mats": ["teak"]},
-          drawings: ["doorveneer", "door", "door-narrow"],
+          glance: {"line": "One four-panel teak door design, in two widths.", "facts": [["7 ft 7 in", "tall"], ["3 ft", "main door"], ["2 ft 6 / 2 ft 3", "dressing / bath"], ["45 mm", "veneered blockboard"]], "mats": ["teak"]},
+          drawings: ["doorveneer", "door", "door-narrow", "door-bath"],
           refs: [
             { src: "assets/refs/door-ref-1.jpg", caption: "Reference — pair of panelled doors in a library (film still)" },
             { src: "assets/refs/door-ref-1-crop.jpg", caption: "Close-up — shaped bead, corner roundels, knob on lock rail" },
@@ -348,7 +348,7 @@ window.PROJECT = {
             { label: "Veneer", inherit: "veneer" },
             { label: "Polish", inherit: "polish" },
             { label: "Hardware", value: "", hint: "Handles, hinges, lock, finish (brass / antique brass / nickel)" },
-            { label: "Size", value: "Two widths, one design, all three the same height. Measured 7 ft 7 in tall (2311). D1, the main door, is 3 ft wide (914). D2 and D3 — dressing and bathroom — are 2 ft 6 in (762). Thickness to confirm." },
+            { label: "Size", value: "Two widths, one design, all three the same height. Measured 7 ft 7 in tall (2311). D1, the main door, is 3 ft wide (914). D2, the dressing door, is 2 ft 6 in (762), 2 ft 10 in with its frame; D3, the bathroom door, is 2 ft 3 in (686), 2 ft 6 in with its frame (owner, 26–27 Sept). Thickness to confirm." },
             { label: "How the widths differ", value: "The stiles stay 100 and every rail and moulding stays the same, so the extra width goes entirely into the panels: 562 wide on D2 and D3 against 257 on a D1 leaf. That is why there are two sheets — the details A, B and C serve both, but the elevations cannot." },
           ],
           questions: [

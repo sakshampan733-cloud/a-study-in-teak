@@ -5,8 +5,8 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const SHELL = {
-  rev: "6 — the partition line at 11 ft from the bed wall, 8 ft from the study wall",
-  date: "19.09.2026",
+  rev: "7 — the dressing door at the owner's 27 Sept tape (2 ft 6 in leaf, 2 ft 3 in of wall to the corner)",
+  date: "16.10.2026",
   wStudy: 4547,   // 14 ft 11 in — study wall, the narrow end
   wPart: 4572,    // 15 ft 0 in — at the partition line
   wPreStep: 4597, // 15 ft 1 in — just before the step
@@ -19,9 +19,9 @@ const SHELL = {
   yStep: 4600,    // how far down the step falls — TO CONFIRM
   yPart: 2438,    // 8 ft from the study wall — i.e. 11 ft from the BED wall, as measured
   win: { w: 1219 },                 // 4 ft, hard into the right-hand corner of the study wall
-  dress: { from: 4318, w: 686, frame: 51 },    // door leaf. Set out from the owner's own measurement — 2 ft 4 in (711) from
-                                    // the dressing corner to the FRAME, taken on both sides of the wall — plus a
-                                    // 3 in lining. Same as AST-DR-007. Was 4166, which was back-calculated.
+  dress: { from: 4267, w: 762, frame: 51 },    // door leaf, 2 ft 6 in (owner, 27 Sept: 2 ft 10 in with the frame); its far
+                                    // edge 2 ft 5 in from the bed-wall corner — 2 ft 3 in of wall plus the 2 in frame.
+                                    // Same as AST-DR-007 and AST-DR-023. Was 4318 / 686 (the 25 Sept figures).
   ent: { w: 914 },                  // entrance door, 3 ft, at the very END of the left wall; hinged on the bed-wall corner, it opens flat along the bed wall
 };
 
@@ -109,7 +109,7 @@ const SHELL = {
   const RG = labels(206, "right", 26, 215), LG = labels(44, "left", 26, 235);
   RG.add(v.X(xR - K.win.w / 2), v.Y(0), "WINDOW", "HARD INTO THE CORNER — NO RETURN");
   RG.add(v.X(xR), v.Y(2200), "RIGHT WALL", "PANELLING AND THE DRESSING DOOR");
-  RG.add(v.X(xR), v.Y(K.dress.from + K.dress.w / 2), "DRESSING DOOR", "2 FT 6 × 8 FT · OPENS IN, HINGED RIGHT");
+  RG.add(v.X(xR), v.Y(K.dress.from + K.dress.w / 2), "DRESSING DOOR", "2 FT 6 × 7 FT 7 · OPENS IN, HINGED RIGHT");
   RG.add(v.X(2600), v.Y(K.yPart), "PARTITION LINE", "SHELL REFERENCE ONLY · TO CONFIRM");
   RG.add(v.X((xR + xLb) / 2), v.Y(L), "BED WALL", "PARCHMENT");
   LG.add(v.X(xLb - T / 2), v.Y(L - K.ent.w / 2), "ENTRANCE · 3 FT", "OPENS FLAT ON THE BED WALL");
@@ -121,9 +121,10 @@ const SHELL = {
   ["The room is not square. It widens about 2 in from the",
    "   study wall to the bed wall — roughly half a degree.",
    "Diagonals measured 24 ft 5 in and 23 ft 11 in.",
-   "Right wall — 13 ft 6 in to the door frame and 18 ft 11 in",
-   "   overall are drawn exactly; the 3 ft frame and 2 ft 4 in",
-   "   return do not both fit with a 2 in lining. See AST-DR-007.",
+   "Right wall — 18 ft 11 in overall; the dressing door is a 2 ft 6",
+   "   leaf in a 2 in frame with 2 ft 3 in of wall to the corner",
+   "   (27 Sept). That puts the frame 13 ft 10 from the study",
+   "   corner, 4 in off the 13 ft 6 taped on 18 Sept. See AST-DR-007.",
    "The right wall is taken as the straight reference; the left",
    "   wall carries the splay and the step.",
    "Ceiling 9 ft 1 in, level throughout. The main room ceiling",

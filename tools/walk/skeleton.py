@@ -41,7 +41,7 @@ BA["x1"], BA["s1"] = BA["x0"] + BA["l"], BA["s0"] + BA["w"]
 D3 = dict(open=762)                                              # 2'6" frame to frame, hard in the west corner (LiDAR: 0.77 m)
 CHASE = dict(d=178, from_door=1626)                             # the 7 in wall on the WC wall: 5'4" from the door corner, then 3'7" of it to the far wall
 PIER = dict(east=940, w=254, out=914)                            # 3'1" to the east wall, 10 in thick (owner, 27.09), 3 ft out
-BWIN = dict(x0=4777 + 178 + 50, w=914, sill=1829, h=610)          # bathroom window — size and height NOT measured: OPEN
+BWIN = dict(x0=4777 + 380, w=610, sill=1829, h=305)              # bathroom window 2 ft × 1 ft (owner, 8 Oct), same centre as before (AST-DR-020); sill NOT measured: OPEN
 
 # ── materials (workbench object colours) ───────────────────────────────────────
 WALL, FLOOR, CEIL = (0.80, 0.78, 0.74), (0.36, 0.29, 0.23), (0.86, 0.85, 0.83)

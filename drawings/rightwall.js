@@ -4,13 +4,13 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const RWALL = {
-  rev: "19 — the owner's layered panel moulding (8 Oct); the rail kept",
-  date: "08.10.2026",
-  run: 4318,                   // corner to the door LEAF. Set out backwards from the owner's measurement of
-                               // 2 ft 4 in (711) from the dressing corner to the door FRAME, both sides of the wall,
-                               // plus the 2 in frame. OPEN: with the leaf at 2 ft 3 in the frame then lands 14 ft 0 in
-                               // from the study corner, 6 in off the 13 ft 6 in taped from that end. The 2 ft 4 in and
-                               // the 18 ft 11 in overall are held; the 13 ft 6 in is the reading that has to give.
+  rev: "20 — the dressing door re-set to the owner's 27 Sept tape: 2 ft 6 in leaf, 2 ft 10 in with frame, 2 ft 3 in of wall to the corner",
+  date: "16.10.2026",
+  run: 4267,                   // study corner to the door LEAF: 18 ft 11 in overall less the 2 ft 6 in leaf and the
+                               // 2 ft 5 in from the leaf to the bed-wall corner (2 ft 3 in of wall + the 2 in frame —
+                               // owner, 27 Sept). Before that the drawing used the 25 Sept figures (2 ft 3 in leaf,
+                               // 2 ft 4 in to the frame). OPEN: the frame now lands 13 ft 10 in from the study corner,
+                               // 4 in off the 13 ft 6 in taped from that end on 18 Sept.
   H: 2769,                     // 9 ft 1 in ceiling, level throughout
   wall: 230,
   study: { w: 280, h: 646 },   // study unit 280 (11 in) deep; cupboard carcase to 646, reeded counter 646–686 on top
@@ -22,11 +22,11 @@ const RWALL = {
   lamps: [1, 3, 5],                    // lamps centred inside tall panels 1, 3 and 5
   short: { y0: 212, y1: 546 },
   tall: { y0: 796, top: 139 },         // 2769 − 139 = 2630: panels stop level with the TOP OF THE CASING CROWN
-  door: { w: 686, h: 2311, arch: 153, frame: 51 }, // dressing door: 2 ft 3 in leaf (owner, measured) in a 2 in frame each
-                                       // side = 2 ft 7 in frame to frame. 7 ft 7 in high. Casing 2 in lining + 4 in
+  door: { w: 762, h: 2311, arch: 153, frame: 51 }, // dressing door: 2 ft 6 in leaf in a 2 in frame each side = 2 ft 10 in
+                                       // frame to frame (owner, 27 Sept). 7 ft 7 in high. Casing 2 in lining + 4 in
                                        // moulding = 153 all round, outside the frame.
-  ret: 762,                            // wall past the LEAF = 2 ft 6 in. The measured figure is 2 ft 4 in (711)
-                                       // past the FRAME; add the 2 in frame back on and it is 762 to the leaf.
+  ret: 737,                            // wall past the LEAF = 2 ft 5 in: 2 ft 3 in of wall to the corner plus the 2 in
+                                       // frame (owner, 27 Sept).
   lamp: { y: 1290, span: 150, proj: 230 },   // twin-arm sconce, same height and family as the study wall
 };
 
@@ -225,9 +225,9 @@ const RWALL = {
    "Casing 2 in lining + 4 in moulding = 6 in, 1068 overall;",
    "   crown at 8 ft 8 in, and the tall panels stop on that",
    "   line, not the leaf head at 7 ft 7 in.",
-   "2 ft 4 in corner to frame, measured both sides; leaf 2 ft 3",
-   "   in a 2 in frame. OPEN: that puts the frame 14 ft 0 from the",
-   "   study corner, 6 in off the taped 13 ft 6. Retape that end."]
+   "Dressing door (27 Sept tape): leaf 2 ft 6 in, 2 ft 10 in with frame;",
+   "   2 ft 3 in of wall to the corner. OPEN: the frame lands 13 ft 10",
+   "   from the study corner, 4 in off the 13 ft 6 taped on 18 Sept."]
     .forEach((n, i) => { s += text(318, 191 + i * 4.3, n, { size: 1.55 }); });
 
   // Details along the bottom

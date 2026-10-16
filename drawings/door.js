@@ -3,11 +3,13 @@
 
 window.DRAWINGS = window.DRAWINGS || {};
 
-// The two doors are the same design at two widths: the stiles, rails and mouldings never
-// change, so only the panel width differs. One parametric build, run twice.
+// The three doors are the same design at three widths: the stiles, rails and mouldings never
+// change, so only the panel width differs. One parametric build, run three times.
 const DOOR_TYPES = [
   { key: "door",        W: 457, leaves: 2, name: "D1",      opening: 914, label: "MAIN DOOR",   dwg: "AST-DR-001", sub: "7 ft 7 in × 3 ft" },
-  { key: "door-narrow", W: 762, leaves: 1, name: "D2 · D3", opening: 762, label: "DRESSING · BATHROOM", dwg: "AST-DR-009", sub: "7 ft 7 in × 2 ft 6 in" },
+  { key: "door-narrow", W: 762, leaves: 1, name: "D2",      opening: 762, label: "DRESSING",    dwg: "AST-DR-009", sub: "7 ft 7 in × 2 ft 6 in" },
+  // D3 (owner, 26 Sept): the bathroom leaf is 2 ft 3 in, 2 ft 6 in with its frame — narrower than the dressing door
+  { key: "door-bath",   W: 686, leaves: 1, name: "D3",      opening: 686, label: "BATHROOM",    dwg: "AST-DR-009B", sub: "7 ft 7 in × 2 ft 3 in" },
 ];
 
 const DOOR = {

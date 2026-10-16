@@ -1,60 +1,4 @@
 {
- "roomshell": {
-  "title": "THE ROOM AS BUILT",
-  "dwgs": [
-   "AST-DR-000"
-  ],
-  "keys": [
-   "roomshell"
-  ],
-  "starts": [
-   0
-  ],
-  "pages": 3,
-  "pagesA4": 3
- },
- "doorveneer": {
-  "title": "DOORS — MADE IN VENEER",
-  "dwgs": [
-   "AST-DR-015"
-  ],
-  "keys": [
-   "doorveneer"
-  ],
-  "starts": [
-   0
-  ],
-  "pages": 5,
-  "pagesA4": 5
- },
- "door": {
-  "title": "DOOR D1 — 7 FT 7 IN × 3 FT",
-  "dwgs": [
-   "AST-DR-001"
-  ],
-  "keys": [
-   "door"
-  ],
-  "starts": [
-   0
-  ],
-  "pages": 7,
-  "pagesA4": 7
- },
- "door-narrow": {
-  "title": "DOOR D2 · D3 — 7 FT 7 IN × 2 FT 6 IN",
-  "dwgs": [
-   "AST-DR-009"
-  ],
-  "keys": [
-   "door-narrow"
-  ],
-  "starts": [
-   0
-  ],
-  "pages": 7,
-  "pagesA4": 7
- },
  "architrave": {
   "title": "DOOR CASINGS",
   "dwgs": [
@@ -153,34 +97,6 @@
   ],
   "pages": 4,
   "pagesA4": 4
- },
- "rightwall": {
-  "title": "RIGHT WALL — PANEL MOULDING",
-  "dwgs": [
-   "AST-DR-007"
-  ],
-  "keys": [
-   "rightwall"
-  ],
-  "starts": [
-   0
-  ],
-  "pages": 9,
-  "pagesA4": 9
- },
- "dressingshell": {
-  "title": "DRESSING ROOM",
-  "dwgs": [
-   "AST-DR-023"
-  ],
-  "keys": [
-   "dressingshell"
-  ],
-  "starts": [
-   0
-  ],
-  "pages": 3,
-  "pagesA4": 3
  },
  "mirror": {
   "title": "DRESSING MIRROR",
@@ -390,6 +306,76 @@
   "pages": 24,
   "pagesA4": 24
  },
+ "roomshell": {
+  "title": "THE ROOM AS BUILT",
+  "dwgs": [
+   "AST-DR-000"
+  ],
+  "keys": [
+   "roomshell"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 3,
+  "pagesA4": 3
+ },
+ "doorveneer": {
+  "title": "DOORS — MADE IN VENEER",
+  "dwgs": [
+   "AST-DR-015"
+  ],
+  "keys": [
+   "doorveneer"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 5,
+  "pagesA4": 5
+ },
+ "door": {
+  "title": "DOOR D1 — 7 FT 7 IN × 3 FT",
+  "dwgs": [
+   "AST-DR-001"
+  ],
+  "keys": [
+   "door"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 7,
+  "pagesA4": 7
+ },
+ "door-narrow": {
+  "title": "DOOR D2 — 7 FT 7 IN × 2 FT 6 IN",
+  "dwgs": [
+   "AST-DR-009"
+  ],
+  "keys": [
+   "door-narrow"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 7,
+  "pagesA4": 7
+ },
+ "door-bath": {
+  "title": "DOOR D3 — 7 FT 7 IN × 2 FT 3 IN",
+  "dwgs": [
+   "AST-DR-009B"
+  ],
+  "keys": [
+   "door-bath"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 7,
+  "pagesA4": 7
+ },
  "studywall-arch": {
   "title": "STUDY WALL — WITH ARCHES",
   "dwgs": [
@@ -409,5 +395,33 @@
   ],
   "pages": 16,
   "pagesA4": 16
+ },
+ "rightwall": {
+  "title": "RIGHT WALL — PANEL MOULDING",
+  "dwgs": [
+   "AST-DR-007"
+  ],
+  "keys": [
+   "rightwall"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 9,
+  "pagesA4": 9
+ },
+ "dressingshell": {
+  "title": "DRESSING ROOM",
+  "dwgs": [
+   "AST-DR-023"
+  ],
+  "keys": [
+   "dressingshell"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 3,
+  "pagesA4": 3
  }
 }

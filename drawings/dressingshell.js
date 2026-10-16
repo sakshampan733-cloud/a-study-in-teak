@@ -8,18 +8,18 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const DRESS = {
-  rev: "3 — drawn off the owner's clean sketch: bathroom door on the LEFT wall, dressing door on the bedroom wall, tunnel running east",
-  date: "25.09.2026",
+  rev: "4 — the dressing door at the owner's 27 Sept tape: 2 ft 6 in leaf, 2 ft 3 in of wall to the corner",
+  date: "16.10.2026",
   w: 2819,          // 9 ft 3 in — the room's width, left wall to right wall. CONFIRMED (sketch)
   d: 3759,          // 12 ft 4 in — the room's depth, far wall to bedroom wall. CONFIRMED (sketch)
   t: 229,           // 9 in — the owner's figure, and the same wall as the bedroom's 230 on AST-DR-000
 
   // D2 — the existing dressing door, in the BEDROOM wall (the bottom wall on this sheet).
-  // The sketch showed 2 ft 0 in from the corner, but the owner has since measured it properly:
-  // 2 ft 4 in (711) from the corner to the door FRAME, taken on BOTH sides of the wall. Add the
-  // 3 in lining back on and it is 787 from the corner to the leaf. That figure now governs, and it
-  // matches AST-DR-000/AST-DR-007 exactly — so this corner and the bedroom's bed-wall corner coincide.
-  d2: { w: 686, corner: 762, frame: 711, lining: 51 },
+  // The sketch showed 2 ft 0 in from the corner; the owner then measured 2 ft 4 in to the frame (25 Sept),
+  // and re-measured on 27 Sept: 2 ft 3 in of wall to the corner, 2 ft 5 in with the 2 in frame, and a
+  // 2 ft 6 in leaf (2 ft 10 in with frame). That governs, and matches AST-DR-000/AST-DR-007 exactly —
+  // so this corner and the bedroom's bed-wall corner coincide.
+  d2: { w: 762, corner: 737, frame: 686, lining: 51 },   // owner, 27 Sept: 2 ft 6 in leaf, 2 ft 10 in with frame; 2 ft 3 in of wall to the corner, 2 ft 5 in with the frame
 
   // D3 — the bathroom door, in the LEFT wall, at the bedroom end. The sketch runs 9 ft 4 in of wall
   // down the left side and then opens the door, with 12 ft 4 in over the whole wall — so the sketch
@@ -76,7 +76,7 @@ const DRESS = {
     o += doorBottom(d2x0, K.d2.w, th, dash);
     o += doorLeft(d3y0, K.d3.w, th, dash);
 
-    // wardrobe runs — 2 ft 4 in deep. The left run stops at the bathroom door; the right runs full depth.
+    // wardrobe runs — 2 ft 3 in deep. The left run stops at the bathroom door; the right runs full depth.
     const leftEnd = d3y0;
     o += R(0, 0, K.wd.d, leftEnd, `fill="url(#hatchDR2)" stroke="none"`);
     o += `<path d="M ${f(K.wd.d)} 0 L ${f(K.wd.d)} ${f(leftEnd)}" fill="none" ${Wd(th * 0.7)} stroke-dasharray="${th * 6} ${th * 5}"/>`;
@@ -148,7 +148,7 @@ const DRESS = {
   [["Third pass, and this one copies the sketch rather than interpreting it. The two earlier drawings",
     "both had the shape wrong; everything below is read straight off the owner's own clean drawing.",
     "The BEDROOM wall is the bottom wall here, 9 ft 3 in, and it carries D2, the existing dressing",
-    "   door in from the bedroom, 2 ft 4 in from the right-hand corner to the door FRAME — measured",
+    "   door in from the bedroom, 2 ft 3 in from the right-hand corner to the door FRAME — measured 27 Sept",
     "   on both sides of the wall, and the figure that now governs. The sketch's 2 ft 0 in is superseded.",
     "The BATHROOM door, D3, is in the LEFT wall, at the bedroom end — not in the bedroom wall. The",
     "   sketch runs 9 ft 4 in of wall down from the far corner and then opens the door.",
@@ -157,13 +157,13 @@ const DRESS = {
     "   built and shelved like every other bay, so from the room it reads as one more cupboard.",
     "Ceiling 9 ft 1 in, plain, over the left and right sides — the same height as the main room. A",
     "   domed centre rises to 10 ft 0 in, so the wardrobes are capped at 9 ft 0 in, clear under it."],
-   ["SETTLED — D2 sits 2 ft 4 in from the corner to its frame, on both sides of the wall. That closes",
+   ["SETTLED — D2 sits 2 ft 3 in from the corner to its frame (27 Sept), leaf 2 ft 6 in. That closes",
     "   this sheet against AST-DR-000 and AST-DR-007: this room's right-hand corner and the bedroom's",
     "   bed-wall corner are the same corner. Walls are taken at 9 in throughout. See AST-DR-024.",
-    "OPEN — D3's width. It is drawn 2 ft 6 in, as the owner said, but the sketch's own 9 ft 4 in against",
+    "OPEN — D3 is 2 ft 6 in frame to frame (2 ft 3 in leaf, 26 Sept), but the sketch's 9 ft 4 in against",
     "   12 ft 4 in leaves 3 ft 0 in — so a 6 in return is shown into the corner. To confirm.",
-    "SETTLED — the wardrobes are 2 ft 3 in deep, so the right-hand run reaches the bedroom wall and",
-    "   clears D2's frame, 2 ft 4 in off that corner, by 1 in.",
+    "OPEN — the wardrobes are 2 ft 3 in deep and D2's frame is now 2 ft 3 in off that corner (27 Sept):",
+    "   the right-hand run's face lands flush on the frame, no clearance. Trim the end bay or check on site.",
     "OPEN — the left run is drawn stopping at D3. Whether it ends there or returns over the door",
     "   is not decided.",
     "OPEN — where the tunnel leads, and what is at its far end.",
