@@ -1,0 +1,88 @@
+/* A Study in Teak — v3, on the monopo saigon system (design/redesign-monopo/design-system.md). */
+@font-face { font-family: "Hanken"; src: url(fonts/hanken.woff2) format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; }
+@font-face { font-family: "Hanken"; src: url(fonts/hanken-italic.woff2) format("woff2"); font-weight: 100 900; font-style: italic; font-display: swap; }
+
+:root {
+  --ink: #000; --paper: #fff; --mist: #9a9a9a; --felt: #6d6d6d; --slate: #5a5a5a; --ghost: #262626;
+  --hair: rgba(255, 255, 255, .3); --line: rgba(255, 255, 255, .12);
+  --iris: linear-gradient(90deg, rgb(160, 224, 171), rgb(255, 172, 46) 50%, rgb(165, 45, 37));
+  --ease: cubic-bezier(.19, 1, .22, 1);
+  --col: min(1078px, calc(100vw - 48px));
+  --side: calc((100vw - var(--col)) / 2);
+  --f: "Hanken", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sec: 152px;
+  color-scheme: dark;
+}
+@media (max-width: 760px) { :root { --sec: 88px; } }
+
+* { box-sizing: border-box; }
+html { background: var(--ink); color: var(--paper); -webkit-text-size-adjust: 100%; }
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: hidden; }
+body { margin: 0; background: var(--ink); font: 400 16px/1.5 var(--f); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; overflow-x: hidden; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+img, video { display: block; max-width: 100%; }
+::selection { background: #fff; color: #000; }
+i, em { font-style: italic; }
+@media (pointer: fine) { body, a, button { cursor: none; } }
+
+/* ── the field ── */
+.field { position: absolute; inset: 0 0 auto 0; height: 100vh; height: 100svh; z-index: 0; pointer-events: none; overflow: hidden; background: #000; }
+.field-c { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.field-grain { position: absolute; inset: -50%; opacity: .11; mix-blend-mode: screen; background-size: 180px 180px; animation: grain 1s steps(6) infinite; }
+@keyframes grain { 0% { transform: translate(0, 0); } 17% { transform: translate(-7%, 4%); } 33% { transform: translate(5%, -8%); } 50% { transform: translate(-9%, -3%); } 67% { transform: translate(8%, 7%); } 83% { transform: translate(-3%, 9%); } 100% { transform: translate(0, 0); } }
+html.no-gl .field-c { display: none; }
+html.no-gl .field { background:
+  radial-gradient(40% 55% at 30% 40%, rgba(204, 143, 69, .55), transparent 70%),
+  radial-gradient(35% 50% at 62% 58%, rgba(77, 102, 74, .6), transparent 70%),
+  radial-gradient(30% 40% at 80% 20%, rgba(102, 33, 23, .5), transparent 70%), #000; }
+html.no-gl .field::after { content: ""; position: absolute; inset: auto 0 0 0; height: 30%; background: linear-gradient(transparent, #000); }
+
+/* ── chrome ── */
+.chrome { position: fixed; inset: 0 0 auto 0; z-index: 30; height: 0; }
+.chrome > * { position: absolute; transition: opacity .8s var(--ease), transform 1.25s var(--ease); }
+html.is-loading .chrome > * { opacity: 0; transform: translateY(-8px); }
+.wm { left: var(--side); top: 44px; display: flex; align-items: baseline; gap: 8px; font-size: 16px; line-height: 1.5; white-space: nowrap; }
+.wm b { font-weight: 600; letter-spacing: .05em; }
+.wm span { font-weight: 400; }
+.switch { left: calc(var(--side) + var(--col) * .604); top: 50px; display: flex; align-items: center; gap: 0; font-size: 11px; line-height: 1.2; }
+.switch button { padding: 0 13px; color: var(--mist); letter-spacing: .02em; transition: color .4s ease; }
+.switch button.on, .switch button:hover { color: #fff; }
+.switch-bar { width: 2px; height: 11px; background: #fff; margin-right: 13px; }
+.stack { right: var(--side); top: 42.6px; display: flex; flex-direction: column; align-items: flex-end; }
+.stack a { padding: 7.4px 0; font-size: 11px; line-height: 1.2; letter-spacing: .01em; text-transform: uppercase; color: var(--mist); transition: color .4s ease; }
+.stack a:hover, .stack a.on { color: #fff; }
+.menu-btn { display: none; }
+.sheet { display: none; }
+
+/* ── hero ── */
+.hero { position: relative; z-index: 1; height: 100vh; height: 100svh; min-height: 520px; display: grid; place-items: center; }
+.hero-t { margin: 0; font: 400 clamp(30px, 3.75vw, 54px)/1.39 var(--f); letter-spacing: -.012em; text-align: center; white-space: nowrap; }
+.hero-t .w { display: inline-block; will-change: opacity, filter, transform; }
+.hero-t .w + .w { margin-left: .26em; }
+.badge { position: absolute; left: var(--side); bottom: 88px; width: 80px; height: 80px; color: #fff; }
+.badge svg { width: 100%; height: 100%; overflow: visible; }
+.badge text { font: 600 11px/1.2 var(--f); letter-spacing: .06em; fill: #fff; }
+.badge svg text { transform-origin: 40px 40px; animation: spin 14s linear infinite; }
+.badge-mark circle { fill: none; stroke: #fff; stroke-width: 1.1; }
+@keyframes spin { to { transform: rotate(360deg); } }
+html.is-loading .badge { opacity: 0; }
+.badge { transition: opacity .8s var(--ease); }
+
+/* ── cursor: a small white dot that trails the pointer ── */
+.cursor { position: fixed; left: 0; top: 0; z-index: 60; width: 10px; height: 10px; margin: -5px 0 0 -5px; pointer-events: none; transition: opacity .8s var(--ease); opacity: 0; }
+.cursor::before { content: ""; position: absolute; inset: 0; border-radius: 75px; background: #fff; transition: transform 1.25s var(--ease); }
+.cursor.on { opacity: 1; }
+.cursor.big::before { transform: scale(4.4); }
+@media (pointer: coarse) { .cursor { display: none; } }
+
+/* ── page shell ── */
+#app { position: relative; z-index: 2; }
+#page { position: relative; background: transparent; }
+.col { width: var(--col); margin: 0 auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  .field-grain, .badge svg text { animation: none; }
+}
