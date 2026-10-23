@@ -528,7 +528,7 @@ window.PROJECT = {
     },
     {
       id: "bedroom", title: "Bedroom", kicker: "TV unit · bed · headboard",
-      renders: [{ src: "assets/renders/b_three.jpg", caption: "The bed, three-quarter view" }, { src: "assets/renders/b_front.jpg", caption: "The bed, from the foot" }, { src: "assets/renders/r_bed.jpg", caption: "Pillows and wall lamp" }, { src: "assets/renders/b_head.jpg", caption: "The headboard" }, { src: "assets/renders/b_rug.jpg", caption: "The hide at the foot of the bed" }, { src: "assets/renders/st_close.jpg", caption: "The side table" }, { src: "assets/renders/r_pbed.jpg", caption: "The partition and TV, from the bed" }, { src: "assets/renders/b_cove.jpg", caption: "The bed-wall niche and its cove" }],
+      renders: [{ src: "assets/renders/bed_bare_three.jpg", caption: "The bed on its own, three-quarter view — no mattress or bedding" }, { src: "assets/renders/bed_bare_storage.jpg", caption: "The four storage lids up on their gas struts" }, { src: "assets/renders/bed_bare_foot.jpg", caption: "The bed on its own, from the foot: the lids an inch below the rim" }, { src: "assets/renders/bed_bare_side.jpg", caption: "The bed on its own, the side of the base" }, { src: "assets/renders/bed_bare_head.jpg", caption: "The bed on its own, the headboard" }, { src: "assets/renders/bed_bare_corner.jpg", caption: "The base's rounded foot corner" }, { src: "assets/renders/b_three.jpg", caption: "The bed, three-quarter view" }, { src: "assets/renders/b_front.jpg", caption: "The bed, from the foot" }, { src: "assets/renders/r_bed.jpg", caption: "Pillows and wall lamp" }, { src: "assets/renders/b_head.jpg", caption: "The headboard" }, { src: "assets/renders/b_rug.jpg", caption: "The hide at the foot of the bed" }, { src: "assets/renders/st_close.jpg", caption: "The side table" }, { src: "assets/renders/r_pbed.jpg", caption: "The partition and TV, from the bed" }, { src: "assets/renders/b_cove.jpg", caption: "The bed-wall niche and its cove" }],
       intro: "",
       items: [
         {
@@ -554,6 +554,7 @@ window.PROJECT = {
           id: "bed", name: "Bed", status: "open",
           glance: {"line": "The bed in the bed-wall niche: a gloss-black storage base straight down to the floor, the slim dusty-rose suede headboard behind in a thin black frame.", "facts": [["6 × 6½ ft", "mattress"], ["11 in", "storage base, to the floor"], ["3 ft 4 in", "headboard"], ["Whole hide", "cognac leather, across the foot"]], "mats": ["burl", "teak"]},
           drawings: ["bedframe", "sidetable"],
+          video: { src: "assets/video/bed-film.mp4", poster: "assets/video/bed-film.jpg", caption: "The bed on its own — no bedding, no pillows, no side tables (owner, 23 Oct): no mattress either — just the gloss-black storage base with its rounded corners and the suede headboard in its thin black frame, the suede only above the base. In the model's current finish; the bed's finish is still open." },
           refs: [
             { src: "assets/refs/bedwall-ref-6-plaster-grid-bed.jpg", caption: "Your ref (3 Oct) — THIS bed: low dark-wood platform on turned feet, slim upholstered headboard (owner: the same exact bed and headboard)" },
             { src: "assets/refs/bed-ref-1-low-platform-bed.jpg", caption: "Bed reference (Newberry Projects) — low bed with a thick upholstered base" },
