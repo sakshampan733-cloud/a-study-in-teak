@@ -1181,5 +1181,7 @@ if MODER in ("still", "stills"):
     for n in pick: shoot(n)
 if MODER == "film":                                                      # stage 5: the film of slow composed shots
     exec(compile(open(os.path.join(HERE, "film.py")).read(), "film.py", "exec"))
+if MODER == "showcase":                                                  # the desk and the bed alone (owner, 23 Oct)
+    exec(compile(open(os.path.join(HERE, "showcase.py")).read(), "showcase.py", "exec"))
 bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUTR, "real.blend"))
 print("DONE", MODER)

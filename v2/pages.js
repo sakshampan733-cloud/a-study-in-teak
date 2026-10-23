@@ -390,7 +390,7 @@ function tabPage(t) {
           ${g.mats?.length ? `<div class="gl-mats">${g.mats.map(swatch).join("")}</div>` : ""}
         </div>
       </div>
-      ${i.video ? `<div class="wrap"><figure class="vid reveal"><video src="${esc(U(i.video.src))}" poster="${esc(U(i.video.poster))}" controls playsinline muted loop preload="metadata"></video><figcaption>${esc(i.video.caption)}</figcaption></figure></div>` : ""}
+      ${i.video ? `<div class="wrap"><figure class="vid reveal"><video src="${esc(U(i.video.src))}" poster="${esc(U(i.video.poster))}" controls playsinline muted loop preload="metadata"></video><figcaption>${esc(i.video.caption)} <a class="btn vid-dl" href="${esc(U(i.video.src))}" download>Download the film</a></figcaption></figure></div>` : ""}
       ${sheets(i.drawings || i.drawing)}
       ${i.model3d ? `<div class="wrap"><div class="m3d p3d" id="p3d"></div></div>` : ""}
       <details class="gl-more">
@@ -638,7 +638,7 @@ document.addEventListener("click", (e) => {
     const [kind, ref] = f.dataset.open.split(/:(.*)/s);
     Object.assign(LB, { z: 1, s: 1, x: 0, y: 0, last: null }); LB.pts.clear();
     lb.innerHTML = `<div class="lb-bar"><span class="mono" style="font-size:11px;color:var(--dim)">${kind === "dwg" ? esc(window.DRAWINGS[ref].title) : "Reference"}</span>
-      <div class="grp">${kind === "dwg" ? dimToggle() + paperToggle() : ""}<button class="btn" data-z="-">−</button><button class="btn" data-z="0">Fit</button><button class="btn" data-z="+">+</button><button class="btn" data-z="x">Close</button></div></div>
+      <div class="grp">${kind === "dwg" ? dimToggle() + paperToggle() : `<a class="btn" href="${ref}" download>Download</a>`}<button class="btn" data-z="-">−</button><button class="btn" data-z="0">Fit</button><button class="btn" data-z="+">+</button><button class="btn" data-z="x">Close</button></div></div>
       <div class="lb-body"><div class="lb-inner${kind === "dwg" ? " is-dwg" : ""}">${kind === "dwg" ? window.DRAWINGS[ref].svg : `<img src="${ref}">`}</div></div>
       <div class="lb-hint mono">Pinch or scroll to zoom · drag to move · double-tap to zoom in</div>`;
     lb.hidden = false;
