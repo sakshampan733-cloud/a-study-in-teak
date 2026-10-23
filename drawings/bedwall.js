@@ -13,8 +13,8 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const BEDWALL = {
-  rev: "5 — 2 in face, 15 in niche; headboard; new side tables; speakers",
-  date: "07.10.2026",
+  rev: "6 — the bed's storage base and the suede above it only, in the section (owner, 23 Oct)",
+  date: "23.10.2026",
   W: 4724, H: 2769, T: 230,                 // 15 ft 6 in wall, 9 ft 1 in ceiling, 9 in walls (AST-DR-001)
   deep: 381, edge: 51,                      // 15 in at the niche (owner, 7 Oct); 2 in everywhere else — as deep as D1's
                                             // lining, so the open leaf lies along the face (owner: "two inches")
@@ -36,12 +36,15 @@ const BEDWALL = {
 
 // The bed in the owner's photo, sized to the 6 ft × 6 ft 6 in mattress on the plan. Proportions read off the photo.
 const BEDFRAME = {
-  rev: "7 — the suede only above the base; below it the headboard's back in the frame's gloss black (owner, 23 Oct)",
+  rev: "8 — storage: four lift-up lids on gas struts, 1 in below a rim the mattress sits in; the suede only above the base (owner, 23 Oct)",
   date: "23.10.2026",
   mat: { w: 1829, l: 1981, h: 254 },        // 6 ft × 6 ft 6 in, 10 in thick — mattress to be chosen
   over: 51,                                 // the frame runs 2 in past the mattress at the sides and the foot
   base: { h: 280, r: 75, ease: 15 },        // corners rounded 3 in in plan, every edge eased ⅝ in (owner, 8 Oct: 3 ft to walk past — the shins)                         // a storage base, a plain box straight down to the floor — no legs (owner, 7 Oct);
                                             // 11 in to the mattress, the storage inside not drawn; GLOSS BLACK lacquer (owner, 7 Oct)
+  // the storage (owner, 23 Oct): the mattress sits IN the base — four lids an inch below a rim round the sides and foot
+  // (the headboard closes the head end), each hinged on the centre spine, held open by two gas struts; four compartments
+  store: { rim: 25, wall: 50, foot: 51, head: 18, floor: 18, lid: 18, spine: 18, ledge: 20, open: 80, pv: 69, at: 250, drop: 30, body: 230, rod: 225 },
   head: { h: 1016, t: 76, gap: 25, ply: 18, ease: 6, frame: 32, fd: 70, cr: 32 },   // cr: the frame's two top corners rounded (owner, 8 Oct)   // headboard top 3 ft 4 in off the floor, 3 in thick, 1 in off the
                                             // plaster; framed top and sides in a 1¼ in gloss-black border — as thin as the dressing
                                             // mirror's frame — 2¾ in deep, the rose panel ¼ in proud of it (owner, 7 Oct)
@@ -61,7 +64,7 @@ const BEDFRAME = {
   // the bed sits on the niche's centre: the headboard 1 in off the plaster, the frame and mattress in front of it
   const bc = (N.u0 + N.u1) / 2, fw = B.mat.w + 2 * B.over, HB = B.head;
   const vHb = K.plaster + HB.gap, vHf = vHb + HB.t, vMat1 = vHf + B.mat.l, vFr1 = vMat1 + B.over;
-  const yBase = B.base.h, yMat = yBase + B.mat.h;
+  const SB = B.store, yBase = B.base.h, yDeck = yBase - SB.rim, yLid = yDeck - SB.lid, yMat = yDeck + B.mat.h;   // the mattress on the lids, in the rim
   const tables = [N.u0 + (bc - fw / 2 - N.u0) / 2, N.u1 - (N.u1 - bc - fw / 2) / 2];
   const leafTip = W - K.door.leaf;
   const spkU = [K.spk.u, 2 * bc - K.spk.u], spkY1 = K.spk.y0 + K.spk.h;   // square on the bed: the right one over the open door
@@ -251,9 +254,22 @@ const BEDFRAME = {
     // floor, the mattress, a pillow
     o += RC(vHf + 500, Y(12), vFr1 + 600, Y(0), `fill="${RUG}" stroke-width="${th * 0.6}"`);
     o += headCut(vHb, Y, 0, th);
-    o += RC(vHf, Y(yMat), vMat1, Y(yBase), `fill="#fff" stroke-width="${th * 1.2}"`) + RC(vHf + 30, Y(yMat + 150), vHf + 560, Y(yMat), `fill="#fff" stroke-width="${th * 0.8}"`);
-    o += RC(vHf, Y(yBase), vFr1, Y(0), `fill="${WOOD}" stroke-width="${th * 1.2}"`);
+    o += RC(vHf, Y(yMat), vMat1, Y(yDeck), `fill="#fff" stroke-width="${th * 1.2}"`) + RC(vHf + 30, Y(yMat + 150), vHf + 560, Y(yMat), `fill="#fff" stroke-width="${th * 0.8}"`);
+    o += baseCut(vHf, vFr1, Y, th);
     o += `<line x1="${-K.T}" y1="${Y(0)}" x2="${vFr1 + 250}" y2="${Y(0)}" stroke-width="${th * 4}"/><line x1="${-K.T}" y1="${Y(H)}" x2="${vFr1 + 250}" y2="${Y(H)}" stroke-width="${th * 2}" stroke-dasharray="40 20"/>`;
+    return o;
+  }
+  // the storage base cut along its length through the right-hand compartments (owner, 23 Oct): the floor board, the
+  // head panel, the foot wall rising 1 in past the lids as the rim, the cross rail, the two lids on their ledges; beyond,
+  // the spine, and a gas strut at each end of each compartment
+  function baseCut(v0, v1, Y, th) {
+    const cut = `fill="url(#hatchBW2)" stroke-width="${th}"`, vm = (v0 + SB.head + v1 - SB.foot) / 2, vf = v1 - SB.foot;
+    let o = RC(v0 + SB.head, Y(yLid), vf, Y(SB.floor), `fill="#fff" stroke-width="${th * 0.6}"`);                         // the spine, beyond
+    [v0 + SB.head + 40, vm - 49, vm + 49, vf - 40].forEach((v) => (o += RC(v - 11, Y(yLid - SB.drop), v + 11, Y(SB.floor + 20), `fill="#fff" stroke-width="${th * 0.6}"`)));   // struts, end on
+    o += RC(vf, Y(yBase), v1, Y(0), cut) + RC(v0, Y(SB.floor), vf, Y(0), cut) + RC(v0, Y(yLid), v0 + SB.head, Y(SB.floor), cut);
+    o += RC(vm - SB.spine / 2, Y(yLid), vm + SB.spine / 2, Y(SB.floor), cut);
+    o += RC(v0 + SB.head, Y(yLid), v0 + SB.head + SB.ledge, Y(yLid - SB.ledge), cut) + RC(vf - SB.ledge, Y(yLid), vf, Y(yLid - SB.ledge), cut);
+    o += RC(v0 + 2, Y(yDeck), vm - 1.5, Y(yLid), cut) + RC(vm + 1.5, Y(yDeck), vf - 2, Y(yLid), cut);
     return o;
   }
   // the headboard cut through, back at v0, from its foot (yb) to its top: ¾ in ply back, then foam under suede with an eased top
@@ -336,7 +352,7 @@ const BEDFRAME = {
   s += vs.g(section(ts), 0.3);
   s += chainV([vs.Y(0), vs.Y(H - hTop), vs.Y(H - N.h), vs.Y(H)], vs.X(-K.T) - 3, [H - hTop, `${CW}`, `${N.h} NICHE`], { from: vs.X(-K.T), size: 1.2 });
   s += chainH([vs.X(0), vs.X(K.edge), vs.X(K.deep)], vs.Y(0) - 3, [K.edge, CB], { from: vs.Y(0), size: 1.2 });
-  s += chainV([vs.Y(H), vs.Y(H - yBase), vs.Y(H - yMat), vs.Y(H - HB.h)], vs.X(vFr1) + 6, [`${yBase} BASE`, B.mat.h, HB.h - yMat], { from: vs.X(vFr1) + 1, size: 1.1 });
+  s += chainV([vs.Y(H), vs.Y(H - yDeck), vs.Y(H - yMat), vs.Y(H - HB.h)], vs.X(vFr1) + 6, [`${yDeck} TO THE LIDS`, B.mat.h, HB.h - yMat], { from: vs.X(vFr1) + 1, size: 1.1 });
   s += chainV([vs.Y(H), vs.Y(H - HB.h)], vs.X(vFr1) + 13, [`${HB.h} HEADBOARD`], { from: vs.X(vFr1) + 1, size: 1.15 });
   s += chainH([vs.X(0), vs.X(vHb), vs.X(vHf), vs.X(vFr1)], vs.Y(H) + 6, [vHb, HB.t, `${vFr1 - vHf} BASE`], { from: vs.Y(H) + 1, size: 1.1 });
   s += chainH([vs.X(0), vs.X(vFr1)], vs.Y(H) + 12, [`${vFr1} WALL TO FOOT`], { from: vs.Y(H) + 1, size: 1.2 });
@@ -423,6 +439,7 @@ const BEDFRAME = {
     [-1, 1].forEach((s2) => (o += RC(c + s2 * 60, Y(yMat + 200), c + s2 * (B.mat.w / 2 - 40), Y(yMat), `fill="#fff" stroke-width="${th}"`)));
     o += RC(B.over, Y(yMat), fwB - B.over, Y(yBase), `fill="#fff" stroke-width="${th * 1.2}"`);
     o += RC(0, Y(yBase), fwB, Y(0), `rx="${B.base.ease}" fill="${WOOD}" stroke-width="${th * 1.2}"`);
+    o += `<g stroke-width="${th * 0.6}" stroke-dasharray="${th * 6} ${th * 4}"><line x1="${SB.wall}" y1="${Y(yDeck)}" x2="${fwB - SB.wall}" y2="${Y(yDeck)}"/><line x1="${SB.wall}" y1="${Y(SB.floor)}" x2="${fwB - SB.wall}" y2="${Y(SB.floor)}"/><line x1="${fwB / 2}" y1="${Y(yLid)}" x2="${fwB / 2}" y2="${Y(SB.floor)}"/></g>`;   // the lids, the floor board and the spine, hidden
     [B.base.r, fwB - B.base.r].forEach((u) => (o += `<line x1="${f(u)}" y1="${f(Y(yBase) + B.base.ease)}" x2="${f(u)}" y2="${f(Y(0) - B.base.ease)}" stroke-width="${th * 0.4}"/>`));   // where the round corners turn
     o += `<line x1="-120" y1="${Y(0)}" x2="${fwB + 120}" y2="${Y(0)}" stroke-width="${th * 3}"/>`;
     return o;
@@ -436,18 +453,55 @@ const BEDFRAME = {
     o += `<line x1="${-HB.gap}" y1="${Y(0)}" x2="${-HB.gap}" y2="${Y(HB.h + 80)}" stroke-width="${th * 1.6}" stroke-dasharray="${dash}"/>`;
     o += RC(v0, Y(yMat), v0 + B.mat.l, Y(yBase), `fill="#fff" stroke-width="${th * 1.2}"`) + RC(v0 + 30, Y(yMat + 150), v0 + 560, Y(yMat), `fill="#fff" stroke-width="${th * 0.8}"`);
     o += RC(v0, Y(yBase), lenB, Y(0), `rx="${B.base.ease}" fill="${WOOD}" stroke-width="${th * 1.2}"`);
+    { const vm = (v0 + SB.head + lenB - SB.foot) / 2;
+      o += `<g stroke-width="${th * 0.6}" stroke-dasharray="${dash}"><line x1="${v0}" y1="${Y(yDeck)}" x2="${lenB - SB.foot}" y2="${Y(yDeck)}"/><line x1="${v0}" y1="${Y(SB.floor)}" x2="${lenB - SB.foot}" y2="${Y(SB.floor)}"/><line x1="${vm}" y1="${Y(yDeck)}" x2="${vm}" y2="${Y(SB.floor)}"/></g>`; }
     o += `<line x1="${f(lenB - B.base.r)}" y1="${f(Y(yBase) + B.base.ease)}" x2="${f(lenB - B.base.r)}" y2="${f(Y(0) - B.base.ease)}" stroke-width="${th * 0.4}"/>`;
     o += `<line x1="-120" y1="${Y(0)}" x2="${lenB + 120}" y2="${Y(0)}" stroke-width="${th * 3}"/>`;
     return o;
   }
   function bedPlan(th, dash) {
-    const F = HB.frame, fd = HB.fd;
+    const F = HB.frame, fd = HB.fd, c = fwB / 2, vf = lenB - SB.foot, vm = (HB.t + SB.head + vf) / 2, r = B.base.r;
     let o = `<path d="M 0 0 L ${fwB} 0 L ${fwB} ${fd} L ${fwB - F} ${fd} L ${fwB - F} ${HB.t} L ${F} ${HB.t} L ${F} ${fd} L 0 ${fd} Z" fill="${UPH}" stroke-width="${th * 1.2}"/>`
       + `<path d="M ${F} 0 L ${F} ${fd} M ${fwB - F} 0 L ${fwB - F} ${fd}" stroke-width="${th * 0.6}"/>`;     // the frame's stiles, the panel between
-    o += RC(0, HB.t, fwB, lenB, `rx="${B.base.r}" fill="${WOOD}" stroke-width="${th * 1.2}"`) + RC(B.over, HB.t, fwB - B.over, HB.t + B.mat.l, `fill="#fff" stroke-width="${th}"`);
-    [-1, 1].forEach((m) => (o += RC(fwB / 2 + m * 40, HB.t + 30, fwB / 2 + m * (B.mat.w / 2 - 20), HB.t + 330, `fill="#fff" stroke-width="${th * 0.7}"`)));   // pillows
+    // the base: square at the head (against the headboard), its foot corners rounded 3 in; the rim round the sides and foot
+    o += `<path d="M 0 ${HB.t} L ${fwB} ${HB.t} L ${fwB} ${lenB - r} A ${r} ${r} 0 0 1 ${fwB - r} ${lenB} L ${r} ${lenB} A ${r} ${r} 0 0 1 0 ${lenB - r} Z" fill="${WOOD}" stroke-width="${th * 1.2}"/>`;
+    o += RC(SB.wall, HB.t, fwB - SB.wall, vf, `fill="#fff" stroke-width="${th}"`);
+    // the four lids, 3 mm apart; the hinge along the spine (chain line); the gas struts under them (dashed); LIFT at each free edge
+    [[SB.wall + 2, c - 1.5], [c + 1.5, fwB - SB.wall - 2]].forEach(([u0, u1]) => [[HB.t + 2, vm - 1.5], [vm + 1.5, vf - 2]].forEach(([w0, w1]) => (o += RC(u0, w0, u1, w1, `fill="#fff" stroke-width="${th * 0.9}"`))));
+    o += `<line x1="${c}" y1="${HB.t}" x2="${c}" y2="${vf}" stroke-width="${th * 0.6}" stroke-dasharray="${th * 14} ${th * 4} ${th * 2} ${th * 4}"/>`;
+    o += `<g stroke-width="${th * 2.2}" stroke-dasharray="${dash}">` + [-1, 1].map((m) => [HB.t + SB.head + 30, vm - SB.spine / 2 - 30, vm + SB.spine / 2 + 30, vf - 30].map((w) => `<line x1="${f(c + m * SB.pv)}" y1="${f(w)}" x2="${f(c + m * (SB.at + 1.5))}" y2="${f(w)}"/>`).join("")).join("") + `</g>`;
+    [[SB.wall + 70, "start"], [fwB - SB.wall - 70, "end"]].forEach(([u, a]) => [HB.t + (vm - HB.t) / 2, vm + (vf - vm) / 2].forEach((w) => (o += `<text x="${f(u)}" y="${f(w + 20)}" font-size="${th * 18}" text-anchor="${a}" fill="#000" stroke="none" font-family="Helvetica, Arial, sans-serif" letter-spacing="${th * 2}">LIFT</text>`)));
     // the headboard's two bolts into the base, dashed
     o += `<g stroke-width="${th * 0.6}" stroke-dasharray="${dash}">` + [fwB * 0.25, fwB * 0.75].map((u) => `<line x1="${f(u)}" y1="${HB.ply}" x2="${f(u)}" y2="${HB.t + 80}"/>`).join("") + `</g>`;
+    return o;
+  }
+  // the storage, cut across the bed at a compartment, looking from the foot (owner, 23 Oct): the side walls rising 1 in past
+  // the lids as the rim, the floor board, the spine; the left lid shut, the right one open 80° on its gas strut (the strut
+  // at the near end of each compartment; one more at the far end); the mattress dashed in the rim — it lifts with its lid
+  const topS = 1180;
+  function storeDetail(th, dash) {
+    const Y = (h) => topS - h, c = fwB / 2, cut = `fill="url(#hatchBW2)" stroke-width="${th}"`, a = SB.open * Math.PI / 180;
+    const rot = (hx, x, z, m) => [hx + m * (x * Math.cos(a) - z * Math.sin(a)), yDeck + x * Math.sin(a) + z * Math.cos(a)];
+    const w = c - 1.5 - SB.wall - 2;                                          // a lid's width, hinge to free edge
+    let o = `<line x1="-80" y1="${Y(0)}" x2="${fwB + 80}" y2="${Y(0)}" stroke-width="${th * 3}"/>`;
+    o += RC(0, Y(yBase), SB.wall, Y(0), cut) + RC(fwB - SB.wall, Y(yBase), fwB, Y(0), cut) + RC(SB.wall, Y(SB.floor), fwB - SB.wall, Y(0), cut);
+    o += RC(c - SB.spine / 2, Y(yLid), c + SB.spine / 2, Y(SB.floor), cut);
+    o += RC(SB.wall, Y(yLid), SB.wall + SB.ledge, Y(yLid - SB.ledge), cut) + RC(fwB - SB.wall - SB.ledge, Y(yLid), fwB - SB.wall, Y(yLid - SB.ledge), cut);
+    o += RC(SB.wall + 2, Y(yDeck), c - 1.5, Y(yLid), cut);                                                                  // the left lid, shut
+    o += RC(c + 1.5, Y(yDeck), fwB - SB.wall - 2, Y(yLid), `fill="none" stroke-width="${th * 0.6}" stroke-dasharray="${dash}"`);   // the right lid's shut place
+    const L = [[0, 0], [w, 0], [w, -SB.lid], [0, -SB.lid]].map(([x, z]) => rot(c + 1.5, x, z, 1));
+    o += P(L.map(([u, h]) => [u, Y(h)]), cut);                                                                                 // the right lid, open
+    o += RC(SB.wall, Y(yMat), fwB - SB.wall, Y(yDeck), `fill="none" stroke-width="${th * 0.6}" stroke-dasharray="${dash}"`);     // the mattress
+    // the struts: the body (thick) from its pivot on the floor board by the spine, the rod (thin) from the bracket under the lid
+    const strut = (pv, at) => {
+      const dx = at[0] - pv[0], dz = at[1] - pv[1], d = Math.hypot(dx, dz), ux = dx / d, uz = dz / d;
+      return `<line x1="${f(pv[0])}" y1="${f(Y(pv[1]))}" x2="${f(pv[0] + ux * SB.body)}" y2="${f(Y(pv[1] + uz * SB.body))}" stroke-width="22"/>`
+        + `<line x1="${f(at[0])}" y1="${f(Y(at[1]))}" x2="${f(at[0] - ux * SB.rod)}" y2="${f(Y(at[1] - uz * SB.rod))}" stroke-width="8"/>`
+        + `<circle cx="${f(pv[0])}" cy="${f(Y(pv[1]))}" r="14" fill="#fff" stroke-width="${th}"/><circle cx="${f(at[0])}" cy="${f(Y(at[1]))}" r="12" fill="#fff" stroke-width="${th}"/>`;
+    };
+    o += strut([c - SB.pv, SB.floor + 20], [c - 1.5 - SB.at, yLid - SB.drop]);
+    o += strut([c + SB.pv, SB.floor + 20], rot(c + 1.5, SB.at, -SB.lid - SB.drop, 1));
+    o += `<circle cx="${f(c + 1.5)}" cy="${f(Y(yDeck))}" r="10" fill="#fff" stroke-width="${th}"/>`;                           // the hinge on the spine
     return o;
   }
   // the headboard's top edge at 1:5
@@ -471,7 +525,7 @@ const BEDFRAME = {
   s2 += vf.g(bedFront(tf), 0.3);
   s2 += chainH([vf.X(0), vf.X(B.over), vf.X(fwB - B.over), vf.X(fwB)], vf.Y(topB) + 5, [B.over, `${B.mat.w} MATTRESS`, B.over], { from: vf.Y(topB) + 1, size: 1.2 });
   s2 += chainH([vf.X(0), vf.X(fwB)], vf.Y(topB) + 11, [`${fwB} OVERALL — THE HEADBOARD THE SAME`], { from: vf.Y(topB) + 1, size: 1.4 });
-  s2 += chainV([vf.Y(topB), vf.Y(topB - yBase), vf.Y(topB - yMat), vf.Y(0)], vf.X(fwB) + 6, [`${yBase} BASE`, `${B.mat.h} MATTRESS`, HB.h - yMat], { from: vf.X(fwB) + 1, size: 1.15 });
+  s2 += chainV([vf.Y(topB), vf.Y(topB - yBase), vf.Y(topB - yMat), vf.Y(0)], vf.X(fwB) + 6, [`${yBase} BASE`, yMat - yBase, HB.h - yMat], { from: vf.X(fwB) + 1, size: 1.15 });
   s2 += chainV([vf.Y(topB), vf.Y(0)], vf.X(fwB) + 13, [`${HB.h} TO THE TOP`], { from: vf.X(fwB) + 1, size: 1.25 });
   s2 += note(vf.X(fwB * 0.82), vf.Y(120), vf.X(fwB * 0.82) + 8, vf.Y(-60), "HEADBOARD, DUSTY-ROSE SUEDE", "1¼ IN GLOSS-BLACK FRAME, ITS TOP CORNERS ROUNDED");
 
@@ -484,7 +538,7 @@ const BEDFRAME = {
   s2 += note(vsd.X(lenB - 300), vsd.Y(topB - 140), vsd.X(lenB) - 10, vsd.Y(topB + 120), "STORAGE BASE, TO THE FLOOR", "NO LEGS, GLOSS BLACK · CORNERS ROUNDED 3 IN, EDGES EASED ⅝ IN", "end");
 
   const scP2 = 20, vpl = view(28, 152, scP2, "Bed plan"), tpl = vpl.w(0.1), dpl = `${vpl.w(1)} ${vpl.w(0.7)}`;
-  s2 += heading(18, 142, "PLAN", `SCALE 1:${scP2} · HEADBOARD AT THE TOP`, 80);
+  s2 += heading(18, 142, "PLAN", `SCALE 1:${scP2} · HEADBOARD AT THE TOP · THE MATTRESS OFF: THE RIM AND THE FOUR LIDS`, 80);
   s2 += vpl.g(bedPlan(tpl, dpl), 0.3);
   s2 += chainV([vpl.Y(0), vpl.Y(HB.t), vpl.Y(lenB)], vpl.X(fwB) + 5, [HB.t, lenB - HB.t], { from: vpl.X(fwB) + 1, size: 1.1 });
   s2 += chainV([vpl.Y(0), vpl.Y(lenB)], vpl.X(fwB) + 11, [lenB], { from: vpl.X(fwB) + 1, size: 1.2 });
@@ -502,6 +556,17 @@ const BEDFRAME = {
     L2.add(vh.X(HB.t - 3), vh.Y(90), "DUSTY-ROSE SUEDE PANEL", "¼ IN PROUD OF THE FRAME · PLAIN");
     s2 += L2.draw(); }
 
+  const vst = view(152, 232, 25, "Bed storage"), tst = vst.w(0.12), dst = `${vst.w(1)} ${vst.w(0.7)}`;
+  s2 += heading(150, 224, "3 · THE STORAGE", "SECTION ACROSS A COMPARTMENT · SCALE 1:25", 70);
+  s2 += vst.g(storeDetail(tst, dst), 0.3);
+  s2 += chainV([vst.Y(topS), vst.Y(topS - SB.floor), vst.Y(topS - yLid), vst.Y(topS - yDeck), vst.Y(topS - yBase)], vst.X(0) - 3, [SB.floor, yLid - SB.floor, SB.lid, SB.rim], { from: vst.X(0) - 0.5, size: 1.0 });
+  { const L3 = labels(vst.X(fwB) + 8, "right", 230, 284);
+    L3.add(vst.X(fwB - SB.wall / 2), vst.Y(topS - yBase + 10), "THE RIM, 1 IN PAST THE LIDS", "ROUND THE SIDES AND FOOT · THE MATTRESS SITS IN IT");
+    L3.add(vst.X(fwB / 2 + 520), vst.Y(topS - yDeck - 560), "FOUR LIDS, ¾ IN, EACH LIFTS ON ITS OWN", "HINGED ON THE SPINE · OPEN TO 80°");
+    L3.add(vst.X(fwB / 2 + 150), vst.Y(topS - 160), "TWO GAS STRUTS PER LID", "ONE AT EACH END OF ITS COMPARTMENT");
+    L3.add(vst.X(fwB * 0.3), vst.Y(topS - 60), "FOUR COMPARTMENTS, 9 IN DEEP", "A SPINE DOWN THE MIDDLE, A RAIL ACROSS");
+    s2 += L3.draw(); }
+
   s2 += heading(300, 142, "2 · FIXING", "", 40);
   ["The headboard bolts to the base's head end —",
    "two M8 bolts through the base into T-nuts in the",
@@ -511,16 +576,16 @@ const BEDFRAME = {
     .forEach((n, i) => (s2 += text(300, 152 + i * 4.3, n, { size: 1.45 })));
 
   s2 += heading(300, 182, "NOTES", `REVISION ${B.rev.split(" ")[0]}`, 100);
-  ["The bed on a storage base (owner, 7 Oct): a plain box straight down to",
-   "the floor, no legs, 2 in past the 6 ft × 6 ft 6 in mattress at the sides",
-   "and foot, 11 in to the mattress. The storage inside is not drawn.",
-   "The slim headboard behind it, the frame's width, 3 ft 4 in high: a dusty-",
-   "rose suede panel from the base's top up only, in a 1¼ in gloss-black frame",
-   "— as thin as the dressing mirror's; below the suede its back is gloss black",
-   "to the floor (owner, 23 Oct). The base in GLOSS BLACK lacquer",
-   "(owner, 7 Oct): the room's black accent, Deco with the rose. Mattress 10 in."]
+  ["The bed on a storage base (owner, 7 Oct): a box straight to the floor, no",
+   "legs, 2 in past the 6 ft × 6 ft 6 in mattress at the sides and foot. The",
+   "mattress sits IN it (owner, 23 Oct): four lift-up lids 1 in below a rim round",
+   "the sides and foot, the headboard closing the head; each lid hinged on the",
+   "spine, held open by two gas struts, over its own compartment — detail 3.",
+   "Headboard: rose suede from the base's top up only, in a 1¼ in gloss-black",
+   "frame; below the suede its back is gloss black. Base and lids GLOSS BLACK",
+   "for now (owner: the lids may change). Mattress 10 in, to be chosen."]
     .forEach((n, i) => (s2 += text(300, 193 + i * 4.3, n, { size: 1.45 })));
 
-  s2 += titleBlock({ title: "THE BED", sub: "Front · Side · Plan · Headboard", date: B.date, rev: B.rev, dwg: "AST-DR-035", scale: "AS NOTED @ A3" });
+  s2 += titleBlock({ title: "THE BED", sub: "Front · Side · Plan · Headboard · Storage", date: B.date, rev: B.rev, dwg: "AST-DR-035", scale: "AS NOTED @ A3" });
   window.DRAWINGS.bedframe = { title: "The bed · AST-DR-035", svg: mono(sheet(s2)), model: true };
 })();

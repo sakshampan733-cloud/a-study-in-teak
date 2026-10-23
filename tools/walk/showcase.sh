@@ -8,11 +8,11 @@ B=/Applications/Blender.app/Contents/MacOS/Blender
 PY=/Library/Developer/CommandLineTools/usr/bin/python3
 FF=tools/node/node_modules/ffmpeg-static/ffmpeg
 OUT=build/showcase
-DESK=(d01_reveal d02_drawers d03_corner d04_frieze d07_wide)
-BED=(b01_reveal b02_corner b03_side b04_headboard b05_hcorner b06_wide)
+DESK=(d01_reveal d02_drawers d03_corner d04_frieze d05_back d07_wide)
+BED=(b01_reveal b02_corner b03_side b07_storage b08_strut b04_headboard b05_hcorner b06_wide)
 log() { echo "$(date '+%H:%M:%S') $*" | tee -a $OUT/progress.txt; }
 mkdir -p $OUT
-log "render: desk ${#DESK} shots, bed ${#BED} shots, 5 stills"
+log "render: desk ${#DESK} shots, bed ${#BED} shots, 6 stills"
 for attempt in 1 2 3 4; do
   find $OUT/desk $OUT/bed -name "f*.png" -size 0 -delete 2>/dev/null          # a crash leaves an empty placeholder frame
   : > $OUT/render.log

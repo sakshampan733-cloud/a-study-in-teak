@@ -16,9 +16,9 @@ BASE = OUTR
 WHAT = os.environ.get("WHAT", "desk,bed,stills").split(",")
 
 # ── what goes: every loose piece of furniture, its dressing, and the bedding ──
-FURN = ("bed_base", "headboard", "mattress", "duvet", "sheet_fold", "throw", "pillow", "cushion", "st0_", "st1_", "deskchair", "gb_",
+FURN = ("bed_", "headboard", "mattress", "duvet", "sheet_fold", "throw", "pillow", "cushion", "st0_", "st1_", "deskchair", "gb_",
         "hide", "lamp_", "monitor_", "blotter", "book0", "book1", "book2", "vase", "dk2_")
-KEEP = {"desk": ("dk2_",), "bed": ("bed_base", "headboard")}                # the bed: no mattress either (owner, 23 Oct)
+KEEP = {"desk": ("dk2_",), "bed": ("bed_", "headboard")}                # the bed: no mattress either (owner, 23 Oct)
 PRIM = ("Cylinder", "Sphere", "Torus", "Cone", "Cube", "Circle")
 
 def bbox(o):
@@ -54,14 +54,21 @@ DESK = [
     ("d02_drawers", 132, ((1350, 700, 820), (1700, 1620, 380)), ((3300, 700, 820), (2950, 1620, 380)), 24, 4.0, {"tilt": True}),
     ("d03_corner", 132, ((690, 1010, 260), (1250, 1580, 200)), ((690, 1010, 880), (1250, 1580, 640)), 30, 4.0, {"tilt": True}),
     ("d04_frieze", 132, ((1850, 1000, 900), (2000, 1529, 640)), ((2750, 1000, 900), (2900, 1529, 640)), 35, 4.0, {"tilt": True}),
+    # the back, panelled like the ends, from the bed's side (the glass-block partition is hidden with the furniture)
+    ("d05_back", 132, ((1500, 3450, 950), (1750, 2316, 400)), ((3150, 3450, 950), (2900, 2316, 400)), 24, 5.6, {"tilt": True}),
     ("d07_wide", 132, ((900, 720, 1450), (2337, 1850, 450)), ((720, 640, 1650), (2337, 1850, 450)), 22, 5.6, {"tilt": True}),
 ]
-# bed: base x 1373–3302, s 3613–5645, 280 high, gloss black, its corners rounded, no mattress; the headboard 1405–3270
+# bed: base x 1373–3302, s 3613–5645, 280 high, gloss black, the foot corners rounded, no mattress; a 1 in rim round four
+# lids (top at 255) hinged on the spine at x 2337, the cross rail at s 4646; the headboard 1405–3270
 # at s 5645, to 984, in a thin black frame, the suede only above the base; the niche behind, 915–3760
 BED = [
     ("b01_reveal", 120, ((2337, 2300, 1700), (2337, 4900, 380)), ((2337, 2620, 1560), (2337, 4900, 380)), 24, 5.6, {"tilt": True}),
     ("b02_corner", 120, ((3820, 3150, 460), (3260, 3660, 180)), ((3780, 3980, 430), (3260, 3700, 180)), 35, 2.8, {"tilt": True}),
     ("b03_side", 132, ((3880, 3700, 380), (3302, 4000, 160)), ((3880, 4900, 380), (3302, 5200, 160)), 28, 4.0, {"tilt": True}),
+    # the storage (owner, 23 Oct): the four lids lift one after another on their gas struts, seen from over the foot;
+    # then close on one strut with its lid up
+    ("b07_storage", 168, ((2337, 2450, 1900), (2337, 4650, 230)), ((2337, 2800, 1750), (2337, 4650, 230)), 24, 5.6, {"tilt": True, "ev": 0.3}),
+    ("b08_strut", 120, ((3000, 3250, 750), (2420, 3720, 260)), ((2950, 3420, 700), (2420, 3720, 260)), 32, 4.0, {"tilt": True, "ev": 0.6}),
     ("b04_headboard", 120, ((2600, 3950, 750), (2337, 5650, 700)), ((2450, 4150, 1150), (2337, 5650, 700)), 28, 5.6, {"tilt": True}),
     ("b05_hcorner", 120, ((3720, 5080, 1180), (3285, 5660, 960)), ((3560, 5300, 1120), (3285, 5660, 960)), 50, 2.8, {"tilt": True}),
     ("b06_wide", 132, ((850, 3300, 1400), (2337, 4900, 420)), ((650, 2950, 1550), (2337, 4900, 420)), 22, 5.6, {"tilt": True}),
@@ -73,7 +80,22 @@ STILLS = [
     ("bed_side", (4450, 4650, 600), (2337, 4650, 380), 18, 8.0),
     ("bed_head", (3500, 4250, 1150), (2337, 5650, 700), 28, 6.3),
     ("bed_corner", (3950, 3000, 700), (3150, 3800, 240), 35, 5.6),
+    ("bed_storage", (3950, 3050, 1650), (2337, 4650, 250), 24, 8.0),
 ]
+
+# the lids: shut, all open, or opening one after another — (start, end) frames for each, in BED_LIDS order
+# (left foot, left head, right foot, right head; bedwall.py); 80° open, eased in and out like a gas strut
+LID_OPEN = math.radians(80)
+LIDS = {"b07_storage": [(20, 64), (70, 114), (45, 89), (95, 139)], "b08_strut": "open", "bed_storage": "open"}
+def lids(state=None):
+    for i, (hg, sgn) in enumerate(globals().get("BED_LIDS", [])):
+        hg.animation_data_clear(); hg.rotation_euler = (0, 0, 0)
+        if state == "open": hg.rotation_euler[1] = -sgn * LID_OPEN
+        elif state:
+            f0, f1 = state[i]
+            hg.keyframe_insert("rotation_euler", index=1, frame=f0)
+            hg.rotation_euler[1] = -sgn * LID_OPEN; hg.keyframe_insert("rotation_euler", index=1, frame=f1)
+    bpy.context.view_layer.update()
 
 def render_setup():
     bake_modifiers()
@@ -114,9 +136,9 @@ if "bed" in WHAT or "stills" in WHAT:
     if "bed" in WHAT:
         OUTR = os.path.join(BASE, "bed")
         for sh in BED:
-            if pick(sh[0]): film_shot(sh)
+            if pick(sh[0]): lids(LIDS.get(sh[0])); film_shot(sh)
     if "stills" in WHAT:
         sc.view_settings.exposure = EV0
         for st in STILLS:
-            if pick(st[0]): still(*st)
+            if pick(st[0]): sc.frame_set(1); lids(LIDS.get(st[0])); still(*st)
 OUTR = BASE

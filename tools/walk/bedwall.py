@@ -150,7 +150,69 @@ def round_box(o, rc, re_, edges="z"):
     for p_ in o.data.polygons: p_.use_smooth = True
     b = o.modifiers.new("ease", "BEVEL"); b.width = re_; b.segments = 5; b.limit_method = "ANGLE"; b.harden_normals = True
     return o
-o_ = dbox("bed_base", xa, SV(vF1), 0, xb, SV(vF0), BASE, M_BED); round_box(o_, 0.075, 0.015, "z")   # 3 in round in plan, top edge eased
+# The storage base (owner, 23 Oct): the mattress sits IN it — the top is four lift-up lids an inch below a rim that runs
+# round the sides and the foot (the headboard closes the head end), so the mattress cannot slide; under the lids four
+# compartments, split by a spine down the middle and a rail across. Each lid hinges on the spine and lifts from the
+# side of the bed, held open by two gas struts, one at each end of its compartment. All in the base's gloss black for now.
+X0_, X1_ = min(xa, xb), max(xa, xb); XC_ = (X0_ + X1_) / 2
+SH_, SF_ = SV(vF0), SV(vF1)                              # the head end (at the headboard's face) and the foot, in s
+TW, TF, TH, TB = 50.0, 51.0, 18.0, 18.0                  # the walls: sides and foot to the rim's width, head panel and floor board
+DECK, LID = BASE - 25.0, 18.0                            # the lids' top 1 in below the rim; ¾ in lids
+SM_ = (SH_ + SF_ + TF - TH) / 2                          # the cross rail, halfway along the compartments
+RB = 75.0                                                # the foot corners rounded 3 in in plan (owner, 8 Oct); the head corners square, at the headboard
+def outline_prism(name, z0, z1, m):
+    pts = [(X0_, SH_), (X1_, SH_)]
+    for cx, cs, a0 in ((X1_ - RB, SF_ + RB, 0.0), (X0_ + RB, SF_ + RB, -90.0)):
+        for q in range(13):
+            t = math.radians(a0 - 90.0 * q / 12); pts.append((cx + RB * math.cos(t), cs + RB * math.sin(t)))
+    bm_ = bmesh.new(); lo = [bm_.verts.new(P(x, s_, z0)) for x, s_ in pts]; hi = [bm_.verts.new(P(x, s_, z1)) for x, s_ in pts]
+    n_ = len(pts)
+    for i in range(n_): bm_.faces.new((lo[i], lo[(i + 1) % n_], hi[(i + 1) % n_], hi[i]))
+    bm_.faces.new(lo[::-1]); bm_.faces.new(hi); bmesh.ops.recalc_face_normals(bm_, faces=bm_.faces[:])
+    me_ = bpy.data.meshes.new(name); bm_.to_mesh(me_); bm_.free(); o = bpy.data.objects.new(name, me_); DET.objects.link(o); setmat(o, m); return o
+o_ = outline_prism("bed_base", 0, BASE, M_BED)
+for nm_, bx in (("pocket", (X0_ + TW, SF_ + TF, DECK - 1, X1_ - TW, SH_ + 10, BASE + 20)),          # the mattress's pocket, open at the head
+                ("cavity", (X0_ + TW, SF_ + TF, TB, X1_ - TW, SH_ - TH, DECK + 1))):                   # the storage under the lids
+    c_ = box("bed_cut_" + nm_, *bx, WALL, DET)
+    bo = o_.modifiers.new(nm_, "BOOLEAN"); bo.object = c_; bo.operation = "DIFFERENCE"; bo.solver = "EXACT"
+    bpy.context.view_layer.objects.active = o_; bpy.ops.object.modifier_apply(modifier=nm_); bpy.data.objects.remove(c_, do_unlink=True)
+for p_ in o_.data.polygons: p_.use_smooth = True
+b_ = o_.modifiers.new("ease", "BEVEL"); b_.width = 0.006; b_.segments = 4; b_.limit_method = "ANGLE"; b_.harden_normals = True
+# inside: the spine, the cross rail, and a ledge round the walls for the lids to sit on
+ZL = DECK - LID
+for nm_, bx in (("spine", (XC_ - 9, SF_ + TF, TB, XC_ + 9, SH_ - TH, ZL)), ("rail", (X0_ + TW, SM_ - 9, TB, X1_ - TW, SM_ + 9, ZL)),
+                ("ledge_l", (X0_ + TW, SF_ + TF, ZL - 20, X0_ + TW + 20, SH_ - TH, ZL)), ("ledge_r", (X1_ - TW - 20, SF_ + TF, ZL - 20, X1_ - TW, SH_ - TH, ZL)),
+                ("ledge_f", (X0_ + TW, SF_ + TF, ZL - 20, X1_ - TW, SF_ + TF + 20, ZL)), ("ledge_h", (X0_ + TW, SH_ - TH - 20, ZL - 20, X1_ - TW, SH_ - TH, ZL))):
+    o_ = dbox("bed_" + nm_, *bx, M_BED); bevel(o_, 0.0015, 2)
+# the lids, each on a hinge along the spine; the gas struts at the ends of each compartment, body on the floor board by the
+# spine, rod to a bracket under the lid 250 mm out from the hinge (249 long shut, 456 open at 80°: a 230 body, 225 rod)
+BED_LIDS = []
+M_STRUT = flat("strut_steel", (0.62, 0.63, 0.65), 0.28, 1.0)              # the struts' bodies satin steel, the rods chrome
+def strut_piece(name, r, length):
+    bm_ = bmesh.new(); seg = 16
+    a_ = [bm_.verts.new((r * math.cos(2 * math.pi * q / seg), r * math.sin(2 * math.pi * q / seg), 0)) for q in range(seg)]
+    b2 = [bm_.verts.new((r * math.cos(2 * math.pi * q / seg), r * math.sin(2 * math.pi * q / seg), length)) for q in range(seg)]
+    for q in range(seg): f_ = bm_.faces.new((a_[q], a_[(q + 1) % seg], b2[(q + 1) % seg], b2[q])); f_.smooth = True
+    bm_.faces.new(a_[::-1]); bm_.faces.new(b2); bmesh.ops.recalc_face_normals(bm_, faces=bm_.faces[:])
+    me_ = bpy.data.meshes.new(name); bm_.to_mesh(me_); bm_.free(); o = bpy.data.objects.new(name, me_); DET.objects.link(o); return o
+def empty(name, loc, parent=None):
+    e = bpy.data.objects.new(name, None); e.empty_display_size = 0.02; DET.objects.link(e); e.location = loc
+    if parent: e.parent = parent; e.matrix_parent_inverse = parent.matrix_world.inverted()
+    return e
+for side, (lx0, lx1, sgn) in (("l", (X0_ + TW + 2, XC_ - 1.5, -1)), ("r", (XC_ + 1.5, X1_ - TW - 2, 1))):
+    for end, (ls0, ls1) in (("foot", (SF_ + TF + 2, SM_ - 1.5)), ("head", (SM_ + 1.5, SH_ - 2))):
+        hx = XC_ + sgn * 1.5
+        hg = empty(f"bed_hinge_{side}{end}", P(hx, (ls0 + ls1) / 2, DECK)); bpy.context.view_layer.update()
+        lid = dbox(f"bed_lid_{side}{end}", lx0, ls0, ZL, lx1, ls1, DECK, M_BED); bevel(lid, 0.002, 2)
+        lid.parent = hg; lid.matrix_parent_inverse = hg.matrix_world.inverted()
+        for k, se in enumerate((ls0 + 30, ls1 - 30)):
+            pv = empty(f"bed_strut_pv_{side}{end}{k}", P(XC_ + sgn * 69, se, TB + 20))
+            at = empty(f"bed_strut_at_{side}{end}{k}", P(hx + sgn * 250, se, ZL - 30), hg)
+            body = strut_piece(f"bed_strut_body_{side}{end}{k}", 0.011, 0.230); setmat(body, M_STRUT); body.location = pv.location
+            c1 = body.constraints.new("DAMPED_TRACK"); c1.target = at; c1.track_axis = "TRACK_Z"
+            rod = strut_piece(f"bed_strut_rod_{side}{end}{k}", 0.004, 0.225); setmat(rod, M_CHROME)
+            c2 = rod.constraints.new("COPY_LOCATION"); c2.target = at; c3 = rod.constraints.new("DAMPED_TRACK"); c3.target = pv; c3.track_axis = "TRACK_Z"
+        BED_LIDS.append((hg, sgn))
 # the headboard: a rose suede panel in a thin gloss-black frame round its top and sides — 1¼ in face, as thin as the
 # dressing mirror's frame, 2¾ in deep — the panel ¼ in proud of it (owner, 7 Oct)
 HBF, HBD = 32.0, 70.0
@@ -171,7 +233,7 @@ o_ = dbox("headboard", xa + HBF, SV(HB_F), BASE, xb - HBF, SV(HB_B + 2), HB_H - 
 for p_ in o_.data.polygons: p_.use_smooth = True
 o_ = dbox("headboard_frame_low", xa + HBF, SV(HB_B + HBD), 0, xb - HBF, SV(HB_B), BASE, M_BED); bevel(o_, 0.003, 3)
 # the mattress (the bedding is made on it next, in realism.py)
-o_ = box("mattress", XU(BC + MW / 2), SV(vF0 + ML), BASE, XU(BC - MW / 2), SV(vF0), BASE + MATT, WALL, FUR)
+o_ = box("mattress", XU(BC + MW / 2), SV(vF0 + ML), DECK, XU(BC - MW / 2), SV(vF0), DECK + MATT, WALL, FUR)      # in the rim, on the lids
 setmat(o_, M_LINEN_WHITE); bevel(o_, 0.035, 5)
 for p_ in o_.data.polygons: p_.use_smooth = True
 
