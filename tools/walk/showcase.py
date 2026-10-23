@@ -1,5 +1,5 @@
 # Two pieces on their own (owner, 23 Oct): a film of the desk and a film of the bed, each alone in the room — no other
-# furniture, the bed with no bedding — slow, close shots that show the mouldings; and stills of the bare bed.
+# furniture, the bed with no bedding and no mattress — slow, close shots that show the mouldings; and stills of the bare bed.
 # Run by real.py in its namespace, so the room, materials, light and render settings are the walk-through film's own:
 #
 #   DEVICES=gpu blender -b --python tools/walk/real.py -- build/showcase showcase [samples]
@@ -18,7 +18,7 @@ WHAT = os.environ.get("WHAT", "desk,bed,stills").split(",")
 # ── what goes: every loose piece of furniture, its dressing, and the bedding ──
 FURN = ("bed_base", "headboard", "mattress", "duvet", "sheet_fold", "throw", "pillow", "cushion", "st0_", "st1_", "deskchair", "gb_",
         "hide", "lamp_", "monitor_", "blotter", "book0", "book1", "book2", "vase", "dk2_")
-KEEP = {"desk": ("dk2_",), "bed": ("bed_base", "headboard", "mattress")}
+KEEP = {"desk": ("dk2_",), "bed": ("bed_base", "headboard")}                # the bed: no mattress either (owner, 23 Oct)
 PRIM = ("Cylinder", "Sphere", "Torus", "Cone", "Cube", "Circle")
 
 def bbox(o):
@@ -46,16 +46,6 @@ def isolate(subject):
         o.hide_render = hide; o.hide_viewport = hide
     print("ISOLATE", subject, "hidden", sum(1 for o in sc.objects if o.hide_render), flush=True)
 
-def mattress():
-    """The model's own mattress (under the bedding, 6 ft × 6 ft 6 in × 10 in) in a plain ivory ticking rather than the
-    sheet's white, which burns out once there is nothing over it."""
-    m = bpy.data.objects["mattress"]
-    mat = bpy.data.materials.get("sc_ticking") or bpy.data.materials.new("sc_ticking"); mat.use_nodes = True
-    b = mat.node_tree.nodes["Principled BSDF"]; b.inputs["Base Color"].default_value = (.34, .31, .27, 1); b.inputs["Roughness"].default_value = .9
-    for k, v in (("Sheen Weight", .5), ("Sheen Roughness", .5)):
-        if k in b.inputs: b.inputs[k].default_value = v
-    m.data.materials.clear(); m.data.materials.append(mat)
-
 # ── the shots: name, frames, (camera from, looking at), (camera to, looking at), lens, f-stop, extras ──
 # desk: x 1194–3480, s 1529–2316 since 23 Oct (2 ft 7 in deep, its back still 2 in off the glass; the drawer fronts face
 # the study wall), top 710–750; pedestals x 1194–1814 and 2860–3480; the four corners hollowed R150, top to plinth
@@ -66,8 +56,8 @@ DESK = [
     ("d04_frieze", 132, ((1850, 1000, 900), (2000, 1529, 640)), ((2750, 1000, 900), (2900, 1529, 640)), 35, 4.0, {"tilt": True}),
     ("d07_wide", 132, ((900, 720, 1450), (2337, 1850, 450)), ((720, 640, 1650), (2337, 1850, 450)), 22, 5.6, {"tilt": True}),
 ]
-# bed: base x 1373–3302, s 3613–5645, 280 high, gloss black, its corners rounded; the mattress on it to 534; the headboard
-# 1405–3270 at s 5645, to 984, in a thin black frame whose posts run to the floor; the niche behind, 915–3760
+# bed: base x 1373–3302, s 3613–5645, 280 high, gloss black, its corners rounded, no mattress; the headboard 1405–3270
+# at s 5645, to 984, in a thin black frame, the suede only above the base; the niche behind, 915–3760
 BED = [
     ("b01_reveal", 120, ((2337, 2300, 1700), (2337, 4900, 380)), ((2337, 2620, 1560), (2337, 4900, 380)), 24, 5.6, {"tilt": True}),
     ("b02_corner", 120, ((3820, 3150, 460), (3260, 3660, 180)), ((3780, 3980, 430), (3260, 3700, 180)), 35, 2.8, {"tilt": True}),
@@ -120,7 +110,7 @@ if "desk" in WHAT:
     for sh in DESK:
         if pick(sh[0]): film_shot(sh)
 if "bed" in WHAT or "stills" in WHAT:
-    mattress(); isolate("bed")
+    isolate("bed")
     if "bed" in WHAT:
         OUTR = os.path.join(BASE, "bed")
         for sh in BED:

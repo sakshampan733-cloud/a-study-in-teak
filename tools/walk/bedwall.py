@@ -165,8 +165,11 @@ for nm_, (x0_, x1_, z0_, z1_) in {"top": (xa, xb, HB_H - HBF, HB_H), "l": (xa, x
         for p_ in o_.data.polygons: p_.use_smooth = True
         b_ = o_.modifiers.new("ease", "BEVEL"); b_.width = 0.004; b_.segments = 3; b_.limit_method = "ANGLE"; b_.harden_normals = True
     else: bevel(o_, 0.003, 3)
-o_ = dbox("headboard", xa + HBF, SV(HB_F), 0, xb - HBF, SV(HB_B + 2), HB_H - HBF, M_HEAD); bevel(o_, 0.006, 4)
+# the suede only from the base's top up (owner, 23 Oct: "it's just supposed to be on the top"); below it, hidden behind
+# the base, the headboard's back in the frame's gloss black, flush with the frame, down to the floor where it bolts on
+o_ = dbox("headboard", xa + HBF, SV(HB_F), BASE, xb - HBF, SV(HB_B + 2), HB_H - HBF, M_HEAD); bevel(o_, 0.006, 4)
 for p_ in o_.data.polygons: p_.use_smooth = True
+o_ = dbox("headboard_frame_low", xa + HBF, SV(HB_B + HBD), 0, xb - HBF, SV(HB_B), BASE, M_BED); bevel(o_, 0.003, 3)
 # the mattress (the bedding is made on it next, in realism.py)
 o_ = box("mattress", XU(BC + MW / 2), SV(vF0 + ML), BASE, XU(BC - MW / 2), SV(vF0), BASE + MATT, WALL, FUR)
 setmat(o_, M_LINEN_WHITE); bevel(o_, 0.035, 5)

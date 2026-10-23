@@ -100,20 +100,6 @@
   "pages": 10,
   "pagesA4": 10
  },
- "bedwall": {
-  "title": "BED WALL — THE NICHE",
-  "dwgs": [
-   "AST-DR-034"
-  ],
-  "keys": [
-   "bedwall"
-  ],
-  "starts": [
-   0
-  ],
-  "pages": 8,
-  "pagesA4": 8
- },
  "tvunit": {
   "title": "TV UNIT — DRAWERS",
   "dwgs": [
@@ -127,20 +113,6 @@
   ],
   "pages": 8,
   "pagesA4": 8
- },
- "bedframe": {
-  "title": "THE BED",
-  "dwgs": [
-   "AST-DR-035"
-  ],
-  "keys": [
-   "bedframe"
-  ],
-  "starts": [
-   0
-  ],
-  "pages": 7,
-  "pagesA4": 7
  },
  "sidetable": {
   "title": "THE SIDE TABLES",
@@ -423,5 +395,33 @@
   ],
   "pages": 25,
   "pagesA4": 25
+ },
+ "bedframe": {
+  "title": "THE BED",
+  "dwgs": [
+   "AST-DR-035"
+  ],
+  "keys": [
+   "bedframe"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 7,
+  "pagesA4": 7
+ },
+ "bedwall": {
+  "title": "BED WALL — THE NICHE",
+  "dwgs": [
+   "AST-DR-034"
+  ],
+  "keys": [
+   "bedwall"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 9,
+  "pagesA4": 9
  }
 }
