@@ -81,7 +81,7 @@ for i in range(4):
 fbox("tv", cx - 614, yP + pT / 2, 850, cx + 614, yP + pT / 2 + 45, 1545, DARK)
 
 # ── the desk: hollowed corners, two pedestals, frieze; it sits in the desk-side curve ──
-dL, dD, dh = 2286, 914, 150
+dL, dD, dh = 2286, 787, 150                            # desk 7 ft 6 in × 2 ft 7 in (owner, 23 Oct)
 def dgap():
     def need(ax, ad):
         if ax <= st: return pT / 2 - ad

@@ -61,7 +61,7 @@
   })();
 
   // the desk: the square-cornered version (AST-DR-028), its back 2 in from the glass — room for a monitor arm's clamp
-  const desk = { L: 2286, D: 914, gap: 50 };
+  const desk = { L: 2286, D: 787, gap: 50 };   // 2 ft 7 in deep (owner, 23 Oct)
   desk.back = yP - pT / 2 - desk.gap; desk.front = desk.back - desk.D;
 
   const R = (x0, y0, x1, y1, c = "", a = "") => `<rect class="${c}" x="${f(Math.min(x0, x1))}" y="${f(Math.min(y0, y1))}" width="${f(Math.abs(x1 - x0))}" height="${f(Math.abs(y1 - y0))}" ${a}/>`;

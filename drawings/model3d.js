@@ -33,7 +33,7 @@ window.MODEL3D = (function () {
     };
     // the bed in the bed-wall niche (AST-DR-034/035): no headboard — the frame 1 in off the plaster, 2 in past the mattress
     const drF = pT / 2 + 5 + 400, bed = { w: 1929, l: 2108 }, bedHead = L - 45, bedFoot = bedHead - bed.l;   // headboard + base (AST-DR-035 rev 4)
-    const desk = { L: 2286, D: 914, H: 750 }; desk.back = yP - pT / 2 - 50; desk.front = desk.back - desk.D;
+    const desk = { L: 2286, D: 787, H: 750 };   // 2 ft 7 in deep (owner, 23 Oct) desk.back = yP - pT / 2 - 50; desk.front = desk.back - desk.D;
     return { cx, yP, pT, RUN, pAt, drF, bed, bedFoot, bedHead, desk };
   }
 

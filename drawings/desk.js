@@ -4,9 +4,9 @@
 window.DRAWINGS = window.DRAWINGS || {};
 
 const DESK = {
-  rev: "9 — plain teak top, gold on handles only",
-  date: "17.09.2026",
-  L: 2286, D: 914, H: 750, // 7 ft 6 in × 3 ft; height set for a 5 ft 9 in user
+  rev: "10 — 2 ft 7 in deep (owner, 23 Oct); plain teak top, gold on handles only",
+  date: "23.10.2026",
+  L: 2286, D: 787, H: 750, // 7 ft 6 in × 2 ft 7 in (owner, 23 Oct: was 3 ft); height set for a 5 ft 9 in user
   top: 40,        // top thickness incl. reeded edge
   ov: 30,         // top overhang, all round
   frz: 75,        // frieze (drawer) band height — slim, keeps 620 knee clearance
@@ -32,7 +32,7 @@ const DESK = {
 // cove, frieze, rail, pedestals, plinth — turns a plain 90° corner instead of the R150 hollow. Nothing
 // else changes: the carving, the reeded edge, the consoles, the collars and drops, the fielded doors and
 // the plinth are all kept. The corner mouldings stay too, standing on each face right at the corner.
-const DESK_SQUARE = { rev: "1 — square corners, every detail kept", date: "30.09.2026" };
+const DESK_SQUARE = { rev: "2 — 2 ft 7 in deep (owner, 23 Oct); square corners, every detail kept", date: "23.10.2026" };
 // The PLAIN square desk (owner, 2 Oct — the one selected): the carving comes off — no console brackets, no carved
 // drops, no carved collars — because it costs more than it is worth, needs a carver and a far finer drawing, and
 // would never come out like the reference anyway. What stays is the joinery a good carpenter runs with a moulder:
@@ -42,12 +42,12 @@ const DESK_SQUARE = { rev: "1 — square corners, every detail kept", date: "30.
 // A monitor-arm clamp bay at the back centre: the clamp bites 2–3 in in from the back edge, so the underside of the
 // top is kept clear 4 in in (the frieze back rail and the modesty panel set in to 4 in, the cove stopped, the centre
 // frieze drawer shortened) and its body sits in the 2 in gap behind the desk, before the glass.
-const DESK_PLAIN = { rev: "2 — no corner mouldings, wider drawers, monitor clamp bay", date: "02.10.2026", stile: 38,
+const DESK_PLAIN = { rev: "3 — 2 ft 7 in deep (owner, 23 Oct); no corner mouldings, wider drawers, monitor clamp bay", date: "23.10.2026", stile: 38,
   clamp: { w: 254, back: 102, drop: 89, gap: 51 } };   // bay 10 in wide · clear 4 in in from the back edge · 3½ in under the top · 2 in to the glass
 // The plain desk with its HOLLOW CORNERS BACK (owner, 7 Oct: "I have found someone else who could make them"): everything
 // as the plain desk — no carving, no corner mouldings, the clamp bay — but all four corners hollowed R150 again, top to
 // bottom, every layer struck from one centre. The outer stiles widen to clear the hollow, so the outer drawers narrow.
-const DESK_CURVED = { rev: "1 — the plain desk with its four hollow corners back", date: "07.10.2026" };
+const DESK_CURVED = { rev: "2 — 2 ft 7 in deep (owner, 23 Oct: was 3 ft); the plain desk with its four hollow corners", date: "23.10.2026" };
 
 function buildDesk(VAR) {
   const { INK, THIN, DIM, f, text, view, chainH, chainV, bubble, note, heading, cutMark, frame, titleBlock, sheet } = window.DK;
@@ -562,7 +562,7 @@ function buildDesk(VAR) {
   s1 += heading(176, 17, "LEFT END ELEVATION", `SCALE 1:${sc} · FRONT →`, 50);
   s1 += vE.g(end(tE) + `<line x1="-60" y1="${K.H}" x2="${K.D + 60}" y2="${K.H}" stroke-width="${vE.w(0.6)}"/>`, 0.3);
   s1 += chainH([0, K.ov, K.D - K.ov, K.D].map(vE.X), vE.Y(K.H) + 6, [K.ov, K.D - 2 * K.ov, K.ov], { from: vE.Y(K.H) + 1, size: 1.5 });
-  s1 += chainH([vE.X(0), vE.X(K.D)], vE.Y(K.H) + 12, [`${K.D} DEEP (3 FT)`], { from: vE.Y(K.H) + 1 });
+  s1 += chainH([vE.X(0), vE.X(K.D)], vE.Y(K.H) + 12, [`${K.D} DEEP (2 FT 7 IN)`], { from: vE.Y(K.H) + 1 });
 
   // Section A–A
   const scS = 12, vS = view(282, 34, scS, "Section A-A"), tS = vS.w(0.12);
@@ -627,7 +627,7 @@ function buildDesk(VAR) {
        "Husk drop: three husks, plain, then three reeds run", "   out below — not twelve veined husks and beads.",
        "Pedestal boss: the gadrooned boss and ring pull stay,", "   the acanthus scrolls and ribbon come off.",
        "Everything else — hollowed corners, edge moulding,", "   reeded rail, console brackets, plinth — is unchanged.", "First-angle projection."]
-    : ["Dimensions in feet and inches. Do not scale.", "Length 7 ft 6 in and depth 3 ft confirmed.", "   Height 750 set for a 5 ft 9 in user.",
+    : ["Dimensions in feet and inches. Do not scale.", "Length 7 ft 6 in; depth 2 ft 7 in (owner, 23 Oct).", "   Height 750 set for a 5 ft 9 in user.",
        "Solid teak throughout; polish sets the room finish.", "Three graduated drawers in each pedestal.", "Hollowed corners; moulding strip at both curve ends.",
        "Carving shown schematically — carver to", "   work from reference and Details sheet.",
        "A square-cornered version of this desk is drawn", "   on AST-DR-028 for a carpenter who cannot make the hollows.", "First-angle projection."])

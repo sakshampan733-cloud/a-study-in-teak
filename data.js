@@ -392,7 +392,7 @@ window.PROJECT = {
       items: [
         {
           id: "desk", name: "Desk", status: "final",
-          glance: {"line": "Tommy Shelby's double-pedestal desk, in solid teak — square corners, mouldings only, no carving, backed up to the glass.", "facts": [["7 ft 6 × 3 ft", "top"], ["750 mm", "high"], ["Plain", "square, no carving (AST-DR-031)"], ["2 in", "off the partition"]], "mats": ["teak", "brass"]},
+          glance: {"line": "Tommy Shelby's double-pedestal desk, in solid teak — square corners, mouldings only, no carving, backed up to the glass.", "facts": [["7 ft 6 × 2 ft 7", "top"], ["750 mm", "high"], ["Plain", "square, no carving (AST-DR-031)"], ["2 in", "off the partition"]], "mats": ["teak", "brass"]},
           drawings: ["desk-curved", "desk-curved-details", "desk-curved-3d", "desk-plain", "desk-plain-details", "desk-plain-3d", "desk-square", "desk-square-details", "desk-square-3d", "desk", "desk-details", "desk-3d"],
           refs: [
             { src: "assets/refs/desk-ref-1.jpg", caption: "Reference — Tommy Shelby's desk, Peaky Blinders (screen photo)" },
@@ -414,7 +414,7 @@ window.PROJECT = {
             { label: "Base", value: "Moulded plinth under each pedestal — to confirm (plinth vs bun feet vs castors)." },
             { label: "Hardware", value: "Polished brass swan-neck bail handles with round rosette posts on the six pedestal drawers. The three frieze drawers have none — push-to-open." },
             { label: "Finish", value: "Rich red-brown, high gloss (French-polish look). This finish sets the polish for the whole room." },
-            { label: "Dimensions", value: "2286 L × 914 D × 750 H (7 ft 6 in × 3 ft; height set for a 5 ft 9 in user, 620 mm knee clearance)" },
+            { label: "Dimensions", value: "2286 L × 787 D × 750 H (7 ft 6 in × 2 ft 7 in — the owner's change, 23 Oct, from 3 ft; height set for a 5 ft 9 in user, 620 mm knee clearance)" },
           ],
           questions: [
             "Size: how much space do you have? Reference proportions suggest roughly 1800 L × 900 D × 760 H — your room may need smaller.",

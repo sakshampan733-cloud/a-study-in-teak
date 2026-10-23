@@ -8,7 +8,7 @@ from mathutils import Vector
 
 for o in list(sc.objects):
     if o.name.startswith("dk_"): bpy.data.objects.remove(o, do_unlink=True)
-L_, D_, H_ = 2286.0, 914.0, 750.0
+L_, D_, H_ = 2286.0, 787.0, 750.0                      # 7 ft 6 in × 2 ft 7 in (owner, 23 Oct: was 3 ft)
 TOPT, OVd, FRZ, RAILd, PLH, PLP, PEDW, STL = 40.0, 30.0, 75.0, 15.0, 80.0, 15.0, 560.0, 38.0
 HR, HF = 150.0, 12.0
 DXO, DSO = dx0, dFront                                                 # the top's front-left corner in the room

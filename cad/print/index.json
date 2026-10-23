@@ -27,46 +27,6 @@
   "pages": 8,
   "pagesA4": 8
  },
- "desk-square": {
-  "title": "DESK (SQUARE CORNERS) — GENERAL ARRANGEMENT",
-  "dwgs": [
-   "AST-DR-028",
-   "AST-DR-029",
-   "AST-DR-030"
-  ],
-  "keys": [
-   "desk-square",
-   "desk-square-details",
-   "desk-square-3d"
-  ],
-  "starts": [
-   0,
-   9,
-   20
-  ],
-  "pages": 25,
-  "pagesA4": 25
- },
- "desk": {
-  "title": "DESK — GENERAL ARRANGEMENT",
-  "dwgs": [
-   "AST-DR-002",
-   "AST-DR-003",
-   "AST-DR-004"
-  ],
-  "keys": [
-   "desk",
-   "desk-details",
-   "desk-3d"
-  ],
-  "starts": [
-   0,
-   9,
-   20
-  ],
-  "pages": 25,
-  "pagesA4": 25
- },
  "studywall": {
   "title": "STUDY WALL — GENERAL ARRANGEMENT",
   "dwgs": [
@@ -139,26 +99,6 @@
   ],
   "pages": 10,
   "pagesA4": 10
- },
- "desk-plain": {
-  "title": "DESK (PLAIN, SQUARE) — GENERAL ARRANGEMENT",
-  "dwgs": [
-   "AST-DR-031",
-   "AST-DR-032",
-   "AST-DR-033"
-  ],
-  "keys": [
-   "desk-plain",
-   "desk-plain-details",
-   "desk-plain-3d"
-  ],
-  "starts": [
-   0,
-   9,
-   19
-  ],
-  "pages": 24,
-  "pagesA4": 24
  },
  "bedwall": {
   "title": "BED WALL — THE NICHE",
@@ -286,26 +226,6 @@
   "pages": 7,
   "pagesA4": 7
  },
- "desk-curved": {
-  "title": "DESK (HOLLOW CORNERS) — GENERAL ARRANGEMENT",
-  "dwgs": [
-   "AST-DR-045",
-   "AST-DR-046",
-   "AST-DR-047"
-  ],
-  "keys": [
-   "desk-curved",
-   "desk-curved-details",
-   "desk-curved-3d"
-  ],
-  "starts": [
-   0,
-   9,
-   19
-  ],
-  "pages": 24,
-  "pagesA4": 24
- },
  "roomshell": {
   "title": "THE ROOM AS BUILT",
   "dwgs": [
@@ -423,5 +343,85 @@
   ],
   "pages": 3,
   "pagesA4": 3
+ },
+ "desk-curved": {
+  "title": "DESK (HOLLOW CORNERS) — GENERAL ARRANGEMENT",
+  "dwgs": [
+   "AST-DR-045",
+   "AST-DR-046",
+   "AST-DR-047"
+  ],
+  "keys": [
+   "desk-curved",
+   "desk-curved-details",
+   "desk-curved-3d"
+  ],
+  "starts": [
+   0,
+   9,
+   19
+  ],
+  "pages": 24,
+  "pagesA4": 24
+ },
+ "desk-plain": {
+  "title": "DESK (PLAIN, SQUARE) — GENERAL ARRANGEMENT",
+  "dwgs": [
+   "AST-DR-031",
+   "AST-DR-032",
+   "AST-DR-033"
+  ],
+  "keys": [
+   "desk-plain",
+   "desk-plain-details",
+   "desk-plain-3d"
+  ],
+  "starts": [
+   0,
+   9,
+   19
+  ],
+  "pages": 24,
+  "pagesA4": 24
+ },
+ "desk-square": {
+  "title": "DESK (SQUARE CORNERS) — GENERAL ARRANGEMENT",
+  "dwgs": [
+   "AST-DR-028",
+   "AST-DR-029",
+   "AST-DR-030"
+  ],
+  "keys": [
+   "desk-square",
+   "desk-square-details",
+   "desk-square-3d"
+  ],
+  "starts": [
+   0,
+   9,
+   20
+  ],
+  "pages": 25,
+  "pagesA4": 25
+ },
+ "desk": {
+  "title": "DESK — GENERAL ARRANGEMENT",
+  "dwgs": [
+   "AST-DR-002",
+   "AST-DR-003",
+   "AST-DR-004"
+  ],
+  "keys": [
+   "desk",
+   "desk-details",
+   "desk-3d"
+  ],
+  "starts": [
+   0,
+   9,
+   20
+  ],
+  "pages": 25,
+  "pagesA4": 25
  }
 }

@@ -240,7 +240,7 @@
     s += room([[-50, 0], [4547, 0], [4547, 5766], [-177, 5766], [-177, 4600], [-50, 4600]]) + room([[4777, 2947], [8536, 2947], [8536, 5766], [4777, 5766]]) +
       room([[7622, 5766], [8536, 5766], [8536, 8103], [7622, 8103]]) + room([[4777, 0], [8511, 0], [8511, 2718], [4777, 2718]]);
     s += `<line x1="-50" y1="2413" x2="4547" y2="2413" class="swp-part"/>`;
-    s += `<rect x="1309" y="3640" width="1929" height="2040" rx="60" class="swp-furn"/><rect x="1194" y="1180" width="2286" height="914" rx="40" class="swp-furn"/>`;
+    s += `<rect x="1309" y="3640" width="1929" height="2040" rx="60" class="swp-furn"/><rect x="1194" y="1307" width="2286" height="787" rx="40" class="swp-furn"/>`;
     s += `<rect x="4800" y="1600" width="1524" height="610" class="swp-furn"/><ellipse cx="7650" cy="1450" rx="380" ry="820" class="swp-furn"/>`;
     [["STUDY", 2250, 1650], ["BEDROOM", 2250, 4300], ["DRESSING", 6650, 4250], ["BATH", 6650, 2200], ["TUNNEL", 8080, 7700]].forEach(([t, x, y]) => (s += `<text x="${x}" y="${y}" class="swp-lbl">${t}</text>`));
     for (const f of fixAll()) {
