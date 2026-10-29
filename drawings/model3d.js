@@ -25,7 +25,7 @@ window.MODEL3D = (function () {
   // partition on the old centre line, turning towards the bed only; the desk (square corners) 2 in off it; the bed
   // with its rug; no curved bed back (its design is still open).
   function layout(L) {
-    const cx = 2337, yP = L - 3353, pT = 95, RUN = 2400, straight = 600, pR = 1300;
+    const cx = 2337, yP = L - 3353, pT = 95, RUN = 2700, straight = 600, pR = 660;   // 18 blocks; 5 at each end curve 15 in to the bed (29 Oct)
     const pAt = (u, w) => {
       if (Math.abs(u) <= straight) return [cx + u, yP + w];
       const sg = Math.sign(u), th = (Math.abs(u) - straight) / pR;
@@ -107,13 +107,12 @@ window.MODEL3D = (function () {
 
     {
       const Y = layout(L), { cx, pAt, RUN, pT } = Y;
-      const path = (w, n = 16) => Array.from({ length: n + 1 }, (_, i) => pAt(-RUN / 2 + RUN * i / n, w));
+      const path = (w, n = 18) => Array.from({ length: n + 1 }, (_, i) => pAt(-RUN / 2 + RUN * i / n, w));
       run(path(0), H, 0, "glassbay");                                         // the glass blocks, floor to ceiling
       slab(cx - 145, Y.yP - pT / 2, 290, pT, H);                              // the wood column, a foot wide
       P.push({ id: "tv", w: 1227, h: 706, cls: "tvpanel", tf: `translate3d(${cx - 613}px,${H - 1408}px,${Y.yP + pT / 2 + 61}px)` });   // the TV, floating
-      { const TG = window.TVGEOM, ol = TG.outline(0), n = ol.length;        // the TV unit (AST-DR-036): its pill-shaped front
-        run(ol.slice(n - 29).concat(ol.slice(0, 29)).map(([x, y]) => [cx + x, Y.yP + y]), 450, 0, "solid");
-        slab(cx - TG.X1, Y.yP + TG.W0, 2 * TG.X1, TG.YF - TG.W0, 450); }       // and its top across the straight front
+      { const TG = window.TVGEOM;                                           // the drawers between the curves (AST-DR-036 rev 3)
+        slab(cx - TG.X1, Y.yP + TG.W0, 2 * TG.X1, TG.YF - TG.W0, 450); }
       slab(cx - Y.desk.L / 2, Y.desk.front, Y.desk.L, Y.desk.D, Y.desk.H);   // the desk, square corners, 2 in off the glass
       slab(cx - Y.bed.w / 2, Y.bedFoot, Y.bed.w, Y.bed.l - 76, 534);         // the bed: storage base to the floor, and the mattress
       slab(cx - Y.bed.w / 2, Y.bedHead - 76, Y.bed.w, 76, 1016);             // the headboard, 3 ft 4 in

@@ -100,20 +100,6 @@
   "pages": 10,
   "pagesA4": 10
  },
- "tvunit": {
-  "title": "TV UNIT — DRAWERS",
-  "dwgs": [
-   "AST-DR-036"
-  ],
-  "keys": [
-   "tvunit"
-  ],
-  "starts": [
-   0
-  ],
-  "pages": 8,
-  "pagesA4": 8
- },
  "sidetable": {
   "title": "THE SIDE TABLES",
   "dwgs": [
@@ -423,5 +409,19 @@
   ],
   "pages": 9,
   "pagesA4": 9
+ },
+ "tvunit": {
+  "title": "TV UNIT — DRAWERS",
+  "dwgs": [
+   "AST-DR-036"
+  ],
+  "keys": [
+   "tvunit"
+  ],
+  "starts": [
+   0
+  ],
+  "pages": 7,
+  "pagesA4": 7
  }
 }

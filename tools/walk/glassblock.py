@@ -7,21 +7,22 @@
 #
 # Mano Vetra block (Eco Outdoor, Tom Fereday): 5½ in square (140 mm), 3¾ in deep (95 mm), solid hand-cast glass,
 # 3/8 in (10 mm) joints, so one block and its joint is 150 mm. Cast glass can't be cut: every piece of wood lands on
-# that grid, so the foot-wide column is two blocks (290 mm of wood) and the wall is 16 blocks across to keep it
-# central. PCURVE=1 (default) turns each end gently toward the bed on a 1.3 m radius (about the tightest a 140 mm
-# block takes; Eco Outdoor's own figure still to confirm); PCURVE=0 keeps it straight.
+# that grid, so the foot-wide column is two blocks (290 mm of wood) and the wall is 18 blocks across to keep it
+# central. PCURVE=1 (default): a straight middle of 8 blocks and, at each end, a proper curve toward the bed — 5 blocks
+# on a 660 radius, 65°, coming 15 in forward (owner, 29 Oct: "curve it as much as it should"; Eco Outdoor to confirm
+# the joints, which open to ~21 mm on the bed side and close up on the desk side). PCURVE=0 keeps it straight.
 import bpy, bmesh, math, os
 from mathutils import Vector, noise
 
 MOD, BLK, DEP = 150.0, 140.0, 95.0                     # module, block face, block depth (mm)
-COLS, ROWS = 16, 18
-L = COLS * MOD                                         # 2400 developed (≈ 2356 across with the curve)
-BOARD_C, BOARD_R = (5, 11), (5, 9)                     # columns [5, 11) = 6 blocks (890 mm), rows [5, 9) = 4 blocks (590 mm)
-WCOLS = (7, 8)                                         # the column: the middle two blocks, a foot wide
+COLS, ROWS = 18, 18
+L = COLS * MOD                                         # 2700 developed (≈ 2390 across with the curve)
+BOARD_C, BOARD_R = (6, 12), (5, 9)                     # columns [5, 11) = 6 blocks (890 mm), rows [5, 9) = 4 blocks (590 mm)
+WCOLS = (8, 9)                                         # the column: the middle two blocks, a foot wide
 Z0 = 10.0                                              # the mortar bed under the first course
 PX, PS = bcx if "bcx" in dir() else 2337.0, 2413.0     # the old partition's centre line: on the bed's axis, 3353 off the bed wall
 CURVE = os.environ.get("PCURVE", "1") != "0"
-RAD = float(os.environ.get("PRAD", 1300)); STRAIGHT = 8 * MOD / 2   # the middle 8 blocks stay straight; 4 curve at each end
+RAD = float(os.environ.get("PRAD", 660)); STRAIGHT = 8 * MOD / 2    # the middle 8 blocks stay straight; 5 curve at each end
 
 def place(u, w):
     """Developed position u (mm along the wall from its middle) and w (mm across it, + toward the bed) to plan x, s."""
@@ -174,24 +175,21 @@ bm_mt = bmesh.new(); slab(bm_mt, -200, 200, DEP / 2, wf, zc - 150, zc + 150); be
 cy.transmission_bounces = max(cy.transmission_bounces, 12); cy.max_bounces = max(cy.max_bounces, 12)
 cy.volume_bounces = max(getattr(cy, "volume_bounces", 0), 2)
 
-# ── the TV unit (owner, 3 Oct; AST-DR-036). The 4 × 2 run that followed the curve could not open at its curved ends:
-#    now it is a pill in plan — a straight front across the middle, a quarter-round at each end wrapping back to the
-#    partition's tip. Four bays of 450 on the glass joints: two stacks of two drawers in the middle, and at each end one
-#    cabinet two drawers tall behind a flat door, hinged on the drawer side. The round ends are fixed; nothing that
-#    moves is curved. The 9292 burl re-tinted to the Dark Diva colour (tex/burl_darkdiva.jpg), in the Dark Diva's satin
-#    polish; a bullnose top oversailing 10; a dark plinth set back 50; the slim brass bars. Low (450) and 400 deep.
+# ── the TV unit (AST-DR-036 rev 3, owner 29 Oct): the drawers fill the space between the partition's two curves — one
+#    straight front from tip to tip, six equal bays of two drawers, the outer boxes cut at the back to the glass so
+#    every drawer runs straight out; the third bay from the left open for the subwoofer. The 9292 burl re-tinted to the
+#    Dark Diva colour, satin; a bullnose top oversailing 10 at the front and stopping at the glass; a dark plinth set
+#    back 50; the slim brass bars. Low (450) and 400 deep in the middle.
 M_BURL_DD = veneer("burl_darkdiva", 0.32, 0.4, 0.62, 1.0, "burl_darkdiva.jpg", 0.6)   # satin, polished well darker than the room (owner, 7 Oct)
 depth(M_BURL_DD, 0.03, 0.0)
-CDP, CHT, PL, TOP, FR, GAP, OVER, BAY = 400.0, 450.0, 60.0, 26.0, 20.0, 3.0, 10.0, 450.0
-W0 = DEP / 2 + 5; YF = W0 + CDP; X1 = 2 * BAY; UE = L / 2 + 14                 # back 5 off the glass; the tip of the end channel
+CDP, CHT, PL, TOP, FR, GAP, OVER, NB, SUBB = 400.0, 450.0, 60.0, 26.0, 20.0, 3.0, 10.0, 6, 2
+W0 = DEP / 2 + 5; YF = W0 + CDP; UE = L / 2 + 14                                  # back 5 off the glass; the tip of the end channel
 def tv_loc(u, w):                                                                   # developed (u, w) to plan, from the partition's middle
     x_, s_ = place(u, w); return x_ - PX, s_ - PS
-EX, EY = tv_loc(UE, W0)
-RR = ((EX - X1) ** 2 + (YF - EY) ** 2) / (2 * (YF - EY)); CYc = YF - RR; TE = math.atan2(EY - CYc, EX - X1)   # the round end: tangent to the front, landing on the tip
-def tv_outline(off, wb=W0, n=28):
-    arc = lambda sg: [(sg * (X1 + (RR + off) * math.cos(t)), CYc + (RR + off) * math.sin(t)) for t in (math.pi / 2 + (TE - math.pi / 2) * i / n for i in range(n + 1))]
-    back = [tv_loc(UE + off - 2 * (UE + off) * i / 48, wb) for i in range(49)]
-    return arc(1) + back + arc(-1)[::-1]
+XT = tv_loc(UE, W0)[0]                                                              # the unit runs from tip to tip
+def tv_outline(off, wb=W0):
+    yF = YF + off; pts = [p_ for p_ in (tv_loc(UE - 2 * UE * i / 120, wb) for i in range(121)) if p_[1] < yF]
+    return [(pts[0][0], yF)] + pts + [(pts[-1][0], yF)]
 def tv_prism(name, pts, z0, z1, mat):
     q = []
     for p_ in pts:                                                               # drop coincident points
@@ -209,36 +207,31 @@ def tv_prism(name, pts, z0, z1, mat):
     o_ = bpy.data.objects.new(name, me); GB.objects.link(o_); me.materials.append(mat)
     for p_ in me.polygons: p_.use_smooth = True
     return o_
-tv_body = [(X1, YF - FR)] + tv_outline(0) + [(-X1, YF - FR)]                           # the carcase, its straight front set back behind the fronts
+tv_body = [(XT, YF - FR)] + tv_outline(0)[1:-1] + [(-XT, YF - FR)]                  # the carcase, its straight front behind the fronts
 CON_B = tv_prism("gb_console", tv_body, PL, CHT - TOP, M_BURL_DD); bevel(CON_B, 0.002, 2)
-tv_top = tv_prism("gb_console_top", tv_outline(OVER), CHT - TOP, CHT, M_BURL_DD); bevel(tv_top, 0.012, 6)   # a full bullnose
+tv_top = tv_prism("gb_console_top", tv_outline(OVER), CHT - TOP, CHT, M_BURL_DD); bevel(tv_top, 0.012, 6)   # a bullnose front
 tv_prism("gb_console_plinth", tv_outline(-50, W0 + 9), 0, PL, M_DARK)
-tv_fh = (CHT - TOP - PL - 3 * GAP) / 2; tv_zD = [PL + GAP, PL + 2 * GAP + tv_fh]; tv_zmid = (PL + CHT - TOP) / 2
-tv_bayX = [-X1, -BAY, 0.0, BAY, X1]
-def tv_pull(nm, xc, zc, upright):
-    a_, b_ = (5, 130) if upright else (130, 5)
-    ps = [(0, -110), (0, 110)] if upright else [(-110, 0), (110, 0)]
-    dbox(nm, PX + xc - a_, PS + YF + 18, zc - b_, PX + xc + a_, PS + YF + 28, zc + b_, M_BRASS)    # a slim brass bar, 260 long,
-    for k_, (dx_, dz_) in enumerate(ps):                                                       # on two posts
-        dbox(f"{nm}_post{k_}", PX + xc + dx_ - 4, PS + YF, zc + dz_ - 4, PX + xc + dx_ + 4, PS + YF + 18, zc + dz_ + 4, M_BRASS)
-for i in range(4):
-    a_ = tv_bayX[i] + (GAP if i == 0 else GAP / 2); b_ = tv_bayX[i + 1] - (GAP if i == 3 else GAP / 2)
-    if i == 0:                                                                   # the left cabinet stands open, no door (owner): the subwoofer
+tv_fh = (CHT - TOP - PL - 3 * GAP) / 2; tv_zD = [PL + GAP, PL + 2 * GAP + tv_fh]
+tv_bayX = [-XT + 2 * XT * i / NB for i in range(NB + 1)]
+def tv_pull(nm, xc, zc):
+    dbox(nm, PX + xc - 130, PS + YF + 18, zc - 5, PX + xc + 130, PS + YF + 28, zc + 5, M_BRASS)    # a slim brass bar, 260 long,
+    for k_, dx_ in enumerate((-110, 110)):                                                     # on two posts
+        dbox(f"{nm}_post{k_}", PX + xc + dx_ - 4, PS + YF, zc - 4, PX + xc + dx_ + 4, PS + YF + 18, zc + 4, M_BRASS)
+for i in range(NB):
+    a_ = tv_bayX[i] + (GAP if i == 0 else GAP / 2); b_ = tv_bayX[i + 1] - (GAP if i == NB - 1 else GAP / 2)
+    if i == SUBB:                                                                # the open bay: the subwoofer
         cut_ = dbox("gb_subcut", PX + a_, PS + W0 + 20, PL + 18, PX + b_, PS + YF + 5, CHT - TOP - 18, M_BURL_DD)
         bo_ = CON_B.modifiers.new("subbay", "BOOLEAN"); bo_.object = cut_; bo_.operation = "DIFFERENCE"; cut_.hide_render = True; cut_.hide_viewport = True
         # Sony's Bar 6 subwoofer, 210 × 388 × 388 — 388 tall will not stand in the 364 clear, so it lies on its side (to check with Sony)
         M_SUB = fabric("sub_cloth", (0.018, 0.018, 0.02), 0.3, 0.95, 1400)
         sx_ = (a_ + b_) / 2
         sb_ = dbox("gb_subwoofer", PX + sx_ - 194, PS + YF - 6 - 388, PL + 20, PX + sx_ + 194, PS + YF - 6, PL + 20 + 210, M_SUB); bevel(sb_, 0.01, 3)
-    elif i == 3:                                                                 # a cabinet: one flat door, two drawers tall
-        fo = dbox(f"gb_door{i}", PX + a_, PS + YF - FR, tv_zD[0], PX + b_, PS + YF, tv_zD[1] + tv_fh, M_BURL_DD); bevel(fo, 0.005, 4)
-        tv_pull(f"gb_pull{i}", (a_ + 50) if i == 0 else (b_ - 50), tv_zmid, True)
-    else:                                                                        # a stack of two drawers
-        for j, z0 in enumerate(tv_zD):
-            fo = dbox(f"gb_drawer{i}{j}", PX + a_, PS + YF - FR, z0, PX + b_, PS + YF, z0 + tv_fh, M_BURL_DD); bevel(fo, 0.005, 4)
-            tv_pull(f"gb_pull{i}{j}", (a_ + b_) / 2, z0 + tv_fh / 2, False)
+        continue
+    for j, z0 in enumerate(tv_zD):                                               # a stack of two drawers
+        fo = dbox(f"gb_drawer{i}{j}", PX + a_, PS + YF - FR, z0, PX + b_, PS + YF, z0 + tv_fh, M_BURL_DD); bevel(fo, 0.005, 4)
+        tv_pull(f"gb_pull{i}{j}", (a_ + b_) / 2, z0 + tv_fh / 2)
 # the soundbar on the top, centred under the TV (owner): Sony BRAVIA Theatre Bar 6, 950 × 64 × 110, set 30 back from the edge
 M_SBAR = fabric("soundbar_cloth", (0.02, 0.02, 0.022), 0.3, 0.95, 1600)
 sbr = dbox("gb_soundbar", PX - 475, PS + YF - 30 - 110, CHT, PX + 475, PS + YF - 30, CHT + 64, M_SBAR); bevel(sbr, 0.012, 4)
 dbox("gb_soundbar_top", PX - 470, PS + YF - 30 - 108, CHT + 63, PX + 470, PS + YF - 32, CHT + 64.5, M_DARK)
-print(f"TV unit: pill, front {2 * X1:.0f} straight, round ends R {RR:.0f}, {CHT:.0f} high, {CDP:.0f} deep", flush=True)
+print(f"TV unit: between the curves, front {2 * XT:.0f} tip to tip, {NB} bays, {CHT:.0f} high, {CDP:.0f} deep in the middle", flush=True)

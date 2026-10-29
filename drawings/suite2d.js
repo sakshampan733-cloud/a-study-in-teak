@@ -33,11 +33,11 @@
   // floor, 2 in past the mattress at the sides and foot
   const BW = { edge: 51, deep: 381, cove: 152, flat: 25, plaster: 20 };   // 15 in at the niche: the 14 in side tables sit inside it
   const bedW = 1929, bedL = 1981, hbBack = L - 45, hbFront = L - 121, bedFoot = hbFront - bedL - 51, BT = 121;
-  // partition (owner, 1 Oct): Mano cast-glass blocks, 95 deep, 16 blocks of 150 = 2400 along its run, on the old
-  // centre line 11 ft off the bed wall. A straight middle of 8 blocks; each end turns TOWARDS THE BED only, on a 1.3 m
-  // radius over 4 blocks (26°, 136 out) — about as tight as the blocks go. One foot-wide wood column up the middle;
-  // the TV floats on the bed side; under it the TV unit, a pill in plan, 450 high and 400 deep (AST-DR-036).
-  const pT = 95, yP = L - 3353, MOD = 150, RUN = 16 * MOD, pR = 1300, straight = 8 * MOD / 2;
+  // partition (owner, 1 Oct; curve 29 Oct): Mano cast-glass blocks, 95 deep, 18 blocks of 150 = 2700 along its run, on
+  // the old centre line 11 ft off the bed wall. A straight middle of 8 blocks; each end a proper curve TOWARDS THE BED
+  // only, 5 blocks on a 660 radius (65°, 15 in out). One foot-wide wood column up the middle; the TV floats on the bed
+  // side; the drawers fill the space between the curves, 450 high, 400 deep in the middle (AST-DR-036 rev 3).
+  const pT = 95, yP = L - 3353, MOD = 150, RUN = 18 * MOD, pR = 660, straight = 8 * MOD / 2;
   const pTurn = (RUN / 2 - straight) / pR, reach = pR * (1 - Math.cos(pTurn));
   const pAt = (u, w) => {                                    // run position u (from the middle) and offset w (+ towards the bed) to plan x, y
     if (Math.abs(u) <= straight) return [cx + u, yP + w];
@@ -142,20 +142,20 @@
     },
     partition() {
       const ring = (wa, wb, u0, u1) => { const a = along(wa, u0, u1), b = along(wb, u0, u1).reverse(); return a.concat(b); };
-      // the TV unit (AST-DR-036): a pill in plan — a straight front, a quarter-round at each end back to the glass's tip;
-      // four bays, two drawer stacks in the middle and a flat-doored cabinet at each end
+      // the TV unit (AST-DR-036 rev 3): between the partition's two curves, a straight front from tip to tip, six bays of
+      // drawers (one open for the subwoofer)
       const TG = window.TVGEOM, at = ([x, y]) => [cx + x, yP + y];
       let o = `<path class="fu" d="${poly(TG.outline(0).map(at))}"/>`;
-      TG.bayX.slice(1, -1).forEach((x) => { const [ax, ay] = at([x, TG.W0 + 9]), [bx, by] = at([x, TG.YF]);
+      TG.bayX.slice(1, -1).forEach((x) => { const [ax, ay] = at([x, TG.backAt(x, TG.W0 + 9)]), [bx, by] = at([x, TG.YF]);
         o += `<line class="thin" x1="${f(ax)}" y1="${f(ay)}" x2="${f(bx)}" y2="${f(by)}"/>`; });
       { const [ax, ay] = at([-TG.X1, TG.YF - 20]), [bx, by] = at([TG.X1, TG.YF - 20]); o += `<line class="thin" x1="${f(ax)}" y1="${f(ay)}" x2="${f(bx)}" y2="${f(by)}"/>`; }
-      [-225, 225].forEach((c) => { const [ax, ay] = at([c - 130, TG.YF + 28]), [bx] = at([c + 130, 0]); o += `<line class="thin" x1="${f(ax)}" y1="${f(ay)}" x2="${f(bx)}" y2="${f(ay)}"/>`; });
+      TG.bayX.slice(0, -1).map((x, i) => (x + TG.bayX[i + 1]) / 2).filter((_, i) => i !== TG.K.sub).forEach((c) => { const [ax, ay] = at([c - 130, TG.YF + 28]), [bx] = at([c + 130, 0]); o += `<line class="thin" x1="${f(ax)}" y1="${f(ay)}" x2="${f(bx)}" y2="${f(ay)}"/>`; });
       o += `<path class="glassb" d="${poly(ring(-pT / 2, pT / 2))}"/>`;                // the glass blocks
-      for (let i = 1; i < 16; i++) { const [ax, ay] = pAt(-RUN / 2 + i * MOD, -pT / 2), [bx, by] = pAt(-RUN / 2 + i * MOD, pT / 2);
+      for (let i = 1; i < RUN / MOD; i++) { const [ax, ay] = pAt(-RUN / 2 + i * MOD, -pT / 2), [bx, by] = pAt(-RUN / 2 + i * MOD, pT / 2);
         o += `<line class="thin" x1="${f(ax)}" y1="${f(ay)}" x2="${f(bx)}" y2="${f(by)}"/>`; }
       o += R(cx - col / 2, yP - pT / 2, cx + col / 2, yP + pT / 2, "solidf");                // the wood column, a foot wide
       o += R(cx - tv.w / 2, yP + pT / 2 + tv.stand, cx + tv.w / 2, yP + pT / 2 + tv.stand + tv.d, "tv");
-      o += Tx(cx, yP + drFront - 110, `TV UNIT · 4 DRAWERS, 2 CABINETS · ${ftin(drw.d)} DEEP · AST-DR-036`, "tx2", { size: 66 });
+      o += Tx(cx, yP + drFront - 110, `DRAWERS BETWEEN THE CURVES · 10 + SUB BAY · AST-DR-036`, "tx2", { size: 66 });
       const [lx] = pAt(-RUN / 2, 0), [rx] = pAt(RUN / 2, 0);
       o += `<g class="fdim">` +
         dimH(lx - pT / 2, rx + pT / 2, yP - 330, yP - pT / 2, `${ftin(rx - lx + pT)} GLASS-BLOCK PARTITION`, { size: 90 }) +
