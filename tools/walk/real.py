@@ -1062,6 +1062,7 @@ EVX = {"wd_open": 1.0, "wd_shoes": 1.0, "h_wardrobe": 0.9, "dress": 0.8, "h_dres
        "bath_van": 0.8, "bath_van2": 0.8, "bath_wc": 0.8, "bath_tub": 0.8, "bath_up": 0.8, "d2close": 0.3}               # interiors with less light
 def shoot(name):
     global EV_BASE
+    if os.environ.get("RESUME") == "1" and os.path.exists(os.path.join(OUTR, name + ".png")): print("have", name, flush=True); return
     cp, tp = VIEWS[name][:2]
     op = VIEWS[name][2] if len(VIEWS[name]) > 2 else {}
     if EV_BASE is None: EV_BASE = sc.view_settings.exposure
