@@ -971,6 +971,8 @@ if os.environ.get("REAL4", "1") != "0":                              # stage 4: 
     exec(compile(open(os.path.join(HERE, "realism.py")).read(), "realism.py", "exec"))
 if os.environ.get("REALTEST") == "1":                                # 9 Oct: scanned surface detail + a higher render quality (test)
     exec(compile(open(os.path.join(HERE, "realtest.py")).read(), "realtest.py", "exec"))
+if os.environ.get("PHOTO") == "1":                                   # 8 Nov: the photoreal pass (light, grain, smudges, shades)
+    exec(compile(open(os.path.join(HERE, "photoreal.py")).read(), "photoreal.py", "exec"))
 
 EYE_R = 1600; LENS_R = float(os.environ.get("LENS", 18))
 VIEWS = {  # name: camera (x, s[, z]), looking at (x, s, z)
