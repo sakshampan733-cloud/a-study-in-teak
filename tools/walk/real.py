@@ -1191,6 +1191,7 @@ if MODER == "stops":                                                    # a quic
         sc.render.image_settings.file_format = "JPEG"; bpy.ops.render.render(write_still=True)
 
 if MODER in ("still", "stills"):
+    if os.environ.get("PHOTO") == "1": bake_modifiers(); sc.render.use_persistent_data = True   # as the film does: the GPU fell over on live modifiers (8 Nov)
     sc.render.resolution_x, sc.render.resolution_y = int(os.environ.get("RX", 1280)), int(os.environ.get("RY", 720))
     for d in ("door_d2",): sc.objects[d].rotation_euler.z = sc.objects[d]["open"]
     pick = [ONLY] if ONLY else ([v for v in os.environ["STILLS"].split(",")] if os.environ.get("STILLS") else list(VIEWS))
