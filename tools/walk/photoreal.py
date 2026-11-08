@@ -93,4 +93,40 @@ for mn in ("cream_paint", "ceiling_paint"):
     nt.links.new(vo.outputs["Distance"], bp.inputs["Height"])
     if b.inputs["Normal"].is_linked: nt.links.new(b.inputs["Normal"].links[0].from_socket, bp.inputs["Normal"])
     nt.links.new(bp.outputs["Normal"], b.inputs["Normal"])
+
+# ── 6 · bedding that has been slept in a little ──────────────────────────────
+# The cloth sim gives the right drape but the surfaces between the folds stayed glass-smooth, and the modelled pillows
+# read as cushions cut from foam. Two scales of crease, as pressed linen has: soft swells a hand-width across (geometry,
+# a few mm) and fine creases running mostly one way (a stretched noise in the shading). Shapes and layout unchanged.
+def crease_shader(m, strength=0.35, scale=12.0, stretch=4.0):
+    if not m or not m.use_nodes or m.get("pr_crease"): return
+    nt = m.node_tree; b = next((n for n in nt.nodes if n.bl_idname == "ShaderNodeBsdfPrincipled"), None)
+    if not b: return
+    tc = nt.nodes.new("ShaderNodeTexCoord"); mp = nt.nodes.new("ShaderNodeMapping"); mp.inputs["Scale"].default_value = (1.0, stretch, 1.0)
+    nt.links.new(tc.outputs["Object"], mp.inputs["Vector"])
+    n = nt.nodes.new("ShaderNodeTexNoise"); n.inputs["Scale"].default_value = scale; n.inputs["Detail"].default_value = 6; n.inputs["Distortion"].default_value = 0.6
+    nt.links.new(mp.outputs["Vector"], n.inputs["Vector"])
+    ridge = nt.nodes.new("ShaderNodeMath"); ridge.operation = "PINGPONG"; ridge.inputs[1].default_value = 0.5      # sharp-crested creases, not bumps
+    nt.links.new(n.outputs["Fac"], ridge.inputs[0])
+    bp = nt.nodes.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = strength; bp.inputs["Distance"].default_value = 0.003
+    nt.links.new(ridge.outputs["Value"], bp.inputs["Height"])
+    if b.inputs["Normal"].is_linked: nt.links.new(b.inputs["Normal"].links[0].from_socket, bp.inputs["Normal"])
+    nt.links.new(bp.outputs["Normal"], b.inputs["Normal"]); m["pr_crease"] = 1
+    print("photoreal: creases", m.name, flush=True)
+for mn, st in (("linen_white", 0.6), ("linen_ivory", 0.7), ("linen_taupe", 0.5), ("suede_taupe", 0.25)):
+    crease_shader(bpy.data.materials.get(mn), st)
+SWELL = float(os.environ.get("PR_SWELL", 0.010))
+for o in [o for o in sc.objects if o.type == "MESH" and o.name.startswith(("duvet", "sheet_fold", "throw", "pillow_", "cushion_"))]:
+    if not any(md.type == "SUBSURF" for md in o.modifiers):
+        ss = o.modifiers.new("pr_sub", "SUBSURF"); ss.levels = 0; ss.render_levels = 1
+    tx = bpy.data.textures.new(o.name + "_swell", "CLOUDS"); tx.noise_scale = 0.09 if o.name.startswith(("pillow", "cushion")) else 0.14; tx.noise_depth = 2
+    dp = o.modifiers.new("pr_swell", "DISPLACE"); dp.texture = tx; dp.texture_coords = "GLOBAL"; dp.mid_level = 0.5
+    dp.strength = SWELL * (0.7 if o.name.startswith(("pillow", "cushion")) else 1.0)
+    print("photoreal: swell", o.name, flush=True)
+
+# ── 7 · the downlights' discs: a warm white, not the cold blue the white balance turned them ──
+md = bpy.data.materials.get("spot_disc")
+if md:
+    b = md.node_tree.nodes["Principled BSDF"]; b.inputs["Emission Color"].default_value = (1.0, 0.66, 0.36, 1)
+    b.inputs["Base Color"].default_value = (1.0, 0.66, 0.36, 1)
 print("photoreal pass done", flush=True)
