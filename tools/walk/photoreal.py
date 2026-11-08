@@ -129,4 +129,28 @@ md = bpy.data.materials.get("spot_disc")
 if md:
     b = md.node_tree.nodes["Principled BSDF"]; b.inputs["Emission Color"].default_value = (1.0, 0.66, 0.36, 1)
     b.inputs["Base Color"].default_value = (1.0, 0.66, 0.36, 1)
+
+# ── 8 · books handled for years: the corners and the spine's edges rubbed paler ─
+mj = bpy.data.materials.get("book_jacket")
+if mj:
+    nt = mj.node_tree; b = nt.nodes["Principled BSDF"]
+    src = b.inputs["Base Color"].links[0].from_socket if b.inputs["Base Color"].is_linked else None
+    if src:
+        bv = nt.nodes.new("ShaderNodeBevel"); bv.inputs["Radius"].default_value = 0.0025; bv.samples = 4
+        geo = nt.nodes.new("ShaderNodeNewGeometry")
+        dt = nt.nodes.new("ShaderNodeVectorMath"); dt.operation = "DOT_PRODUCT"
+        nt.links.new(bv.outputs["Normal"], dt.inputs[0]); nt.links.new(geo.outputs["Normal"], dt.inputs[1])
+        nz = nt.nodes.new("ShaderNodeTexNoise"); nz.inputs["Scale"].default_value = 160; nz.inputs["Detail"].default_value = 3
+        edge = nt.nodes.new("ShaderNodeMapRange"); edge.inputs["From Min"].default_value = 0.995; edge.inputs["From Max"].default_value = 0.93
+        nt.links.new(dt.outputs["Value"], edge.inputs["Value"])
+        w_ = nt.nodes.new("ShaderNodeMath"); w_.operation = "MULTIPLY"; w_.use_clamp = True
+        nt.links.new(edge.outputs["Result"], w_.inputs[0]); nt.links.new(nz.outputs["Fac"], w_.inputs[1])
+        w2 = nt.nodes.new("ShaderNodeMath"); w2.operation = "MULTIPLY"; w2.use_clamp = True; w2.inputs[1].default_value = 1.4
+        nt.links.new(w_.outputs["Value"], w2.inputs[0])
+        rub = nt.nodes.new("ShaderNodeHueSaturation"); rub.inputs["Saturation"].default_value = 0.55; rub.inputs["Value"].default_value = 1.6
+        nt.links.new(src, rub.inputs["Color"])
+        mx = nt.nodes.new("ShaderNodeMixRGB"); nt.links.new(w2.outputs["Value"], mx.inputs["Fac"])
+        nt.links.new(src, mx.inputs["Color1"]); nt.links.new(rub.outputs["Color"], mx.inputs["Color2"])
+        nt.links.new(mx.outputs["Color"], b.inputs["Base Color"])
+        print("photoreal: book wear", flush=True)
 print("photoreal pass done", flush=True)

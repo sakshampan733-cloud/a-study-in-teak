@@ -591,7 +591,16 @@ def book_obj(name, x0, s0, z0, w, d, h, tone):
             v.co.x = (x0 + (a0 if v.co.x < 0 else a1)) / 1000; v.co.y = -(s0 + (b0 if v.co.y < 0 else b1)) / 1000; v.co.z = (z0 + (c0 if v.co.z < 0 else c1)) / 1000
         for f in {f for v in r["verts"] for f in v.link_faces}: f.material_index = mi
     part(0, 0, 0, bt, d, h, 0); part(w - bt, 0, 0, w, d, h, 0)                         # the boards
-    part(bt, d - 3.0, 0, w - bt, d, h, 0)                                              # the spine, at the front
+    # the spine, at the front: rounded as a bound hardback's is (owner, 8 Nov: "books are boxes"), bowing out between
+    # the boards with a shallow joint where it meets each one
+    bulge = min(5.0, w * 0.11); n_ = 10
+    prof = [(bt - 0.3, d - 0.6)] + [(bt + (w - 2 * bt) * i / n_, d + bulge * math.sin(math.pi * i / n_) ** 0.8) for i in range(n_ + 1)] + \
+           [(w - bt + 0.3, d - 0.6), (w - bt, d - 3.0), (bt, d - 3.0)]
+    bot = [bm.verts.new(((x0 + a) / 1000, -(s0 + b) / 1000, z0 / 1000)) for a, b in prof]
+    top = [bm.verts.new(((x0 + a) / 1000, -(s0 + b) / 1000, (z0 + h) / 1000)) for a, b in prof]
+    for i in range(len(prof)):
+        bm.faces.new((bot[i], bot[(i + 1) % len(prof)], top[(i + 1) % len(prof)], top[i])).smooth = 1 <= i <= n_
+    bm.faces.new(bot[::-1]); bm.faces.new(top)
     part(bt - 0.2, 3, 3, w - bt + 0.2, d - 3.0, h - 3, 1)                              # the pages, set in
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
@@ -600,6 +609,7 @@ def book_obj(name, x0, s0, z0, w, d, h, tone):
     bv = o.modifiers.new("bevel", "BEVEL"); bv.width = 0.0009; bv.segments = 2; bv.limit_method = "ANGLE"
     return o
 bookx = {}
+rng_tilt = __import__('random').Random(1108)
 for z in (686, 890 + 25, 1160 + 25, 1430 + 25, 1700 + 25):
     top = min([zz for zz in (890, 1160, 1430, 1700, gB["ys"]) if zz > z + 10]); room_h = top - z - 15    # the top row stops under the arch's springing
     x = 70 + rng.uniform(0, 30); nb = 0; setn = 0; set_tone = set_h = set_w = set_d = 0
@@ -638,7 +648,10 @@ for z in (686, 890 + 25, 1160 + 25, 1430 + 25, 1700 + 25):
         o = book_obj(f"bk{x:.0f}{z:.0f}", x, y0, z, w_, d_, h_, btone); setn -= 1
         if rng.random() < 0.07 and nb:                                # a leaning book: rests against its neighbour
             pivot_rot(o, (x + w_ / 2, y0 + d_ / 2, z), 0, rng.choice([-1, 1]) * rng.uniform(0.08, 0.2), 0); x += w_ + 22; setn = 0
-        else: x += w_ + rng.uniform(0.3, 2.0)
+        else:
+            # no book stands dead upright: a whisker forward or back (sideways would cut into its neighbours)
+            pivot_rot(o, (x + w_ / 2, y0 + d_ / 2, z), rng_tilt.uniform(-0.014, 0.014), 0, 0)   # own sequence: the shelves' layout unchanged
+            x += w_ + rng.uniform(0.3, 2.0)
         nb += 1
 # the bookcase strip light, under the head rail
 ld = bpy.data.lights.new("book_strip", "AREA"); ld.shape = "RECTANGLE"; ld.size, ld.size_y = (book - 120) / 1000, 0.03; ld.energy = 35; warm(ld, 3000)

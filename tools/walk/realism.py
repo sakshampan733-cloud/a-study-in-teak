@@ -154,8 +154,13 @@ def pillow(name, w, h, T, cover, flange=0.0, curl=0.0, seed=0):
     running out of them, the sides drawn in a little by the stuffing, the top curling back a touch where it leans; a
     sham carries a flat flange round it. Modelled, not simulated — pumped cloth came out puffy and limp. w × h is the
     body, T its full thickness, all mm; the pillow lies in x (across) and y (up its height), z through it."""
-    nu = 80; nv = max(28, round(nu * h / w)); pin = 0.045
+    nu = 80; nv = max(28, round(nu * h / w)); pin = 0.065
     def at(u, v): return (u * w / 2 * (1 - pin * (1 - v * v)), v * h / 2 * (1 - 1.5 * pin * (1 - u * u)))
+    def settle(u, v, x, y):                                                     # the seam's own sag, shared with the flange
+        y = max(y, -h / 2 * (0.955 + 0.02 * noise.noise(Vector((x / 120, seed * 1.3, 2.1)))))
+        kt = max(0.0, (v - 0.55) / 0.45)
+        y -= kt * (0.025 * h + 7.0 * (1 + noise.noise(Vector((x / 140, seed * 0.9, 4.2)))))
+        return x + 5.0 * v * math.sin(seed * 2.1 + 0.6), y
     def gu(q): return max(0.0, 1 - abs(q) ** 3.0) ** 0.45                    # long way: the stuffing spreads, fuller to the ends
     def gv(q): return max(0.0, 1 - abs(q) ** 2.2) ** 0.5                     # short way: a rounder dome
     off = Vector((seed * 2.3, seed * 1.1, 0.7))
@@ -172,8 +177,14 @@ def pillow(name, w, h, T, cover, flange=0.0, curl=0.0, seed=0):
             for j in range(nv + 1):
                 u, v = -1 + 2 * i / nu, -1 + 2 * j / nv
                 x, y = at(u, v); t = gu(u) * gv(v); st = math.sqrt(t)
-                lump = 5.0 * noise.noise(Vector((x / 260, y / 260, side * 0.8)) + off) + 1.8 * noise.noise(Vector((x / 90, y / 90, side * 0.8)) + off)
+                lump = 7.0 * noise.noise(Vector((x / 300, y / 300, side * 0.8)) + off) + 2.2 * noise.noise(Vector((x / 90, y / 90, side * 0.8)) + off)
                 z = side * (T / 2 * t + st * (6.0 * crease(x, y) + lump))                  # stuffing never sits even; creases out of the corners
+                # lived-in (owner, 8 Nov: "pillows look cut from foam"), every term zero on the seam so the faces still meet:
+                # the weight settles the bottom into a flat seat that bulges out; the middle gives a little where it leans;
+                # the top, with nothing under it, slumps and goes wavy; and no two sit square
+                kb = max(0.0, (-0.5 - v) / 0.5) ** 1.6
+                z *= (1 + 0.18 * kb) * (1 - 0.10 * math.exp(-(u / 0.4) ** 2 - (v / 0.55) ** 2))
+                x, y = settle(u, v, x, y)
                 V[side, i, j] = bm.verts.new((x / 1000, y / 1000, (z + curl * ((v + 1) / 2) ** 2) / 1000))
         for i in range(nu):
             for j in range(nv):
@@ -185,7 +196,7 @@ def pillow(name, w, h, T, cover, flange=0.0, curl=0.0, seed=0):
                [(1 - 2 * i / nu, 1) for i in range(nu)] + [(-1, 1 - 2 * j / nv) for j in range(nv)])
         rings = []
         for k, (u, v) in enumerate(per):
-            x, y = at(u, v); nx_, ny_ = (u >= 1) - (u <= -1), (v >= 1) - (v <= -1)
+            x, y = settle(u, v, *at(u, v)); nx_, ny_ = (u >= 1) - (u <= -1), (v >= 1) - (v <= -1)
             zc = curl * ((v + 1) / 2) ** 2; wav = 2.5 * noise.noise(Vector((k * 0.09, seed * 0.7, 3.3)))
             rings.append([bm.verts.new(((x + nx_ * dd) / 1000, (y + ny_ * dd) / 1000, (zc + dz + (wav if dd > 0 else 0)) / 1000))
                           for dd, dz in ((-14.0, 1.5), (flange, 1.5), (flange, -1.5), (-14.0, -1.5))])
