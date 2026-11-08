@@ -110,9 +110,19 @@ def film_shot(sh):
     sc.render.filepath = os.path.join(OUTR, name, "f")
     print("SHOT", name, n, "frames", flush=True)
     if PREVIEW:                                                           # first and last frame only, to check the framing
-        for fr in (1, n):
-            sc.frame_set(fr); sc.render.filepath = os.path.join(OUTR, "preview", f"{name}_{fr:03d}.png")
-            bpy.ops.render.render(write_still=True)
+        # PREVIEW_AT=0.5 picks frames by fraction of the shot; PREVIEW_SPP=128,512 renders each at several sample counts
+        # (quality tests: one scene build, a side-by-side), timing each frame into preview/times.txt
+        import time
+        frs = [max(1, min(n, round(float(u) * n))) for u in os.environ["PREVIEW_AT"].split(",")] if os.environ.get("PREVIEW_AT") else (1, n)
+        spps = [int(v) for v in os.environ["PREVIEW_SPP"].split(",")] if os.environ.get("PREVIEW_SPP") else [cy.samples]
+        for fr in frs:
+            for spp in spps:
+                cy.samples = spp; sc.frame_set(fr); tag = f"_{spp}spp" if len(spps) > 1 else ""
+                sc.render.filepath = os.path.join(OUTR, "preview", f"{name}_{fr:03d}{tag}.png")
+                t0 = time.time(); bpy.ops.render.render(write_still=True); dt = time.time() - t0
+                with open(os.path.join(OUTR, "preview", "times.txt"), "a") as fh: fh.write(f"{name} f{fr} {spp}spp {dt:.1f}s\n")
+                print(f"PREVIEW {name} f{fr} {spp}spp {dt:.1f}s", flush=True)
+        cy.samples = SPP
         return
     bpy.ops.render.render(animation=True)
 
@@ -127,6 +137,11 @@ if MODER == "film":
     else: ims.file_format = "PNG"; ims.color_depth = "8"
     sc.render.use_overwrite = False; sc.render.use_placeholder = True                # resumable
     cy.samples = SPP; cy.adaptive_threshold = float(os.environ.get("ATHRESH", 0.02))
+    if os.environ.get("HQ") == "1":                                      # the 4K master (Nov): the denoiser's careful mode on the GPU, deeper light
+        try: cy.denoising_prefilter = "ACCURATE"; cy.denoising_quality = "HIGH"; cy.denoising_use_gpu = True
+        except Exception as e: print("HQ denoise?", e, flush=True)
+        cy.max_bounces = 12; cy.diffuse_bounces = 6; cy.glossy_bounces = 6; cy.sample_clamp_indirect = 10.0
+        print("HQ on", flush=True)
     EV0 = sc.view_settings.exposure
     want = os.environ.get("SHOTS")
     for sh in SHOTS:
