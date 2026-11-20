@@ -1,0 +1,1612 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wardrobe Planner — A Study in Teak</title>
+<!--
+  The dressing-room wardrobe planner. Standalone: open this file in Safari or Chrome. Not part of the website.
+  Every bay is drawn to the repo's measurements:
+    · bay widths   — AST-DR-023 / AST-DR-025 (left run 2,845 over 3 bays, right run 3,759 over 4), switchable to the
+                     Blender model (tools/walk/furnish.py) or AST-DR-048's 930 nominal in Settings
+    · heights      — AST-DR-048 (drawings/wardrobe-interiors.js): 2,743 high, 100 plinth, 18 sides and top, 22 boards,
+                     loft shelf at 2,183
+    · depth        — 686 overall; 22 door, 58 lit back (55 + 3 air, tools/walk/wardrobe2.py), 4 front clearance
+    · end bays     — L3 and the tunnel bay R4 have the fold-slide doors of AST-DR-026 (option C): the folded pair parks
+                     along one side, so fittings there stop 100 short of it
+    · tunnel bay   — R4: shelves on the hidden door, 10¼ in (260) deep, up to the 2,183 tunnel mouth; the bay itself
+                     stays clear to walk through
+  State is saved in this browser (localStorage "ast.wardrobeplanner.v1"); Export / Import move it between browsers.
+-->
+<style>
+@font-face { font-family: "Cond"; src: url(../v2/fonts/cond.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Grotesk"; src: url(../v2/fonts/grotesk.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Mono"; src: url(../v2/fonts/mono.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+:root {
+  --void: #0b0b0b; --panel: #151616; --panel2: #1c1e1e; --line: #2a2d2d; --line2: #3a3e3e;
+  --bone: #edebe7; --muted: #9a968e; --dim: #6c6963; --ember: #cc6437; --ember2: #e07a4c;
+  --red: #e0584c; --amber: #d6a03c; --ok: #7fae7a; --paper: #f2eee6;
+  --cond: "Cond", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --grotesk: "Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --mono: "Mono", "SF Mono", Menlo, monospace;
+  --smooth: cubic-bezier(.76, 0, .24, 1);
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--void); color: var(--bone); font: 13px/1.4 var(--grotesk); -webkit-font-smoothing: antialiased;
+  display: flex; flex-direction: column; overflow: hidden; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
+input, select, textarea { font: inherit; color: inherit; }
+
+/* ── top bar ── */
+.top { display: flex; align-items: center; gap: 18px; padding: 10px 16px 9px; border-bottom: 1px solid var(--line); flex: none; }
+.brand { display: flex; flex-direction: column; gap: 3px; }
+.kick { font: 10.5px/1 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.brand h1 { margin: 0; font: 400 27px/0.95 var(--cond); text-transform: uppercase; letter-spacing: -.005em; }
+.actions { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+.pill { height: 32px; padding: 0 14px; border: 1px solid var(--line2); border-radius: 100vw; font: 11.5px/1 var(--mono);
+  text-transform: uppercase; letter-spacing: -.01em; display: inline-flex; align-items: center; gap: 7px; white-space: nowrap;
+  transition: border-color .2s, background-color .2s, color .2s; }
+.pill:hover { border-color: var(--bone); }
+.pill:disabled { opacity: .32; cursor: default; border-color: var(--line2); }
+.pill.ember { background: var(--ember); border-color: var(--ember); color: #1a0d06; }
+.pill.ember:hover { background: var(--ember2); border-color: var(--ember2); }
+.pill.small { height: 26px; padding: 0 10px; font-size: 10.5px; }
+.pill svg { width: 13px; height: 13px; }
+.saved { font: 10.5px/1.2 var(--mono); color: var(--muted); text-transform: uppercase; text-align: right; min-width: 92px; }
+.menuwrap { position: relative; }
+.menu { position: absolute; right: 0; top: 38px; z-index: 30; min-width: 290px; background: var(--panel2); border: 1px solid var(--line2);
+  border-radius: 10px; padding: 6px; box-shadow: 0 18px 50px rgba(0,0,0,.55); display: none; }
+.menu.open { display: block; }
+.menu button { display: block; width: 100%; text-align: left; padding: 9px 11px; border-radius: 7px; }
+.menu button:hover { background: #2a2d2d; }
+.menu button b { display: block; font-weight: 400; }
+.menu button span { display: block; font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+.menu hr { border: 0; border-top: 1px solid var(--line2); margin: 6px 4px; }
+.menu label { display: block; padding: 6px 11px 4px; font: 10.5px var(--mono); text-transform: uppercase; color: var(--muted); }
+.menu select { width: calc(100% - 12px); margin: 0 6px 6px; }
+
+/* ── cupboards column ── */
+.bays { border-right: 1px solid var(--line); overflow-y: auto; padding: 12px 12px 24px; display: flex; flex-direction: column; gap: 14px; background: #0e0f0f; }
+.keyplan { display: flex; flex-direction: column; gap: 7px; }
+.keyplan svg { width: 100%; height: auto; max-height: 170px; display: block; }
+.keyplan .bayk { cursor: pointer; }
+.keyplan .bayk:hover rect { fill: #3d4141; }
+.run { display: flex; flex-direction: column; gap: 5px; }
+.run h3 { margin: 0 0 2px; font: 10px/1.2 var(--mono); text-transform: uppercase; color: var(--muted); letter-spacing: .03em; }
+.thumb { display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: center; width: 100%; padding: 5px 8px 5px 6px;
+  border: 1px solid var(--line); border-radius: 7px; background: var(--panel); text-align: left; transition: border-color .15s; }
+.thumb:hover { border-color: var(--line2); }
+.thumb svg { width: 26px; height: 62px; display: block; }
+.thumb > span { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.thumb.sel { border-color: var(--ember); box-shadow: inset 0 0 0 1px var(--ember); }
+.thumb .id { font: 11px/1 var(--mono); display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.thumb .lb { font-size: 12px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.thumb .lb.none { color: var(--dim); }
+.thumb .fr { font: 10px/1.2 var(--mono); color: var(--muted); }
+.thumb.tunnel { background: #121313; }
+.flag { display: inline-flex; align-items: center; justify-content: center; min-width: 15px; height: 15px; padding: 0 4px; border-radius: 8px;
+  font: 9.5px/1 var(--mono); color: #160b06; }
+.flag.err { background: var(--red); } .flag.warn { background: var(--amber); } .flag.okk { background: transparent; color: var(--ok); }
+
+/* ── main ── */
+main { flex: 1; display: grid; grid-template-columns: 228px minmax(0, 1fr) 360px; min-height: 0; }
+.stagewrap { display: flex; flex-direction: column; min-width: 0; min-height: 0; padding: 12px 16px 14px; gap: 10px; }
+.stagehead { display: flex; align-items: flex-end; gap: 22px; }
+.stagehead > div:first-child { flex: 1; min-width: 0; }
+.stagehead h2 { font: 400 34px/0.9 var(--cond); text-transform: uppercase; margin: 0; letter-spacing: -.005em; display: flex; align-items: baseline; }
+.stagehead h2 input { flex: 1; min-width: 0; background: transparent; border: 0; border-bottom: 1px dashed transparent; border-radius: 0; padding: 0 0 2px;
+  font: inherit; text-transform: uppercase; letter-spacing: inherit; color: var(--bone); outline: none; }
+.stagehead h2 input:hover { border-bottom-color: var(--line2); }
+.stagehead h2 input:focus { border-bottom-color: var(--ember); }
+.stagehead h2 input::placeholder { color: #5d5a55; }
+.stagehead .dims { margin-top: 6px; }
+.stagehead h2 .bid { color: var(--ember); margin-right: 10px; }
+.stagehead .where { font: 10.5px/1.3 var(--mono); text-transform: uppercase; color: var(--muted); margin-top: 6px; }
+.meter { flex: none; width: 300px; display: flex; flex-direction: column; gap: 5px; }
+.meter .row { display: flex; justify-content: space-between; gap: 12px; font: 10.5px/1.2 var(--mono); text-transform: uppercase; color: var(--muted); }
+.meter .row b { font-weight: 400; color: var(--bone); }
+.bar { height: 6px; border-radius: 3px; background: #2a2d2d; overflow: hidden; display: flex; }
+.bar i { display: block; height: 100%; background: var(--bone); }
+.bar i.over { background: var(--red); }
+.dims { font: 10.5px/1.4 var(--mono); text-transform: uppercase; color: var(--muted); }
+.dims b { font-weight: 400; color: var(--bone); }
+#stage { flex: 1; min-height: 340px; background: var(--paper); border-radius: 10px; position: relative; overflow-x: hidden; overflow-y: auto; }
+#stage svg { display: block; width: 100%; touch-action: none; -webkit-user-select: none; user-select: none; }
+#stage svg text, .thumb svg text { font-family: var(--grotesk); }
+#stage svg text.m { font-family: var(--mono); }
+#stage .fit { cursor: grab; }
+#stage.dragging .fit, #stage.dragging { cursor: grabbing; }
+#stage .fit:hover .hit { stroke: #cc6437; stroke-opacity: .55; }
+#stage .hd { cursor: ns-resize; }
+.stagebar { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; font: 10.5px/1 var(--mono); text-transform: uppercase; color: var(--muted); }
+.seg { display: inline-flex; border: 1px solid var(--line2); border-radius: 100vw; overflow: hidden; }
+.seg button { padding: 6px 10px; font: 10.5px/1 var(--mono); text-transform: uppercase; color: var(--muted); }
+.seg button.on { background: var(--bone); color: #111; }
+.hint { margin-left: auto; color: var(--dim); text-transform: none; font-family: var(--grotesk); font-size: 12px; }
+
+/* ── side panel ── */
+aside { border-left: 1px solid var(--line); overflow-y: auto; background: #0e0f0f; }
+.sec { border-bottom: 1px solid var(--line); padding: 14px 16px 16px; }
+.sec h4 { margin: 0 0 10px; font: 10.5px/1 var(--mono); text-transform: uppercase; letter-spacing: .04em; color: var(--muted);
+  display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.sec h4 .sub { text-transform: none; letter-spacing: 0; font-family: var(--grotesk); font-size: 11.5px; color: var(--dim); }
+input[type=text], input[type=number], textarea, select { background: #181a1a; border: 1px solid #323636; border-radius: 7px;
+  padding: 7px 9px; width: 100%; outline: none; transition: border-color .15s; }
+input:focus, textarea:focus, select:focus { border-color: var(--ember); }
+textarea { resize: vertical; min-height: 54px; line-height: 1.35; }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.chips button { padding: 4px 9px; border: 1px solid var(--line2); border-radius: 100vw; font-size: 11.5px; color: #cfccc6; }
+.chips button:hover { border-color: var(--bone); color: var(--bone); }
+.chk { display: flex; align-items: flex-start; gap: 9px; padding: 5px 0; cursor: pointer; font-size: 12.5px; }
+.chk input { margin: 2px 0 0; accent-color: var(--ember); }
+.chk small { display: block; color: var(--muted); font-size: 11.5px; }
+.rowbtns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.field { display: flex; flex-direction: column; gap: 4px; margin-top: 9px; }
+.field > span { font: 10px/1 var(--mono); text-transform: uppercase; color: var(--muted); }
+.trio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 9px; }
+.trio label { display: flex; flex-direction: column; gap: 4px; }
+.trio label > span { font: 10px/1 var(--mono); text-transform: uppercase; color: var(--muted); }
+.trio small { font: 10px/1 var(--mono); color: var(--dim); }
+.grp { margin-top: 12px; }
+.grp:first-of-type { margin-top: 0; }
+.grp h5 { margin: 0 0 5px; font: 10px/1 var(--mono); text-transform: uppercase; color: var(--dim); letter-spacing: .04em; }
+.pal { display: grid; grid-template-columns: 34px 1fr auto; gap: 8px; align-items: center; width: 100%; text-align: left; padding: 6px 7px;
+  border-radius: 7px; border: 1px solid transparent; touch-action: none; }
+.pal:hover { background: #1b1d1d; border-color: var(--line); }
+.pal:disabled { opacity: .3; cursor: not-allowed; }
+.pal svg { width: 34px; height: 26px; display: block; }
+.pal .nm { font-size: 12.5px; line-height: 1.2; }
+.pal .nm small { display: block; font-size: 11px; color: var(--muted); }
+.pal .sz { font: 10px/1.2 var(--mono); color: var(--muted); text-align: right; white-space: nowrap; }
+.pal .tag { font: 9px/1 var(--mono); color: var(--ember); border: 1px solid rgba(204,100,55,.45); border-radius: 4px; padding: 2px 4px; margin-left: 5px;
+  vertical-align: 1px; text-transform: uppercase; }
+.fitcard .ttl { font: 400 22px/1 var(--cond); text-transform: uppercase; }
+.fitcard .desc { color: var(--muted); font-size: 12px; margin-top: 4px; }
+.empty { color: var(--dim); font-size: 12.5px; }
+.issues { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.issues li { display: grid; grid-template-columns: 8px 1fr; gap: 9px; font-size: 12.5px; line-height: 1.35; padding: 7px 9px; border-radius: 7px;
+  background: #161818; cursor: default; }
+.issues li[data-fit] { cursor: pointer; }
+.issues li[data-fit]:hover { background: #1e2121; }
+.issues li i { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; }
+.issues li.err i { background: var(--red); } .issues li.warn i { background: var(--amber); } .issues li.info i { background: #7d8b9a; }
+.issues li.okk i { background: var(--ok); }
+.note { font-size: 11.5px; color: var(--muted); line-height: 1.45; }
+.note b { color: var(--bone); font-weight: 400; }
+kbd { font: 10px var(--mono); border: 1px solid var(--line2); border-bottom-width: 2px; border-radius: 4px; padding: 1px 4px; color: #cfccc6; }
+
+/* ── palette drag ghost, toast, modal ── */
+.ghost { position: fixed; z-index: 60; pointer-events: none; padding: 6px 10px; border-radius: 7px; background: var(--ember); color: #1a0d06;
+  font: 11px/1 var(--mono); text-transform: uppercase; transform: translate(-50%, -130%); box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+.toast { position: fixed; left: 50%; bottom: 22px; transform: translate(-50%, 20px); z-index: 70; background: var(--panel2); color: var(--bone);
+  border: 1px solid var(--line2); border-radius: 10px; padding: 11px 16px; max-width: 560px; font-size: 13px; box-shadow: 0 14px 40px rgba(0,0,0,.5);
+  opacity: 0; pointer-events: none; transition: opacity .25s var(--smooth), transform .35s var(--smooth); }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.toast.bad { border-color: var(--red); }
+.modal { position: fixed; inset: 0; z-index: 80; background: rgba(0,0,0,.6); display: none; align-items: center; justify-content: center; padding: 30px; }
+.modal.open { display: flex; }
+.modal .box { width: min(820px, 100%); max-height: calc(100vh - 60px); display: flex; flex-direction: column; gap: 12px; background: var(--panel2);
+  border: 1px solid var(--line2); border-radius: 12px; padding: 20px 22px; box-shadow: 0 30px 80px rgba(0,0,0,.6); }
+.modal h3 { margin: 0; font: 400 26px/1 var(--cond); text-transform: uppercase; }
+.modal textarea { flex: 1; min-height: 340px; font: 11.5px/1.45 var(--mono); white-space: pre; }
+.modal .foot { display: flex; gap: 8px; align-items: center; }
+.modal .foot .msg { margin-right: auto; font: 11px var(--mono); text-transform: uppercase; color: var(--ok); }
+.helpgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 26px; font-size: 13px; line-height: 1.45; overflow: auto; }
+.helpgrid p { margin: 0 0 8px; }
+.helpgrid h6 { margin: 6px 0 4px; font: 10.5px var(--mono); text-transform: uppercase; color: var(--muted); letter-spacing: .04em; }
+@media (max-width: 1240px) { main { grid-template-columns: 196px minmax(0, 1fr) 320px; } .hint { display: none; } }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <span class="kick">A Study in Teak · Dressing room</span>
+    <h1>Wardrobe planner</h1>
+  </div>
+  <div class="actions">
+    <span class="saved" id="saved">—</span>
+    <button class="pill" id="undo" title="Undo (⌘Z)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4 2.5 7.5 6 11M3 7.5h6.5a4 4 0 0 1 0 8H8"/></svg>Undo</button>
+    <button class="pill" id="redo" title="Redo (⇧⌘Z)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 4l3.5 3.5L10 11M13 7.5H6.5a4 4 0 0 0 0 8H8"/></svg>Redo</button>
+    <button class="pill" id="export" title="Save the plan as a file">Export</button>
+    <button class="pill" id="import" title="Open a plan file">Import</button>
+    <div class="menuwrap">
+      <button class="pill" id="moreBtn" title="Start again, settings">Reset &amp; settings ▾</button>
+      <div class="menu" id="moreMenu">
+        <button data-reset="empty"><b>Start again — empty cupboards</b><span>Every cupboard back to its loft shelf only. Undo can bring it back.</span></button>
+        <button data-reset="approved"><b>Start from the 7 Oct layout</b><span>The layout on AST-DR-048 (approved in chat, 7 Oct), to edit from.</span></button>
+        <hr>
+        <label for="setOut">Bay widths from</label>
+        <select id="setOut"></select>
+        <label for="snapSel">Snap</label>
+        <select id="snapSel">
+          <option value="32">32 mm hole system (shelf pins)</option>
+          <option value="10">10 mm</option>
+          <option value="0">Off — free</option>
+        </select>
+        <hr>
+        <button id="helpBtn"><b>How to use it</b><span>Mouse, keys, and what the checks mean.</span></button>
+      </div>
+    </div>
+    <button class="pill ember" id="copyClaude" title="Copy the whole plan as text to paste to Claude">Copy for Claude</button>
+  </div>
+</header>
+
+<main>
+  <nav class="bays" id="overview" aria-label="Cupboards"></nav>
+  <div class="stagewrap">
+    <div class="stagehead" id="stagehead"></div>
+    <div id="stage"><svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg></div>
+    <div class="stagebar">
+      <span>Units</span>
+      <span class="seg" id="unitSeg"><button data-u="both">ft-in + mm</button><button data-u="ftin">ft-in</button><button data-u="mm">mm</button></span>
+      <span class="seg" id="clothesSeg"><button data-c="1">Show clothes</button><button data-c="0">Plain</button></span>
+      <span class="hint">Drag a fitting to move it · drag its top or bottom tab to resize · <kbd>⌫</kbd> deletes · <kbd>⌘Z</kbd> undo · <kbd>[</kbd> <kbd>]</kbd> cupboards · hold <kbd>⌥</kbd> to drag without snapping</span>
+    </div>
+  </div>
+  <aside id="side"></aside>
+</main>
+
+<svg id="defs" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"></svg>
+<input type="file" id="fileIn" accept=".json,.txt,application/json,text/plain" hidden>
+<div class="toast" id="toast"></div>
+<div class="modal" id="claudeModal">
+  <div class="box">
+    <h3>Copy for Claude</h3>
+    <div class="note">Paste this into the chat. It lists every cupboard bottom to top with heights from the floor, and ends with a <b>DATA</b> line that holds the whole plan, so the drawings and the Blender model can be built straight from it.</div>
+    <textarea id="claudeText" readonly></textarea>
+    <div class="foot"><span class="msg" id="claudeMsg"></span><button class="pill" id="claudeCopy">Copy again</button><button class="pill ember" data-close>Done</button></div>
+  </div>
+</div>
+<div class="modal" id="helpModal">
+  <div class="box">
+    <h3>How to use it</h3>
+    <div class="helpgrid">
+      <div>
+        <h6>Cupboards</h6>
+        <p>The strip at the top shows all seven bays as you see them standing in the room: the left wall L1–L3 (L1 by the bathroom door, L3 beside the mirror), and the right wall R4–R1 (R4 is the tunnel bay beside the mirror, R1 by the bedroom wall). Click one, or use the small plan, or <kbd>[</kbd> <kbd>]</kbd>.</p>
+        <p>Name a cupboard on the right (Shoes, Linen, Daily…) and add a note if you like.</p>
+        <h6>Fittings</h6>
+        <p>Click a fitting in the list to drop it into the best free space, or drag it straight onto the drawing at the height you want. Every fitting starts at its usual real size.</p>
+        <p>Drag a fitting up or down to move it. It slides past others into the nearest space it fits and snaps to the 32 mm shelf-pin holes and to the fittings next to it. Hold <kbd>⌥</kbd> to place it freely.</p>
+        <p>Select it and drag the small tabs at its top and bottom to change its height. It can't go below its minimum (a hanging rail keeps its drop).</p>
+      </div>
+      <div>
+        <h6>Checks</h6>
+        <p><b style="color:var(--red)">Red</b> means it can't be built that way. <b style="color:var(--amber)">Amber</b> means it works but is awkward: a rail above easy reach, a drawer too high to see into, a shelf with too little space above it. Grey notes are just good to know.</p>
+        <p>The bar at the top right shows how much height is still free below the loft. The dashed boxes on the drawing are the free spaces.</p>
+        <h6>Saving</h6>
+        <p>Everything saves itself in this browser as you go. Export saves a file you can keep or open in another browser with Import. Undo and Redo go back and forth through every change. Reset can start again or load the 7 Oct layout.</p>
+        <h6>Keys</h6>
+        <p><kbd>⌫</kbd> delete · <kbd>⌘D</kbd> duplicate · <kbd>↑</kbd> <kbd>↓</kbd> move one step (<kbd>⇧</kbd> for 1 mm) · <kbd>⌘Z</kbd> / <kbd>⇧⌘Z</kbd> undo / redo · <kbd>Esc</kbd> deselect.</p>
+        <h6>When you're happy</h6>
+        <p>Press <b>Copy for Claude</b> and paste it in the chat.</p>
+      </div>
+    </div>
+    <div class="foot"><span class="msg"></span><button class="pill ember" data-close>Got it</button></div>
+  </div>
+</div>
+
+<script>
+(() => {
+"use strict";
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const n1 = (v) => Math.round(v * 10) / 10;
+const uid = () => "f" + Math.random().toString(36).slice(2, 8);
+const clone = (o) => JSON.parse(JSON.stringify(o));
+
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+// MEASUREMENTS — from the repo, not guessed. mm throughout; z is up from the floor.
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+const M = {
+  H: 2743,          // 9 ft 0 in — top of the wardrobes (AST-DR-023 hWd, AST-DR-025 H, AST-DR-048 H)
+  ceil: 2769,       // 9 ft 1 in — the plain ceiling over both runs (AST-DR-023 hSide)
+  depth: 686,       // 2 ft 3 in — carcase depth (AST-DR-023 wd.d, AST-DR-025, AST-DR-048 D)
+  side: 18, top: 18, board: 22,   // AST-DR-048: 18 sides and top, 22 shelves
+  plinth: 100,      // AST-DR-048: the inside floor sits on a 100 plinth
+  loft: 2183,       // AST-DR-048: loft shelf at 7 ft 2 in, one open space above it
+  door: 22,         // wardrobe2.py: the carcase stops 22 inside the doors
+  litBack: 58,      // wardrobe2.py / AST-DR-048 detail 1: the opal lit back takes 55, 58 with its air
+  airFront: 4,      // wardrobe2.py: 4 clear of the doors
+  pack: 100,        // AST-DR-026 / data.js: the parked fold-slide pair takes ~3 in; stop fittings ~4 in short of that side
+  mouth: 2183,      // skeleton.py TUN.h: the tunnel mouth (owner thinks nearer 7 ft 6 in — still to confirm)
+  doorShelf: 260,   // data.js "The Hidden Door": shelves 10¼ in deep on the door
+  doorShelfW: 790,  // furnish.py: 2 ft 8 in (810) door, its shelves 790 wide; a fixed 4 in upright beside it
+  reach: 2000,      // the owner is 5 ft 9 in: a rail above 2,000 needs a step
+  drawerTop: 1400,  // top of a drawer you can still see into
+};
+const SETOUT = {
+  drawings: { name: "Room drawings — AST-DR-023 / 025", short: "AST-DR-023/025", L: 2845 / 3, R: 3759 / 4,
+    note: "Left run: 9 ft 4 in of wall (2,845) from the mirror corner to the bathroom door, over 3 bays. Right run: the full 12 ft 4 in (3,759) over 4 bays." },
+  model: { name: "Blender model — furnish.py", short: "Blender model", L: 2997 / 3, R: 3759 / 4,
+    note: "The model starts the left run straight after a 2 ft 6 in bathroom door, without the 6 in return AST-DR-023 shows (still OPEN on that sheet): 2,997 over 3 bays." },
+  nominal: { name: "Interiors sheet — AST-DR-048 (930)", short: "AST-DR-048 nominal", L: 930, R: 930,
+    note: "AST-DR-048 draws every bay 930 wide, nominal, \"set out to the real runs on site\"." },
+};
+const BAYDEF = {
+  L1: { run: "L", n: 1, where: "Left wall · 1st, by the bathroom door" },
+  L2: { run: "L", n: 2, where: "Left wall · 2nd, the middle" },
+  L3: { run: "L", n: 3, where: "Left wall · 3rd, beside the mirror", pack: "L",
+    packNote: "End bay: its fold-slide doors (AST-DR-026, option C) fold out, then slide back in along the side by L2 — fittings stop 100 short of that side." },
+  R1: { run: "R", n: 1, where: "Right wall · 1st, by the bedroom wall" },
+  R2: { run: "R", n: 2, where: "Right wall · 2nd" },
+  R3: { run: "R", n: 3, where: "Right wall · 3rd" },
+  R4: { run: "R", n: 4, where: "Right wall · 4th, beside the mirror — the tunnel bay", pack: "R", tunnel: true,
+    packNote: "The tunnel bay: behind its fold-slide doors the back is the hidden door. Its shelves sit on the door, 10¼ in deep, up to the tunnel mouth; the bay in front stays clear to walk through." },
+};
+const ORDER = ["L1", "L2", "L3", "R1", "R2", "R3", "R4"];
+const SEEN = { L: ["L1", "L2", "L3"], R: ["R4", "R3", "R2", "R1"] };   // as you see them, standing in the room
+
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+// FITTINGS — standard sizes. h = height the fitting takes, including any clearance it needs.
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+const HOOK = 60;   // rail centre to the top of a hanging zone: room for the hanger hooks
+const T = {
+  loft:     { name: "Loft shelf", short: "Loft", group: "top", h: 22, fixed: true, tunnelOK: true, zmin: 1600, zmax: 2450,
+              desc: "The top storage: one open space above this shelf, as on AST-DR-048. One per cupboard; drag it to change the loft's height." },
+  shelf:    { name: "Shelf", group: "shelves", h: 22, fixed: true, pref: "mid", tunnelOK: true,
+              desc: "22 board on shelf pins. Folded clothes want 250–350 clear above; linen and blankets 350–450." },
+  pullShelf:{ name: "Pull-out shelf", group: "shelves", h: 90, fixed: true, pref: 900,
+              desc: "A shelf on soft-close runners with a low lip — folded shirts and knitwear you can see from above." },
+  display:  { name: "Display shelf, lit", short: "Display shelf", group: "shelves", h: 300, min: 180, max: 900, pref: 1300, tunnelOK: true,
+              opts: { lit: true, risers: 0, glass: false },
+              desc: "For the perfumes: a 22 board, the clear height above it, and an LED strip along the front. Stretch it for one big shelf; add stepped risers so the back row shows." },
+  watch:    { name: "Watch display", group: "shelves", h: 260, min: 200, max: 420, pref: 1150, tunnelOK: true, tag: "showroom",
+              desc: "Marble-and-brass watch stands standing on their own lit shelf, as the showroom photo." },
+  shortHang:{ name: "Short hang", group: "hang", h: 1060, min: 810, max: 1300, pref: "top", rail: true,
+              opts: { led: false },
+              desc: "Rail for shirts, T-shirts and jackets. Usual drop 900–1,000 below the rail, plus 60 above it for the hooks. Two stacked make a double hang." },
+  longHang: { name: "Long hang", group: "hang", h: 1600, min: 1260, max: 2000, pref: "top", rail: true,
+              opts: { led: false },
+              desc: "Rail for suits, coats, kurtas and long clothes. Suits need about 1,200 below the rail; long coats and kurtas 1,400–1,600." },
+  pullDown: { name: "Pull-down rail", group: "hang", h: 1000, min: 900, max: 1150, pref: "top", rail: true,
+              desc: "A wardrobe lift: a high rail on arms that swings down to you, so the space up high is usable. Made for bays 830–1,150 wide." },
+  carousel: { name: "Carousel", group: "hang", h: 1500, min: 900, max: 2100, pref: "bottom", tag: "showroom",
+              desc: "A turning pole with hook arms for bags, belts and scarves, as the showroom photo. In a 3 ft bay the arms reach about 290 each way." },
+  drawer:   { name: "Drawer", group: "drawers", h: 200, min: 90, max: 450, pref: "bottom", opts: { lock: false, velvet: false },
+              desc: "Soft-close, full-extension. Small 120 for accessories, medium 200, large 300 for knitwear and cushion covers." },
+  jewel:    { name: "Jewellery & watch drawer", short: "Jewellery drawer", group: "drawers", h: 120, min: 100, max: 180, pref: 950, tag: "showroom",
+              opts: { glassLid: true, lock: true },
+              desc: "A shallow drawer with a fitted leather tray, watch cushions and a glass lid, as the showroom photo; lockable." },
+  ironing:  { name: "Ironing board drawer", short: "Ironing drawer", group: "drawers", h: 120, fixed: true, pref: 820,
+              desc: "A drawer that hides a fold-out ironing board — pull it out, unfold, press. Best at about waist height." },
+  trouser:  { name: "Trouser pull-out", short: "Trouser pull-out", group: "pull", h: 620, min: 540, max: 760, pref: 260, tag: "showroom",
+              opts: { glassTray: false },
+              desc: "Trousers folded over bars on a pull-out frame. With the glass tray on top (showroom photo) it carries belts or a watch too." },
+  laundry:  { name: "Laundry pull-out", group: "pull", h: 550, min: 400, max: 720, pref: "bottom", tag: "showroom", opts: { bins: 2 },
+              desc: "Lined baskets on a pull-out, as the showroom photo. Best at the floor." },
+  shoeTilt: { name: "Tilting shoe trays", short: "Shoe trays", group: "shoes", h: 185 * 5, min: 185, max: 185 * 11, pitch: 185, pref: "bottom", tag: "showroom",
+              desc: "Trays that tip their front down as they open, so the shoes face you (showroom photo). 185 apart, as AST-DR-048; two pairs a tray in a 3 ft bay." },
+  shoeRack: { name: "Shoe rack, sloped", short: "Shoe rack", group: "shoes", h: 200 * 4, min: 200, max: 200 * 10, pitch: 200, pref: "bottom",
+              desc: "Fixed sloping shelves with a heel rail, 200 apart. Simple and cheap." },
+  boots:    { name: "Boot space", group: "shoes", h: 480, min: 380, max: 650, pref: "bottom",
+              desc: "A shelf with clear height for boots and high-tops." },
+  tieRack:  { name: "Tie & belt pull-out", short: "Tie & belt rack", group: "side", side: true, h: 500, min: 350, max: 700, pref: 1250,
+              desc: "Slim rack on the side panel that slides out, with hooks for ties and belts. Fits beside hanging clothes." },
+  valet:    { name: "Valet hook", group: "side", side: true, h: 60, fixed: true, pref: 1600,
+              desc: "Pull-out hook on the side panel: hang tomorrow's outfit or a suit straight from the cleaner's." },
+  mirrorPull:{ name: "Pull-out mirror", group: "side", side: true, h: 1000, min: 700, max: 1400, pref: 600,
+              desc: "A tall narrow mirror that slides out of the side of the cupboard." },
+  socket:   { name: "Socket", group: "side", side: true, h: 90, fixed: true, pref: 1100,
+              desc: "A power point inside the cupboard — hair dryer, watch winder, steamer." },
+};
+const GROUPS = [["hang", "Hanging"], ["shelves", "Shelves & display"], ["drawers", "Drawers"], ["pull", "Pull-outs"], ["shoes", "Shoes"], ["side", "On the side panel"], ["top", "Top"]];
+const PALETTE = [
+  ["shortHang"], ["longHang"], ["pullDown"], ["carousel"],
+  ["shelf"], ["pullShelf"], ["display"], ["watch"],
+  ["drawer", { h: 120, label: "Small drawer", sub: "accessories" }], ["drawer", { h: 200, label: "Medium drawer" }], ["drawer", { h: 300, label: "Large drawer" }],
+  ["jewel"], ["ironing"],
+  ["trouser"], ["laundry"],
+  ["shoeTilt"], ["shoeRack"], ["boots"],
+  ["tieRack"], ["valet"], ["mirrorPull"], ["socket"],
+  ["loft"],
+];
+const SOLID = new Set(["loft", "shelf", "pullShelf", "display", "watch", "drawer", "jewel", "ironing", "trouser", "laundry", "shoeTilt", "shoeRack", "boots"]);
+const DRAWERS = new Set(["drawer", "jewel", "ironing"]);
+const PULLOUTS = new Set(["pullShelf", "trouser", "laundry", "shoeTilt", "shoeRack"]);
+const LABELS = ["Shoes", "Linen & cushions", "Daily wear", "Winter", "Suits", "Long clothes", "Perfume", "Accessories", "Folded clothes", "Bags"];
+
+function drawerSize(h) { return h <= 150 ? "small" : h <= 250 ? "medium" : "large"; }
+function fitName(f, long) {
+  const t = T[f.type];
+  if (f.type === "drawer") return `${drawerSize(f.h)[0].toUpperCase()}${drawerSize(f.h).slice(1)} drawer`;
+  return long ? t.name : (t.short || t.name);
+}
+
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+// STATE
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+const KEY = "ast.wardrobeplanner.v1";
+function emptyBay(id) {
+  return { label: "", note: "", lit: !BAYDEF[id].tunnel, edgeLed: false, sensor: false, fits: [{ id: uid(), type: "loft", z: M.loft, h: M.board, label: "", opts: {} }] };
+}
+function mk(type, z, h, label, opts, side) {
+  const t = T[type];
+  return { id: uid(), type, z, h: h ?? t.h, label: label || "", opts: Object.assign(clone(t.opts || {}), opts || {}), ...(t.side ? { side: side || "R" } : {}) };
+}
+// AST-DR-048 (drawings/wardrobe-interiors.js), the layout approved in chat on 7 Oct, in this planner's terms
+function approvedBays() {
+  const B = {}; ORDER.forEach((id) => (B[id] = emptyBay(id)));
+  const set = (id, label, fits) => { B[id].label = label; B[id].fits.push(...fits); };
+  set("L1", "Long clothes", [mk("longHang", 810, 1310, "kurtas, suits"), mk("shelf", 640), mk("drawer", 430, 190), mk("drawer", 250, 160), mk("drawer", 110, 120)]);
+  set("L2", "Shirts, watches, trousers", [mk("shortHang", 1082, 878, "shirts"), mk("shelf", 1060), mk("jewel", 940, 110, "watches + jewellery", { glassLid: false }),
+    mk("trouser", 200, 710, "trouser pull-out No. 2")]);
+  set("L3", "Perfume + hair", [mk("display", 1880, 280, "perfumes"), mk("display", 1600, 280, "perfumes"), mk("display", 1320, 280, "perfumes"),
+    mk("shelf", 780, null, "hair-dryer bay"), mk("drawer", 430, 310), mk("drawer", 115, 305), mk("socket", 1000, null, "hair dryer", null, "R")]);
+  set("R1", "Folded clothes", [0, 1, 2, 3, 4].map((i) => mk("shelf", 760 + i * 330)).concat([0, 1, 2].map((i) => mk("drawer", 115 + i * 215, 200))));
+  set("R2", "Towels, trousers, laundry", [mk("shelf", 1940), mk("shelf", 1620, null, "towels"), mk("trouser", 800, 560, "trouser pull-out No. 1"),
+    mk("drawer", 590, 170, "socks"), mk("laundry", 115, 455)]);
+  set("R3", "Shoes", [mk("shelf", 1960, null, "bags"), mk("shoeTilt", 140, 185 * 9)]);
+  set("R4", "Tunnel door", [2050, 1730, 1410, 1090, 770, 450].map((z) => mk("shelf", z)));
+  return B;
+}
+function freshState(kind) {
+  const bays = {};
+  if (kind === "approved") Object.assign(bays, approvedBays()); else ORDER.forEach((id) => (bays[id] = emptyBay(id)));
+  return { v: 1, setOut: "drawings", units: "both", snap: 32, clothes: true, sel: "L1", collapsed: false, bays };
+}
+let state = load() || freshState("empty");
+const ui = { fit: null, drag: null, palDrag: null, typing: false };
+const hist = { past: [], future: [] };
+
+function valid(s) {
+  if (!s || typeof s !== "object" || !s.bays) return false;
+  return ORDER.every((id) => s.bays[id] && Array.isArray(s.bays[id].fits) && s.bays[id].fits.every((f) => T[f.type] && isFinite(f.z) && isFinite(f.h)));
+}
+function normalise(s) {
+  const out = freshState("empty");
+  out.setOut = SETOUT[s.setOut] ? s.setOut : "drawings";
+  out.units = ["both", "ftin", "mm"].includes(s.units) ? s.units : "both";
+  out.snap = [0, 10, 32].includes(+s.snap) ? +s.snap : 32;
+  out.clothes = s.clothes !== false; out.collapsed = !!s.collapsed;
+  out.sel = ORDER.includes(s.sel) ? s.sel : "L1";
+  ORDER.forEach((id) => {
+    const b = s.bays[id];
+    out.bays[id] = { label: String(b.label || ""), note: String(b.note || ""), lit: b.lit !== false && !BAYDEF[id].tunnel, edgeLed: !!b.edgeLed, sensor: !!b.sensor,
+      fits: b.fits.map((f) => ({ id: f.id || uid(), type: f.type, z: +f.z, h: +f.h, label: String(f.label || ""), opts: Object.assign(clone(T[f.type].opts || {}), f.opts || {}),
+        ...(T[f.type].side ? { side: f.side === "L" ? "L" : "R" } : {}) })) };
+  });
+  return out;
+}
+function load() {
+  try { const s = JSON.parse(localStorage.getItem(KEY)); return valid(s) ? normalise(s) : null; } catch (e) { return null; }
+}
+let saveT = 0;
+function save() {
+  clearTimeout(saveT);
+  saveT = setTimeout(() => {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); setSaved(`Saved · ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`); }
+    catch (e) { setSaved("Not saved — export to keep it"); }
+  }, 250);
+}
+function setSaved(t) { $("#saved").textContent = t; }
+
+// undo — the plan (bays + bay widths), not the view
+const snapStr = () => JSON.stringify({ setOut: state.setOut, bays: state.bays });
+function record(prev) { hist.past.push(prev || snapStr()); if (hist.past.length > 300) hist.past.shift(); hist.future = []; updateUndo(); }
+function restore(str) {
+  const s = JSON.parse(str); state.setOut = s.setOut; state.bays = s.bays;
+  if (ui.fit && !findFit(ui.fit)) ui.fit = null;
+  save(); renderAll();
+}
+function undo() { if (!hist.past.length) return; hist.future.push(snapStr()); restore(hist.past.pop()); updateUndo(); toast("Undone"); }
+function redo() { if (!hist.future.length) return; hist.past.push(snapStr()); restore(hist.future.pop()); updateUndo(); toast("Redone"); }
+function updateUndo() { $("#undo").disabled = !hist.past.length; $("#redo").disabled = !hist.future.length; }
+function change(fn) { const prev = snapStr(); fn(); if (snapStr() !== prev) record(prev); save(); renderAll(); }
+
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+// UNITS
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+function ftin(mm, long) {
+  let q = Math.round(Math.abs(mm) / 25.4 * 4);
+  const ft = Math.floor(q / 48); q -= ft * 48;
+  const inch = Math.floor(q / 4), fr = ["", "¼", "½", "¾"][q % 4];
+  const ins = (inch || !fr ? String(inch) : "") + fr;
+  const sign = mm < 0 ? "−" : "";
+  if (long) return sign + (ft ? (ins === "0" ? `${ft} ft` : `${ft} ft ${ins} in`) : `${ins} in`);
+  return sign + (ft ? (ins === "0" ? `${ft}′` : `${ft}′ ${ins}″`) : `${ins}″`);
+}
+const mmf = (mm) => Math.round(mm).toLocaleString("en-GB");
+function dim(mm, long) {
+  if (state.units === "mm") return mmf(mm);
+  if (state.units === "ftin") return ftin(mm, long);
+  return `${ftin(mm, long)} · ${mmf(mm)}`;
+}
+const both = (mm) => `${mmf(mm)} (${ftin(mm, true)})`;
+
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+// GEOMETRY & CHECKS
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+function geo(id) {
+  const d = BAYDEF[id], so = SETOUT[state.setOut], b = state.bays[id];
+  const W = d.run === "L" ? so.L : so.R, inner = W - 2 * M.side, tunnel = !!d.tunnel;
+  const pack = tunnel ? inner - M.doorShelfW : d.pack ? M.pack : 0;
+  const x0 = M.side + (d.pack === "L" ? pack : 0), x1 = W - M.side - (d.pack === "R" ? pack : 0);
+  const lit = !!b.lit && !tunnel;
+  const depth = tunnel ? M.doorShelf : M.depth - M.door - (lit ? M.litBack : 0) - M.airFront;
+  return { id, W, inner, pack, packSide: d.pack || null, x0, x1, usable: x1 - x0, depth, floor: tunnel ? 0 : M.plinth, top: M.H - M.top, lit, tunnel };
+}
+const lane = (f) => (T[f.type].side ? f.side || "R" : "F");
+const bay = (id = state.sel) => state.bays[id];
+function findFit(fid) { for (const id of ORDER) { const f = state.bays[id].fits.find((x) => x.id === fid); if (f) return { f, id }; } return null; }
+
+// free intervals in f's lane, ignoring f itself; zero-height walls split the run (the tunnel mouth)
+function gaps(id, f, laneKey) {
+  const g = geo(id), L = laneKey || lane(f);
+  const occ = bay(id).fits.filter((o) => o !== f && lane(o) === L).map((o) => [o.z, o.z + o.h]);
+  if (g.tunnel && L === "F") occ.push([M.mouth, M.mouth]);
+  occ.sort((a, b) => a[0] - b[0]);
+  const out = []; let cur = g.floor;
+  for (const [a, b] of occ) { if (a > cur + 0.01) out.push([cur, a]); cur = Math.max(cur, b); }
+  if (g.top > cur + 0.01) out.push([cur, g.top]);
+  return out;
+}
+function zBounds(id, f) {
+  const t = T[f.type], g = geo(id);
+  let lo = t.zmin ?? g.floor, hi = t.zmax ?? Infinity;
+  if (f.type === "loft" && g.tunnel) lo = Math.max(lo, M.mouth);
+  return [lo, hi];
+}
+// nearest z to cand where f (height h) fits in a free space
+function placeNear(id, f, cand, h) {
+  const [lo, hi] = zBounds(id, f);
+  let best = null, bd = Infinity;
+  for (const [a0, b0] of gaps(id, f)) {
+    const a = Math.max(a0, lo), b = Math.min(b0, hi + h);
+    if (b - a < h - 0.01) continue;
+    const z = clamp(cand, a, b - h), d = Math.abs(z - cand);
+    if (d < bd) { bd = d; best = z; }
+  }
+  return best;
+}
+function loftOf(id) { return bay(id).fits.find((f) => f.type === "loft"); }
+function mainTop(id) { const l = loftOf(id), g = geo(id); return l ? l.z : g.top; }
+function autoZ(id, f, h) {
+  const t = T[f.type], g = geo(id), mt = mainTop(id);
+  if (f.type === "loft") return placeNear(id, f, M.loft, h);
+  const [lo, hi] = zBounds(id, f);
+  const gs = gaps(id, f).map(([a, b]) => [Math.max(a, lo), Math.min(b, mt, hi + h)]).filter(([a, b]) => b - a >= h - 0.01);
+  if (!gs.length) {   // nothing below the loft: a shelf may still go in the loft
+    if (f.type === "shelf") return placeNear(id, f, g.top - 300, h);
+    return null;
+  }
+  const p = t.pref ?? "mid";
+  if (p === "bottom") return gs[0][0];
+  if (p === "top") { const gg = gs[gs.length - 1]; return gg[1] - h; }
+  if (p === "mid") {
+    const gg = gs.reduce((m, x) => (x[1] - x[0] > m[1] - m[0] ? x : m));
+    const mid = (gg[0] + gg[1]) / 2 - h / 2, s = state.snap || 1;
+    return clamp(g.floor + Math.round((mid - g.floor) / s) * s, gg[0], gg[1] - h);
+  }
+  let best = null, bd = Infinity;
+  for (const [a, b] of gs) { const z = clamp(p, a, b - h), d = Math.abs(z - p); if (d < bd) { bd = d; best = z; } }
+  return best;
+}
+function largestGap(id, laneKey, belowLoft) {
+  const mt = mainTop(id);
+  return gaps(id, null, laneKey || "F").map(([a, b]) => [a, belowLoft ? Math.min(b, mt) : b]).filter(([a, b]) => b > a)
+    .reduce((m, x) => (x[1] - x[0] > (m ? m[1] - m[0] : 0) ? x : m), null);
+}
+
+function analyse(id) {
+  const g = geo(id), B = bay(id), issues = [], info = {};
+  const add = (lvl, f, msg) => issues.push({ lvl, fit: f ? f.id : null, msg });
+  const F = B.fits.filter((f) => lane(f) === "F").sort((a, b) => a.z - b.z);
+  const loft = loftOf(id), mt = loft ? loft.z : g.top;
+  // bounds and overlaps
+  for (const f of B.fits) if (f.z < g.floor - 0.5 || f.z + f.h > g.top + 0.5) add("err", f, `${fitName(f)} runs outside the cupboard.`);
+  for (const L of ["F", "L", "R"]) {
+    const xs = B.fits.filter((f) => lane(f) === L).sort((a, b) => a.z - b.z);
+    for (let i = 1; i < xs.length; i++) if (xs[i].z < xs[i - 1].z + xs[i - 1].h - 0.5) add("err", xs[i], `${fitName(xs[i])} overlaps ${fitName(xs[i - 1])}.`);
+  }
+  if (g.tunnel) for (const f of B.fits) {
+    if (!T[f.type].tunnelOK) add("err", f, `${fitName(f)} can't go in the tunnel bay: it only takes shelves on the hidden door (10¼ in deep), so the bay stays clear to walk through.`);
+    if (f.z < M.mouth - 0.5 && f.z + f.h > M.mouth + 0.5) add("err", f, `${fitName(f)} crosses the top of the tunnel mouth (${both(M.mouth)}).`);
+  }
+  // free spaces in the main run
+  const gs = []; let cur = g.floor;
+  for (const f of F) { if (f.z > cur + 0.5) gs.push([cur, f.z]); cur = Math.max(cur, f.z + f.h); }
+  if (g.top > cur + 0.5) gs.push([cur, g.top]);
+  // each fitting
+  F.forEach((f, i) => {
+    const t = T[f.type], next = F[i + 1], prev = F[i - 1];
+    const above = (next ? next.z : g.top) - (f.z + f.h), top = f.z + f.h, inLoft = loft && f !== loft && f.z >= loft.z;
+    info[f.id] = { above };
+    if (f.type === "loft") {
+      if (above < 300) add("warn", f, `Only ${dim(above)} clear in the loft — too little to be worth the door.`);
+      if (f.z < 1900) add("info", f, `The loft shelf is low (${dim(f.z)}); everything above it is loft.`);
+    }
+    if (f.type === "shelf" || f.type === "pullShelf") {
+      if (above > 0.5 && above < 150) add("warn", f, `Only ${dim(above)} clear above this ${fitName(f).toLowerCase()} — too tight to use. Folded clothes want 250–350.`);
+      if (above <= 0.5 && next && (next.type === "shelf" || next.type === "pullShelf" || next.type === "loft")) add("warn", f, `Two boards touching — this ${fitName(f).toLowerCase()} has nothing above it.`);
+    }
+    if (t.rail) {
+      const rail = top - HOOK, drop = f.h - HOOK;
+      if (f.type !== "pullDown" && rail > M.reach) add("warn", f, `Rail at ${dim(rail)} is above easy reach (you're 5 ft 9 in) — you'd want a step, or a pull-down rail.`);
+      if (f.type === "shortHang" && drop < 900) add("warn", f, `${dim(drop)} drop is tight for shirts — 900 to 1,000 is usual.`);
+      if (f.type === "longHang" && drop < 1400) add("info", f, `${dim(drop)} drop: fine for suits; long coats and kurtas want 1,400–1,600.`);
+      if (f.type === "pullDown") {
+        if (g.usable < 830 || g.usable > 1150) add("err", f, `A pull-down rail fits bays 830–1,150 wide; this one has ${dim(g.usable)} clear.`);
+        if (top < 1750) add("info", f, `A pull-down rail earns its keep up high — this one tops out at ${dim(top)}.`);
+      }
+      if (prev && SOLID.has(prev.type) && prev.type !== "shelf" && prev.type !== "loft" && f.z - (prev.z + prev.h) < 0.5 && prev.type !== "boots")
+        add("info", f, `Clothes hang straight onto the ${fitName(prev).toLowerCase()} below — fine, but a shelf between keeps hems clear.`);
+    }
+    if (f.type === "carousel") {
+      if (g.usable < 700 || g.depth < 550) add("warn", f, `A carousel needs about 700 × 550 clear; this bay has ${dim(g.usable)} × ${dim(g.depth)}.`);
+      else add("info", f, `Showroom carousels sit in corner units; in this bay its arms can reach about ${dim(Math.floor(g.depth / 2) - 10)} each way.`);
+    }
+    if (DRAWERS.has(f.type) && top > M.drawerTop) add("warn", f, `Top at ${dim(top)} — too high to see into. Keep drawers below about ${dim(M.drawerTop)}.`);
+    if (PULLOUTS.has(f.type) && top > 1700) add("warn", f, `${fitName(f)} tops out at ${dim(top)} — high for a pull-out.`);
+    if (f.type === "laundry" && f.z > g.floor + 250) add("info", f, `Laundry baskets are easiest at the floor.`);
+    if (inLoft && !["shelf", "display", "watch"].includes(f.type)) add("warn", f, `${fitName(f)} is in the loft (over ${dim(loft.z)}) — fine for boxes and spare bedding, awkward for this.`);
+  });
+  // side-panel fittings
+  B.fits.filter((f) => lane(f) !== "F").forEach((s) => {
+    if (g.packSide && s.side === g.packSide) add("err", s, `The folded doors park on this side of ${id} — put the ${fitName(s).toLowerCase()} on the other side.`);
+    const hits = F.filter((o) => SOLID.has(o.type) && o.z < s.z + s.h - 0.5 && o.z + o.h > s.z + 0.5);
+    if (hits.length) add("warn", s, `${fitName(s)} clashes with the ${fitName(hits[0]).toLowerCase()} — side-panel fittings need open space or hanging beside them.`);
+  });
+  if (!loft && !g.tunnel) add("info", null, `No loft in ${id} — the space runs to the top.`);
+  // totals
+  const mainTotal = mt - g.floor;
+  const usedMain = F.filter((f) => f.type !== "loft" && f.z < mt).reduce((s, f) => s + Math.min(f.z + f.h, mt) - f.z, 0);
+  const freeMain = mainTotal - usedMain;
+  const gMain = gs.map(([a, b]) => [a, Math.min(b, mt)]).filter(([a, b]) => b - a > 0.5);
+  const big = gMain.reduce((m, x) => (x[1] - x[0] > (m ? m[1] - m[0] : 0) ? x : m), null);
+  const loftClear = loft ? gs.filter(([a]) => a >= loft.z).reduce((s, [a, b]) => s + b - a, 0) : 0;
+  const order = { err: 0, warn: 1, info: 2 };
+  issues.sort((a, b) => order[a.lvl] - order[b.lvl]);
+  return { g, issues, info, gaps: gs, mainTotal, usedMain, freeMain, big, loftClear, loftZ: loft ? loft.z : null,
+    errs: issues.filter((x) => x.lvl === "err").length, warns: issues.filter((x) => x.lvl === "warn").length };
+}
+
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+// DRAWING — one bay elevation, doors off, seen from the room. SVG user units = mm, y down.
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+const C = { ink: "#1d1b18", thin: "#7a7369", board: "#c8a477", boardEdge: "#7e5d38", carc: "#b8946a", front: "#ebe0cc", front2: "#e0d1b7",
+  brass: "#a7803c", glass: "#d6e4e6", glassEdge: "#7f9aa0", lit: "#fff3d9", back: "#f7f3ec", pack: "#ddd2c0", ember: "#cc6437", red: "#c8392b", amber: "#c98d1a",
+  cloth: ["#4f5e6c", "#e4ddd0", "#8c3a2e", "#3f4a3e", "#c9b596", "#2e333b", "#a29d93", "#6f5944", "#d7cdbd", "#5d4a5a"],
+  shoe: ["#3a2216", "#6e4223", "#1d1916", "#8a5a33"] };
+const Y = (z) => M.H - z;
+const f1 = (v) => n1(v);
+function R(x, z, w, h, a) { return `<rect x="${f1(x)}" y="${f1(Y(z + h))}" width="${f1(Math.max(0, w))}" height="${f1(Math.max(0, h))}" ${a || ""}/>`; }
+function Ln(x1, z1, x2, z2, a) { return `<line x1="${f1(x1)}" y1="${f1(Y(z1))}" x2="${f1(x2)}" y2="${f1(Y(z2))}" ${a || ""}/>`; }
+const NS = `vector-effect="non-scaling-stroke"`;
+const st = (c, w, extra) => `fill="none" stroke="${c}" stroke-width="${w}" ${NS} ${extra || ""}`;
+const fs = (fill, c, w) => `fill="${fill}" stroke="${c}" stroke-width="${w}" ${NS}`;
+function rng(seed) { let s = 0; for (const c of seed) s = (s * 31 + c.charCodeAt(0)) | 0; return () => { s = (s + 0x6D2B79F5) | 0; let t = Math.imul(s ^ (s >>> 15), 1 | s); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+
+function fitX(f, g) {
+  if (!T[f.type].side) return [g.x0, g.x1];
+  const w = 80; return f.side === "L" ? [g.x0, g.x0 + w] : [g.x1 - w, g.x1];
+}
+function drawFit(f, g, o) {   // o: { lw (line weight), clothes }
+  const t = T[f.type], [x0, x1] = fitX(f, g), w = x1 - x0, z = f.z, h = f.h, top = z + h, lw = o.lw, r = rng(f.id);
+  const board = (zz, fill) => R(x0, zz, w, M.board, fs(fill || C.board, C.boardEdge, lw));
+  const pull = (zc, len) => Ln((x0 + x1) / 2 - len / 2, zc, (x0 + x1) / 2 + len / 2, zc, `stroke="${C.brass}" stroke-width="${lw * 2.6}" stroke-linecap="round" ${NS}`);
+  const front = (z0, hh, fill) => R(x0 + 3, z0 + 2, w - 6, hh - 4, fs(fill || C.front, C.ink, lw));
+  let s = "";
+  switch (f.type) {
+    case "loft": case "shelf": s += board(z); break;
+    case "pullShelf":
+      s += board(z) + R(x0 + 4, z + M.board, w - 8, h - M.board - 6, fs("rgba(200,164,119,.18)", C.thin, lw * 0.7)) + pull(z + 50, Math.min(140, w * .25)); break;
+    case "display": case "watch": {
+      s += board(z, f.opts?.glass ? C.glass : C.board);
+      const lit = f.type === "watch" || f.opts?.lit;
+      if (lit) s += R(x0, top - 26, w, 26, `fill="url(#glow)" stroke="none"`) + Ln(x0 + 8, top - 6, x1 - 8, top - 6, `stroke="#f1c46a" stroke-width="${lw * 2}" ${NS}`);
+      const risers = f.type === "display" ? +f.opts?.risers || 0 : 0, base = z + M.board, clearH = h - M.board - 26;
+      for (let k = 0; k < risers; k++) s += R(x0 + 6, base + k * 45, w - 12, 45, fs(k % 2 ? "#e2d2b6" : "#d9c6a5", C.thin, lw * 0.6));
+      if (f.type === "watch") {
+        const n = Math.max(1, Math.floor(w / 220));
+        for (let k = 0; k < n; k++) {
+          const cx = x0 + (k + 0.5) * (w / n), sh = Math.min(clearH - 20, 150);
+          s += R(cx - 70, base, 140, 14, fs("#efe9e0", C.thin, lw * 0.6));
+          s += Ln(cx - 10, base + 14, cx - 10, base + sh, `stroke="${C.brass}" stroke-width="${lw * 2}" ${NS}`) + Ln(cx + 22, base + 14, cx + 22, base + sh * 0.7, `stroke="${C.brass}" stroke-width="${lw * 2}" ${NS}`);
+          s += R(cx - 58, base + sh - 8, 54, 26, fs("#8d8a83", C.ink, lw * 0.6)) + R(cx + 22, base + sh * 0.7 - 6, 50, 22, fs("#8d8a83", C.ink, lw * 0.6));
+        }
+      } else if (o.clothes) {
+        const rows = Math.max(1, risers || 1);
+        for (let k = 0; k < rows; k++) {
+          const zb = base + (risers ? k * 45 + 45 : 0), room = clearH - (risers ? (k + 1) * 45 : 0);
+          if (room < 60) continue;
+          let x = x0 + 30 + (k % 2) * 40;
+          while (x < x1 - 70) {
+            const bw = 44 + Math.floor(r() * 40), bh = Math.min(room - 30, 70 + Math.floor(r() * 90));
+            if (bh < 40) break;
+            s += `<rect x="${f1(x)}" y="${f1(Y(zb + bh))}" width="${bw}" height="${f1(bh)}" rx="${f1(bw * 0.18)}" ${fs("rgba(200,220,224,.75)", C.glassEdge, lw * 0.6)}/>`;
+            s += R(x + bw / 2 - 11, zb + bh, 22, 18, fs(r() < 0.6 ? C.brass : "#2b2622", C.ink, lw * 0.4));
+            x += bw + 26 + Math.floor(r() * 30);
+          }
+        }
+      }
+      break;
+    }
+    case "shortHang": case "longHang": case "pullDown": {
+      const rail = top - HOOK;
+      s += R(x0, z, w, h, `fill="rgba(204,100,55,.045)" stroke="none"`);
+      s += Ln(x0, z, x1, z, st(C.thin, lw * 0.6, `stroke-dasharray="6 5"`));
+      if (o.clothes) {
+        const pitch = f.type === "longHang" ? 58 : 52, n = Math.max(1, Math.floor((w - 40) / pitch));
+        for (let k = 0; k < n; k++) {
+          const cx = x0 + 24 + (k + 0.5) * ((w - 48) / n) + (r() - 0.5) * 10;
+          const drop = h - HOOK, L = drop * (f.type === "longHang" ? 0.62 + r() * 0.36 : 0.72 + r() * 0.24), gw = 18 + r() * 16;
+          const col = C.cloth[Math.floor(r() * C.cloth.length)];
+          const zt = rail - 30;
+          s += `<path d="M ${f1(cx - 4)} ${f1(Y(zt))} L ${f1(cx + 4)} ${f1(Y(zt))} L ${f1(cx + gw / 2)} ${f1(Y(zt - 60))} L ${f1(cx + gw / 2 - 2)} ${f1(Y(zt - L))} Q ${f1(cx)} ${f1(Y(zt - L - 14))} ${f1(cx - gw / 2 + 2)} ${f1(Y(zt - L))} L ${f1(cx - gw / 2)} ${f1(Y(zt - 60))} Z" ${fs(col, "rgba(29,27,24,.55)", lw * 0.5)}/>`;
+          s += `<path d="M ${f1(cx)} ${f1(Y(rail - 30))} L ${f1(cx)} ${f1(Y(rail - 6))} q 0 -16 9 -16" ${st("#5b4632", lw * 0.8)}/>`;
+        }
+      }
+      if (f.type === "pullDown") {
+        s += `<path d="M ${f1(x0 + 6)} ${f1(Y(top - 20))} Q ${f1(x0 + 6)} ${f1(Y(rail - 300))} ${f1(x0 + 120)} ${f1(Y(rail - 420))}" ${st(C.ink, lw * 0.8, `stroke-dasharray="8 6"`)}/>`;
+        s += `<path d="M ${f1(x1 - 6)} ${f1(Y(top - 20))} Q ${f1(x1 - 6)} ${f1(Y(rail - 300))} ${f1(x1 - 120)} ${f1(Y(rail - 420))}" ${st(C.ink, lw * 0.8, `stroke-dasharray="8 6"`)}/>`;
+        s += R(x0, top - 60, 26, 60, fs("#8b8780", C.ink, lw * 0.6)) + R(x1 - 26, top - 60, 26, 60, fs("#8b8780", C.ink, lw * 0.6));
+      }
+      if (f.opts?.led) s += Ln(x0 + 10, rail + 14, x1 - 10, rail + 14, `stroke="#f1c46a" stroke-width="${lw * 2}" ${NS}`);
+      s += Ln(x0, rail, x1, rail, `stroke="${C.brass}" stroke-width="${lw * 3.4}" stroke-linecap="round" ${NS}`);
+      s += R(x0, rail - 18, 10, 36, fs(C.brass, C.ink, lw * 0.5)) + R(x1 - 10, rail - 18, 10, 36, fs(C.brass, C.ink, lw * 0.5));
+      break;
+    }
+    case "carousel": {
+      const cx = (x0 + x1) / 2, hub = z + h * 0.62, rx = Math.min(w / 2 - 20, 300);
+      s += R(cx - 9, z, 18, h, fs("#57534d", C.ink, lw * 0.6));
+      s += `<ellipse cx="${f1(cx)}" cy="${f1(Y(hub))}" rx="${f1(rx)}" ry="${f1(rx * 0.16)}" ${st(C.thin, lw * 0.6, `stroke-dasharray="5 4"`)}/>`;
+      for (let k = 0; k < 10; k++) {
+        const a = (k / 10) * Math.PI * 2, ex = cx + Math.cos(a) * rx, ey = Y(hub) + Math.sin(a) * rx * 0.16;
+        s += `<line x1="${f1(cx)}" y1="${f1(Y(hub))}" x2="${f1(ex)}" y2="${f1(ey)}" ${st("#57534d", lw * 1.3)}/>`;
+      }
+      s += R(cx - 26, hub - 22, 52, 44, fs("#6b6760", C.ink, lw * 0.6));
+      if (o.clothes) s += `<path d="M ${f1(cx + 40)} ${f1(Y(hub - 30))} q 70 10 80 140 l -150 0 q 0 -120 70 -140 Z" ${fs("#b79a72", C.ink, lw * 0.5)}/>`;
+      break;
+    }
+    case "drawer": case "jewel": case "ironing": {
+      s += front(z, h, f.type === "drawer" && drawerSize(h) === "large" ? C.front2 : C.front);
+      s += pull(z + h / 2, Math.min(150, w * 0.26));
+      if (f.type === "jewel") {
+        if (f.opts?.glassLid) s += R(x0 + 30, z + h - 26, w - 60, 10, fs("rgba(190,214,218,.8)", C.glassEdge, lw * 0.6));
+        if (f.opts?.lock) s += `<circle cx="${f1((x0 + x1) / 2)}" cy="${f1(Y(z + h * 0.24))}" r="7" ${fs("#2b2622", C.ink, lw * 0.4)}/>`;
+      }
+      if (f.type === "drawer" && f.opts?.lock) s += `<circle cx="${f1((x0 + x1) / 2)}" cy="${f1(Y(z + h * 0.2))}" r="7" ${fs("#2b2622", C.ink, lw * 0.4)}/>`;
+      if (f.type === "ironing") s += `<path d="M ${f1(x0 + 40)} ${f1(Y(z + h * 0.28))} l 120 0 l 30 -10" ${st(C.thin, lw * 0.8)}/>`;
+      break;
+    }
+    case "trouser": {
+      const bar = top - (f.opts?.glassTray ? 80 : 22);
+      if (f.opts?.glassTray) s += R(x0 + 4, top - 70, w - 8, 66, fs("rgba(200,220,224,.65)", C.glassEdge, lw * 0.7));
+      s += R(x0 + 4, bar - 10, w - 8, 20, fs("#8f8a82", C.ink, lw * 0.7));
+      if (o.clothes) {
+        const n = Math.max(3, Math.floor((w - 60) / 70));
+        for (let k = 0; k < n; k++) {
+          const cx = x0 + 40 + (k + 0.5) * ((w - 80) / n), L = (bar - z) * (0.84 + r() * 0.12);
+          s += R(cx - 13, bar - L, 26, L, fs(C.cloth[Math.floor(r() * C.cloth.length)], "rgba(29,27,24,.5)", lw * 0.5));
+        }
+      } else for (let k = 0; k < 5; k++) s += Ln(x0 + 60 + k * (w - 120) / 4, bar, x0 + 60 + k * (w - 120) / 4, z + 40, st(C.brass, lw * 1.6));
+      s += R(x0 + 4, z, 22, h - 10, fs("#a39d93", C.ink, lw * 0.5));
+      break;
+    }
+    case "laundry": {
+      s += front(z, h);
+      const bins = +f.opts?.bins || 1;
+      for (let k = 0; k < bins; k++) {
+        const bx0 = x0 + 30 + k * ((w - 60) / bins) + (k ? 10 : 0), bx1 = x0 + 30 + (k + 1) * ((w - 60) / bins) - (k < bins - 1 ? 10 : 0);
+        s += R(bx0, z + 30, bx1 - bx0, h - 110, fs("rgba(176,146,104,.25)", C.thin, lw * 0.6));
+        for (let yy = z + 60; yy < z + h - 90; yy += 40) s += Ln(bx0 + 8, yy, bx1 - 8, yy, st("rgba(120,96,64,.45)", lw * 0.5));
+      }
+      s += pull(top - 40, Math.min(150, w * 0.26));
+      break;
+    }
+    case "shoeTilt": case "shoeRack": {
+      const p = t.pitch, n = Math.max(1, Math.round(h / p));
+      for (let k = 0; k < n; k++) {
+        const zb = z + k * p;
+        if (f.type === "shoeTilt") {
+          s += `<path d="M ${f1(x0 + 4)} ${f1(Y(zb + 12))} L ${f1(x1 - 4)} ${f1(Y(zb + 12))} L ${f1(x1 - 4)} ${f1(Y(zb + 58))} L ${f1(x0 + 4)} ${f1(Y(zb + 58))} Z" ${fs(C.front, C.ink, lw)}/>`;
+          s += Ln(x0 + 4, zb + 22, x1 - 4, zb + 22, `stroke="${C.brass}" stroke-width="${lw * 2}" ${NS}`);
+          if (o.clothes && r() < 0.75) {
+            const pairs = Math.max(1, Math.floor((w - 40) / 240));
+            for (let j = 0; j < pairs; j++) {
+              const cx = x0 + 30 + (j + 0.5) * ((w - 60) / pairs), col = C.shoe[Math.floor(r() * C.shoe.length)];
+              for (const sx of [-48, 48]) s += `<path d="M ${f1(cx + sx - 40)} ${f1(Y(zb + 58))} q 0 -70 30 -86 q 30 -10 50 20 l 4 66 Z" ${fs(col, C.ink, lw * 0.5)}/>`;
+            }
+          }
+        } else {
+          s += `<path d="M ${f1(x0 + 4)} ${f1(Y(zb + 20))} L ${f1(x1 - 4)} ${f1(Y(zb + 20))} L ${f1(x1 - 4)} ${f1(Y(zb + 38))} L ${f1(x0 + 4)} ${f1(Y(zb + 38))} Z" ${fs(C.board, C.boardEdge, lw)}/>`;
+          s += Ln(x0 + 4, zb + 62, x1 - 4, zb + 62, `stroke="#8f8a82" stroke-width="${lw * 1.8}" ${NS}`);
+          if (o.clothes && r() < 0.75) {
+            const pairs = Math.max(1, Math.floor((w - 40) / 240));
+            for (let j = 0; j < pairs; j++) {
+              const cx = x0 + 30 + (j + 0.5) * ((w - 60) / pairs), col = C.shoe[Math.floor(r() * C.shoe.length)];
+              for (const sx of [-48, 48]) s += `<path d="M ${f1(cx + sx - 40)} ${f1(Y(zb + 38))} q 0 -64 30 -80 q 30 -8 50 18 l 4 62 Z" ${fs(col, C.ink, lw * 0.5)}/>`;
+            }
+          }
+        }
+      }
+      break;
+    }
+    case "boots":
+      s += board(z);
+      if (o.clothes) for (let k = 0; k < Math.max(1, Math.floor(w / 190)); k++) {
+        const bx = x0 + 50 + k * 190, bh = Math.min(h - 70, 300 + r() * 80), col = C.shoe[Math.floor(r() * C.shoe.length)];
+        s += `<path d="M ${f1(bx)} ${f1(Y(z + M.board))} l 0 ${f1(-bh)} l 60 0 l 0 ${f1(bh - 70)} q 50 6 70 50 l 0 20 Z" ${fs(col, C.ink, lw * 0.5)}/>`;
+      }
+      break;
+    case "tieRack":
+      s += R(x0, z, w, h, fs("#d9ccb6", C.ink, lw * 0.8));
+      for (let yy = z + 40; yy < top - 20; yy += 32) s += Ln(x0 + 12, yy, x1 - 12, yy, st(C.brass, lw * 1.3));
+      if (o.clothes) for (let k = 0; k < 4; k++) s += R(x0 + 14 + k * 14, z + 30 + r() * 60, 8, h * 0.62, fs(C.cloth[(k * 3 + 2) % C.cloth.length], "none", 0));
+      break;
+    case "valet":
+      s += R(x0, z, w, h, fs("#d9ccb6", C.ink, lw * 0.8)) + Ln(x0 + 10, z + h / 2, x1 + 70, z + h / 2, `stroke="${C.brass}" stroke-width="${lw * 2.4}" stroke-linecap="round" ${NS}`);
+      break;
+    case "mirrorPull":
+      s += R(x0, z, w, h, fs("#dde6e8", C.ink, lw * 0.8));
+      for (let k = 0; k < 3; k++) s += Ln(x0 + 10, z + h * (0.3 + k * 0.18), x1 - 10, z + h * (0.42 + k * 0.18), st("#ffffff", lw * 1.2));
+      break;
+    case "socket":
+      s += R(x0 + 4, z, w - 8, h, fs("#f6f3ee", C.ink, lw * 0.8)) + `<circle cx="${f1((x0 + x1) / 2 - 14)}" cy="${f1(Y(z + h / 2))}" r="7" fill="${C.ink}"/><circle cx="${f1((x0 + x1) / 2 + 14)}" cy="${f1(Y(z + h / 2))}" r="7" fill="${C.ink}"/>`;
+      break;
+  }
+  return s;
+}
+
+function drawCarcase(g, B, o) {
+  const lw = o.lw; let s = "";
+  s += R(g.x0 - (g.packSide === "L" ? g.pack : 0), g.floor, g.inner, g.top - g.floor, g.lit ? `fill="url(#litback)" stroke="none"` : `fill="${C.back}" stroke="none"`);
+  if (g.tunnel) {   // the hidden door, its shelves on its face, the tunnel behind
+    s += R(g.x0, 0, g.usable, M.mouth - 10, fs("#d9c8ab", C.ink, lw * 0.8));
+    s += R(g.x0 + 8, 8, g.usable - 16, M.mouth - 26, fs("none", C.thin, lw * 0.5));
+    s += R(g.x1, 0, g.pack, M.mouth, `fill="url(#hatchPack)" stroke="${C.thin}" stroke-width="${lw * 0.6}" ${NS}`);
+  }
+  if (g.packSide && !g.tunnel) {
+    const px = g.packSide === "L" ? M.side : g.W - M.side - g.pack;
+    s += R(px, g.floor, g.pack, g.top - g.floor, `fill="url(#hatchPack)" stroke="${C.thin}" stroke-width="${lw * 0.6}" ${NS}`);
+  }
+  if (g.tunnel && g.packSide === "R") {
+    s += R(g.x1, M.mouth, g.pack, g.top - M.mouth, `fill="url(#hatchPack)" stroke="${C.thin}" stroke-width="${lw * 0.6}" ${NS}`);
+  }
+  // sides, top, plinth
+  s += R(0, 0, M.side, M.H, fs(C.carc, C.ink, lw)) + R(g.W - M.side, 0, M.side, M.H, fs(C.carc, C.ink, lw));
+  s += R(M.side, g.top, g.inner, M.top, fs(C.carc, C.ink, lw));
+  if (!g.tunnel) s += R(M.side, 0, g.inner, M.plinth, fs("#3a332c", C.ink, lw)) + R(M.side, M.plinth - 4, g.inner, 4, fs(C.carc, C.ink, lw * 0.5));
+  s += R(0, 0, g.W, M.H, st(C.ink, lw * 1.4));
+  return s;
+}
+
+const DEFS = `<defs>
+  <linearGradient id="litback" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff7e6"/><stop offset=".5" stop-color="#fbf0db"/><stop offset="1" stop-color="#f6ead2"/></linearGradient>
+  <linearGradient id="glow" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd98a" stop-opacity=".55"/><stop offset="1" stop-color="#ffd98a" stop-opacity="0"/></linearGradient>
+  <pattern id="hatchPack" patternUnits="userSpaceOnUse" width="40" height="40" patternTransform="rotate(45)"><rect width="40" height="40" fill="#e6dccb"/><line x1="0" y1="0" x2="0" y2="40" stroke="#b9ab94" stroke-width="10"/></pattern>
+  <pattern id="hatchSel" patternUnits="userSpaceOnUse" width="30" height="30" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="30" stroke="#cc6437" stroke-width="5" stroke-opacity=".25"/></pattern>
+</defs>`;
+
+// the small elevations in the overview strip
+function thumbSVG(id) {
+  const g = geo(id), B = bay(id);
+  let s = drawCarcase(g, B, { lw: 0.6 });
+  B.fits.slice().sort((a, b) => a.z - b.z).forEach((f) => (s += drawFit(f, g, { lw: 0.5, clothes: state.clothes })));
+  return `<svg viewBox="-20 ${Y(M.H) - 20} ${n1(g.W + 40)} ${M.H + 40}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${s}</svg>`;
+}
+
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+// RENDER
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+let K = 0.2;   // px per mm on the stage
+function renderAll() { renderOverview(); renderStage(); renderSide(); syncControls(); }
+
+function renderOverview() {
+  const ov = $("#overview");
+  const so = SETOUT[state.setOut];
+  // key plan, drawn as AST-DR-023: mirror wall at the top, the bedroom wall at the bottom
+  const W = 2819, D = 3759, d = M.depth, Lb = so.L, Rb = 3759 / 4;
+  let kp = `<rect x="0" y="0" width="${W}" height="${D}" fill="none" stroke="#6c6963" stroke-width="60"/>`;
+  kp += `<rect x="${W}" y="0" width="900" height="914" fill="#1a1c1c" stroke="#3a3e3e" stroke-width="30" stroke-dasharray="80 60"/>`;
+  kp += `<rect x="${(W - 1067) / 2}" y="30" width="1067" height="90" fill="#6c6963"/>`;
+  const leftEnd = state.setOut === "model" ? D - 762 : 2845;
+  kp += `<rect x="-60" y="${leftEnd}" width="60" height="762" fill="#0b0b0b"/><rect x="${W - 737 - 762}" y="${D}" width="762" height="60" fill="#0b0b0b"/>`;
+  SEEN.L.forEach((id) => {   // L3 at the mirror (top), L1 at the bathroom door
+    const k = BAYDEF[id].n, y1 = leftEnd - (k - 1) * Lb, y0 = y1 - Lb, a = analyse(id);
+    kp += `<g class="bayk" data-bay="${id}"><rect x="0" y="${n1(y0 + (state.setOut === "model" ? 0 : 0))}" width="${d}" height="${n1(Lb)}" fill="${id === state.sel ? "#cc6437" : "#2c2f2f"}" stroke="#0b0b0b" stroke-width="30"/>
+      <text x="${d / 2}" y="${n1(y0 + Lb / 2 + 90)}" font-size="260" text-anchor="middle" fill="${id === state.sel ? "#1a0d06" : "#edebe7"}" font-family="Menlo, monospace">${id}</text></g>`;
+  });
+  ["R1", "R2", "R3", "R4"].forEach((id) => {   // R4 at the mirror (top), R1 at the bedroom wall
+    const k = BAYDEF[id].n, y0 = D - k * Rb;
+    kp += `<g class="bayk" data-bay="${id}"><rect x="${W - d}" y="${n1(y0)}" width="${d}" height="${n1(Rb)}" fill="${id === state.sel ? "#cc6437" : id === "R4" ? "#1f2121" : "#2c2f2f"}" stroke="#0b0b0b" stroke-width="30"/>
+      <text x="${W - d / 2}" y="${n1(y0 + Rb / 2 + 90)}" font-size="260" text-anchor="middle" fill="${id === state.sel ? "#1a0d06" : "#edebe7"}" font-family="Menlo, monospace">${id}</text></g>`;
+  });
+  kp += `<text x="${W / 2}" y="420" font-size="200" text-anchor="middle" fill="#9a968e" font-family="Menlo, monospace">MIRROR</text>`;
+  kp += `<text x="${W / 2}" y="${D - 160}" font-size="190" text-anchor="middle" fill="#6c6963" font-family="Menlo, monospace">BEDROOM ↓</text>`;
+  kp += `<text x="${W + 450}" y="520" font-size="170" text-anchor="middle" fill="#6c6963" font-family="Menlo, monospace">TUNNEL</text>`;
+  const keyplan = `<div class="keyplan"><h3 class="kick" style="margin:0">The dressing room</h3><svg viewBox="-120 -120 ${W + 1100} ${D + 260}">${kp}</svg></div>`;
+
+  const thumb = (id) => {
+    const a = analyse(id), B = bay(id), g = a.g;
+    const flag = a.errs ? `<span class="flag err" title="${a.errs} problem(s)">${a.errs}</span>` : a.warns ? `<span class="flag warn" title="${a.warns} to look at">${a.warns}</span>` : `<span class="flag okk">✓</span>`;
+    const fr = g.tunnel ? "shelves on the hidden door" : `${ftin(a.freeMain)} height left`;
+    return `<button class="thumb${id === state.sel ? " sel" : ""}${g.tunnel ? " tunnel" : ""}" data-bay="${id}" title="${esc(BAYDEF[id].where)}">
+      ${thumbSVG(id)}<span><span class="id">${id}${flag}</span><span class="lb${B.label ? "" : " none"}">${esc(B.label || (g.tunnel ? "Tunnel bay" : "No label"))}</span><span class="fr">${fr}</span></span></button>`;
+  };
+  ov.innerHTML = keyplan +
+    `<div class="run"><h3>Left wall · as you face it, L1 by the bathroom door</h3>${SEEN.L.map(thumb).join("")}</div>` +
+    `<div class="run"><h3>Right wall · as you face it, R4 by the mirror</h3>${SEEN.R.map(thumb).join("")}</div>`;
+}
+
+function renderStage() {
+  const id = state.sel, B = bay(id), a = analyse(id), g = a.g, svg = $("#svg"), box = $("#stage");
+  renderHead(a);                       // first, so the box below it has its final height
+  svg.style.height = "0px";            // let the box size itself, then measure it
+  const cw = box.clientWidth || 800, ch = box.clientHeight || 600;
+  // fit the bay to the box, but never smaller than 0.17 px/mm: below that a 22 shelf is a hairline (the box scrolls instead)
+  K = Math.max(0.17, Math.min((ch - 80) / M.ceil, (cw - 470) / g.W));
+  const px = (p) => p / K, fsz = (p) => n1(p / K);
+  const ML = px(210), MR = px(250), MT = px(30), MB = px(50);
+  svg.setAttribute("viewBox", `${n1(-ML)} ${n1(Y(M.ceil) - MT)} ${n1(g.W + ML + MR)} ${n1(M.ceil + MT + MB)}`);
+  svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+  svg.style.height = Math.max(ch, Math.ceil(M.ceil * K + 80)) + "px";
+  const lw = 1, sel = ui.fit && B.fits.find((f) => f.id === ui.fit);
+  const bad = {}; a.issues.forEach((x) => { if (x.fit && (x.lvl === "err" || (x.lvl === "warn" && bad[x.fit] !== "err"))) bad[x.fit] = x.lvl; });
+  const T_ = (x, z, txt, size, attrs) => `<text x="${f1(x)}" y="${f1(Y(z))}" font-size="${fsz(size)}" ${attrs || ""}>${txt}</text>`;
+  let s = "";
+  // ceiling and floor
+  s += Ln(-px(150), M.ceil, g.W + px(40), M.ceil, st("#9b948a", 1, `stroke-dasharray="7 5"`));
+  s += T_(g.W + px(8), M.ceil + px(4), `CEILING ${dim(M.ceil)}`, 9.5, `fill="#8a8379" class="m" dominant-baseline="auto"`);
+  s += Ln(-px(150), 0, g.W + px(40), 0, `stroke="${C.ink}" stroke-width="2.2" ${NS}`);
+  s += drawCarcase(g, B, { lw });
+  // free spaces
+  a.gaps.forEach(([ga, gb]) => {
+    const hh = gb - ga; if (hh < 2) return;
+    s += R(g.x0 + 6, ga + 4, g.usable - 12, Math.max(0, hh - 8), `fill="none" stroke="#a39b8f" stroke-width="1" stroke-dasharray="4 4" ${NS} rx="${px(4)}"`);
+    if (hh * K >= 26) {
+      const inLoft = a.loftZ != null && ga >= a.loftZ;
+      s += T_((g.x0 + g.x1) / 2, (ga + gb) / 2 + px(5), `${inLoft ? "LOFT · " : ""}FREE ${dim(hh)}`, 10.5, `text-anchor="middle" fill="#8a8379" class="m" letter-spacing="0.02em"`);
+      if (inLoft && hh * K >= 48) s += T_((g.x0 + g.x1) / 2, (ga + gb) / 2 - px(10), `step stool to reach`, 9.5, `text-anchor="middle" fill="#a39b8f"`);
+    }
+  });
+  // fittings
+  const fits = B.fits.slice().sort((p, q) => (lane(p) === "F") - (lane(q) === "F") || p.z - q.z).reverse();
+  fits.forEach((f) => {
+    const [x0, x1] = fitX(f, g), minH = px(12), hz = Math.max(f.h, minH), hzz = f.z + f.h / 2 - hz / 2;
+    const flag = bad[f.id];
+    s += `<g class="fit" data-fit="${f.id}">${drawFit(f, g, { lw, clothes: state.clothes })}`;
+    if (flag) s += R(x0, f.z, x1 - x0, f.h, `fill="${flag === "err" ? "rgba(200,57,43,.12)" : "rgba(201,141,26,.10)"}" stroke="${flag === "err" ? C.red : C.amber}" stroke-width="1.6" ${NS} stroke-dasharray="${flag === "err" ? "none" : "6 3"}"`);
+    s += R(x0, hzz, x1 - x0, hz, `class="hit" fill="transparent" stroke="transparent" stroke-width="2" ${NS}`);
+    s += `</g>`;
+  });
+  // the selection, with its resize tabs
+  if (sel) {
+    const [x0, x1] = fitX(sel, g), t = T[sel.type];
+    s += R(x0 - px(3), sel.z - px(3), x1 - x0 + px(6), sel.h + px(6), `fill="url(#hatchSel)" stroke="${C.ember}" stroke-width="2" ${NS} pointer-events="none"`);
+    if (!t.fixed) {
+      // tabs straddle the edges; on a short fitting they sit outside it, so its body is still there to grab
+      const cx = (x0 + x1) / 2, tw = Math.min(px(48), (x1 - x0) * 0.8), th = px(9), out = sel.h * K < 40 ? th / 2 + px(2) : 0;
+      const tab = (z, which) => `<g class="hd" data-fit="${sel.id}" data-h="${which}">${R(cx - tw / 2 - px(6), z - th / 2 - px(3), tw + px(12), th + px(6), `fill="transparent"`)}${R(cx - tw / 2, z - th / 2, tw, th, `fill="${C.ember}" stroke="#fff" stroke-width="1.2" ${NS} rx="${f1(px(3))}"`)}</g>`;
+      s += tab(sel.z + sel.h + out, "top") + tab(sel.z - out, "bottom");
+    }
+  }
+  // left: the run of heights, bottom to top, and the overall levels
+  const F = B.fits.filter((f) => lane(f) === "F").sort((p, q) => p.z - q.z);
+  const segs = []; let cur = 0;
+  if (g.floor > 0) { segs.push([0, g.floor, "plinth"]); cur = g.floor; }
+  F.forEach((f) => { if (f.z > cur + 0.5) segs.push([cur, f.z, "gap"]); segs.push([f.z, f.z + f.h, f.id]); cur = f.z + f.h; });
+  if (g.top > cur + 0.5) segs.push([cur, g.top, "gap"]);
+  segs.push([g.top, M.H, "top"]);
+  const cx1 = -px(16);
+  s += Ln(cx1, 0, cx1, M.H, st(C.ink, 0.8));
+  segs.forEach(([za, zb, kind]) => {
+    s += Ln(cx1 - px(4), za, cx1 + px(4), za, st(C.ink, 0.9)) + Ln(cx1 - px(4), zb, cx1 + px(4), zb, st(C.ink, 0.9));
+    const hh = zb - za;
+    if (hh * K >= 13) s += T_(cx1 - px(7), (za + zb) / 2 - px(3.5), dim(hh), 10, `text-anchor="end" fill="${kind === "gap" ? "#8a8379" : C.ink}" class="m"`);
+  });
+  const cx2 = -px(150), lz = a.loftZ;
+  const lvls = lz != null ? [0, lz, M.H] : [0, M.H];
+  s += Ln(cx2, 0, cx2, M.H, st(C.ink, 0.8));
+  lvls.forEach((z) => (s += Ln(cx2 - px(4), z, cx2 + px(4), z, st(C.ink, 0.9))));
+  const vtxt = (x, z, t, size, fill) => `<text transform="translate(${f1(x)} ${f1(Y(z))}) rotate(-90)" font-size="${fsz(size)}" text-anchor="middle" fill="${fill || C.ink}" class="m">${t}</text>`;
+  if (lz != null) {
+    s += vtxt(cx2 - px(7), lz / 2, `${dim(lz)} FLOOR TO LOFT SHELF`, 10.5);
+    if ((M.H - lz) * K > 60) s += vtxt(cx2 - px(7), (lz + M.H) / 2, `${dim(M.H - lz)} LOFT`, 10.5);
+  } else s += vtxt(cx2 - px(7), M.H / 2, `${dim(M.H)} OVERALL`, 10.5);
+  s += vtxt(cx2 - px(24), M.H / 2, `${dim(M.H)} OVERALL — AST-DR-048`, 9.5, "#8a8379");
+  // bottom: widths
+  const wy1 = -px(18), wy2 = -px(36);
+  const hdim = (xa, xb, z, label) => Ln(xa, z, xb, z, st(C.ink, 0.8)) + Ln(xa, z - px(4), xa, z + px(4), st(C.ink, 0.9)) + Ln(xb, z - px(4), xb, z + px(4), st(C.ink, 0.9)) +
+    T_((xa + xb) / 2, z + px(4), label, 10, `text-anchor="middle" fill="${C.ink}" class="m"`);
+  s += hdim(0, g.W, wy1, `${dim(g.W)} BAY`);
+  s += hdim(g.x0, g.x1, wy2, g.pack ? `${dim(g.usable)} CLEAR${g.tunnel ? " — DOOR SHELVES" : " OF THE DOORS"}` : `${dim(g.inner)} INSIDE`);
+  // tunnel and pack labels
+  if (g.tunnel) {
+    s += vtxt(g.x1 + g.pack / 2 + px(4), M.mouth / 2, "FIXED UPRIGHT · FOLDED DOORS", 9, "#7a7369");
+    s += T_((g.x0 + g.x1) / 2, M.mouth + px(6), `TUNNEL MOUTH ${dim(M.mouth)}`, 9.5, `text-anchor="middle" fill="#7a7369" class="m"`);
+    s += Ln(g.x0, M.mouth, g.x1 + g.pack, M.mouth, st(C.thin, 1, `stroke-dasharray="3 3"`));
+  } else if (g.pack) {
+    const px0 = g.packSide === "L" ? M.side : g.W - M.side - g.pack;
+    s += vtxt(px0 + g.pack / 2 + px(4), (g.floor + g.top) / 2, "FOLDED DOORS PARK HERE · AST-DR-026", 9, "#7a7369");
+  }
+  // right: callouts, de-overlapped
+  const items = B.fits.map((f) => {
+    const [x0, x1] = fitX(f, g), zc = f.z + f.h / 2;
+    return { f, ax: x1, ay: Y(zc), y: Y(zc) };
+  }).sort((p, q) => p.ay - q.ay);
+  const gap = px(26), yTop = Y(M.H) + px(6), yBot = Y(0) - px(4);
+  items.forEach((it, i) => { it.y = Math.max(it.ay, i ? items[i - 1].y + gap : yTop); });
+  for (let i = items.length - 1; i >= 0; i--) { const lim = i === items.length - 1 ? yBot : items[i + 1].y - gap; if (items[i].y > lim) items[i].y = lim; }
+  const lx = g.W + px(30);
+  items.forEach(({ f, ax, ay, y }) => {
+    const isSel = f.id === ui.fit, flag = bad[f.id], col = isSel ? C.ember : flag === "err" ? C.red : C.ink;
+    s += `<path d="M ${f1(ax)} ${f1(ay)} L ${f1(g.W + px(12))} ${f1(ay)} L ${f1(lx - px(4))} ${f1(y)}" ${st(isSel ? C.ember : "#9b948a", isSel ? 1.4 : 0.8)}/>`;
+    s += `<circle cx="${f1(ax)}" cy="${f1(ay)}" r="${f1(px(2.4))}" fill="${isSel ? C.ember : C.ink}"/>`;
+    const name = (f.label ? `${esc(f.label)}` : esc(fitName(f))).toUpperCase();
+    s += `<g class="fit" data-fit="${f.id}"><text x="${f1(lx)}" y="${f1(y - px(1))}" font-size="${fsz(11.5)}" fill="${col}" class="m" letter-spacing="0.01em">${flag ? (flag === "err" ? "● " : "▲ ") : ""}${name}</text>`;
+    s += `<text x="${f1(lx)}" y="${f1(y + px(12))}" font-size="${fsz(10.5)}" fill="#7a7369">${esc(spec(f, a))}</text>`;
+    s += `<rect x="${f1(lx - px(4))}" y="${f1(y - px(13))}" width="${f1(px(240))}" height="${f1(px(30))}" fill="transparent"/></g>`;
+  });
+  svg.innerHTML = s;
+}
+
+function spec(f, a) {
+  const t = T[f.type], top = f.z + f.h, lab = f.label ? fitName(f) + " · " : "";
+  const at = `${dim(f.z)} up`;
+  switch (f.type) {
+    case "loft": return `${lab}loft above it: ${dim(a.loftClear)} clear`;
+    case "shelf": case "pullShelf": return `${lab}${dim(f.z)} up · ${dim(a.info[f.id]?.above ?? 0)} clear above`;
+    case "display": return `${lab}${dim(f.h - M.board)} clear${f.opts.lit ? " · lit" : ""}${+f.opts.risers ? ` · ${f.opts.risers} risers` : ""}`;
+    case "watch": return `${lab}${dim(f.h)} · lit shelf`;
+    case "shortHang": case "longHang": case "pullDown": return `${lab}rail ${dim(top - HOOK)} · ${dim(f.h - HOOK)} drop`;
+    case "carousel": return `${lab}${dim(f.h)} tall · ${at}`;
+    case "drawer": return `${lab}${dim(f.h)} front · ${at}`;
+    case "jewel": return `${lab}${dim(f.h)} front${f.opts.glassLid ? " · glass lid" : ""}${f.opts.lock ? " · lock" : ""}`;
+    case "trouser": return `${lab}${dim(f.h)}${f.opts.glassTray ? " · glass tray" : ""} · ${at}`;
+    case "laundry": return `${lab}${f.opts.bins} bin${f.opts.bins > 1 ? "s" : ""} · ${dim(f.h)}`;
+    case "shoeTilt": case "shoeRack": { const n = Math.round(f.h / t.pitch); return `${lab}${n} ${f.type === "shoeTilt" ? "tray" : "tier"}${n > 1 ? "s" : ""} · ${dim(t.pitch)} apart`; }
+    case "boots": return `${lab}${dim(f.h - M.board)} clear`;
+    default: return `${lab}${f.side === "L" ? "left" : "right"} side · ${dim(f.h)} · ${at}`;
+  }
+}
+
+function renderHead(a) {
+  const id = state.sel, B = bay(id), g = a.g, d = BAYDEF[id];
+  const pct = clamp(a.usedMain / Math.max(1, a.mainTotal), 0, 1);
+  const left = g.tunnel ? "" : `<div class="meter">
+      <div class="row"><span>Height left below the loft</span><b>${dim(a.freeMain)}</b></div>
+      <div class="bar"><i style="width:${(pct * 100).toFixed(1)}%"></i></div>
+      <div class="row"><span>of ${dim(a.mainTotal)} · biggest space ${a.big ? dim(a.big[1] - a.big[0]) : "none"}</span><span>${a.loftZ != null ? `loft ${dim(a.loftClear)}` : "no loft"}</span></div>
+    </div>`;
+  const head = $("#stagehead");
+  if (!$("#bayTitle")) head.innerHTML = `<div><h2><span class="bid"></span><input id="bayTitle" maxlength="60" spellcheck="false" autocomplete="off"></h2><div class="where"></div><div class="dims"></div></div><div class="meterbox"></div>`;
+  const ti = $("#bayTitle");
+  $(".bid", head).textContent = id;
+  if (document.activeElement !== ti || ti.dataset.bay !== id) ti.value = B.label;
+  ti.dataset.bay = id;
+  ti.placeholder = g.tunnel ? "The tunnel bay — name it" : "Name this cupboard…";
+  $(".where", head).textContent = d.where;
+  $(".dims", head).innerHTML = `Bay <b>${dim(g.W)}</b> wide · <b>${dim(M.H)}</b> high · <b>${dim(M.depth)}</b> deep &nbsp;—&nbsp; inside <b>${dim(g.pack ? g.usable : g.inner)}</b> × <b>${dim(g.depth)}</b> deep${g.tunnel ? " (door shelves)" : g.lit ? " (lit back)" : ""}`;
+  $(".meterbox", head).innerHTML = left;
+}
+
+// ── side panel ──
+function palIcon(type) {
+  const g = { x0: 2, x1: 32 };
+  const ic = {
+    shortHang: `<line x1="3" y1="5" x2="31" y2="5" stroke="#c9a15a" stroke-width="2"/>${[7, 12, 17, 22, 27].map((x) => `<rect x="${x - 1.5}" y="6" width="3" height="${10 + (x % 3) * 2}" rx="1" fill="#8a8a84"/>`).join("")}`,
+    longHang: `<line x1="3" y1="3" x2="31" y2="3" stroke="#c9a15a" stroke-width="2"/>${[7, 12, 17, 22, 27].map((x) => `<rect x="${x - 1.5}" y="4" width="3" height="${17 + (x % 3) * 2}" rx="1" fill="#8a8a84"/>`).join("")}`,
+    pullDown: `<path d="M4 4 Q4 16 12 20 M30 4 Q30 16 22 20" stroke="#8a8a84" fill="none" stroke-dasharray="2 2"/><line x1="10" y1="20" x2="24" y2="20" stroke="#c9a15a" stroke-width="2"/>`,
+    carousel: `<line x1="17" y1="2" x2="17" y2="24" stroke="#8a8a84" stroke-width="2"/><ellipse cx="17" cy="13" rx="13" ry="3" fill="none" stroke="#8a8a84"/>`,
+    shelf: `<rect x="3" y="11" width="28" height="3" fill="#c8a477"/>`,
+    pullShelf: `<rect x="3" y="15" width="28" height="3" fill="#c8a477"/><rect x="4" y="10" width="26" height="5" fill="none" stroke="#8a8a84"/>`,
+    display: `<rect x="3" y="20" width="28" height="3" fill="#c8a477"/><line x1="4" y1="4" x2="30" y2="4" stroke="#f1c46a" stroke-width="2"/>${[7, 13, 19, 25].map((x, i) => `<rect x="${x}" y="${10 + i % 2 * 3}" width="4" height="${10 - i % 2 * 3}" rx="1" fill="#a9c3c7"/>`).join("")}`,
+    watch: `<rect x="3" y="21" width="28" height="2" fill="#c8a477"/><path d="M11 20V9M20 20V12" stroke="#c9a15a" stroke-width="1.6"/><rect x="6" y="7" width="7" height="4" fill="#8a8a84"/><rect x="19" y="10" width="7" height="4" fill="#8a8a84"/>`,
+    drawer: `<rect x="3" y="7" width="28" height="12" fill="#ebe0cc" stroke="#555"/><line x1="13" y1="13" x2="21" y2="13" stroke="#c9a15a" stroke-width="2"/>`,
+    jewel: `<rect x="3" y="9" width="28" height="9" fill="#ebe0cc" stroke="#555"/><rect x="6" y="10" width="22" height="2" fill="#a9c3c7"/><line x1="13" y1="15" x2="21" y2="15" stroke="#c9a15a" stroke-width="2"/>`,
+    ironing: `<rect x="3" y="9" width="28" height="9" fill="#ebe0cc" stroke="#555"/><path d="M7 15h10l4-2" stroke="#555" fill="none"/>`,
+    trouser: `<rect x="3" y="4" width="28" height="3" fill="#8a8a84"/>${[8, 14, 20, 26].map((x) => `<rect x="${x - 2}" y="7" width="4" height="15" fill="#5b6b7a"/>`).join("")}`,
+    laundry: `<rect x="3" y="3" width="28" height="20" fill="#ebe0cc" stroke="#555"/><rect x="6" y="8" width="10" height="12" fill="#cdb48c"/><rect x="18" y="8" width="10" height="12" fill="#cdb48c"/>`,
+    shoeTilt: [0, 1, 2].map((k) => `<rect x="3" y="${4 + k * 7}" width="28" height="4" fill="#ebe0cc" stroke="#555" stroke-width=".8"/>`).join(""),
+    shoeRack: [0, 1, 2].map((k) => `<line x1="3" y1="${8 + k * 7}" x2="31" y2="${6 + k * 7}" stroke="#c8a477" stroke-width="2.4"/>`).join(""),
+    boots: `<rect x="3" y="21" width="28" height="2" fill="#c8a477"/><path d="M9 21V7h5v9q5 1 6 5Z" fill="#6e4223"/>`,
+    tieRack: `<rect x="12" y="3" width="10" height="20" fill="#d9ccb6" stroke="#555" stroke-width=".8"/>${[7, 11, 15, 19].map((y) => `<line x1="13" y1="${y}" x2="21" y2="${y}" stroke="#c9a15a"/>`).join("")}`,
+    valet: `<rect x="5" y="9" width="6" height="8" fill="#d9ccb6" stroke="#555" stroke-width=".8"/><line x1="8" y1="13" x2="29" y2="13" stroke="#c9a15a" stroke-width="2"/>`,
+    mirrorPull: `<rect x="12" y="2" width="10" height="22" fill="#dde6e8" stroke="#555" stroke-width=".8"/><line x1="14" y1="9" x2="20" y2="6" stroke="#fff"/>`,
+    socket: `<rect x="11" y="7" width="12" height="12" rx="1.5" fill="#f6f3ee" stroke="#555"/><circle cx="15" cy="13" r="1.4" fill="#222"/><circle cx="19" cy="13" r="1.4" fill="#222"/>`,
+    loft: `<rect x="3" y="15" width="28" height="3" fill="#c8a477"/><rect x="7" y="5" width="9" height="10" fill="#8a8a84"/><rect x="18" y="8" width="9" height="7" fill="#6d6963"/>`,
+  };
+  return `<svg viewBox="0 0 34 26">${ic[type] || ""}</svg>`;
+}
+
+function renderSide() {
+  const id = state.sel, B = bay(id), a = analyse(id), g = a.g, d = BAYDEF[id];
+  const sel = ui.fit && B.fits.find((f) => f.id === ui.fit);
+  let h = "", hCup = "";
+  // cupboard
+  hCup += `<div class="sec"><h4>Cupboard ${id}<span class="sub">name it in the big title, or pick one</span></h4>
+    <div class="chips" style="margin-top:0">${LABELS.map((l) => `<button data-label="${esc(l)}">${esc(l)}</button>`).join("")}</div>
+    <div class="field"><span>Note</span><textarea id="bayNote" placeholder="Anything to remember about this cupboard">${esc(B.note)}</textarea></div>
+    ${g.tunnel ? "" : `<label class="chk"><input type="checkbox" id="optLit" ${B.lit ? "checked" : ""}><span>Lit back <small>Opal acrylic lit from behind, as AST-DR-048. Takes 58 off the depth: ${dim(M.depth - M.door - M.litBack - M.airFront)} clear with it, ${dim(M.depth - M.door - M.airFront)} without.</small></span></label>`}
+    <label class="chk"><input type="checkbox" id="optEdge" ${B.edgeLed ? "checked" : ""}><span>Door-edge LED <small>A light strip down the hinge-side edge, as the showroom photo.</small></span></label>
+    <label class="chk"><input type="checkbox" id="optSensor" ${B.sensor ? "checked" : ""}><span>Door switch <small>Lights come on when the door opens.</small></span></label>
+    ${d.packNote ? `<p class="note" style="margin:8px 0 0">${esc(d.packNote)}</p>` : ""}
+    <div class="rowbtns">
+      <select id="copyFrom" style="width:auto;flex:1"><option value="">Copy the inside of…</option>${ORDER.filter((x) => x !== id).map((x) => `<option value="${x}">${x}${state.bays[x].label ? " · " + esc(state.bays[x].label) : ""}</option>`).join("")}</select>
+      <button class="pill small" id="clearBay">Empty it</button>
+    </div>
+  </div>`;
+  // selected fitting
+  if (sel) {
+    const t = T[sel.type], top = sel.z + sel.h, own = a.issues.filter((x) => x.fit === sel.id);
+    const opt = (k, label, small) => `<label class="chk"><input type="checkbox" data-opt="${k}" ${sel.opts?.[k] ? "checked" : ""}><span>${label}${small ? `<small>${small}</small>` : ""}</span></label>`;
+    let opts = "";
+    if (t.rail && sel.type !== "pullDown") opts += opt("led", "LED rail light");
+    if (sel.type === "display") opts += opt("lit", "Lit — LED strip") + opt("glass", "Glass shelf", "You said no glass inside (7 Oct) — here if you change your mind.") +
+      `<div class="field"><span>Stepped risers</span><select data-opt="risers"><option value="0">None</option><option value="2">2 steps</option><option value="3">3 steps</option></select></div>`;
+    if (sel.type === "jewel") opts += opt("glassLid", "Glass lid", "Showroom photo. On 7 Oct you kept the drawer but without the lid.") + opt("lock", "Lock");
+    if (sel.type === "drawer") opts += opt("lock", "Lock") + opt("velvet", "Velvet tray inside");
+    if (sel.type === "trouser") opts += opt("glassTray", "Glass tray on top", "Showroom photo: a glass-topped tray over the bars for belts or a watch.");
+    if (sel.type === "laundry") opts += `<div class="field"><span>Baskets</span><select data-opt="bins"><option value="1">One</option><option value="2">Two</option></select></div>`;
+    if (t.side) opts += `<div class="field"><span>Side</span><select id="fitSide"><option value="L">Left side panel</option><option value="R">Right side panel</option></select></div>`;
+    const pitch = t.pitch, count = pitch ? Math.round(sel.h / pitch) : 0;
+    h += `<div class="sec fitcard"><h4>Selected<span class="sub">${t.tag ? "from the showroom" : ""}</span></h4>
+      <div class="ttl">${esc(fitName(sel, true))}</div>
+      <div class="desc">${esc(t.desc)}</div>
+      <div class="field"><span>Label</span><input type="text" id="fitLabel" placeholder="e.g. socks, ties, winter coats" value="${esc(sel.label)}" maxlength="50"></div>
+      <div class="trio">
+        <label><span>Bottom</span><input type="number" id="fitZ" value="${Math.round(sel.z)}" step="1"><small>${ftin(sel.z)}</small></label>
+        <label><span>Top</span><input type="number" id="fitTop" value="${Math.round(top)}" step="1" ${t.fixed ? "disabled" : ""}><small>${ftin(top)}</small></label>
+        <label><span>${pitch ? (sel.type === "shoeTilt" ? "Trays" : "Tiers") : "Height"}</span>${pitch ? `<input type="number" id="fitCount" value="${count}" min="1" max="${Math.round(t.max / pitch)}" step="1"><small>${ftin(sel.h)} · ${mmf(sel.h)}</small>` : `<input type="number" id="fitH" value="${Math.round(sel.h)}" step="1" ${t.fixed ? "disabled" : ""}><small>${ftin(sel.h)}</small>`}</label>
+      </div>
+      ${t.fixed ? "" : `<div class="note" style="margin-top:6px">${pitch ? `${dim(pitch)} a ${sel.type === "shoeTilt" ? "tray" : "tier"}` : `${dim(t.min)} to ${dim(t.max)}`} · mm, from the floor</div>`}
+      ${t.rail ? `<div class="note" style="margin-top:4px">Rail at <b>${dim(top - HOOK)}</b>, ${dim(HOOK)} below the top for the hooks; clothes drop <b>${dim(sel.h - HOOK)}</b>.</div>` : ""}
+      ${opts}
+      ${own.length ? `<ul class="issues" style="margin-top:10px">${own.map((x) => `<li class="${x.lvl}"><i></i><span>${esc(x.msg)}</span></li>`).join("")}</ul>` : ""}
+      <div class="rowbtns">
+        <button class="pill small" id="dupFit">Duplicate</button>
+        <select id="moveTo" style="width:auto;flex:1"><option value="">Move to…</option>${ORDER.filter((x) => x !== id).map((x) => `<option value="${x}">${x}${state.bays[x].label ? " · " + esc(state.bays[x].label) : ""}</option>`).join("")}</select>
+        <button class="pill small" id="delFit" style="border-color:#6b3a33">Delete</button>
+      </div>
+    </div>`;
+  }
+  // palette
+  const hasLoft = !!loftOf(id);
+  h += `<div class="sec"><h4>Add a fitting<span class="sub">click, or drag onto the drawing</span></h4>`;
+  GROUPS.forEach(([gk, gname]) => {
+    const items = PALETTE.filter(([type]) => T[type].group === gk);
+    h += `<div class="grp"><h5>${gname}</h5>`;
+    items.forEach(([type, ov]) => {
+      const t = T[type], hh = ov?.h ?? t.h, dis = (g.tunnel && !t.tunnelOK) || (type === "loft" && hasLoft);
+      const nm = ov?.label || t.name, sub = ov?.sub || "";
+      h += `<button class="pal" data-type="${type}" data-h="${hh}" ${dis ? "disabled" : ""} title="${esc(t.desc)}${dis ? (type === "loft" ? " — this cupboard has its loft shelf already" : " — not in the tunnel bay") : ""}">
+        ${palIcon(type)}<span class="nm">${esc(nm)}${t.tag ? `<span class="tag">${t.tag}</span>` : ""}${sub ? `<small>${esc(sub)}</small>` : ""}</span><span class="sz">${t.pitch ? `${ftin(t.pitch)} each` : t.rail ? `${ftin(hh - HOOK)} drop` : ftin(hh)}</span></button>`;
+    });
+    h += `</div>`;
+  });
+  h += `</div>` + hCup;
+  // checks
+  h += `<div class="sec"><h4>Checks — ${id}<span class="sub">${a.errs ? `${a.errs} problem${a.errs > 1 ? "s" : ""}` : a.warns ? `${a.warns} to look at` : "all clear"}</span></h4>`;
+  h += a.issues.length ? `<ul class="issues">${a.issues.map((x) => `<li class="${x.lvl}" ${x.fit ? `data-fit="${x.fit}"` : ""}><i></i><span>${esc(x.msg)}</span></li>`).join("")}</ul>`
+    : `<ul class="issues"><li class="okk"><i></i><span>Everything fits, with its usual clearances.</span></li></ul>`;
+  h += `</div>`;
+  // where the numbers come from
+  const so = SETOUT[state.setOut];
+  h += `<div class="sec"><h4>Measurements</h4><p class="note" style="margin:0">
+    <b>Widths:</b> ${esc(so.name)}. ${esc(so.note)} Change it under Reset &amp; settings.<br><br>
+    <b>Heights:</b> AST-DR-048 — ${both(M.H)} overall, ${M.plinth} plinth, ${M.side} sides and top, ${M.board} shelves, the loft shelf at ${both(M.loft)}; ceiling ${both(M.ceil)}.<br><br>
+    <b>Depth:</b> ${both(M.depth)} overall; inside, ${M.door} goes to the doors, ${M.litBack} to the lit back and ${M.airFront} clearance.<br><br>
+    <b>Clearances:</b> rails sit ${HOOK} below the top of their zone for the hooks; a rail above ${mmf(M.reach)} is out of easy reach and a drawer topping ${mmf(M.drawerTop)} is too high to see into.</p></div>`;
+  $("#side").innerHTML = h;
+  if (sel) {
+    $$("select[data-opt]").forEach((s) => (s.value = String(sel.opts?.[s.dataset.opt] ?? "")));
+    if ($("#fitSide")) $("#fitSide").value = sel.side || "R";
+  }
+}
+
+function syncControls() {
+  $$("#unitSeg button").forEach((b) => b.classList.toggle("on", b.dataset.u === state.units));
+  $$("#clothesSeg button").forEach((b) => b.classList.toggle("on", (b.dataset.c === "1") === !!state.clothes));
+  $("#setOut").value = state.setOut; $("#snapSel").value = String(state.snap);
+  updateUndo();
+}
+
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+// ACTIONS
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+let toastT = 0;
+function toast(msg, bad) {
+  const t = $("#toast"); t.textContent = msg; t.classList.toggle("bad", !!bad); t.classList.add("show");
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), bad ? 4200 : 1800);
+}
+function selectBay(id) { if (!BAYDEF[id]) return; state.sel = id; ui.fit = null; save(); renderAll(); }
+function selectFit(fid) { ui.fit = fid; renderStage(); renderSide(); $("#side").scrollTop = 0; }
+
+function addFit(type, opt) {
+  const id = state.sel, g = geo(id), t = T[type];
+  if (g.tunnel && !t.tunnelOK) return toast(`${t.name} can't go in the tunnel bay — only shelves on the hidden door.`, true);
+  if (type === "loft" && loftOf(id)) return toast("This cupboard has its loft shelf already — drag it to move it.", true);
+  const f = mk(type, 0, opt?.h ?? t.h);
+  if (t.side) f.side = g.packSide === "R" ? "L" : g.packSide === "L" ? "R" : "R";
+  let z = opt?.zc != null ? placeNear(id, f, snapZ(id, f, opt.zc - f.h / 2, f.h, false), f.h) : autoZ(id, f, f.h);
+  let shrunk = false;
+  if (z == null && !t.fixed) {   // try it shorter, down to its minimum
+    const lg = (t.side ? gaps(id, f) : gaps(id, f).map(([a, b]) => [a, Math.min(b, mainTop(id))])).filter(([a, b]) => b > a)
+      .reduce((m, x) => (x[1] - x[0] > (m ? m[1] - m[0] : 0) ? x : m), null);
+    if (lg) {
+      let hh = Math.min(f.h, lg[1] - lg[0]);
+      if (t.pitch) hh = Math.floor(hh / t.pitch) * t.pitch;
+      if (hh >= t.min) { f.h = hh; z = opt?.zc != null ? placeNear(id, f, opt.zc - hh / 2, hh) : autoZ(id, f, hh); shrunk = z != null; }
+    }
+  }
+  if (z == null) {
+    const lg = largestGap(id, t.side ? f.side : "F", true);
+    const need = t.fixed ? f.h : t.min;
+    return toast(`No room for ${t.pitch ? "a " + t.name.toLowerCase() : fitName(f).toLowerCase()} in ${id}: it needs ${dim(need)}, and the biggest free space ${lg ? `is ${dim(lg[1] - lg[0])}` : "is none"}. Shorten or remove something first.`, true);
+  }
+  f.z = z;
+  change(() => { bay(id).fits.push(f); ui.fit = f.id; });
+  $("#side").scrollTop = 0;
+  toast(shrunk ? `${fitName(f)} added — shortened to ${dim(f.h)} to fit.` : `${fitName(f)} added at ${dim(f.z)}.`);
+}
+function deleteFit(fid) {
+  const r = findFit(fid); if (!r) return;
+  change(() => { const B = state.bays[r.id]; B.fits = B.fits.filter((x) => x.id !== fid); ui.fit = null; });
+  toast(`${fitName(r.f)} deleted — ⌘Z brings it back.`);
+}
+function duplicateFit(fid) {
+  const r = findFit(fid); if (!r) return;
+  const f = clone(r.f); f.id = uid();
+  if (f.type === "loft") return toast("One loft shelf per cupboard.", true);
+  let z = placeNear(r.id, f, r.f.z + r.f.h, f.h);
+  if (z == null) z = autoZ(r.id, f, f.h);
+  if (z == null) return toast(`No room for another ${fitName(f).toLowerCase()} in ${r.id}.`, true);
+  f.z = z; change(() => { state.bays[r.id].fits.push(f); ui.fit = f.id; });
+}
+function moveFitTo(fid, target) {
+  const r = findFit(fid); if (!r || !BAYDEF[target]) return;
+  const t = T[r.f.type], tg = geo(target);
+  if (tg.tunnel && !t.tunnelOK) return toast(`${fitName(r.f)} can't go in the tunnel bay.`, true);
+  if (r.f.type === "loft" && loftOf(target)) return toast(`${target} has its loft shelf already.`, true);
+  const f = clone(r.f);
+  if (t.side && tg.packSide === f.side) f.side = f.side === "L" ? "R" : "L";
+  let z = placeNear(target, f, f.z, f.h);
+  if (z == null) z = autoZ(target, f, f.h);
+  if (z == null) return toast(`No room for the ${fitName(f).toLowerCase()} in ${target}.`, true);
+  f.z = z;
+  change(() => { state.bays[r.id].fits = state.bays[r.id].fits.filter((x) => x.id !== fid); state.bays[target].fits.push(f); state.sel = target; ui.fit = f.id; });
+  toast(`Moved to ${target}.`);
+}
+function copyInside(from, to) {
+  const src = state.bays[from], tg = geo(to);
+  const fits = src.fits.filter((f) => !tg.tunnel || T[f.type].tunnelOK).map((f) => {
+    const c = clone(f); c.id = uid();
+    if (T[c.type].side && tg.packSide === c.side) c.side = c.side === "L" ? "R" : "L";
+    return c;
+  });
+  const dropped = src.fits.length - fits.length;
+  change(() => { state.bays[to].fits = fits; ui.fit = null; });
+  toast(`Copied the inside of ${from} into ${to}${dropped ? ` (${dropped} fitting${dropped > 1 ? "s" : ""} left out — not for the tunnel bay)` : ""}.`);
+}
+
+// set a fitting's bottom/height from the panel, keeping it clear of the others
+function setFitGeom(fid, z, h) {
+  const r = findFit(fid); if (!r) return;
+  const t = T[r.f.type], g = geo(r.id);
+  if (!t.fixed) { h = clamp(h, t.min, t.max); if (t.pitch) h = Math.max(t.pitch, Math.round(h / t.pitch) * t.pitch); } else h = r.f.h;
+  const nz = placeNear(r.id, r.f, z, h);
+  if (nz == null) { renderSide(); return toast(`That doesn't fit in ${r.id} — not enough free height.`, true); }
+  if (Math.abs(nz - z) > 0.5) toast(`Moved to ${dim(nz)}, the nearest place it fits.`);
+  change(() => { r.f.z = nz; r.f.h = h; });
+}
+
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+// DRAG ON THE STAGE
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+const svgEl = $("#svg");
+function zAt(ev) {
+  const pt = svgEl.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY;
+  const p = pt.matrixTransform(svgEl.getScreenCTM().inverse());
+  return M.H - p.y;
+}
+// snap a bottom z: to the edges next to it first, then to the 32 mm hole grid from the inside floor
+function snapZ(id, f, z, h, free) {
+  if (free) return Math.round(z);
+  const g = geo(id), mag = 9 / K, edges = [g.floor, g.top];
+  bay(id).fits.forEach((o) => { if (o !== f && lane(o) === lane(f)) edges.push(o.z, o.z + o.h); });
+  if (g.tunnel && lane(f) === "F") edges.push(M.mouth);
+  let best = null, bd = mag;
+  for (const e of edges) {
+    if (Math.abs(z - e) < bd) { bd = Math.abs(z - e); best = e; }
+    if (Math.abs(z + h - e) < bd) { bd = Math.abs(z + h - e); best = e - h; }
+  }
+  if (best != null) return best;
+  const s = state.snap; return s ? g.floor + Math.round((z - g.floor) / s) * s : Math.round(z);
+}
+function snapEdge(id, f, e, free) {   // snap one edge (resize)
+  if (free) return Math.round(e);
+  const g = geo(id), mag = 9 / K, edges = [g.floor, g.top];
+  bay(id).fits.forEach((o) => { if (o !== f && lane(o) === lane(f)) edges.push(o.z, o.z + o.h); });
+  for (const x of edges) if (Math.abs(e - x) < mag) return x;
+  const s = state.snap; return s ? g.floor + Math.round((e - g.floor) / s) * s : Math.round(e);
+}
+let raf = 0;
+function schedule() { if (!raf) raf = requestAnimationFrame(() => { raf = 0; renderStage(); }); }
+
+svgEl.addEventListener("pointerdown", (ev) => {
+  if (ev.button !== 0) return;
+  const hd = ev.target.closest(".hd"), el = ev.target.closest("[data-fit]");
+  if (!el) { if (ui.fit) { ui.fit = null; renderStage(); renderSide(); } return; }
+  const fid = el.dataset.fit, r = findFit(fid); if (!r) return;
+  if (ui.fit !== fid) { ui.fit = fid; renderSide(); $("#side").scrollTop = 0; }
+  ui.drag = { fid, mode: hd ? hd.dataset.h : "move", z0: zAt(ev), fz: r.f.z, fh: r.f.h, prev: snapStr(), moved: false };
+  svgEl.setPointerCapture(ev.pointerId);
+  $("#stage").classList.add("dragging");
+  renderStage(); ev.preventDefault();
+});
+svgEl.addEventListener("pointermove", (ev) => {
+  const d = ui.drag; if (!d) return;
+  const r = findFit(d.fid); if (!r) return;
+  const f = r.f, t = T[f.type], id = r.id, g = geo(id), dz = zAt(ev) - d.z0, free = ev.altKey;
+  if (!d.moved && Math.abs(dz) * K < 3) return;
+  d.moved = true;
+  if (d.mode === "move") {
+    const cand = snapZ(id, f, d.fz + dz, f.h, free);
+    const z = placeNear(id, f, cand, f.h);
+    if (z != null) f.z = z;
+  } else {
+    const others = bay(id).fits.filter((o) => o !== f && lane(o) === lane(f));
+    if (d.mode === "top") {
+      const ceil = Math.min(g.top, ...others.filter((o) => o.z >= d.fz + 0.5).map((o) => o.z), g.tunnel && d.fz < M.mouth && lane(f) === "F" ? M.mouth : Infinity);
+      let e = snapEdge(id, f, d.fz + d.fh + dz, free);
+      let hh = clamp(e - d.fz, t.min, Math.min(t.max, ceil - d.fz));
+      if (t.pitch) hh = Math.max(t.pitch, Math.floor((hh + t.pitch / 2) / t.pitch) * t.pitch);
+      if (d.fz + hh > ceil + 0.5) hh = t.pitch ? Math.floor((ceil - d.fz) / t.pitch) * t.pitch : ceil - d.fz;
+      if (hh >= t.min - 0.5) { f.h = hh; f.z = d.fz; }
+    } else {
+      const topE = d.fz + d.fh;
+      const floorB = Math.max(g.floor, ...others.filter((o) => o.z + o.h <= topE - 0.5).map((o) => o.z + o.h), g.tunnel && topE > M.mouth && lane(f) === "F" ? M.mouth : -Infinity);
+      let e = snapEdge(id, f, d.fz + dz, free);
+      let hh = clamp(topE - e, t.min, Math.min(t.max, topE - floorB));
+      if (t.pitch) hh = Math.max(t.pitch, Math.floor((hh + t.pitch / 2) / t.pitch) * t.pitch);
+      if (topE - hh < floorB - 0.5) hh = t.pitch ? Math.floor((topE - floorB) / t.pitch) * t.pitch : topE - floorB;
+      if (hh >= t.min - 0.5) { f.h = hh; f.z = topE - hh; }
+    }
+  }
+  schedule();
+});
+function endDrag() {
+  const d = ui.drag; if (!d) return;
+  ui.drag = null; $("#stage").classList.remove("dragging");
+  if (d.moved && snapStr() !== d.prev) { record(d.prev); save(); }
+  renderAll();
+}
+svgEl.addEventListener("pointerup", endDrag);
+svgEl.addEventListener("pointercancel", endDrag);
+svgEl.addEventListener("lostpointercapture", () => ui.drag && endDrag());
+
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+// PALETTE: click to add, drag to place
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+$("#side").addEventListener("pointerdown", (ev) => {
+  const b = ev.target.closest(".pal"); if (!b || b.disabled || ev.button !== 0) return;
+  ui.palDrag = { type: b.dataset.type, h: +b.dataset.h, x: ev.clientX, y: ev.clientY, moved: false, ghost: null, label: b.querySelector(".nm").firstChild.textContent.trim() };
+  ev.preventDefault();
+});
+document.addEventListener("pointermove", (ev) => {
+  const p = ui.palDrag; if (!p) return;
+  if (!p.moved && Math.hypot(ev.clientX - p.x, ev.clientY - p.y) < 5) return;
+  if (!p.moved) { p.moved = true; p.ghost = document.createElement("div"); p.ghost.className = "ghost"; p.ghost.textContent = p.label; document.body.appendChild(p.ghost); }
+  p.ghost.style.left = ev.clientX + "px"; p.ghost.style.top = ev.clientY + "px";
+  const over = $("#stage").getBoundingClientRect();
+  const inside = ev.clientX >= over.left && ev.clientX <= over.right && ev.clientY >= over.top && ev.clientY <= over.bottom;
+  p.ghost.textContent = inside ? `${p.label} → ${dim(clamp(zAt(ev), 0, M.H))}` : p.label;
+});
+document.addEventListener("pointerup", (ev) => {
+  const p = ui.palDrag; if (!p) return;
+  ui.palDrag = null;
+  if (p.ghost) p.ghost.remove();
+  if (!p.moved) return addFit(p.type, { h: p.h });
+  const over = $("#stage").getBoundingClientRect();
+  if (ev.clientX >= over.left && ev.clientX <= over.right && ev.clientY >= over.top && ev.clientY <= over.bottom) addFit(p.type, { h: p.h, zc: zAt(ev) });
+});
+
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+// PANEL EVENTS
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+let typingPrev = null;
+["#side", "#stagehead"].forEach((sel) => {
+  $(sel).addEventListener("focusin", (ev) => { if (ev.target.matches("#bayTitle, #bayNote, #fitLabel")) typingPrev = snapStr(); });
+  $(sel).addEventListener("focusout", (ev) => {
+    if (ev.target.matches("#bayTitle, #bayNote, #fitLabel")) { if (typingPrev && snapStr() !== typingPrev) record(typingPrev); typingPrev = null; if (ev.target.id !== "bayTitle") renderSide(); }
+  });
+});
+$("#stagehead").addEventListener("input", (ev) => {
+  if (ev.target.id !== "bayTitle") return;
+  const id = ev.target.dataset.bay; if (!BAYDEF[id]) return;
+  state.bays[id].label = ev.target.value; save(); renderOverview();
+});
+$("#stagehead").addEventListener("keydown", (ev) => { if (ev.target.id === "bayTitle" && (ev.key === "Enter" || ev.key === "Escape")) ev.target.blur(); });
+$("#side").addEventListener("input", (ev) => {
+  const t = ev.target, B = bay();
+  if (t.id === "bayNote") { B.note = t.value; save(); }
+  else if (t.id === "fitLabel") { const r = findFit(ui.fit); if (r) { r.f.label = t.value; save(); renderStage(); } }
+});
+$("#side").addEventListener("change", (ev) => {
+  const t = ev.target, id = state.sel, r = ui.fit && findFit(ui.fit);
+  if (t.id === "optLit") change(() => (bay().lit = t.checked));
+  else if (t.id === "optEdge") change(() => (bay().edgeLed = t.checked));
+  else if (t.id === "optSensor") change(() => (bay().sensor = t.checked));
+  else if (t.id === "copyFrom" && t.value) {
+    const from = t.value; t.value = "";
+    if (bay().fits.length > 1 && !confirm(`Replace everything inside ${id} with a copy of ${from}?`)) return;
+    copyInside(from, id);
+  }
+  else if (t.id === "moveTo" && t.value && r) moveFitTo(r.f.id, t.value);
+  else if (t.id === "fitSide" && r) change(() => (r.f.side = t.value));
+  else if (t.dataset.opt && r) change(() => { r.f.opts = r.f.opts || {}; r.f.opts[t.dataset.opt] = t.type === "checkbox" ? t.checked : +t.value; });
+  else if (r && (t.id === "fitZ" || t.id === "fitH" || t.id === "fitTop" || t.id === "fitCount")) {
+    const f = r.f, v = +t.value; if (!isFinite(v)) return renderSide();
+    if (t.id === "fitZ") setFitGeom(f.id, v, f.h);
+    else if (t.id === "fitH") setFitGeom(f.id, f.z, v);
+    else if (t.id === "fitTop") setFitGeom(f.id, f.z, v - f.z);
+    else setFitGeom(f.id, f.z, v * T[f.type].pitch);
+  }
+});
+$("#side").addEventListener("click", (ev) => {
+  const t = ev.target.closest("button, li[data-fit]"); if (!t) return;
+  if (t.dataset.label != null) { change(() => (bay().label = t.dataset.label)); return; }
+  if (t.id === "clearBay") { if (confirm(`Empty ${state.sel}? Everything but the loft shelf comes out. Undo can bring it back.`)) change(() => { bay().fits = bay().fits.filter((f) => f.type === "loft"); ui.fit = null; }); return; }
+  if (t.id === "delFit" && ui.fit) return deleteFit(ui.fit);
+  if (t.id === "dupFit" && ui.fit) return duplicateFit(ui.fit);
+  if (t.matches("li[data-fit]")) selectFit(t.dataset.fit);
+});
+$("#overview").addEventListener("click", (ev) => {
+  const t = ev.target.closest("[data-bay]"); if (!t) return;
+  selectBay(t.dataset.bay);
+});
+$("#unitSeg").addEventListener("click", (ev) => { const b = ev.target.closest("button"); if (!b) return; state.units = b.dataset.u; save(); renderAll(); });
+$("#clothesSeg").addEventListener("click", (ev) => { const b = ev.target.closest("button"); if (!b) return; state.clothes = b.dataset.c === "1"; save(); renderAll(); });
+
+// top bar
+$("#undo").onclick = undo; $("#redo").onclick = redo;
+const menu = $("#moreMenu");
+$("#moreBtn").onclick = (ev) => { ev.stopPropagation(); menu.classList.toggle("open"); };
+document.addEventListener("click", (ev) => { if (!ev.target.closest(".menuwrap")) menu.classList.remove("open"); });
+$("#setOut").innerHTML = Object.entries(SETOUT).map(([k, v]) => `<option value="${k}">${esc(v.name)} — ${Math.round(v.L)} / ${Math.round(v.R)}</option>`).join("");
+$("#setOut").onchange = (ev) => change(() => (state.setOut = ev.target.value));
+$("#snapSel").onchange = (ev) => { state.snap = +ev.target.value; save(); };
+$$("#moreMenu [data-reset]").forEach((b) => (b.onclick = () => {
+  const kind = b.dataset.reset;
+  if (!confirm(kind === "empty" ? "Empty every cupboard back to its loft shelf? Undo can bring it back." : "Replace the whole plan with the 7 Oct layout (AST-DR-048)? Undo can bring yours back.")) return;
+  menu.classList.remove("open");
+  change(() => { state.bays = freshState(kind).bays; ui.fit = null; });
+  toast(kind === "empty" ? "Started again — every cupboard empty." : "Loaded the 7 Oct layout.");
+}));
+$("#helpBtn").onclick = () => { menu.classList.remove("open"); $("#helpModal").classList.add("open"); };
+$$(".modal").forEach((m) => m.addEventListener("click", (ev) => { if (ev.target === m || ev.target.closest("[data-close]")) m.classList.remove("open"); }));
+
+// export / import
+$("#export").onclick = () => {
+  const data = { app: "ast-wardrobe-planner", v: 1, exported: new Date().toISOString(), plan: { setOut: state.setOut, units: state.units, snap: state.snap, bays: state.bays } };
+  const blob = new Blob([JSON.stringify(data, null, 1)], { type: "application/json" });
+  const a = document.createElement("a"), d = new Date();
+  a.href = URL.createObjectURL(blob);
+  a.download = `wardrobe-plan-${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}.json`;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  toast("Exported — the file is in your Downloads.");
+};
+$("#import").onclick = () => $("#fileIn").click();
+$("#fileIn").onchange = (ev) => {
+  const file = ev.target.files[0]; if (!file) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    let s = null;
+    try { const j = JSON.parse(rd.result); s = j.plan || j; } catch (e) {
+      const m = String(rd.result).match(/^DATA (\{.*\})\s*$/m); if (m) try { s = JSON.parse(m[1]); } catch (e2) { s = null; }
+    }
+    ev.target.value = "";
+    if (!s || !valid({ ...s, bays: s.bays })) return toast("That file isn't a wardrobe plan.", true);
+    const n = normalise({ ...state, ...s });
+    change(() => { state.setOut = n.setOut; state.bays = n.bays; ui.fit = null; });
+    toast(`Imported ${file.name}.`);
+  };
+  rd.readAsText(file);
+};
+
+// copy for Claude
+function claudeText() {
+  const so = SETOUT[state.setOut], d = new Date();
+  const L = [];
+  L.push("WARDROBE PLAN — dressing room (paste this to Claude)");
+  L.push(`Planner: tools/wardrobe-planner.html · ${d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })} ${d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}`);
+  L.push(`Bay widths: ${so.name} — left ${mmf(so.L)}, right ${mmf(so.R)}. Heights: AST-DR-048. All bays ${both(M.H)} high, ${both(M.depth)} deep.`);
+  L.push("Heights are mm from the floor (ft-in in brackets). Lists run bottom to top. Rails sit 60 below the top of their zone.");
+  L.push("Seen from the room: left wall L1 (bathroom door) · L2 · L3 (mirror); right wall R4 (mirror, tunnel) · R3 · R2 · R1 (bedroom wall).");
+  ORDER.forEach((id) => {
+    const B = bay(id), a = analyse(id), g = a.g;
+    L.push("");
+    L.push(`${id} · ${B.label ? `"${B.label}"` : "(no label)"} — ${BAYDEF[id].where}`);
+    L.push(`  bay ${mmf(g.W)} wide, inside ${mmf(g.pack ? g.usable : g.inner)}${g.pack ? (g.tunnel ? " (door shelves)" : " clear of the parked doors") : ""} × ${mmf(g.depth)} deep${g.tunnel ? " (shelves on the hidden door)" : g.lit ? " (lit back)" : " (no lit back)"}`);
+    const lights = [g.tunnel ? null : B.lit ? "lit back" : "no lit back", B.edgeLed ? "door-edge LED" : null, B.sensor ? "door switch" : null].filter(Boolean);
+    if (lights.length) L.push(`  lighting: ${lights.join(", ")}`);
+    if (B.note) L.push(`  note: ${B.note.replace(/\s+/g, " ")}`);
+    const F = B.fits.filter((f) => lane(f) === "F").sort((p, q) => p.z - q.z);
+    let cur = g.floor;
+    const row = (za, zb, txt) => L.push(`    ${String(Math.round(za)).padStart(4)}–${String(Math.round(zb)).padEnd(4)}  ${txt}`);
+    if (!F.length) L.push("    (empty)");
+    F.forEach((f) => {
+      if (f.z > cur + 0.5) row(cur, f.z, `free ${both(f.z - cur)}`);
+      row(f.z, f.z + f.h, claudeLine(f, a));
+      cur = f.z + f.h;
+    });
+    if (g.top > cur + 0.5) row(cur, g.top, `free ${both(g.top - cur)}`);
+    const S = B.fits.filter((f) => lane(f) !== "F").sort((p, q) => p.z - q.z);
+    if (S.length) { L.push("  on the side panels:"); S.forEach((f) => row(f.z, f.z + f.h, claudeLine(f, a))); }
+    if (!g.tunnel) L.push(`  height left below the loft: ${both(a.freeMain)} of ${both(a.mainTotal)}${a.loftZ != null ? ` · loft ${both(a.loftClear)} clear` : ""}`);
+    a.issues.filter((x) => x.lvl !== "info").forEach((x) => L.push(`  ${x.lvl === "err" ? "PROBLEM" : "check"}: ${x.msg}`));
+  });
+  L.push("");
+  L.push("DATA " + JSON.stringify({ v: 1, setOut: state.setOut, bays: state.bays }));
+  return L.join("\n");
+}
+function claudeLine(f, a) {
+  const t = T[f.type], top = f.z + f.h, nm = fitName(f, true) + (f.label ? ` "${f.label}"` : "");
+  const o = f.opts || {};
+  switch (f.type) {
+    case "loft": return `${nm} — 22 board at ${both(f.z)}; loft above it ${both(a.loftClear)} clear`;
+    case "shelf": return `${nm} — 22 board at ${both(f.z)}`;
+    case "pullShelf": return `${nm} — ${f.h} with its lip`;
+    case "display": return `${nm} — ${both(f.h - M.board)} clear above a 22 board${o.lit ? ", LED strip" : ""}${o.glass ? ", glass shelf" : ""}${+o.risers ? `, ${o.risers} stepped risers` : ""}`;
+    case "watch": return `${nm} — stands on a lit shelf, ${both(f.h)}`;
+    case "shortHang": case "longHang": case "pullDown": return `${nm} — rail at ${both(top - HOOK)}, ${both(f.h - HOOK)} drop${o.led ? ", LED rail" : ""}`;
+    case "carousel": return `${nm} — ${both(f.h)} tall`;
+    case "drawer": return `${nm} — ${both(f.h)} front${o.lock ? ", lock" : ""}${o.velvet ? ", velvet tray" : ""}`;
+    case "jewel": return `${nm} — ${both(f.h)} front${o.glassLid ? ", glass lid" : ", no glass lid"}${o.lock ? ", lock" : ""}`;
+    case "ironing": return `${nm} — ${both(f.h)} front`;
+    case "trouser": return `${nm} — ${both(f.h)}${o.glassTray ? ", glass tray on top" : ""}`;
+    case "laundry": return `${nm} — ${both(f.h)}, ${o.bins} basket${o.bins > 1 ? "s" : ""}`;
+    case "shoeTilt": case "shoeRack": { const n = Math.round(f.h / t.pitch); return `${nm} — ${n} × ${t.pitch} = ${both(f.h)}`; }
+    case "boots": return `${nm} — ${both(f.h - M.board)} clear above a 22 board`;
+    default: return `${nm} — ${f.side === "L" ? "left" : "right"} side panel, ${both(f.h)}`;
+  }
+}
+async function copyText(txt) {
+  try { if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(txt); return true; } } catch (e) { /* fall through */ }
+  const ta = $("#claudeText"); ta.focus(); ta.select();
+  try { return document.execCommand("copy"); } catch (e) { return false; }
+}
+$("#copyClaude").onclick = async () => {
+  const txt = claudeText(); $("#claudeText").value = txt; $("#claudeModal").classList.add("open");
+  const ok = await copyText(txt);
+  $("#claudeMsg").textContent = ok ? "Copied — paste it to Claude" : "Select all and copy (⌘A, ⌘C)";
+  $("#claudeMsg").style.color = ok ? "var(--ok)" : "var(--amber)";
+};
+$("#claudeCopy").onclick = async () => { const ok = await copyText($("#claudeText").value); $("#claudeMsg").textContent = ok ? "Copied again" : "Select all and copy (⌘A, ⌘C)"; };
+
+// keys
+document.addEventListener("keydown", (ev) => {
+  const typing = ev.target instanceof Element && ev.target.matches("input, textarea, select");
+  const mod = ev.metaKey || ev.ctrlKey;
+  if (ev.key === "Escape") { $$(".modal.open").forEach((m) => m.classList.remove("open")); menu.classList.remove("open"); if (!typing && ui.fit) { ui.fit = null; renderStage(); renderSide(); } return; }
+  if (typing) return;
+  if (mod && ev.key.toLowerCase() === "z") { ev.preventDefault(); ev.shiftKey ? redo() : undo(); return; }
+  if (mod && ev.key.toLowerCase() === "y") { ev.preventDefault(); redo(); return; }
+  if (mod && ev.key.toLowerCase() === "d" && ui.fit) { ev.preventDefault(); duplicateFit(ui.fit); return; }
+  if ((ev.key === "Backspace" || ev.key === "Delete") && ui.fit) { ev.preventDefault(); deleteFit(ui.fit); return; }
+  if (ev.key === "[" || ev.key === "]") { const i = ORDER.indexOf(state.sel); selectBay(ORDER[(i + (ev.key === "]" ? 1 : ORDER.length - 1)) % ORDER.length]); return; }
+  if ((ev.key === "ArrowUp" || ev.key === "ArrowDown") && ui.fit) {
+    ev.preventDefault();
+    const r = findFit(ui.fit); if (!r) return;
+    const step = (ev.shiftKey ? 1 : state.snap || 10) * (ev.key === "ArrowUp" ? 1 : -1);
+    const z = placeNear(r.id, r.f, r.f.z + step, r.f.h);
+    if (z != null && Math.abs(z - r.f.z) > 0.01) change(() => (r.f.z = z));
+  }
+});
+window.addEventListener("resize", () => renderStage());
+window.addEventListener("storage", (ev) => { if (ev.key === KEY) { const s = load(); if (s) { state = s; renderAll(); } } });
+
+$("#defs").innerHTML = DEFS;
+renderAll();
+setSaved(localStorage.getItem(KEY) ? "Saved in this browser" : "Not saved yet");
+})();
+</script>
+</body>
+</html>
