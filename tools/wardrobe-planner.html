@@ -224,7 +224,8 @@ kbd { font: 10px var(--mono); border: 1px solid var(--line2); border-bottom-widt
       <button class="pill" id="moreBtn" title="Start again, settings">Reset &amp; settings ▾</button>
       <div class="menu" id="moreMenu">
         <button data-reset="empty"><b>Start again — empty cupboards</b><span>Every cupboard back to its loft shelf only. Undo can bring it back.</span></button>
-        <button data-reset="approved"><b>Start from the 7 Oct layout</b><span>The layout on AST-DR-048 (approved in chat, 7 Oct), to edit from.</span></button>
+        <button data-reset="drawn" id="resetDrawn"><b>Start from the drawn plan</b><span>Your 21 Nov layout as tidied and drawn on AST-DR-048 and AST-DR-050: even shelves, rails in reach, the tunnel at 7 ft.</span></button>
+        <button data-reset="approved"><b>Start from the 7 Oct layout</b><span>The older layout approved in chat on 7 Oct, to edit from.</span></button>
         <hr>
         <label for="setOut">Bay widths from</label>
         <select id="setOut"></select>
@@ -298,6 +299,9 @@ kbd { font: 10px var(--mono); border: 1px solid var(--line2); border-bottom-widt
   </div>
 </div>
 
+<!-- the plan as drawn on AST-DR-048 / AST-DR-050, offered under Reset & settings; the page works without it -->
+<script src="../drawings/kit.js"></script>
+<script src="../drawings/wardrobe-interiors.js"></script>
 <script>
 (() => {
 "use strict";
@@ -323,7 +327,7 @@ const M = {
   litBack: 58,      // wardrobe2.py / AST-DR-048 detail 1: the opal lit back takes 55, 58 with its air
   airFront: 4,      // wardrobe2.py: 4 clear of the doors
   pack: 100,        // AST-DR-026 / data.js: the parked fold-slide pair takes ~3 in; stop fittings ~4 in short of that side
-  mouth: 2183,      // skeleton.py TUN.h: the tunnel mouth (owner thinks nearer 7 ft 6 in — still to confirm)
+  mouth: 2134,      // the tunnel is 7 ft 0 in high (owner, 21 Nov) — R4's loft starts there, lower than the 2,183 of the rest
   doorShelf: 260,   // data.js "The Hidden Door": shelves 10¼ in deep on the door
   doorShelfW: 790,  // furnish.py: 2 ft 8 in (810) door, its shelves 790 wide; a fixed 4 in upright beside it
   reach: 2000,      // the owner is 5 ft 9 in: a rail above 2,000 needs a step
@@ -391,8 +395,8 @@ const T = {
               desc: "Lined baskets on a pull-out, as the showroom photo. Best at the floor." },
   shoeTilt: { name: "Tilting shoe trays", short: "Shoe trays", group: "shoes", h: 185 * 5, min: 185, max: 185 * 11, pitch: 185, pref: "bottom", tag: "showroom",
               desc: "Trays that tip their front down as they open, so the shoes face you (showroom photo). 185 apart, as AST-DR-048; two pairs a tray in a 3 ft bay." },
-  shoeRack: { name: "Shoe rack, sloped", short: "Shoe rack", group: "shoes", h: 200 * 4, min: 200, max: 200 * 10, pitch: 200, pref: "bottom",
-              desc: "Fixed sloping shelves with a heel rail, 200 apart. Simple and cheap." },
+  shoeRack: { name: "Shoe rack, sloped", short: "Shoe rack", group: "shoes", h: 200 * 4, min: 200, max: 2200, pitch: 200, pref: "bottom",
+              desc: "Fixed sloping shelves with a heel rail, about 200 apart — spread evenly over the height you give it." },
   boots:    { name: "Boot space", group: "shoes", h: 480, min: 380, max: 650, pref: "bottom",
               desc: "A shelf with clear height for boots and high-tops." },
   tieRack:  { name: "Tie & belt pull-out", short: "Tie & belt rack", group: "side", side: true, h: 500, min: 350, max: 700, pref: 1250,
@@ -417,10 +421,10 @@ const PALETTE = [
 ];
 const SOLID = new Set(["loft", "shelf", "pullShelf", "display", "watch", "drawer", "jewel", "ironing", "trouser", "laundry", "shoeTilt", "shoeRack", "boots"]);
 const DRAWERS = new Set(["drawer", "jewel", "ironing"]);
-const PULLOUTS = new Set(["pullShelf", "trouser", "laundry", "shoeTilt", "shoeRack"]);
+const PULLOUTS = new Set(["pullShelf", "trouser", "laundry", "shoeTilt"]);
 const LABELS = ["Shoes", "Linen & cushions", "Daily wear", "Winter", "Suits", "Long clothes", "Perfume", "Accessories", "Folded clothes", "Bags"];
 
-function drawerSize(h) { return h <= 150 ? "small" : h <= 250 ? "medium" : "large"; }
+function drawerSize(h) { return h <= 150 ? "small" : h <= 250 ? "medium" : h <= 330 ? "large" : "deep"; }
 function fitName(f, long) {
   const t = T[f.type];
   if (f.type === "drawer") return `${drawerSize(f.h)[0].toUpperCase()}${drawerSize(f.h).slice(1)} drawer`;
@@ -456,6 +460,7 @@ function approvedBays() {
 }
 function freshState(kind) {
   const bays = {};
+  if (kind === "drawn" && window.WARDROBE_PLAN) return normalise({ setOut: window.WARDROBE_PLAN.setOut, bays: clone(window.WARDROBE_PLAN.bays) });
   if (kind === "approved") Object.assign(bays, approvedBays()); else ORDER.forEach((id) => (bays[id] = emptyBay(id)));
   return { v: 1, setOut: "drawings", units: "both", snap: 32, clothes: true, sel: "L1", collapsed: false, bays };
 }
@@ -810,7 +815,7 @@ function drawFit(f, g, o) {   // o: { lw (line weight), clothes }
       break;
     }
     case "shoeTilt": case "shoeRack": {
-      const p = t.pitch, n = Math.max(1, Math.round(h / p));
+      const n = Math.max(1, Math.round(h / t.pitch)), p = h / n;
       for (let k = 0; k < n; k++) {
         const zb = z + k * p;
         if (f.type === "shoeTilt") {
@@ -1070,7 +1075,7 @@ function spec(f, a) {
     case "jewel": return `${lab}${dim(f.h)} front${f.opts.glassLid ? " · glass lid" : ""}${f.opts.lock ? " · lock" : ""}`;
     case "trouser": return `${lab}${dim(f.h)}${f.opts.glassTray ? " · glass tray" : ""} · ${at}`;
     case "laundry": return `${lab}${f.opts.bins} bin${f.opts.bins > 1 ? "s" : ""} · ${dim(f.h)}`;
-    case "shoeTilt": case "shoeRack": { const n = Math.round(f.h / t.pitch); return `${lab}${n} ${f.type === "shoeTilt" ? "tray" : "tier"}${n > 1 ? "s" : ""} · ${dim(t.pitch)} apart`; }
+    case "shoeTilt": case "shoeRack": { const n = Math.max(1, Math.round(f.h / t.pitch)); return `${lab}${n} ${f.type === "shoeTilt" ? "tray" : "tier"}${n > 1 ? "s" : ""} · ${dim(f.h / n)} apart`; }
     case "boots": return `${lab}${dim(f.h - M.board)} clear`;
     default: return `${lab}${f.side === "L" ? "left" : "right"} side · ${dim(f.h)} · ${at}`;
   }
@@ -1484,10 +1489,10 @@ $("#setOut").onchange = (ev) => change(() => (state.setOut = ev.target.value));
 $("#snapSel").onchange = (ev) => { state.snap = +ev.target.value; save(); };
 $$("#moreMenu [data-reset]").forEach((b) => (b.onclick = () => {
   const kind = b.dataset.reset;
-  if (!confirm(kind === "empty" ? "Empty every cupboard back to its loft shelf? Undo can bring it back." : "Replace the whole plan with the 7 Oct layout (AST-DR-048)? Undo can bring yours back.")) return;
+  if (!confirm(kind === "empty" ? "Empty every cupboard back to its loft shelf? Undo can bring it back." : kind === "drawn" ? "Replace your plan with the tidied one drawn on AST-DR-048 / 050? Undo can bring yours back." : "Replace the whole plan with the 7 Oct layout? Undo can bring yours back.")) return;
   menu.classList.remove("open");
   change(() => { state.bays = freshState(kind).bays; ui.fit = null; });
-  toast(kind === "empty" ? "Started again — every cupboard empty." : "Loaded the 7 Oct layout.");
+  toast(kind === "empty" ? "Started again — every cupboard empty." : kind === "drawn" ? "Loaded the drawn plan (21 Nov)." : "Loaded the 7 Oct layout.");
 }));
 $("#helpBtn").onclick = () => { menu.classList.remove("open"); $("#helpModal").classList.add("open"); };
 $$(".modal").forEach((m) => m.addEventListener("click", (ev) => { if (ev.target === m || ev.target.closest("[data-close]")) m.classList.remove("open"); }));
@@ -1573,7 +1578,7 @@ function claudeLine(f, a) {
     case "ironing": return `${nm} — ${both(f.h)} front`;
     case "trouser": return `${nm} — ${both(f.h)}${o.glassTray ? ", glass tray on top" : ""}`;
     case "laundry": return `${nm} — ${both(f.h)}, ${o.bins} basket${o.bins > 1 ? "s" : ""}`;
-    case "shoeTilt": case "shoeRack": { const n = Math.round(f.h / t.pitch); return `${nm} — ${n} × ${t.pitch} = ${both(f.h)}`; }
+    case "shoeTilt": case "shoeRack": { const n = Math.max(1, Math.round(f.h / t.pitch)); return `${nm} — ${n} × ${Math.round(f.h / n)} = ${both(f.h)}`; }
     case "boots": return `${nm} — ${both(f.h - M.board)} clear above a 22 board`;
     default: return `${nm} — ${f.side === "L" ? "left" : "right"} side panel, ${both(f.h)}`;
   }
@@ -1668,7 +1673,7 @@ function cadSpec(f, a) {
     case "ironing": return "fold-out ironing board inside";
     case "trouser": return ["trousers folded over bars", o.glassTray && "glass tray on top"].filter(Boolean).join(", ");
     case "laundry": return `${o.bins} lined basket${o.bins > 1 ? "s" : ""}`;
-    case "shoeTilt": case "shoeRack": { const k = Math.round(f.h / t.pitch); return `${k} ${f.type === "shoeTilt" ? "tilting trays" : "sloped tiers"}, ${t.pitch} apart`; }
+    case "shoeTilt": case "shoeRack": { const k = Math.max(1, Math.round(f.h / t.pitch)); return `${k} ${f.type === "shoeTilt" ? "tilting trays" : "sloped tiers"}, ${Math.round(f.h / k)} apart`; }
     case "boots": return `${dc(f.h - M.board)} clear above a 22 board`;
     default: return `on the ${f.side === "L" ? "left" : "right"} side panel`;
   }
@@ -1748,7 +1753,7 @@ function cadBay(D, id, ox) {
         break;
       }
       case "shoeTilt": case "shoeRack": {
-        const p = T[f.type].pitch, k = Math.max(1, Math.round(h / p));
+        const k = Math.max(1, Math.round(h / T[f.type].pitch)), p = h / k;
         D.rect(DT, X(x0), z, w, h, "DASHED");
         for (let i = 0; i < k; i++) {
           const zb = z + i * p;
@@ -1869,6 +1874,7 @@ window.addEventListener("resize", () => renderStage());
 window.addEventListener("storage", (ev) => { if (ev.key === KEY) { const s = load(); if (s) { state = s; renderAll(); } } });
 
 $("#defs").innerHTML = DEFS;
+if (!window.WARDROBE_PLAN) $("#resetDrawn").remove();
 renderAll();
 setSaved(localStorage.getItem(KEY) ? "Saved in this browser" : "Not saved yet");
 })();

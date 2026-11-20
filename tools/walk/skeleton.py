@@ -34,7 +34,7 @@ D2 = dict(leaf=762, open=864, corner=686)                       # dressing door:
 DR = dict(x0=4547 + T, s1=BED["L"], w=2819, d=3759)
 DR["x1"], DR["s0"] = DR["x0"] + DR["d"], DR["s1"] - DR["w"]
 DOME = dict(w=1524, crown=3048)                                  # 10 ft crown; 5 ft strip down the aisle (designer's grid) — OPEN
-TUN = dict(w=914, l=2337, h=2183)                                # 3 ft × 7'8", east end of the dressing's south wall; mouth = hidden door height
+TUN = dict(w=914, l=2337, h=2134)                                # 3 ft × 7'8", 7 ft high (owner, 21 Nov; was 2183), east end of the dressing's south wall; mouth = hidden door height
 # bathroom: 12'3" × 8'11" (tape), north wall on the study-wall line — which leaves exactly a 9 in wall to the dressing
 BA = dict(x0=4777, s0=0, l=3734, w=2718)
 BA["x1"], BA["s1"] = BA["x0"] + BA["l"], BA["s0"] + BA["w"]

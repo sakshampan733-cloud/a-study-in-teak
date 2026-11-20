@@ -86,10 +86,13 @@ window.DK = (function () {
   // against a gutter column: each keeps the height it wants where it can, and where
   // two would overlap they are pushed apart, in order, inside the band. The leader is
   // drawn as an elbow with a horizontal landing into the text, so it reads as one line.
+  // o.size / o.size2 / o.size3 scale the lines (default 1.8 / 1.45 / 1.45), o.bold sets the first line in bold; a third
+  // line is optional.
   function labels(x, side = "right", yMin = 16, yMax = 280, o = {}) {
     const items = [], gap = o.gap ?? 2.4, land = o.land ?? 6;
+    const s1 = o.size || 1.8, s2 = o.size2 || 1.45, s3 = o.size3 || s2, k = s1 / 1.8;
     const api = {
-      add(ax, ay, l1, l2) { if (l1) items.push({ ax, ay, l1, l2: l2 || "", h: l2 ? 6.4 : 3.2 }); return api; },
+      add(ax, ay, l1, l2, l3) { if (l1) items.push({ ax, ay, l1, l2: l2 || "", l3: l3 || "", h: 3.2 * k + (l2 ? 3.2 * k : 0) + (l3 ? s3 * 1.75 : 0) }); return api; },
       draw() {
         if (!items.length) return "";
         items.sort((a, b) => a.ay - b.ay);
@@ -104,8 +107,9 @@ window.DK = (function () {
         return items.map((it) =>
           `<g stroke="${INK}" stroke-width="0.13" fill="none"><path d="M ${f(it.ax)} ${f(it.ay)} L ${f(elbow)} ${f(it.y)} L ${f(x)} ${f(it.y)}"/></g>` +
           `<circle cx="${f(it.ax)}" cy="${f(it.ay)}" r="0.45" fill="${INK}"/>` +
-          text(tx, it.y + 0.6, it.l1, { size: 1.8, anchor: right ? "start" : "end" }) +
-          (it.l2 ? text(tx, it.y + 3.4, it.l2, { size: 1.45, fill: THIN, anchor: right ? "start" : "end" }) : "")
+          text(tx, it.y + 0.6 * k, it.l1, { size: s1, anchor: right ? "start" : "end", weight: o.bold ? 700 : 400 }) +
+          (it.l2 ? text(tx, it.y + 3.4 * k, it.l2, { size: s2, fill: o.size2 ? INK : THIN, anchor: right ? "start" : "end" }) : "") +
+          (it.l3 ? text(tx, it.y + 3.4 * k + s3 * 1.75, it.l3, { size: s3, fill: THIN, anchor: right ? "start" : "end" }) : "")
         ).join("");
       },
     };

@@ -128,20 +128,6 @@
   "pages": 2,
   "pagesA4": 2
  },
- "wardrobe-interiors": {
-  "title": "WARDROBE INTERIORS",
-  "dwgs": [
-   "AST-DR-048"
-  ],
-  "keys": [
-   "wardrobe-interiors"
-  ],
-  "starts": [
-   0
-  ],
-  "pages": 6,
-  "pagesA4": 6
- },
  "foldslide": {
   "title": "END-BAY DOORS",
   "dwgs": [
@@ -423,5 +409,22 @@
   ],
   "pages": 7,
   "pagesA4": 7
+ },
+ "wardrobe-interiors": {
+  "title": "WARDROBE INTERIORS",
+  "dwgs": [
+   "AST-DR-048",
+   "AST-DR-050"
+  ],
+  "keys": [
+   "wardrobe-interiors",
+   "wardrobe-interiors-right"
+  ],
+  "starts": [
+   0,
+   7
+  ],
+  "pages": 13,
+  "pagesA4": 13
  }
 }

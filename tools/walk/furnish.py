@@ -202,7 +202,12 @@ for x0_ in (tb0, tb1 - 18): fbox(f"tb_side{x0_}", x0_, tfront, 0, x0_ + 18, DR["
 fbox("tb_top", tb0, tfront, WDh - 18, tb1, DR["s1"], WDh, CLAY)
 # the hidden door, hinged at the tunnel mouth's left (far-wall) corner, on the tunnel side of the wall
 TS, THh = DR["s1"] + T, TUN["h"]
-LEVELS = [20, 450, 850, 1250, 1650, 2050]
+# the shelves on the hidden door (and, level with them, along the tunnel's left wall): as drawn on AST-DR-050, read from
+# the plan in drawings/wardrobe-interiors.js — five, in six equal spaces up to the 7 ft tunnel head (owner, 21 Nov)
+import json as _json, re as _re
+_wplan = _json.loads(_re.search(r"// PLAN-START\nconst WARDROBE_PLAN = (\{.*?\});\n// PLAN-END",
+    open(os.path.join(HERE, "..", "..", "drawings", "wardrobe-interiors.js")).read(), _re.S).group(1))
+LEVELS = sorted(f["z"] for f in _wplan["bays"]["R4"]["fits"] if f["type"] == "shelf")
 hd = bpy.data.objects.new("hidden_door", None); sc.collection.objects.link(hd)
 hd.location = P(tb1, TS, 0); bpy.context.view_layer.update()
 hdw = 810

@@ -31,7 +31,7 @@ function siteOrder() {
   })(ctx.window.PROJECT);
   return seen.filter((k) => fs.existsSync(path.join(CAD, k + ".svg")));
 }
-const JOIN = { "studywall-arch-sections": "studywall-arch", "studywall-details2": "studywall-arch" };   // the arched study wall: elevation + sections + details, one set
+const JOIN = { "studywall-arch-sections": "studywall-arch", "studywall-details2": "studywall-arch", "wardrobe-interiors-right": "wardrobe-interiors" };   // the arched study wall: elevation + sections + details, one set
 const family = (k) => JOIN[k] || k.replace(/-(details|3d)$/, "");
 
 // ── in the browser: drop the mm layer, convert the notes, thicken, and map the ink ───────────────────────────────
@@ -41,7 +41,7 @@ const PREPARE = String.raw`
   const ftin = (mm) => { const t = Math.round(mm / 25.4 * 8) / 8; let ft = Math.floor(t / 12), r = t - ft * 12, w = Math.floor(r), e = Math.round((r - w) * 8);
     if (e === 8) { e = 0; w++; } if (w === 12) { w = 0; ft++; } const i = (w || !e ? w : "") + FR[e] + '"'; return ft ? ft + "'-" + i : i; };
   const IMP = "(?:\\d+[½¼¾⅛⅜⅝⅞]?|[½¼¾⅛⅜⅝⅞])\\s?(?:in|IN)\\b|\\d+\\s?(?:ft|FT)(?:\\s?\\d+(?:[½¼¾⅛⅜⅝⅞])?\\s?(?:in|IN)\\b)?";
-  const KEEP = [/\b9292\b/g, /\bREVISION \d+/g, /\bREF\. \d+/g];                // a veneer code, revision and reference numbers — not sizes
+  const KEEP = [/\b9292\b/g, /\bREVISION \d+/g, /\bREF\. \d+/g, /\b(?:L[1-3]|R[1-4])\b/g];   // a veneer code, revision and reference numbers, the wardrobe bays — not sizes
   const FIX = { "6 AND 10 IN": "0¼\" AND 0⅜\" IN" };                          // single figures that are mm, said in words
   const conv = (s) => {
     let o = s, kept = [];
@@ -336,7 +336,7 @@ function familyHTML(famTitle, sheets, P) {
         return `<text${at}>${tx}</text>`; });
       defs += `<g id="${ref}">${html}</g>`;
       body += page(sh, fixCaps(sentence(p.name)), sh.tsub, p.N ? `1:${p.N} @ ${P.name}` : "NTS",
-        `<svg viewBox="${x} ${y} ${w} ${h}" style="width:${mm(w * p.s)};height:${mm(h * p.s)}"><use href="#${ref}"/></svg>`, p.N ? scaleBar(p.N, P) : "");
+        `<svg viewBox="${x} ${y} ${w} ${h}" style="width:${mm(w * p.s)};height:${mm(h * p.s)}${p.view.els ? ";overflow:visible" : ""}"><use href="#${ref}"/></svg>`, p.N ? scaleBar(p.N, P) : "");   // lettering enlarged past the view's box stays whole
     });
   });
   const F = P.F, inner = P.W - 2 * F;
