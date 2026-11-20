@@ -93,8 +93,8 @@ input, select, textarea { font: inherit; color: inherit; }
 /* ── main ── */
 main { flex: 1; display: grid; grid-template-columns: 228px minmax(0, 1fr) 360px; min-height: 0; }
 .stagewrap { display: flex; flex-direction: column; min-width: 0; min-height: 0; padding: 12px 16px 14px; gap: 10px; }
-.stagehead { display: flex; align-items: flex-end; gap: 22px; }
-.stagehead > div:first-child { flex: 1; min-width: 0; }
+.stagehead { display: flex; align-items: flex-end; gap: 10px 22px; flex-wrap: wrap; }
+.stagehead > div:first-child { flex: 1 1 380px; min-width: 0; }
 .stagehead h2 { font: 400 34px/0.9 var(--cond); text-transform: uppercase; margin: 0; letter-spacing: -.005em; display: flex; align-items: baseline; }
 .stagehead h2 input { flex: 1; min-width: 0; background: transparent; border: 0; border-bottom: 1px dashed transparent; border-radius: 0; padding: 0 0 2px;
   font: inherit; text-transform: uppercase; letter-spacing: inherit; color: var(--bone); outline: none; }
@@ -104,7 +104,9 @@ main { flex: 1; display: grid; grid-template-columns: 228px minmax(0, 1fr) 360px
 .stagehead .dims { margin-top: 6px; }
 .stagehead h2 .bid { color: var(--ember); margin-right: 10px; }
 .stagehead .where { font: 10.5px/1.3 var(--mono); text-transform: uppercase; color: var(--muted); margin-top: 6px; }
-.meter { flex: none; width: 300px; display: flex; flex-direction: column; gap: 5px; }
+.stagehead > .meterbox { flex: 0 1 300px; min-width: 250px; }
+.meterbox:empty { display: none; }
+.meter { display: flex; flex-direction: column; gap: 5px; }
 .meter .row { display: flex; justify-content: space-between; gap: 12px; font: 10.5px/1.2 var(--mono); text-transform: uppercase; color: var(--muted); }
 .meter .row b { font-weight: 400; color: var(--bone); }
 .bar { height: 6px; border-radius: 3px; background: #2a2d2d; overflow: hidden; display: flex; }
@@ -197,6 +199,12 @@ kbd { font: 10px var(--mono); border: 1px solid var(--line2); border-bottom-widt
 .helpgrid p { margin: 0 0 8px; }
 .helpgrid h6 { margin: 6px 0 4px; font: 10.5px var(--mono); text-transform: uppercase; color: var(--muted); letter-spacing: .04em; }
 @media (max-width: 1240px) { main { grid-template-columns: 196px minmax(0, 1fr) 320px; } .hint { display: none; } }
+@media (max-width: 1100px) {
+  main { grid-template-columns: 172px minmax(0, 1fr) 290px; }
+  
+  .brand h1 { font-size: 22px; } .actions { gap: 6px; } .pill { padding: 0 10px; }
+  .thumb { grid-template-columns: 20px 1fr; gap: 8px; } .thumb svg { width: 20px; height: 52px; }
+}
 </style>
 </head>
 <body>
