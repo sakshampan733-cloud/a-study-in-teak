@@ -434,7 +434,7 @@ function fitName(f, long) {
 // ═════════════════════════════════════════════════════════════════════════════════════════════
 // STATE
 // ═════════════════════════════════════════════════════════════════════════════════════════════
-const KEY = "ast.wardrobeplanner.v1" + (location.hash === "#test" ? ".test" : "");   // #test: a scratch copy, for trying things
+const KEY = "ast.wardrobeplanner.v1" + (window.PLANNER_SHARED ? ".shared" : "") + (location.hash === "#test" ? ".test" : "");   // the shared copy keeps its own; #test: a scratch copy
 function emptyBay(id) {
   return { label: "", note: "", lit: !BAYDEF[id].tunnel, edgeLed: false, sensor: false, fits: [{ id: uid(), type: "loft", z: M.loft, h: M.board, label: "", opts: {} }] };
 }
@@ -464,7 +464,7 @@ function freshState(kind) {
   if (kind === "approved") Object.assign(bays, approvedBays()); else ORDER.forEach((id) => (bays[id] = emptyBay(id)));
   return { v: 1, setOut: "drawings", units: "both", snap: 32, clothes: true, sel: "L1", collapsed: false, bays };
 }
-let state = load() || freshState("empty");
+let state = load() || freshState(window.PLANNER_SHARED && window.WARDROBE_PLAN ? "drawn" : "empty");   // the shared copy opens on the drawn plan
 const ui = { fit: null, drag: null, palDrag: null, typing: false };
 const hist = { past: [], future: [] };
 
