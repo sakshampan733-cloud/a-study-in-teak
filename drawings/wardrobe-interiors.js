@@ -326,8 +326,8 @@ window.WARDROBE_PLAN = WARDROBE_PLAN;
      "   the side by L2, so its fittings stop 4\" short of that side.",
      "Heights are from the finished floor. The plinth is 4\"; the inside floor is on it.",
      "Rails, drawers and boards are the same on the right wall: AST-DR-050.",
-     "TO CONFIRM — the cupboard names, read from the owner's brief: linen, suits and",
-     "   long clothes, the perfume display. Rename any in the planner.",
+     "Cupboard names confirmed by the owner (21 Nov): linen, suits and long clothes,",
+     "   the perfume display.",
      "TO CONFIRM — what goes in L2's and L3's drawers; L1's are named from the brief."]], 140);
   out += titleBlock({ title: "WARDROBE INTERIORS", sub: "Left wall, L1 to L3 · doors off · the lit back", date: "21.11.2026",
     rev: "2 — from the owner's planner, 21 Nov: even shelves, rails in reach", dwg: "AST-DR-048", scale: "1:20 AND 1:5 @ A3" });
@@ -352,8 +352,7 @@ window.WARDROBE_PLAN = WARDROBE_PLAN;
      "   over three drawers (R2), or a trouser pull-out and a drawer (R3).",
      "Bays 3'-1\" wide, 9'-0\" high, 2'-3\" deep. Finish, hardware and the lit back as",
      "   the left wall: AST-DR-048 (rails, boards and loft heights the same).",
-     "TO CONFIRM — the cupboard names, read from the owner's brief; the tunnel",
-     "   height on site (it was 7'-2\" in the model; the owner says 7'-0\")."]], 140);
+     "Cupboard names confirmed by the owner (21 Nov): daily wear (R2, R3), shoes (R1)."]], 140);
   out += titleBlock({ title: "WARDROBE INTERIORS", sub: "Right wall, R4 to R1 · doors off · the tunnel bay", date: "21.11.2026",
     rev: "1 — from the owner's planner, 21 Nov; tunnel 7 ft", dwg: "AST-DR-050", scale: "1:20 @ A3" });
   window.DRAWINGS["wardrobe-interiors-right"] = { title: "Wardrobe interiors — right wall · AST-DR-050", svg: mono(sheet(out)) };

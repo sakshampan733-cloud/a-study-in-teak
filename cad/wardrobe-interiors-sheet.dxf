@@ -489,7 +489,7 @@ $SKPOLY
   9
 $TDCREATE
  40
-2461366.1618402777
+2461366.1757870372
   9
 $TDUCREATE
  40
@@ -497,7 +497,7 @@ $TDUCREATE
   9
 $TDUPDATE
  40
-2461366.1618402777
+2461366.1757870372
   9
 $TDUUPDATE
  40
@@ -929,11 +929,11 @@ $PSTYLEMODE
   9
 $FINGERPRINTGUID
   2
-{9CDF8669-5BA7-4BEB-A38E-F462039C4EB1}
+{421BF738-196D-4B25-B11F-B6FC4399EAFA}
   9
 $VERSIONGUID
   2
-{F841ECEB-DCD8-49B3-9DB3-3298EA2BE251}
+{605F3AE6-1F2C-40C6-BF44-634C42F8126C}
   9
 $EXTNAMES
 290
@@ -1323,9 +1323,9 @@ ISM
   0
 CLASS
   1
-LAYOUT
+ACDBPLACEHOLDER
   2
-AcDbLayout
+AcDbPlaceHolder
   3
 ObjectDBX Classes
  90
@@ -1339,9 +1339,9 @@ ObjectDBX Classes
   0
 CLASS
   1
-ACDBPLACEHOLDER
+LAYOUT
   2
-AcDbPlaceHolder
+AcDbLayout
   3
 ObjectDBX Classes
  90
@@ -23083,7 +23083,7 @@ AcDbText
  40
 0.04875590551181102
   1
-TO CONFIRM — the cupboard names, read from the owner's brief: linen, suits and
+Cupboard names confirmed by the owner (21 Nov): linen, suits and long clothes,
  11
 6.2204724409448815
  21
@@ -23113,7 +23113,7 @@ AcDbText
  40
 0.04875590551181102
   1
-long clothes, the perfume display. Rename any in the planner.
+the perfume display.
  11
 6.2204724409448815
  21
@@ -24747,7 +24747,7 @@ DictionaryVariables
 280
 0
   1
-1.4.2 @ 2026-11-20T22:23:03.624132+00:00
+1.4.2 @ 2026-11-20T22:43:08.666457+00:00
   0
 VISUALSTYLE
   5
@@ -25459,7 +25459,7 @@ DictionaryVariables
 280
 0
   1
-1.4.2 @ 2026-11-20T22:23:03.650319+00:00
+1.4.2 @ 2026-11-20T22:43:08.692827+00:00
   0
 ENDSEC
   0
