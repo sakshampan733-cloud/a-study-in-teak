@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Wardrobe Planner — A Study in Teak</title>
+<link rel="icon" href="../favicon.svg">
 <!--
   The dressing-room wardrobe planner. Standalone: open this file in Safari or Chrome. Not part of the website.
   Every bay is drawn to the repo's measurements:
@@ -229,6 +230,7 @@ kbd { font: 10px var(--mono); border: 1px solid var(--line2); border-bottom-widt
         <button id="helpBtn"><b>How to use it</b><span>Mouse, keys, and what the checks mean.</span></button>
       </div>
     </div>
+    <button class="pill" id="cadBtn" title="A DXF file for CAD: every cupboard drawn to scale, each fitting numbered and labelled, with a schedule">Download CAD</button>
     <button class="pill ember" id="copyClaude" title="Copy the whole plan as text to paste to Claude">Copy for Claude</button>
   </div>
 </header>
@@ -281,7 +283,7 @@ kbd { font: 10px var(--mono); border: 1px solid var(--line2); border-bottom-widt
         <h6>Keys</h6>
         <p><kbd>⌫</kbd> delete · <kbd>⌘D</kbd> duplicate · <kbd>↑</kbd> <kbd>↓</kbd> move one step (<kbd>⇧</kbd> for 1 mm) · <kbd>⌘Z</kbd> / <kbd>⇧⌘Z</kbd> undo / redo · <kbd>Esc</kbd> deselect.</p>
         <h6>When you're happy</h6>
-        <p>Press <b>Copy for Claude</b> and paste it in the chat.</p>
+        <p>Press <b>Copy for Claude</b> and paste it in the chat. <b>Download CAD</b> saves a DXF file (opens in AutoCAD, LibreCAD, DraftSight and the like): all seven cupboards drawn to scale, 1 unit = 1 mm, each one titled with its name, every fitting numbered and labelled with what it's for, and a schedule under each cupboard.</p>
       </div>
     </div>
     <div class="foot"><span class="msg"></span><button class="pill ember" data-close>Got it</button></div>
@@ -420,7 +422,7 @@ function fitName(f, long) {
 // ═════════════════════════════════════════════════════════════════════════════════════════════
 // STATE
 // ═════════════════════════════════════════════════════════════════════════════════════════════
-const KEY = "ast.wardrobeplanner.v1";
+const KEY = "ast.wardrobeplanner.v1" + (location.hash === "#test" ? ".test" : "");   // #test: a scratch copy, for trying things
 function emptyBay(id) {
   return { label: "", note: "", lit: !BAYDEF[id].tunnel, edgeLed: false, sensor: false, fits: [{ id: uid(), type: "loft", z: M.loft, h: M.board, label: "", opts: {} }] };
 }
@@ -1019,7 +1021,7 @@ function renderStage() {
   // tunnel and pack labels
   if (g.tunnel) {
     s += vtxt(g.x1 + g.pack / 2 + px(4), M.mouth / 2, "FIXED UPRIGHT · FOLDED DOORS", 9, "#7a7369");
-    s += T_((g.x0 + g.x1) / 2, M.mouth + px(6), `TUNNEL MOUTH ${dim(M.mouth)}`, 9.5, `text-anchor="middle" fill="#7a7369" class="m"`);
+    s += T_(g.x0 + px(6), M.mouth - px(13), `TUNNEL MOUTH ${dim(M.mouth)}`, 9, `fill="#7a7369" class="m"`);
     s += Ln(g.x0, M.mouth, g.x1 + g.pack, M.mouth, st(C.thin, 1, `stroke-dasharray="3 3"`));
   } else if (g.pack) {
     const px0 = g.packSide === "L" ? M.side : g.W - M.side - g.pack;
@@ -1580,6 +1582,261 @@ $("#copyClaude").onclick = async () => {
   $("#claudeMsg").style.color = ok ? "var(--ok)" : "var(--amber)";
 };
 $("#claudeCopy").onclick = async () => { const ok = await copyText($("#claudeText").value); $("#claudeMsg").textContent = ok ? "Copied again" : "Select all and copy (⌘A, ⌘C)"; };
+
+
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+// CAD — a DXF (R12, the version every CAD program opens), 1 unit = 1 mm. Each bay as an elevation seen from the
+// room, doors off, its fittings numbered and labelled, with a schedule underneath. Text is plain ASCII.
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+function asc(v) {
+  return String(v ?? "").replace(/¼/g, " 1/4").replace(/½/g, " 1/2").replace(/¾/g, " 3/4").normalize("NFKD").replace(/[̀-ͯ]/g, "")
+    .replace(/[‘’′]/g, "'").replace(/[“”″]/g, '"').replace(/[–—−]/g, "-").replace(/×/g, "x").replace(/[·•]/g, "-").replace(/…/g, "...")
+    .replace(/[^\x20-\x7e]/g, "?").replace(/\s+/g, " ").trim();
+}
+function ftinCAD(mm) {
+  let q = Math.round(Math.abs(mm) / 25.4 * 4);
+  const ft = Math.floor(q / 48); q -= ft * 48;
+  const inch = Math.floor(q / 4), fr = ["", "1/4", "1/2", "3/4"][q % 4];
+  const ins = fr ? (inch ? `${inch} ${fr}` : fr) : String(inch);
+  return (mm < 0 ? "-" : "") + (ft ? `${ft}'-${ins}"` : `${ins}"`);
+}
+const dc = (mm) => `${ftinCAD(mm)} (${Math.round(mm)})`;
+const LAYERS = [["WD-CARCASE", 7, "CONTINUOUS"], ["WD-FITTINGS", 7, "CONTINUOUS"], ["WD-DETAIL", 8, "CONTINUOUS"], ["WD-LABELS", 7, "CONTINUOUS"],
+  ["WD-TAGS", 7, "CONTINUOUS"], ["WD-DIMS", 1, "CONTINUOUS"], ["WD-FREE", 8, "DASHED"], ["WD-SCHEDULE", 7, "CONTINUOUS"], ["WD-NOTES", 7, "CONTINUOUS"]];
+function dxfWriter() {
+  const e = [], ext = [Infinity, Infinity, -Infinity, -Infinity];
+  const n = (v) => { const r = Math.round(v * 100) / 100; return Object.is(r, -0) ? "0" : String(r); };
+  const pt = (x, y) => { ext[0] = Math.min(ext[0], x); ext[1] = Math.min(ext[1], y); ext[2] = Math.max(ext[2], x); ext[3] = Math.max(ext[3], y); };
+  const put = (...kv) => { for (let i = 0; i < kv.length; i += 2) e.push(String(kv[i]), String(kv[i + 1])); };
+  const W = {
+    line(L, x1, y1, x2, y2, lt) { pt(x1, y1); pt(x2, y2); put(0, "LINE", 8, L); if (lt) put(6, lt); put(10, n(x1), 20, n(y1), 30, 0, 11, n(x2), 21, n(y2), 31, 0); },
+    poly(L, pts, closed, lt) {
+      put(0, "POLYLINE", 8, L); if (lt) put(6, lt); put(66, 1, 10, 0, 20, 0, 30, 0, 70, closed ? 1 : 0);
+      pts.forEach(([x, y]) => { pt(x, y); put(0, "VERTEX", 8, L, 10, n(x), 20, n(y), 30, 0); });
+      put(0, "SEQEND", 8, L);
+    },
+    rect(L, x, y, w, h, lt) { if (w > 0 && h > 0) W.poly(L, [[x, y], [x + w, y], [x + w, y + h], [x, y + h]], true, lt); },
+    circle(L, x, y, r) { pt(x - r, y - r); pt(x + r, y + r); put(0, "CIRCLE", 8, L, 10, n(x), 20, n(y), 30, 0, 40, n(r)); },
+    // h: text height; al: left | center | right; va: base | middle; rot: degrees
+    text(L, x, y, h, str, al, va, rot) {
+      const t = asc(str); if (!t) return;
+      const ha = { left: 0, center: 1, right: 2 }[al || "left"], v = va === "middle" ? 2 : 0;
+      pt(x, y); pt(x + (al === "right" ? -1 : 1) * t.length * h * 0.75, y + h);
+      put(0, "TEXT", 8, L, 10, n(x), 20, n(y), 30, 0, 40, n(h), 1, t);
+      if (rot) put(50, n(rot));
+      if (ha || v) put(72, ha, 11, n(x), 21, n(y), 31, 0, 73, v);
+    },
+    toString() {
+      const H = [];
+      const h = (...kv) => { for (let i = 0; i < kv.length; i += 2) H.push(String(kv[i]), String(kv[i + 1])); };
+      h(0, "SECTION", 2, "HEADER", 9, "$ACADVER", 1, "AC1009", 9, "$INSBASE", 10, 0, 20, 0, 30, 0,
+        9, "$EXTMIN", 10, n(ext[0]), 20, n(ext[1]), 30, 0, 9, "$EXTMAX", 10, n(ext[2]), 20, n(ext[3]), 30, 0,
+        9, "$LIMMIN", 10, n(ext[0]), 20, n(ext[1]), 9, "$LIMMAX", 10, n(ext[2]), 20, n(ext[3]), 9, "$LTSCALE", 40, 1, 9, "$TEXTSIZE", 40, 30, 0, "ENDSEC");
+      h(0, "SECTION", 2, "TABLES");
+      h(0, "TABLE", 2, "LTYPE", 70, 2);
+      h(0, "LTYPE", 2, "CONTINUOUS", 70, 0, 3, "Solid line", 72, 65, 73, 0, 40, 0);
+      h(0, "LTYPE", 2, "DASHED", 70, 0, 3, "Dashed __ __ __", 72, 65, 73, 2, 40, 18, 49, 12, 49, -6);
+      h(0, "ENDTAB", 0, "TABLE", 2, "LAYER", 70, LAYERS.length);
+      LAYERS.forEach(([nm, col, lt]) => h(0, "LAYER", 2, nm, 70, 0, 62, col, 6, lt));
+      h(0, "ENDTAB", 0, "TABLE", 2, "STYLE", 70, 1, 0, "STYLE", 2, "STANDARD", 70, 0, 40, 0, 41, 1, 50, 0, 71, 0, 42, 30, 3, "txt", 4, "", 0, "ENDTAB", 0, "ENDSEC");
+      h(0, "SECTION", 2, "ENTITIES");
+      return H.concat(e, ["0", "ENDSEC", "0", "EOF"]).join("\r\n") + "\r\n";
+    },
+  };
+  return W;
+}
+function cadSpec(f, a) {
+  const t = T[f.type], o = f.opts || {}, top = f.z + f.h;
+  switch (f.type) {
+    case "loft": return `loft above: ${dc(a.loftClear)} clear, step stool to reach`;
+    case "shelf": return `22 board, ${dc(a.info[f.id]?.above ?? 0)} clear above`;
+    case "pullShelf": return "on soft-close runners, with a low lip";
+    case "display": return [`${dc(f.h - M.board)} clear above a 22 board`, o.lit && "LED strip", o.glass && "glass shelf", +o.risers && `${o.risers} stepped risers`].filter(Boolean).join(", ");
+    case "watch": return "watch stands on a lit shelf";
+    case "shortHang": case "longHang": case "pullDown": return [`rail at ${dc(top - HOOK)}`, `${dc(f.h - HOOK)} drop`, o.led && "LED rail light", f.type === "pullDown" && "pull-down lift"].filter(Boolean).join(", ");
+    case "carousel": return "turning pole with hook arms";
+    case "drawer": return [`${drawerSize(f.h)}, soft-close`, o.lock && "lock", o.velvet && "velvet tray"].filter(Boolean).join(", ");
+    case "jewel": return ["fitted tray, watch cushions", o.glassLid ? "glass lid" : "no glass lid", o.lock && "lock"].filter(Boolean).join(", ");
+    case "ironing": return "fold-out ironing board inside";
+    case "trouser": return ["trousers folded over bars", o.glassTray && "glass tray on top"].filter(Boolean).join(", ");
+    case "laundry": return `${o.bins} lined basket${o.bins > 1 ? "s" : ""}`;
+    case "shoeTilt": case "shoeRack": { const k = Math.round(f.h / t.pitch); return `${k} ${f.type === "shoeTilt" ? "tilting trays" : "sloped tiers"}, ${t.pitch} apart`; }
+    case "boots": return `${dc(f.h - M.board)} clear above a 22 board`;
+    default: return `on the ${f.side === "L" ? "left" : "right"} side panel`;
+  }
+}
+function cadBay(D, id, ox) {
+  const g = geo(id), B = bay(id), a = analyse(id), X = (x) => ox + x;
+  const C_ = "WD-CARCASE", FI = "WD-FITTINGS", DT = "WD-DETAIL", LB = "WD-LABELS", DM = "WD-DIMS";
+  const title = `${id} - ${B.label ? B.label.toUpperCase() : g.tunnel ? "THE TUNNEL BAY" : "NOT NAMED YET"}`;
+  D.text(LB, X(0), M.H + 260, 80, title);
+  D.text(LB, X(0), M.H + 180, 30, `${BAYDEF[id].where}`.toUpperCase());
+  D.text(LB, X(0), M.H + 130, 26, `BAY ${dc(g.W)} WIDE x ${dc(M.H)} HIGH x ${dc(M.depth)} DEEP - INSIDE ${dc(g.pack ? g.usable : g.inner)} x ${dc(g.depth)} DEEP`);
+  const lights = [g.tunnel ? "" : B.lit ? "lit back (opal acrylic)" : "no lit back", B.edgeLed ? "door-edge LED" : "", B.sensor ? "door switch" : ""].filter(Boolean).join(", ");
+  if (lights) D.text(LB, X(0), M.H + 85, 24, `LIGHTING: ${lights}`.toUpperCase());
+  // carcase
+  D.rect(C_, X(0), 0, g.W, M.H);
+  D.rect(C_, X(0), 0, M.side, M.H); D.rect(C_, X(g.W - M.side), 0, M.side, M.H);
+  D.rect(C_, X(M.side), g.top, g.inner, M.top);
+  if (!g.tunnel) D.rect(C_, X(M.side), 0, g.inner, M.plinth);
+  D.line(C_, X(-450), 0, X(g.W + 450), 0);
+  D.line("WD-NOTES", X(-450), M.ceil, X(g.W + 450), M.ceil, "DASHED");
+  D.text("WD-NOTES", X(g.W + 60), M.ceil + 20, 22, `CEILING ${dc(M.ceil)}`);
+  if (g.pack) {   // the parked fold-slide doors (and, in the tunnel bay, the fixed upright beside the hidden door)
+    const px0 = g.packSide === "L" ? M.side : g.W - M.side - g.pack, z0 = g.tunnel ? 0 : g.floor;
+    D.rect(DT, X(px0), z0, g.pack, g.top - z0);
+    for (let z = z0 + 100; z < g.top - 40; z += 120) D.line(DT, X(px0), z - 60, X(px0 + g.pack), z);
+    D.text(LB, X(px0 + g.pack / 2), (z0 + g.top) / 2, 26, g.tunnel ? "FIXED UPRIGHT + FOLDED DOORS" : "FOLDED DOORS PARK HERE (AST-DR-026)", "center", "middle", 90);
+  }
+  if (g.tunnel) {
+    D.rect(DT, X(g.x0), 0, g.usable, M.mouth - 10);
+    D.line(DT, X(g.x0), M.mouth, X(g.x1 + g.pack), M.mouth, "DASHED");
+    D.text(LB, X(g.x0 + 20), M.mouth - 50, 22, `HIDDEN DOOR - SHELVES ON ITS FACE, 10 1/4" (260) DEEP - TUNNEL MOUTH ${dc(M.mouth)}`);
+  }
+  // free spaces
+  a.gaps.forEach(([ga, gb]) => {
+    const hh = gb - ga; if (hh < 30) return;
+    D.rect("WD-FREE", X(g.x0 + 10), ga + 8, g.usable - 20, hh - 16, "DASHED");
+    if (hh >= 90) D.text("WD-FREE", X((g.x0 + g.x1) / 2), (ga + gb) / 2, Math.min(28, hh * 0.3), `${a.loftZ != null && ga >= a.loftZ ? "LOFT - " : ""}FREE ${dc(hh)}`, "center", "middle");
+  });
+  // fittings, numbered bottom to top, then the side-panel ones
+  const F = B.fits.filter((f) => lane(f) === "F").sort((p, q) => p.z - q.z), S = B.fits.filter((f) => lane(f) !== "F").sort((p, q) => p.z - q.z);
+  const list = F.concat(S);
+  list.forEach((f) => {
+    const [x0, x1] = fitX(f, g), w = x1 - x0, z = f.z, h = f.h, top = z + h, cx = (x0 + x1) / 2;
+    switch (f.type) {
+      case "loft": case "shelf": D.rect(FI, X(x0), z, w, M.board); break;
+      case "pullShelf": D.rect(FI, X(x0), z, w, M.board); D.rect(FI, X(x0 + 4), z + M.board, w - 8, h - M.board - 6); break;
+      case "display": case "watch": D.rect(FI, X(x0), z, w, M.board); D.rect(DT, X(x0 + 6), z + M.board, w - 12, h - M.board - 4, "DASHED");
+        if (f.type === "watch" || f.opts?.lit) D.line(DT, X(x0 + 10), top - 8, X(x1 - 10), top - 8);
+        for (let k = 0; k < (+f.opts?.risers || 0); k++) D.rect(DT, X(x0 + 6), z + M.board + k * 45, w - 12, 45);
+        break;
+      case "shortHang": case "longHang": case "pullDown": {
+        const rail = top - HOOK;
+        D.rect(DT, X(x0), z, w, h, "DASHED");
+        D.rect(FI, X(x0), rail - 12, w, 24);
+        D.rect(FI, X(x0), rail - 20, 12, 40); D.rect(FI, X(x1 - 12), rail - 20, 12, 40);
+        D.line(DT, X(x0 + 20), z + 20, X(x1 - 20), z + 20);
+        D.text(DT, X(x1 - 30), z + 32, 18, "HEM LINE", "right");
+        break;
+      }
+      case "carousel": {
+        D.rect(FI, X(cx - 9), z, 18, h);
+        const hub = z + h * 0.62, rx = Math.min(w / 2 - 20, 300), pts = [];
+        for (let k = 0; k <= 32; k++) { const t = (k / 32) * Math.PI * 2; pts.push([X(cx + Math.cos(t) * rx), hub + Math.sin(t) * rx * 0.16]); }
+        D.poly(DT, pts, true);
+        break;
+      }
+      case "drawer": case "jewel": case "ironing": case "laundry":
+        D.rect(FI, X(x0 + 3), z + 2, w - 6, h - 4);
+        { const zp = top - (f.type === "laundry" ? 40 : clamp(h * 0.16, 14, 34)); D.line(DT, X(cx - 70), zp, X(cx + 70), zp); }   // pull near the top, clear of the label
+        break;
+      case "trouser": {
+        const bar = top - (f.opts?.glassTray ? 80 : 22);
+        if (f.opts?.glassTray) D.rect(FI, X(x0 + 4), top - 70, w - 8, 66);
+        D.rect(FI, X(x0 + 4), bar - 10, w - 8, 20);
+        for (let k = 0; k < 6; k++) { const xx = x0 + 60 + k * (w - 120) / 5; D.line(DT, X(xx), bar - 10, X(xx), z + 30); }
+        D.rect(FI, X(x0 + 4), z, 22, h - 10);
+        break;
+      }
+      case "shoeTilt": case "shoeRack": {
+        const p = T[f.type].pitch, k = Math.max(1, Math.round(h / p));
+        D.rect(DT, X(x0), z, w, h, "DASHED");
+        for (let i = 0; i < k; i++) {
+          const zb = z + i * p;
+          if (f.type === "shoeTilt") { D.rect(FI, X(x0 + 4), zb + 12, w - 8, 46); D.line(DT, X(x0 + 4), zb + 22, X(x1 - 4), zb + 22); }
+          else { D.rect(FI, X(x0 + 4), zb + 20, w - 8, 18); D.line(DT, X(x0 + 4), zb + 62, X(x1 - 4), zb + 62); }
+        }
+        break;
+      }
+      case "boots": D.rect(FI, X(x0), z, w, M.board); D.rect(DT, X(x0 + 6), z + M.board, w - 12, h - M.board - 4, "DASHED"); break;
+      case "socket": D.rect(FI, X(x0 + 4), z, w - 8, h); D.circle(DT, X(cx - 14), z + h / 2, 7); D.circle(DT, X(cx + 14), z + h / 2, 7); break;
+      default: D.rect(FI, X(x0), z, w, h);
+    }
+    // the name and purpose, written on the fitting when it is tall enough
+    const nm = fitName(f, true).toUpperCase(), pur = f.label ? `FOR: ${f.label}` : "";
+    if (!T[f.type].side && h >= 100) {
+      const th = Math.min(34, h * 0.24), zc = f.type === "shoeTilt" || f.type === "shoeRack" ? top - th * 1.6 : DRAWERS.has(f.type) || f.type === "laundry" ? z + (h - 30) / 2 : z + h / 2;
+      if (pur) { D.text(LB, X(cx), zc + th * 0.7, th, nm, "center", "middle"); D.text(LB, X(cx), zc - th * 0.75, th * 0.9, pur.toUpperCase(), "center", "middle"); }
+      else D.text(LB, X(cx), zc, th, nm, "center", "middle");
+    } else if (!T[f.type].side && h >= 60) D.text(LB, X(cx), z + h / 2, h * 0.36, pur ? `${nm} - ${pur.toUpperCase()}` : nm, "center", "middle");
+  });
+  // tags: numbered circles off the right of the bay, de-overlapped, with leaders
+  const tags = list.map((f, i) => ({ f, i: i + 1, ay: f.z + f.h / 2, y: f.z + f.h / 2, ax: fitX(f, g)[1] }));
+  tags.sort((p, q) => p.ay - q.ay);
+  tags.forEach((t, i) => { t.y = Math.max(t.ay, i ? tags[i - 1].y + 90 : 40); });
+  for (let i = tags.length - 1; i >= 0; i--) { const lim = i === tags.length - 1 ? M.H - 40 : tags[i + 1].y - 90; if (tags[i].y > lim) tags[i].y = lim; }
+  const tx = g.W + 150;
+  tags.forEach((t) => {
+    D.poly("WD-TAGS", [[X(t.ax), t.ay], [X(g.W + 60), t.ay], [X(tx - 38), t.y]], false);
+    D.circle("WD-TAGS", X(tx), t.y, 38);
+    D.text("WD-TAGS", X(tx), t.y, 34, String(t.i), "center", "middle");
+  });
+  // heights up the left side: each piece, then floor-to-loft and the loft
+  const segs = []; let cur = 0;
+  if (g.floor > 0) { segs.push([0, g.floor]); cur = g.floor; }
+  F.forEach((f) => { if (f.z > cur + 0.5) segs.push([cur, f.z]); segs.push([f.z, f.z + f.h]); cur = f.z + f.h; });
+  if (g.top > cur + 0.5) segs.push([cur, g.top]);
+  segs.push([g.top, M.H]);
+  const c1 = -80;
+  D.line(DM, X(c1), 0, X(c1), M.H);
+  segs.forEach(([za, zb]) => {
+    D.line(DM, X(c1 - 18), za, X(c1 + 18), za); D.line(DM, X(c1 - 18), zb, X(c1 + 18), zb);
+    if (zb - za >= 60) D.text(DM, X(c1 - 26), (za + zb) / 2, Math.min(24, (zb - za) * 0.4), dc(zb - za), "right", "middle");
+  });
+  const c2 = -400, lz = a.loftZ;
+  D.line(DM, X(c2), 0, X(c2), M.H);
+  (lz != null ? [0, lz, M.H] : [0, M.H]).forEach((z) => D.line(DM, X(c2 - 18), z, X(c2 + 18), z));
+  if (lz != null) {
+    D.text(DM, X(c2 - 28), lz / 2, 28, `${dc(lz)} FLOOR TO LOFT SHELF`, "center", "base", 90);
+    D.text(DM, X(c2 - 28), (lz + M.H) / 2, 24, `${dc(M.H - lz)} LOFT`, "center", "base", 90);
+  } else D.text(DM, X(c2 - 28), M.H / 2, 28, `${dc(M.H)} OVERALL`, "center", "base", 90);
+  // widths along the bottom
+  const wdim = (xa, xb, y, label) => { D.line(DM, X(xa), y, X(xb), y); D.line(DM, X(xa), y - 18, X(xa), y + 18); D.line(DM, X(xb), y - 18, X(xb), y + 18); D.text(DM, X((xa + xb) / 2), y + 14, 24, label, "center"); };
+  wdim(0, g.W, -90, `${dc(g.W)} BAY`);
+  wdim(g.x0, g.x1, -170, g.pack ? `${dc(g.usable)} CLEAR${g.tunnel ? " - DOOR SHELVES" : " OF THE PARKED DOORS"}` : `${dc(g.inner)} INSIDE`);
+  // the schedule
+  const sx = X(-420), cols = [0, 90, 700, 1360, 1710, 2060], sy0 = -330;
+  D.text("WD-SCHEDULE", sx, sy0, 34, `SCHEDULE - ${title}`);
+  const head = ["NO.", "FITTING", "WHAT IT'S FOR", "FROM FLOOR", "HEIGHT", "NOTES"];
+  head.forEach((t, j) => D.text("WD-SCHEDULE", sx + cols[j], sy0 - 70, 20, t));
+  D.line("WD-SCHEDULE", sx, sy0 - 84, sx + 2900, sy0 - 84);
+  list.forEach((f, i) => {
+    const y = sy0 - 125 - i * 46;
+    const row = [String(i + 1), fitName(f, true).toUpperCase(), f.label || "-", dc(f.z), f.type === "shelf" || f.type === "loft" ? "22 board" : dc(f.h), cadSpec(f, a)];
+    row.forEach((t, j) => D.text("WD-SCHEDULE", sx + cols[j], y, 22, j === 2 ? asc(t).slice(0, 32) : t));
+    D.line("WD-SCHEDULE", sx, y - 14, sx + 2900, y - 14);
+  });
+  if (!list.length) D.text("WD-SCHEDULE", sx, sy0 - 125, 22, "EMPTY");
+  let ny = sy0 - 125 - Math.max(1, list.length) * 46 - 40;
+  if (!g.tunnel) { D.text("WD-SCHEDULE", sx, ny, 22, `HEIGHT LEFT BELOW THE LOFT: ${dc(a.freeMain)} OF ${dc(a.mainTotal)}${lz != null ? ` - LOFT ${dc(a.loftClear)} CLEAR` : ""}`); ny -= 46; }
+  if (B.note) { D.text("WD-SCHEDULE", sx, ny, 22, `NOTE: ${B.note}`); ny -= 46; }
+  a.issues.filter((x) => x.lvl !== "info").forEach((x) => { D.text("WD-SCHEDULE", sx, ny, 20, `${x.lvl === "err" ? "PROBLEM" : "CHECK"}: ${x.msg}`); ny -= 40; });
+}
+function buildDXF() {
+  const D = dxfWriter(), so = SETOUT[state.setOut], d = new Date();
+  const PITCH = 3300, RUNGAP = 900;
+  D.text("WD-NOTES", -420, M.H + 950, 120, "A STUDY IN TEAK - DRESSING ROOM WARDROBES - THE INSIDES");
+  D.text("WD-NOTES", -420, M.H + 850, 40, `From the wardrobe planner, ${d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}. Elevations seen standing in the room, doors off. 1 unit = 1 mm. Heights from the floor; sizes in feet-inches with mm in brackets.`);
+  D.text("WD-NOTES", -420, M.H + 790, 30, `Bay widths: ${so.name} (left ${Math.round(so.L)}, right ${Math.round(so.R)}). Heights, plinth, boards and the loft shelf: AST-DR-048. Numbers in circles match each cupboard's schedule.`);
+  let x = 0;
+  [["L", "LEFT WALL - AS YOU FACE IT: L1 BY THE BATHROOM DOOR, L3 BY THE MIRROR"], ["R", "RIGHT WALL - AS YOU FACE IT: R4 (THE TUNNEL BAY) BY THE MIRROR, R1 BY THE BEDROOM WALL"]].forEach(([run, head], ri) => {
+    if (ri) x += RUNGAP;
+    D.text("WD-NOTES", x - 420, M.H + 560, 55, head);
+    SEEN[run].forEach((id) => { cadBay(D, id, x); x += PITCH; });
+  });
+  return D.toString();
+}
+$("#cadBtn").onclick = () => {
+  const blob = new Blob([buildDXF()], { type: "application/dxf" });
+  const a = document.createElement("a"), d = new Date();
+  a.href = URL.createObjectURL(blob);
+  a.download = `wardrobe-interiors-${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}.dxf`;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  toast(`CAD file saved to Downloads — ${a.download}`);
+};
+window.WardrobePlanner = { dxf: buildDXF, text: claudeText };
 
 // keys
 document.addEventListener("keydown", (ev) => {
